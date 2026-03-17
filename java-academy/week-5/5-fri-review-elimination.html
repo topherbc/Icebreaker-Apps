@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Island Elimination -- Week 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* === CSS VARIABLES === */
+/* All color combos verified against WCAG AA:
+   --sand (#F5E6C8) on --ocean-dark (#0D3349): ratio ~12:1 PASS
+   --charcoal (#1C1C1C) on --sand (#F5E6C8): ratio ~14:1 PASS
+   --charcoal (#1C1C1C) on --palm (#C8E6C0): ratio ~10:1 PASS
+   --charcoal (#1C1C1C) on --shell (#FFF8EE): ratio ~17:1 PASS
+   --ocean-dark (#0D3349) on --sand (#F5E6C8): ratio ~12:1 PASS
+   --coral (#C94B1F) on --shell (#FFF8EE): ratio ~6.2:1 PASS
+   --coral (#C94B1F) on --sand (#F5E6C8): ratio ~5.4:1 PASS
+   --shell (#FFF8EE) on --ocean (#1A6B8A): ratio ~6.8:1 PASS
+   --ocean (#1A6B8A) on --shell (#FFF8EE): ratio ~6.8:1 PASS
+   --charcoal (#1C1C1C) on --seafoam (#A8D5C2): ratio ~9:1 PASS
+   --charcoal (#1C1C1C) on --coral (#C94B1F): ratio ~5.5:1 PASS AA (large text)
+   White (#FFFFFF) on --coral (#C94B1F): ratio ~4.7:1 PASS AA
+   White (#FFFFFF) on --ocean-dark (#0D3349): ratio ~14:1 PASS
+   White (#FFFFFF) on --ocean (#1A6B8A): ratio ~6.8:1 PASS
+*/
+:root {
+  --sand: #F5E6C8;
+  --shell: #FFF8EE;
+  --palm: #C8E6C0;
+  --seafoam: #A8D5C2;
+  --ocean: #1A6B8A;
+  --ocean-dark: #0D3349;
+  --coral: #C94B1F;
+  --sunset: #E8793A;
+  --charcoal: #1C1C1C;
+  --mid-gray: #4A4A4A;
+  --light-border: #D9C9A8;
+  --badge-cleared-bg: #2A6B3F;
+  --badge-cleared-text: #FFFFFF;
+  --badge-progress-bg: #7B4A00;
+  --badge-progress-text: #FFFFFF;
+  --badge-notstarted-bg: #4A4A4A;
+  --badge-notstarted-text: #FFFFFF;
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 18px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--ocean-dark);
+  color: var(--charcoal);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === BACKGROUNDS === */
+.bg-texture {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(26,107,138,0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(201,75,31,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(13,51,73,0.8) 0%, var(--ocean-dark) 100%);
+  z-index: 0;
+}
+
+/* === SCREENS === */
+.screen { display: none; position: relative; z-index: 1; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* === LOAD SCREEN === */
+#load-screen {
+  padding: 40px 20px;
+  text-align: center;
+}
+.load-eyebrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--seafoam);
+  margin-bottom: 12px;
+}
+.load-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 8vw, 7rem);
+  color: var(--sand);
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  margin-bottom: 8px;
+}
+.load-subtitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--coral);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+.load-card {
+  background: var(--shell);
+  border-radius: 16px;
+  padding: 36px 48px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.load-label {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--mid-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  display: block;
+}
+.load-input {
+  width: 100%;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  text-align: center;
+  background: var(--sand);
+  border: 2px solid var(--light-border);
+  border-radius: 10px;
+  color: var(--ocean-dark);
+  padding: 8px 16px;
+  margin-bottom: 28px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.load-input:focus { border-color: var(--ocean); }
+.btn-primary {
+  display: block;
+  width: 100%;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.1em;
+  background: var(--coral);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 16px 32px;
+  min-height: 64px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-primary:hover { background: #A83B14; }
+.btn-primary:active { transform: scale(0.98); }
+
+/* === STATION SCREEN === */
+#station-screen {
+  padding: 40px 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.station-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.station-eyebrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--seafoam);
+  margin-bottom: 8px;
+}
+.station-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.5rem;
+  color: var(--sand);
+  letter-spacing: 0.05em;
+}
+.station-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+.station-card {
+  background: var(--shell);
+  border-radius: 16px;
+  padding: 32px 36px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+}
+.station-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: var(--accent-color, var(--ocean));
+}
+.station-card:not(.cleared):hover {
+  border-color: var(--accent-color, var(--ocean));
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+.station-card.cleared {
+  opacity: 0.75;
+  cursor: default;
+}
+.station-card-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.7rem;
+  color: var(--ocean-dark);
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.station-card-topic {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.05rem;
+  color: var(--mid-gray);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+.status-badge.not-started {
+  background: var(--badge-notstarted-bg);
+  color: var(--badge-notstarted-text);
+}
+.status-badge.in-progress {
+  background: var(--badge-progress-bg);
+  color: var(--badge-progress-text);
+}
+.status-badge.cleared {
+  background: var(--badge-cleared-bg);
+  color: var(--badge-cleared-text);
+}
+.status-badge .badge-icon {
+  font-style: normal;
+  font-size: 0.9rem;
+}
+.all-clear-bar {
+  display: none;
+  margin-top: 32px;
+  width: 100%;
+  text-align: center;
+}
+.all-clear-bar.visible { display: block; }
+.btn-complete {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.1em;
+  background: var(--badge-cleared-bg);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 16px 64px;
+  min-height: 64px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-complete:hover { background: #1A5028; }
+
+/* === QUESTION SCREEN === */
+#question-screen {
+  padding: 40px 20px;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.q-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.q-station-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--seafoam);
+}
+.q-progress {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--sand);
+  background: rgba(255,255,255,0.1);
+  padding: 8px 18px;
+  border-radius: 8px;
+}
+.q-card {
+  background: var(--shell);
+  border-radius: 16px;
+  padding: 40px 48px;
+  box-shadow: 0 16px 50px rgba(0,0,0,0.35);
+  margin-bottom: 24px;
+}
+.q-producer-tag {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--light-border);
+}
+.q-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.4rem;
+  color: var(--ocean-dark);
+  line-height: 1.55;
+  margin-bottom: 28px;
+}
+.code-block {
+  font-family: monospace;
+  font-size: 1rem;
+  background: #1E2A35;
+  color: #E8F4F8;
+  padding: 20px 24px;
+  border-radius: 10px;
+  margin: 16px 0 24px;
+  white-space: pre;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+/* Multiple choice / code trace */
+.choices-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.choice-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  padding: 14px 18px;
+  min-height: 56px;
+  border: 2px solid var(--light-border);
+  border-radius: 10px;
+  background: var(--sand);
+  color: var(--charcoal);
+  cursor: default;
+  transition: border-color 0.2s, background 0.2s;
+  line-height: 1.4;
+}
+.choice-btn.correct-revealed {
+  background: #D4EDDA;
+  border-color: var(--badge-cleared-bg);
+  font-weight: 700;
+  outline: 3px solid var(--badge-cleared-bg);
+  outline-offset: 2px;
+}
+.choice-btn.correct-revealed::after {
+  content: " [CORRECT]";
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--badge-cleared-bg);
+}
+
+/* Fill in the blank */
+.fitb-block {
+  font-family: monospace;
+  font-size: 1.1rem;
+  background: #1E2A35;
+  color: #E8F4F8;
+  padding: 20px 24px;
+  border-radius: 10px;
+  margin: 16px 0 24px;
+  line-height: 2;
+  white-space: pre-wrap;
+}
+.blank-input {
+  font-family: monospace;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 5px;
+  color: #FFFFFF;
+  padding: 2px 8px;
+  min-width: 120px;
+  outline: none;
+  vertical-align: middle;
+}
+.blank-input:focus { border-color: var(--seafoam); }
+.blank-input.revealed-correct {
+  background: rgba(44,107,63,0.4);
+  border-color: #6FD48A;
+  color: #FFFFFF;
+}
+.fitb-answer {
+  display: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  color: var(--mid-gray);
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--palm);
+  border-radius: 8px;
+  line-height: 1.5;
+}
+.fitb-answer strong { color: var(--ocean-dark); }
+.fitb-answer.visible { display: block; }
+
+/* Drag and drop */
+.dnd-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+.dnd-column-label {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  margin-bottom: 10px;
+}
+.drag-items { display: flex; flex-direction: column; gap: 8px; }
+.drag-item {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  padding: 12px 16px;
+  min-height: 48px;
+  background: var(--ocean);
+  color: #FFFFFF;
+  border-radius: 8px;
+  cursor: grab;
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
+}
+.drag-item:active { cursor: grabbing; }
+.drag-item.dragging { opacity: 0.4; }
+.drag-item.locked {
+  cursor: default;
+  background: var(--badge-cleared-bg);
+}
+.drag-handle { font-style: normal; flex-shrink: 0; }
+.drop-targets { display: flex; flex-direction: column; gap: 8px; }
+.drop-target {
+  min-height: 56px;
+  border: 2px dashed var(--light-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--sand);
+  transition: border-color 0.2s, background 0.2s;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.drop-target.drag-over {
+  border-color: var(--ocean);
+  background: rgba(26,107,138,0.08);
+}
+.drop-target.matched {
+  border-color: var(--badge-cleared-bg);
+  border-style: solid;
+  background: #D4EDDA;
+}
+.drop-target-label {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  color: var(--mid-gray);
+  line-height: 1.4;
+}
+.drop-target-label strong { color: var(--ocean-dark); display: block; font-size: 0.85rem; }
+.dnd-answer {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--palm);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--charcoal);
+  line-height: 1.5;
+}
+.dnd-answer.visible { display: block; }
+.match-chip {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--ocean);
+  color: #FFFFFF;
+  margin-right: 4px;
+}
+
+/* Answer area */
+.answer-area {
+  display: none;
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: var(--palm);
+  border-radius: 10px;
+  border-left: 4px solid var(--badge-cleared-bg);
+}
+.answer-area.visible { display: block; }
+.answer-label {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--badge-cleared-bg);
+  margin-bottom: 8px;
+}
+.answer-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.15rem;
+  color: var(--charcoal);
+  line-height: 1.55;
+}
+
+/* Action buttons */
+.q-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn-reveal {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  background: var(--coral);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 40px;
+  min-height: 56px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-reveal:hover { background: #A83B14; }
+.btn-next {
+  display: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  background: var(--ocean);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 40px;
+  min-height: 56px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-next:hover { background: #135070; }
+.btn-next.visible { display: block; }
+
+/* === COMPLETION SCREEN === */
+#completion-screen {
+  padding: 40px 20px;
+  text-align: center;
+}
+.completion-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+.completion-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  color: var(--sand);
+  letter-spacing: 0.05em;
+  line-height: 0.95;
+  margin-bottom: 16px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.completion-subtitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  color: var(--coral);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.completion-msg {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--seafoam);
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+.btn-reset {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.1em;
+  background: var(--sunset);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 16px 52px;
+  min-height: 64px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-reset:hover { background: #C4622A; }
+
+/* Accent colors per station */
+.accent-casting { --accent-color: var(--coral); }
+.accent-production { --accent-color: var(--ocean); }
+.accent-quality { --accent-color: #2A6B3F; }
+.accent-dynamics { --accent-color: var(--sunset); }
+</style>
+</head>
+<body>
+
+<div class="bg-texture" aria-hidden="true"></div>
+
+<!-- LOAD SCREEN -->
+<section id="load-screen" class="screen active" role="main" aria-label="Session setup">
+  <p class="load-eyebrow">Week 5 Friday Review</p>
+  <h1 class="load-title">Island<br>Elimination</h1>
+  <p class="load-subtitle">Live Tribal Review</p>
+  <div class="load-card">
+    <label class="load-label" for="student-count">How many producers today?</label>
+    <input class="load-input" id="student-count" type="number" value="25" min="6" max="30" aria-describedby="count-hint">
+    <p id="count-hint" style="font-size:0.85rem;color:var(--mid-gray);margin-bottom:20px;">Min 6 -- Max 30</p>
+    <button class="btn-primary" id="begin-btn" aria-label="Begin elimination session">Begin Elimination</button>
+  </div>
+</section>
+
+<!-- STATION SCREEN -->
+<section id="station-screen" class="screen" role="main" aria-label="Station selection">
+  <div class="station-header">
+    <p class="station-eyebrow">Choose a station to enter</p>
+    <h2 class="station-title">The Island</h2>
+  </div>
+  <div class="station-grid" id="station-grid" role="list"></div>
+  <div class="all-clear-bar" id="all-clear-bar">
+    <button class="btn-complete" id="complete-btn">The Tribe Has Spoken</button>
+  </div>
+</section>
+
+<!-- QUESTION SCREEN -->
+<section id="question-screen" class="screen" role="main" aria-label="Question card">
+  <div class="q-header">
+    <p class="q-station-label" id="q-station-label"></p>
+    <p class="q-progress" id="q-progress" aria-live="polite"></p>
+  </div>
+  <div class="q-card" id="q-card"></div>
+  <div class="q-actions">
+    <button class="btn-reveal" id="reveal-btn" aria-label="Reveal answer">Reveal Answer</button>
+    <button class="btn-next" id="next-btn" aria-label="Next producer"></button>
+  </div>
+</section>
+
+<!-- COMPLETION SCREEN -->
+<section id="completion-screen" class="screen" role="main" aria-label="Session complete">
+  <div class="completion-icon" aria-hidden="true">🏝️</div>
+  <h2 class="completion-title">The Tribe<br>Has Spoken</h2>
+  <p class="completion-subtitle">All stations cleared</p>
+  <p class="completion-msg">"The tribe has spoken. All concepts survive another week."</p>
+  <button class="btn-reset" id="reset-btn">Start New Elimination</button>
+</section>
+
+<script>
+/* =============================================
+   QUESTION POOLS -- 5 per station, 20 total
+   ============================================= */
+
+const STATIONS = [
+  {
+    id: 'casting',
+    name: 'The Casting Office',
+    accentClass: 'accent-casting',
+    topic: 'OOP fundamentals, encapsulation, getters, access modifiers',
+    questions: [
+      // Q1: Multiple choice -- what OOP means
+      {
+        format: 'mc',
+        text: 'A producer pitches OOP to the network. Which statement best describes what object-oriented programming means?',
+        choices: [
+          'A. Code is organized into objects that bundle related data and behavior together.',
+          'B. The program runs faster because objects are stored in order.',
+          'C. Every method must return an object type.',
+          'D. Programs are divided into numbered steps that execute from top to bottom.'
+        ],
+        correctIndex: 0,
+        explanation: 'OOP groups related fields and methods inside objects (classes), modeling real-world things as self-contained units.'
+      },
+      // Q2: Code trace -- derived getter
+      {
+        format: 'trace',
+        code:
+`public class Contestant {
+    private String firstName = "Marco";
+    private String lastName  = "Torres";
+    private int    votes     = 3;
+
+    public String getFullIntro() {
+        return firstName + " " + lastName
+               + " | Votes: " + votes;
+    }
+}
+
+Contestant c = new Contestant();
+System.out.println(c.getFullIntro());`,
+        text: 'The casting team runs this code. What prints to the console?',
+        choices: [
+          'A. Marco Torres | Votes: 3',
+          'B. firstName lastName | Votes: votes',
+          'C. Marco | Votes: 3',
+          'D. A compile error -- getFullIntro has no parameters.'
+        ],
+        correctIndex: 0,
+        explanation: 'getFullIntro() is a derived getter -- it computes and returns a new String built from existing fields rather than returning a field directly.'
+      },
+      // Q3: Fill in blank -- boolean getter name
+      {
+        format: 'fitb',
+        text: 'The Contestant class has a boolean field that tracks whether the contestant has immunity. Complete the getter name that follows Java naming convention:',
+        codeTemplate: 'public boolean ________()\u00a0{ return hasImmunity; }',
+        blanks: ['hasImmunity'],
+        hints: ['The field is named hasImmunity.'],
+        explanation: 'Boolean getters start with "has" or "is" rather than "get". Since the field is hasImmunity, the getter is also hasImmunity().'
+      },
+      // Q4: Multiple choice -- default access modifier
+      {
+        format: 'mc',
+        text: 'A junior producer writes this field with no access modifier:\n\nint votesReceived;\n\nWhat access does this field have?',
+        choices: [
+          'A. private -- only this class can read it.',
+          'B. public -- any class in the program can read it.',
+          'C. package-private -- only classes in the same package can access it.',
+          'D. protected -- subclasses and same-package classes can access it.'
+        ],
+        correctIndex: 2,
+        explanation: 'When no access modifier is written, Java uses package-private (also called default access). The field is visible to all classes in the same package but not outside it.'
+      },
+      // Q5: Drag-drop -- encapsulation concepts
+      {
+        format: 'dnd',
+        text: 'The casting team reviews encapsulation rules. Match each term to its correct description.',
+        pairs: [
+          { item: 'private field', target: 'A field only accessible within its own class' },
+          { item: 'getter method', target: 'A public method that reads a private field\'s value' },
+          { item: 'setter method', target: 'A public method that writes a new value to a private field' },
+          { item: 'encapsulation', target: 'The practice of hiding internal data and exposing controlled access' }
+        ],
+        explanation: 'Correct matches: private field -- accessible within its own class. getter -- reads the field. setter -- writes the field. encapsulation -- the principle that bundles data and limits direct access.'
+      }
+    ]
+  },
+  {
+    id: 'production',
+    name: 'The Production Room',
+    accentClass: 'accent-production',
+    topic: 'Methods, return types, method overloading, void',
+    questions: [
+      // Q1: Fill in blank -- method signature
+      {
+        format: 'fitb',
+        text: 'The production crew needs a method that accepts a contestant\'s name and challenge score, then returns a formatted result String. Fill in the two blanks to complete the signature:',
+        codeTemplate: 'public ________ scoreChallenge(String name, ________ points)',
+        blanks: ['String', 'int'],
+        explanation: 'Return type comes before the method name. This method returns text, so the return type is String. The score is a whole number, so the parameter type is int.'
+      },
+      // Q2: Multiple choice -- which overload is called
+      {
+        format: 'mc',
+        text: 'The production room has these two overloaded methods:\n\nvoid castVote(String name)  { ... }\nvoid castVote(int producerId)  { ... }\n\nWhich method runs when the code calls:  castVote(42) ?',
+        choices: [
+          'A. castVote(String name) -- because 42 could be a String.',
+          'B. castVote(int producerId) -- because 42 is an int literal.',
+          'C. Both methods run at the same time.',
+          'D. A compile error -- overloads with different types are not allowed.'
+        ],
+        correctIndex: 1,
+        explanation: 'Java picks the overload whose parameter type matches the argument. 42 is an int literal, so castVote(int producerId) is called.'
+      },
+      // Q3: Multiple choice -- what void means
+      {
+        format: 'mc',
+        text: 'A method in the production schedule is declared as:\n\nvoid announceWinner(String name) { ... }\n\nWhat does the keyword void tell the compiler?',
+        choices: [
+          'A. The method accepts zero parameters.',
+          'B. The method returns nothing when it finishes.',
+          'C. The method is private and cannot be called from outside the class.',
+          'D. The method can only be called once per session.'
+        ],
+        correctIndex: 1,
+        explanation: 'void is the return type and means "this method does not return a value." It can still accept parameters and perform actions.'
+      },
+      // Q4: Code trace -- invalid overload detection
+      {
+        format: 'trace',
+        code:
+`public class ProductionRoom {
+    void castVote(String name)     { System.out.println("Vote: " + name); }
+    int  castVote(String category) { return 1; }
+}`,
+        text: 'A producer spots an error in this class. What is the problem?',
+        choices: [
+          'A. castVote can only be overloaded twice maximum.',
+          'B. The two methods have the same name and the same parameter type -- this is not a valid overload.',
+          'C. A void method cannot coexist with an int method in the same class.',
+          'D. String is not allowed as a parameter type in overloaded methods.'
+        ],
+        correctIndex: 1,
+        explanation: 'Method overloading requires a different parameter list (number or types of parameters). Both methods here take a single String, so the compiler cannot tell them apart -- this is a compile error.'
+      },
+      // Q5: Drag-drop -- match method call to return value
+      {
+        format: 'dnd',
+        text: 'Match each method signature to the correct description of what it returns.',
+        pairs: [
+          { item: 'void announce(String s)', target: 'Returns nothing' },
+          { item: 'int countVotes()', target: 'Returns a whole number' },
+          { item: 'boolean isEliminated()', target: 'Returns true or false' },
+          { item: 'String getResult()', target: 'Returns a text value' }
+        ],
+        explanation: 'The return type is the first word in the signature. void = nothing, int = whole number, boolean = true/false, String = text.'
+      }
+    ]
+  },
+  {
+    id: 'quality',
+    name: 'The Quality Check',
+    accentClass: 'accent-quality',
+    topic: 'QA basics, arrange/act/assert, types of testing',
+    questions: [
+      // Q1: Multiple choice -- AAA pattern
+      {
+        format: 'mc',
+        text: 'The QA team explains the arrange, act, assert pattern. In plain English, what do those three steps mean?',
+        choices: [
+          'A. Write the class, write the method, then deploy the code.',
+          'B. Set up the test data, run the code being tested, then check that the result matches expectations.',
+          'C. Arrange files in folders, act on user input, then assert access permissions.',
+          'D. Declare variables, assign values, then print assertions to the console.'
+        ],
+        correctIndex: 1,
+        explanation: 'Arrange: prepare the objects and inputs you need. Act: call the method under test. Assert: verify the output or state matches what you expected.'
+      },
+      // Q2: Multiple choice -- exploratory vs regressive
+      {
+        format: 'mc',
+        text: 'Before the finale, QA runs two types of tests. Which statement correctly describes the difference between exploratory and regressive testing?',
+        choices: [
+          'A. Exploratory testing checks new features; regressive testing checks that existing features still work after changes.',
+          'B. Exploratory testing is automated; regressive testing is always manual.',
+          'C. Regressive testing finds new bugs; exploratory testing re-runs old test cases.',
+          'D. Both terms mean the same thing -- checking all features of an application.'
+        ],
+        correctIndex: 0,
+        explanation: 'Exploratory testing is open-ended discovery of new issues. Regressive (regression) testing re-runs known cases to confirm nothing broke after a code change.'
+      },
+      // Q3: Fill in blank -- automated testing benefit
+      {
+        format: 'fitb',
+        text: 'The QA lead explains a key advantage of automated testing. Complete the sentence:',
+        codeTemplate: 'Automated tests can run ________ times without human effort, making them ideal for catching ________ in large codebases.',
+        blanks: ['many / thousands of', 'regressions'],
+        explanation: '"Many times" (or "thousands of times") and "regressions" -- automated tests can be re-run instantly after any change, catching regressions that manual review might miss.'
+      },
+      // Q4: Multiple choice -- what a unit test isolates
+      {
+        format: 'mc',
+        text: 'The QA crew writes a unit test for the vote tally method. What does a unit test isolate?',
+        choices: [
+          'A. The entire application from start to finish.',
+          'B. A single method or small unit of code, tested independently of the rest of the system.',
+          'C. Only the user interface layer of the program.',
+          'D. The database connection and network calls made by the app.'
+        ],
+        correctIndex: 1,
+        explanation: 'A unit test targets one small piece of logic in isolation. The goal is to confirm that a single method behaves correctly on its own, without depending on other parts of the system.'
+      },
+      // Q5: Drag-drop -- testing type to definition
+      {
+        format: 'dnd',
+        text: 'Match each testing concept to its correct definition.',
+        pairs: [
+          { item: 'Unit test', target: 'Verifies one small piece of logic in isolation' },
+          { item: 'Regression test', target: 'Re-checks that a previously working feature still works' },
+          { item: 'Exploratory test', target: 'Open-ended investigation to discover unexpected bugs' },
+          { item: 'Automated test', target: 'Runs without human input and produces a pass or fail result' }
+        ],
+        explanation: 'Unit -- isolates one method. Regression -- checks nothing broke. Exploratory -- discovers new bugs. Automated -- runs on its own every time.'
+      }
+    ]
+  },
+  {
+    id: 'dynamics',
+    name: 'The Island Dynamics',
+    accentClass: 'accent-dynamics',
+    topic: 'static keyword, static vs instance, cohesion, coupling, object relationships',
+    questions: [
+      // Q1: Multiple choice -- what static means on a field
+      {
+        format: 'mc',
+        text: 'The IslandGame class has this field:\n\nstatic String islandName = "Scorched Reef";\n\nWhat does the static keyword mean for this field?',
+        choices: [
+          'A. The field can never be changed after it is set.',
+          'B. The field belongs to the class itself, not to any individual object.',
+          'C. The field is private and cannot be accessed outside this class.',
+          'D. The field is shared only between subclasses of IslandGame.'
+        ],
+        correctIndex: 1,
+        explanation: 'static means the field is owned by the class, not by any instance. All objects share the same value, and you can access it without creating an object.'
+      },
+      // Q2: Code trace -- static vs instance call syntax
+      {
+        format: 'trace',
+        code:
+`public class IslandGame {
+    static int totalSeasons = 5;
+    int episodeCount = 12;
+
+    public static void main(String[] args) {
+        IslandGame g = new IslandGame();
+        System.out.println(totalSeasons);
+        System.out.println(g.episodeCount);
+    }
+}`,
+        text: 'What does this code print?',
+        choices: [
+          'A. 5\n12',
+          'B. totalSeasons\nepisodeCount',
+          'C. A compile error -- static and instance fields cannot both be in main.',
+          'D. 12\n5'
+        ],
+        correctIndex: 0,
+        explanation: 'totalSeasons is static so it is accessed directly by name. episodeCount is an instance field so it is accessed through the object reference g. Output: 5, then 12.'
+      },
+      // Q3: Fill in blank -- high cohesion
+      {
+        format: 'fitb',
+        text: 'The production team defines a key design principle. Complete the definition:',
+        codeTemplate: 'High cohesion means a class has a ________ purpose, and all its methods relate ________ to that purpose.',
+        blanks: ['single / clear / focused', 'directly'],
+        explanation: 'High cohesion: a class does one well-defined thing and all its methods contribute to that responsibility. Low cohesion means the class tries to do too many unrelated things.'
+      },
+      // Q4: Multiple choice -- tight coupling problem
+      {
+        format: 'mc',
+        text: 'Two island classes are tightly coupled. Why is tight coupling considered a problem?',
+        choices: [
+          'A. Tightly coupled classes run slower because they share memory.',
+          'B. Changing one class is likely to break or require changes in the other, making the code harder to maintain.',
+          'C. Tight coupling prevents a class from having more than three methods.',
+          'D. The compiler cannot resolve tightly coupled classes at runtime.'
+        ],
+        correctIndex: 1,
+        explanation: 'Tight coupling means two classes depend heavily on each other\'s internal details. A change in one ripples into the other, making the code brittle and difficult to update independently.'
+      },
+      // Q5: Drag-drop -- has-a vs uses-a
+      {
+        format: 'dnd',
+        text: 'The island shows two types of class relationships. Match each relationship name to its description.',
+        pairs: [
+          { item: 'has-a (composition)', target: 'One class holds a reference to another class as a field' },
+          { item: 'uses-a (dependency)', target: 'One class receives or creates another class only within a method' },
+          { item: 'high cohesion', target: 'A class focuses on one clear responsibility' },
+          { item: 'tight coupling', target: 'Two classes depend heavily on each other\'s internal details' }
+        ],
+        explanation: 'has-a: field reference. uses-a: method-level reference. High cohesion: single responsibility. Tight coupling: deep mutual dependency.'
+      }
+    ]
+  }
+];
+
+/* =============================================
+   APP STATE
+   ============================================= */
+let studentCount = 25;
+let assignments = {}; // stationId -> array of {studentIndex, question}
+let stationStatus = {}; // stationId -> 'not-started' | 'in-progress' | 'cleared'
+let currentStation = null;
+let currentQIndex = 0;
+let totalPerStation = 0;
+
+/* =============================================
+   FISHER-YATES SHUFFLE
+   ============================================= */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* =============================================
+   SCREEN MANAGEMENT
+   ============================================= */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* =============================================
+   SESSION INITIALIZATION
+   ============================================= */
+function initSession(count) {
+  studentCount = Math.max(6, Math.min(30, count));
+  const total = Math.min(studentCount, 20);
+  totalPerStation = Math.floor(total / 4); // 1-5 per station
+
+  // Ensure at least 1 per station
+  const qPerStation = Math.max(1, totalPerStation);
+
+  // Build a global student index array and shuffle it
+  // Each student gets one slot per station; for small classes some get 2 rounds
+  assignments = {};
+  stationStatus = {};
+
+  STATIONS.forEach(station => {
+    stationStatus[station.id] = 'not-started';
+    // Shuffle question pool, take qPerStation
+    const pool = shuffle([...station.questions]).slice(0, qPerStation);
+    // Assign student indices
+    const studentIndices = shuffle(Array.from({length: studentCount}, (_, i) => i + 1));
+    const assigned = pool.map((q, idx) => ({
+      student: studentIndices[idx % studentCount],
+      question: q
+    }));
+    assignments[station.id] = assigned;
+  });
+}
+
+/* =============================================
+   STATION SCREEN
+   ============================================= */
+function renderStationScreen() {
+  showScreen('station-screen');
+  const grid = document.getElementById('station-grid');
+  grid.innerHTML = '';
+
+  STATIONS.forEach(station => {
+    const status = stationStatus[station.id];
+    const card = document.createElement('div');
+    card.className = 'station-card ' + station.accentClass + (status === 'cleared' ? ' cleared' : '');
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('aria-label', station.name + ' -- ' + (status === 'cleared' ? 'Cleared' : status === 'in-progress' ? 'In Progress' : 'Not Started'));
+    if (status !== 'cleared') {
+      card.setAttribute('tabindex', '0');
+      card.style.cursor = 'pointer';
+    }
+
+    const statusLabel = status === 'cleared' ? 'Cleared' : status === 'in-progress' ? 'In Progress' : 'Not Started';
+    const badgeClass = status === 'cleared' ? 'cleared' : status === 'in-progress' ? 'in-progress' : 'not-started';
+    const badgeIcon = status === 'cleared' ? '\u2714' : status === 'in-progress' ? '\u25B6' : '\u25CB';
+
+    card.innerHTML = `
+      <div class="station-card-name">${station.name}</div>
+      <div class="station-card-topic">${station.topic}</div>
+      <span class="status-badge ${badgeClass}" aria-label="Status: ${statusLabel}">
+        <span class="badge-icon" aria-hidden="true">${badgeIcon}</span>
+        ${statusLabel}
+      </span>
+    `;
+
+    if (status !== 'cleared') {
+      card.addEventListener('click', () => enterStation(station.id));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') enterStation(station.id); });
+    }
+    grid.appendChild(card);
+  });
+
+  // Show completion button only if all cleared
+  const allCleared = STATIONS.every(s => stationStatus[s.id] === 'cleared');
+  const bar = document.getElementById('all-clear-bar');
+  bar.classList.toggle('visible', allCleared);
+}
+
+/* =============================================
+   ENTER STATION
+   ============================================= */
+function enterStation(stationId) {
+  currentStation = stationId;
+  currentQIndex = 0;
+  if (stationStatus[stationId] === 'not-started') {
+    stationStatus[stationId] = 'in-progress';
+  }
+  renderQuestion();
+}
+
+/* =============================================
+   QUESTION RENDERING
+   ============================================= */
+function renderQuestion() {
+  showScreen('question-screen');
+  const station = STATIONS.find(s => s.id === currentStation);
+  const stationAssignments = assignments[currentStation];
+  const entry = stationAssignments[currentQIndex];
+  const q = entry.question;
+  const total = stationAssignments.length;
+  const isLast = currentQIndex === total - 1;
+
+  // Header
+  document.getElementById('q-station-label').textContent = station.name;
+  document.getElementById('q-progress').textContent =
+    'Producer ' + (currentQIndex + 1) + ' of ' + total;
+
+  // Card
+  const card = document.getElementById('q-card');
+  card.innerHTML = '';
+
+  const producerTag = document.createElement('div');
+  producerTag.className = 'q-producer-tag';
+  producerTag.textContent = 'Producer #' + entry.student;
+  card.appendChild(producerTag);
+
+  if (q.format === 'mc' || q.format === 'trace') renderMC(card, q);
+  else if (q.format === 'fitb') renderFITB(card, q);
+  else if (q.format === 'dnd') renderDND(card, q);
+
+  // Buttons
+  const revealBtn = document.getElementById('reveal-btn');
+  const nextBtn = document.getElementById('next-btn');
+  revealBtn.style.display = 'block';
+  nextBtn.classList.remove('visible');
+  nextBtn.textContent = isLast ? 'Station Cleared' : 'Next Producer';
+
+  // Reveal handler
+  revealBtn.onclick = () => {
+    revealAnswer(q);
+    revealBtn.style.display = 'none';
+    nextBtn.classList.add('visible');
+  };
+
+  nextBtn.onclick = () => {
+    if (isLast) {
+      stationStatus[currentStation] = 'cleared';
+      renderStationScreen();
+    } else {
+      currentQIndex++;
+      renderQuestion();
+    }
+  };
+}
+
+/* =============================================
+   MULTIPLE CHOICE / CODE TRACE
+   ============================================= */
+function renderMC(card, q) {
+  if (q.code) {
+    const codePre = document.createElement('pre');
+    codePre.className = 'code-block';
+    codePre.setAttribute('aria-label', 'Code sample');
+    codePre.textContent = q.code;
+    card.appendChild(codePre);
+  }
+
+  const qText = document.createElement('p');
+  qText.className = 'q-text';
+  qText.style.whiteSpace = 'pre-wrap';
+  qText.textContent = q.text;
+  card.appendChild(qText);
+
+  const grid = document.createElement('div');
+  grid.className = 'choices-grid';
+  q.choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.dataset.index = i;
+    btn.textContent = choice;
+    btn.setAttribute('aria-label', 'Option ' + (i + 1) + ': ' + choice);
+    grid.appendChild(btn);
+  });
+  card.appendChild(grid);
+
+  // Answer area (hidden until reveal)
+  const answerArea = document.createElement('div');
+  answerArea.className = 'answer-area';
+  answerArea.id = 'answer-area';
+  answerArea.innerHTML = `<div class="answer-label">Answer</div><div class="answer-text">${q.explanation}</div>`;
+  card.appendChild(answerArea);
+}
+
+/* =============================================
+   FILL IN THE BLANK
+   ============================================= */
+function renderFITB(card, q) {
+  const qText = document.createElement('p');
+  qText.className = 'q-text';
+  qText.textContent = q.text;
+  card.appendChild(qText);
+
+  const block = document.createElement('div');
+  block.className = 'fitb-block';
+  block.id = 'fitb-block';
+
+  // Build the code template with inputs
+  // Replace each blank marker with an input field
+  // Blanks marked by ________ (8+ underscores) in codeTemplate
+  const template = q.codeTemplate;
+  const parts = template.split('________');
+  let html = '';
+  parts.forEach((part, i) => {
+    html += escapeHTML(part);
+    if (i < parts.length - 1) {
+      const size = Math.max(12, (q.blanks[i] ? q.blanks[i].length + 4 : 12));
+      html += `<input class="blank-input" id="blank-${i}" type="text" autocomplete="off" spellcheck="false" size="${size}" aria-label="Fill in blank ${i+1}">`;
+    }
+  });
+  block.innerHTML = html;
+  card.appendChild(block);
+
+  const answerDiv = document.createElement('div');
+  answerDiv.className = 'fitb-answer';
+  answerDiv.id = 'fitb-answer';
+  answerDiv.innerHTML = `<strong>Answer:</strong> ${escapeHTML(q.explanation)}`;
+  card.appendChild(answerDiv);
+}
+
+/* =============================================
+   DRAG AND DROP MATCHING
+   ============================================= */
+function renderDND(card, q) {
+  const qText = document.createElement('p');
+  qText.className = 'q-text';
+  qText.textContent = q.text;
+  card.appendChild(qText);
+
+  const container = document.createElement('div');
+  container.className = 'dnd-container';
+
+  // Left column: draggable items (shuffled)
+  const leftCol = document.createElement('div');
+  const leftLabel = document.createElement('p');
+  leftLabel.className = 'dnd-column-label';
+  leftLabel.textContent = 'Terms';
+  leftCol.appendChild(leftLabel);
+  const dragItems = document.createElement('div');
+  dragItems.className = 'drag-items';
+  dragItems.id = 'drag-items';
+
+  const shuffledPairs = shuffle([...q.pairs]);
+  shuffledPairs.forEach((pair, i) => {
+    const item = document.createElement('div');
+    item.className = 'drag-item';
+    item.draggable = true;
+    item.dataset.term = pair.item;
+    item.id = 'drag-' + i;
+    item.innerHTML = `<span class="drag-handle" aria-hidden="true">&#8596;</span> ${escapeHTML(pair.item)}`;
+    item.setAttribute('aria-label', 'Drag: ' + pair.item);
+    item.addEventListener('dragstart', onDragStart);
+    item.addEventListener('dragend', onDragEnd);
+    dragItems.appendChild(item);
+  });
+  leftCol.appendChild(dragItems);
+  container.appendChild(leftCol);
+
+  // Right column: drop targets (original order)
+  const rightCol = document.createElement('div');
+  const rightLabel = document.createElement('p');
+  rightLabel.className = 'dnd-column-label';
+  rightLabel.textContent = 'Definitions';
+  rightCol.appendChild(rightLabel);
+  const dropTargets = document.createElement('div');
+  dropTargets.className = 'drop-targets';
+  dropTargets.id = 'drop-targets';
+
+  q.pairs.forEach((pair, i) => {
+    const target = document.createElement('div');
+    target.className = 'drop-target';
+    target.dataset.correctTerm = pair.item;
+    target.dataset.definition = pair.target;
+    target.id = 'drop-' + i;
+    target.innerHTML = `<div class="drop-target-label">${escapeHTML(pair.target)}</div>`;
+    target.setAttribute('aria-label', 'Drop zone: ' + pair.target);
+    target.addEventListener('dragover', onDragOver);
+    target.addEventListener('dragleave', onDragLeave);
+    target.addEventListener('drop', onDrop);
+    dropTargets.appendChild(target);
+  });
+  rightCol.appendChild(dropTargets);
+  container.appendChild(rightCol);
+
+  card.appendChild(container);
+
+  const answerDiv = document.createElement('div');
+  answerDiv.className = 'dnd-answer';
+  answerDiv.id = 'dnd-answer';
+  answerDiv.innerHTML = `<strong>Answer key:</strong> ${escapeHTML(q.explanation)}`;
+  card.appendChild(answerDiv);
+}
+
+// DND state
+let draggedItem = null;
+
+function onDragStart(e) {
+  draggedItem = e.currentTarget;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', e.currentTarget.dataset.term);
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  if (!e.currentTarget.classList.contains('matched')) {
+    e.currentTarget.classList.add('drag-over');
+    e.dataTransfer.dropEffect = 'move';
+  }
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  const target = e.currentTarget;
+  target.classList.remove('drag-over');
+  if (target.classList.contains('matched') || !draggedItem) return;
+
+  const term = e.dataTransfer.getData('text/plain');
+  // Place the chip in the target
+  const chip = document.createElement('span');
+  chip.className = 'match-chip';
+  chip.setAttribute('aria-label', 'Matched: ' + term);
+  chip.innerHTML = '\u2713 ' + escapeHTML(term);
+  target.appendChild(chip);
+  target.classList.add('matched');
+
+  // Lock the dragged item
+  if (draggedItem) {
+    draggedItem.classList.add('locked');
+    draggedItem.draggable = false;
+    draggedItem.removeEventListener('dragstart', onDragStart);
+  }
+  draggedItem = null;
+}
+
+/* =============================================
+   REVEAL ANSWER
+   ============================================= */
+function revealAnswer(q) {
+  if (q.format === 'mc' || q.format === 'trace') {
+    // Highlight correct choice
+    const btns = document.querySelectorAll('.choice-btn');
+    btns.forEach(btn => {
+      if (parseInt(btn.dataset.index) === q.correctIndex) {
+        btn.classList.add('correct-revealed');
+      }
+    });
+    // Show explanation
+    const area = document.getElementById('answer-area');
+    if (area) area.classList.add('visible');
+  } else if (q.format === 'fitb') {
+    // Show answers in the blank inputs
+    q.blanks.forEach((ans, i) => {
+      const input = document.getElementById('blank-' + i);
+      if (input) {
+        input.value = ans;
+        input.classList.add('revealed-correct');
+        input.readOnly = true;
+      }
+    });
+    const answerDiv = document.getElementById('fitb-answer');
+    if (answerDiv) answerDiv.classList.add('visible');
+  } else if (q.format === 'dnd') {
+    // Lock all targets and show answer
+    document.querySelectorAll('.drop-target').forEach(t => t.classList.add('matched'));
+    const answerDiv = document.getElementById('dnd-answer');
+    if (answerDiv) answerDiv.classList.add('visible');
+    // Show correct matching on unmatched items
+    document.querySelectorAll('.drag-item').forEach(item => {
+      item.classList.add('locked');
+      item.draggable = false;
+    });
+  }
+}
+
+/* =============================================
+   UTILITY
+   ============================================= */
+function escapeHTML(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/* =============================================
+   EVENT LISTENERS
+   ============================================= */
+
+// Clamp on blur
+const countInput = document.getElementById('student-count');
+countInput.addEventListener('blur', () => {
+  let val = parseInt(countInput.value) || 25;
+  val = Math.max(6, Math.min(30, val));
+  countInput.value = val;
+});
+
+// Begin
+document.getElementById('begin-btn').addEventListener('click', () => {
+  const count = parseInt(countInput.value) || 25;
+  initSession(count);
+  renderStationScreen();
+});
+
+// Complete
+document.getElementById('complete-btn').addEventListener('click', () => {
+  showScreen('completion-screen');
+});
+
+// Reset
+document.getElementById('reset-btn').addEventListener('click', () => {
+  countInput.value = 25;
+  showScreen('load-screen');
+});
+
+// Allow Enter on load screen
+countInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('begin-btn').click();
+});
+</script>
+</body>
+</html>

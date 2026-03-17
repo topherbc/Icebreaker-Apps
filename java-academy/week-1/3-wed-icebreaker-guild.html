@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guild Initiation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --stone:       #0d0c0a;
+    --stone-mid:   #1a1814;
+    --stone-light: #2a2620;
+    --amber:       #c8882a;
+    --amber-glow:  #e8a84a;
+    --amber-dim:   #7a5018;
+    --parchment:   #f0e8d0;
+    --parchment-mid: #d8ccb0;
+    --parchment-dark: #b0a080;
+    --ink:         #1a1208;
+    --ink-mid:     #3a2e18;
+    --ruby:        #8b1a1a;
+    --ruby-bright: #c02828;
+    --sage:        #2a5028;
+    --sage-bright: #3a7038;
+    --reveal-bg:   #1e2a1e;
+    --reveal-border: #3a5a3a;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--stone);
+    color: var(--parchment);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    overflow: hidden;
+  }
+
+  /* === BACKGROUND TEXTURE === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 20%, rgba(200,136,42,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(200,136,42,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 40% at 90% 80%, rgba(200,136,42,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* === LAYOUT === */
+  .screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* === LOAD SCREEN === */
+  .load-emblem {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .load-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(52px, 7vw, 80px);
+    font-weight: 900;
+    color: var(--amber-glow);
+    line-height: 1;
+    text-align: center;
+    text-shadow: 0 0 60px rgba(200,136,42,0.4), 0 4px 8px rgba(0,0,0,0.8);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .load-subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-size: 22px;
+    font-style: italic;
+    color: var(--parchment-mid);
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .load-card {
+    background: linear-gradient(160deg, #221e14 0%, #1a1610 100%);
+    border: 1px solid var(--amber-dim);
+    border-radius: 12px;
+    padding: 40px 48px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(200,136,42,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .load-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  }
+
+  .load-label {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .load-input {
+    width: 100%;
+    background: var(--stone-mid);
+    border: 1px solid var(--amber-dim);
+    border-radius: 8px;
+    color: var(--parchment);
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    padding: 12px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+  .load-input::-webkit-inner-spin-button,
+  .load-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .load-input:focus {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(200,136,42,0.2);
+  }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    margin-top: 28px;
+    padding: 18px 32px;
+    background: linear-gradient(160deg, var(--amber) 0%, var(--amber-dim) 100%);
+    color: var(--ink);
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 56px;
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    box-shadow: 0 4px 20px rgba(200,136,42,0.3);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(200,136,42,0.45);
+    filter: brightness(1.1);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:focus-visible {
+    outline: 3px solid var(--amber-glow);
+    outline-offset: 3px;
+  }
+
+  /* === CARD SCREEN === */
+  .card-screen {
+    gap: 16px;
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding-top: 24px;
+    padding-bottom: 32px;
+  }
+
+  .progress-bar-wrap {
+    width: 100%;
+    max-width: 820px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--stone-light);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-label {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--amber-dim);
+    white-space: nowrap;
+    min-width: 130px;
+    text-align: right;
+  }
+
+  /* THE CARD WRAPPER -- scrollable multi-question container */
+  .card {
+    background: linear-gradient(170deg, #f5eddb 0%, #e8dcbf 60%, #d8ccab 100%);
+    border-radius: 16px;
+    padding: 36px 48px 40px;
+    max-width: 820px;
+    width: 100%;
+    box-shadow:
+      0 2px 0 #b09060,
+      0 6px 0 #8a7040,
+      0 12px 40px rgba(0,0,0,0.7),
+      0 0 80px rgba(200,136,42,0.12);
+    position: relative;
+    animation: cardIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(140,100,40,0.25);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  /* RECRUIT HEADER on card */
+  .recruit-header {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(140,100,40,0.25);
+  }
+
+  /* QUESTION BLOCK -- one per question in the group */
+  .question-block {
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(140,100,40,0.18);
+  }
+  .question-block:last-of-type {
+    border-bottom: none;
+  }
+
+  .card-type-label {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .type-fun { color: var(--sage-bright); }
+  .type-tech { color: var(--ruby-bright); }
+
+  .type-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .card-question {
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(22px, 2.8vw, 30px);
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  .madlib-hint {
+    background: rgba(42,80,40,0.12);
+    border: 1px solid rgba(42,80,40,0.3);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--sage);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .madlib-hint strong { font-weight: 600; }
+
+  .answer-input {
+    width: 100%;
+    background: rgba(255,255,255,0.7);
+    border: 2px solid rgba(140,100,40,0.4);
+    border-radius: 8px;
+    color: var(--ink);
+    font-family: 'Crimson Pro', serif;
+    font-size: 20px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .answer-input:focus {
+    border-color: var(--sage-bright);
+    box-shadow: 0 0 0 3px rgba(42,80,40,0.15);
+  }
+  .answer-input::placeholder { color: rgba(60,40,0,0.35); }
+
+  .reveal-zone {
+    /* no extra margin needed, question-block handles spacing */
+  }
+
+  .btn-reveal {
+    background: transparent;
+    border: 2px solid var(--ruby);
+    color: var(--ruby-bright);
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 48px;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-reveal:hover {
+    background: rgba(139,26,26,0.1);
+  }
+  .btn-reveal:focus-visible {
+    outline: 3px solid var(--ruby-bright);
+    outline-offset: 3px;
+  }
+
+  .answer-reveal {
+    background: var(--reveal-bg);
+    border: 1px solid var(--reveal-border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: #90d890;
+    font-family: 'Crimson Pro', serif;
+    font-size: 20px;
+    margin-top: 10px;
+    display: none;
+    animation: fadeIn 0.25s ease;
+  }
+  .answer-reveal.shown { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(140,100,40,0.25);
+  }
+
+  .btn-next {
+    width: 100%;
+    padding: 16px 32px;
+    background: linear-gradient(160deg, #3a2e10 0%, #2a2008 100%);
+    color: var(--amber-glow);
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid var(--amber-dim);
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 56px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-next:hover {
+    background: linear-gradient(160deg, #4a3e18 0%, #3a2e10 100%);
+    box-shadow: 0 4px 16px rgba(200,136,42,0.2);
+    transform: translateY(-1px);
+  }
+  .btn-next:focus-visible {
+    outline: 3px solid var(--amber-glow);
+    outline-offset: 3px;
+  }
+
+  /* === FINALE SCREEN === */
+  .finale-screen {
+    gap: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 40px 32px 48px;
+    justify-content: flex-start;
+    align-items: center;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+  }
+
+  .finale-header {
+    text-align: center;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 800px;
+    flex-shrink: 0;
+  }
+
+  .finale-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.4em;
+    color: var(--amber-dim);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .finale-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    color: var(--amber-glow);
+    text-shadow: 0 0 40px rgba(200,136,42,0.4);
+    line-height: 1.1;
+  }
+
+  .finale-card {
+    background: linear-gradient(170deg, #f5eddb 0%, #e8dcbf 60%, #d8ccab 100%);
+    border-radius: 16px;
+    padding: 44px 52px;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 2px 0 #b09060, 0 6px 0 #8a7040, 0 16px 50px rgba(0,0,0,0.7);
+    position: relative;
+    animation: cardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+  }
+
+  .finale-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(140,100,40,0.25);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .finale-story {
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(20px, 2.5vw, 26px);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .finale-story p {
+    margin-bottom: 16px;
+  }
+
+  .finale-story p:last-child {
+    margin-bottom: 0;
+  }
+
+  .slot-value {
+    color: var(--sage);
+    font-weight: 600;
+    font-style: italic;
+    border-bottom: 1.5px solid rgba(42,80,40,0.4);
+    padding-bottom: 1px;
+  }
+
+  .btn-restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 40px;
+    background: linear-gradient(160deg, var(--amber) 0%, var(--amber-dim) 100%);
+    color: var(--ink);
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 56px;
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    box-shadow: 0 4px 20px rgba(200,136,42,0.3);
+  }
+  .btn-restart:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 8px 28px rgba(200,136,42,0.4);
+  }
+  .btn-restart:focus-visible {
+    outline: 3px solid var(--amber-glow);
+    outline-offset: 3px;
+  }
+
+  .ornament {
+    color: var(--amber-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 24px;
+    text-align: center;
+    margin: 8px 0;
+    letter-spacing: 0.3em;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOAD SCREEN -->
+<main id="screen-load" class="screen active" aria-label="Guild Initiation setup">
+  <div class="load-emblem" aria-hidden="true">&#10022; The Adventurers Guild &#10022;</div>
+  <h1 class="load-title">Guild Initiation</h1>
+  <p class="load-subtitle">Rites of the First Cohort</p>
+  <div class="load-card">
+    <label class="load-label" for="recruit-count">How many recruits today?</label>
+    <input
+      class="load-input"
+      id="recruit-count"
+      type="number"
+      min="6"
+      max="30"
+      value="25"
+      aria-describedby="recruit-help"
+    />
+    <p id="recruit-help" class="sr-only">Enter a number between 6 and 30</p>
+    <button class="btn-primary" id="btn-start" onclick="startSession()">
+      &#9876; Shuffle and Begin
+    </button>
+  </div>
+</main>
+
+<!-- CARD SCREEN -->
+<section id="screen-card" class="screen card-screen" aria-label="Current initiation card" aria-live="polite">
+  <div class="progress-bar-wrap" role="group" aria-label="Session progress">
+    <div class="progress-track" aria-hidden="true">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-label" id="progress-label" aria-live="off"></div>
+  </div>
+
+  <!-- Card is built dynamically by renderGroup() -->
+  <div id="card-container" style="width:100%;max-width:820px;"></div>
+</section>
+
+<!-- FINALE SCREEN -->
+<section id="screen-finale" class="screen finale-screen" aria-label="Guild chronicle finale">
+  <div class="finale-header">
+    <p class="finale-eyebrow">The Chronicle is Written</p>
+    <h2 class="finale-title">Tales of the First Cohort</h2>
+  </div>
+  <div class="finale-card">
+    <div class="ornament" aria-hidden="true">&#10070; &#10070; &#10070;</div>
+    <div class="finale-story" id="finale-story" role="region" aria-label="The cohort story"></div>
+    <div class="ornament" aria-hidden="true">&#10070; &#10070; &#10070;</div>
+  </div>
+  <button class="btn-restart" onclick="restartSession()">
+    <span aria-hidden="true">&#8635;</span> Start Over
+  </button>
+</section>
+
+<script>
+/* =============================================
+   DATA: QUESTIONS
+   ============================================= */
+
+/* =============================================
+   FUN QUESTIONS
+   12 total, organized into 6 pairs.
+   Each pair maps to one self-contained mad lib paragraph.
+   Pair index is stored on each question so the story
+   builder knows which paragraph each answer belongs to.
+   ============================================= */
+
+const FUN_QUESTIONS = [
+  // Pair 0: talent + curiosity
+  {
+    q: "What is one thing you were surprisingly good at before you ever tried it?",
+    slot: "talent", label: "a hidden talent", pair: 0
+  },
+  {
+    q: "If you could spend a Saturday learning absolutely anything -- no pressure, no career reason -- what would it be?",
+    slot: "curiosity", label: "a curiosity", pair: 0
+  },
+  // Pair 1: chapter + word
+  {
+    q: "What would you title the chapter of your life you are in right now?",
+    slot: "chapter", label: "a chapter title", pair: 1
+  },
+  {
+    q: "What is one word you would want your future teammates to use to describe you?",
+    slot: "word", label: "one word", pair: 1
+  },
+  // Pair 2: place + joy
+  {
+    q: "What is the most interesting place you have ever done focused, creative work?",
+    slot: "place", label: "a place", pair: 2
+  },
+  {
+    q: "What is something small -- easily overlooked -- that genuinely makes your day better?",
+    slot: "joy", label: "a small joy", pair: 2
+  },
+  // Pair 3: genre + nontech
+  {
+    q: "If your coding style were a genre of music, what would it be?",
+    slot: "genre", label: "a music genre", pair: 3
+  },
+  {
+    q: "What is a skill outside of tech that you think quietly makes you a better developer?",
+    slot: "nontech", label: "a non-tech skill", pair: 3
+  },
+  // Pair 4: food + belief
+  {
+    q: "What is a food you were convinced you hated, tried again, and now genuinely love?",
+    slot: "food", label: "a food", pair: 4
+  },
+  {
+    q: "What is something you used to believe about learning or working that you have since changed your mind about?",
+    slot: "belief", label: "a former belief", pair: 4
+  },
+  // Pair 5: words + question
+  {
+    q: "Describe your ideal working environment in three words.",
+    slot: "envwords", label: "three words", pair: 5
+  },
+  {
+    q: "What is a question you wish people asked you more often?",
+    slot: "question", label: "a good question", pair: 5
+  }
+];
+
+const TECH_QUESTIONS = [
+  {
+    // GitHub repositories
+    q: "In one sentence, what is a GitHub repository?",
+    answer: "A repository is a folder that stores a project's files and the full history of every change ever made to them."
+  },
+  {
+    // GitHub repositories
+    q: "True or false: two developers can work on the same GitHub repository at the same time.",
+    answer: "True -- that is one of the core reasons repositories exist."
+  },
+  {
+    // Java syntax
+    q: "Every Java program needs one method to run. What is it called?",
+    answer: "main -- specifically: public static void main(String[] args)"
+  },
+  {
+    // Java syntax
+    q: "What punctuation mark ends most statements in Java?",
+    answer: "A semicolon ( ; )"
+  },
+  {
+    // Variables and data types
+    q: "What is the difference between int and double in Java?",
+    answer: "int stores whole numbers only. double stores numbers with decimal points."
+  },
+  {
+    // Variables and data types
+    q: "I want to store the value true or false. What data type do I use?",
+    answer: "boolean"
+  },
+  {
+    // IntelliJ IDE
+    q: "What does an IDE like IntelliJ do that a plain text editor does not?",
+    answer: "It understands your code -- offering error highlighting, autocomplete, debugging tools, and the ability to run your program directly."
+  },
+  {
+    // Operations
+    q: "In Java, what does the % operator give you?",
+    answer: "The remainder after division. For example, 10 % 3 gives 1."
+  },
+  {
+    // Operations
+    q: "What is the result of 5 + 3 * 2 in Java, and why?",
+    answer: "11 -- multiplication happens before addition, following standard order of operations."
+  },
+  {
+    // Versioning and LTS
+    q: "What does LTS stand for, and why does it matter when choosing a Java version?",
+    answer: "Long-Term Support. LTS versions receive security and bug fixes for years, making them the safe choice for production projects."
+  },
+  {
+    // Versioning and LTS
+    q: "If a library says it requires Java 17+, can you use it with Java 11?",
+    answer: "No -- Java 11 is an older version. You would need to upgrade to Java 17 or higher."
+  },
+  {
+    // Java vs JavaScript
+    q: "True or false: Java and JavaScript are the same languages.",
+    answer: "False -- for example: Java and JavaScript are entirely different languages are used for different purposes! JavaScript is mostly used for Web Applications."
+  },
+  {
+    // Java vs JavaScript
+    q: "True or false: you can use Java to build a website front end the same way you use JavaScript.",
+    answer: "False -- JavaScript runs natively in browsers and controls the front end. Java is not designed for that purpose."
+  }
+];
+
+/* =============================================
+   MAD LIB
+   The story is written as a single flowing piece.
+   It collects every filled slot and weaves them in
+   naturally. Sentences that require a slot are only
+   included when that slot was filled. The prose reads
+   cleanly with any number of answers, 1 through 12.
+   ============================================= */
+
+function sv(val) {
+  return `<span class="slot-value">${escapeHtml(val)}</span>`;
+}
+
+function buildStory(a) {
+  // Helper: is a slot filled?
+  const has = (...keys) => keys.every(k => a[k] && a[k].trim());
+
+  const sentences = [];
+
+  // Opening -- always present
+  sentences.push(`<p>The guild scribe recorded what the cohort said on the day they arrived. Not all of them answered the same questions. That is how it works here -- what follows is drawn from what this group actually said.</p>`);
+
+  // Block: talent + curiosity (pair 0)
+  if (has('talent') && has('curiosity')) {
+    sentences.push(`<p>One of them once discovered ${sv(a.talent)} without ever meaning to. Another has a quiet weekend ambition: to go deep on ${sv(a.curiosity)}, not because it advances anything, just because it matters to them.</p>`);
+  } else if (has('talent')) {
+    sentences.push(`<p>One of them once discovered ${sv(a.talent)} without ever meaning to. Ask them about it and they will tell you the whole story.</p>`);
+  } else if (has('curiosity')) {
+    sentences.push(`<p>One of them has a quiet weekend ambition: to spend a free Saturday going deep on ${sv(a.curiosity)}, not because it helps their career, just because it matters to them.</p>`);
+  }
+
+  // Block: chapter + word (pair 1)
+  if (has('chapter') && has('word')) {
+    sentences.push(`<p>If you asked them to name the chapter of their lives written just before they arrived here, one of them called it ${sv(a.chapter)}. The word they want their future teammates to use? ${sv(a.word)}. Said without hesitation.</p>`);
+  } else if (has('chapter')) {
+    sentences.push(`<p>If you asked them to name the chapter of their lives written just before they arrived here, one of them called it ${sv(a.chapter)}.</p>`);
+  } else if (has('word')) {
+    sentences.push(`<p>The word one of them wants their future teammates to use when they think of them: ${sv(a.word)}. They said it without hesitation.</p>`);
+  }
+
+  // Block: place + joy (pair 2)
+  if (has('place') && has('joy')) {
+    sentences.push(`<p>The most interesting place any of them has ever done real focused work: ${sv(a.place)}. They also know good work does not always require a grand setting. Sometimes it starts with ${sv(a.joy)} -- something small, reliable, easy to overlook.</p>`);
+  } else if (has('place')) {
+    sentences.push(`<p>The most interesting place any of them has ever done real focused work: ${sv(a.place)}. They remember it clearly.</p>`);
+  } else if (has('joy')) {
+    sentences.push(`<p>One of them knows that good work does not always require a grand setting. Sometimes it starts with ${sv(a.joy)} -- something small, reliable, easy to overlook. They have not overlooked it.</p>`);
+  }
+
+  // Block: genre + nontech (pair 3)
+  if (has('genre') && has('nontech')) {
+    sentences.push(`<p>Ask about their coding style and one of them will reach for a genre: ${sv(a.genre)}. They also bring something to this work that has nothing to do with syntax -- ${sv(a.nontech)}. It has been quietly useful for longer than they realize.</p>`);
+  } else if (has('genre')) {
+    sentences.push(`<p>Ask about their coding style and one of them will reach for a genre: ${sv(a.genre)}. That tracks.</p>`);
+  } else if (has('nontech')) {
+    sentences.push(`<p>One of them brings something to this work that has nothing to do with syntax -- ${sv(a.nontech)}. It has been quietly useful for longer than they realize.</p>`);
+  }
+
+  // Block: food + belief (pair 4)
+  if (has('food') && has('belief')) {
+    sentences.push(`<p>They changed their minds about ${sv(a.food)}. The willingness to be wrong about something you were sure of is a real skill. One of them also used to believe ${sv(a.belief)} -- until they did not anymore.</p>`);
+  } else if (has('food')) {
+    sentences.push(`<p>They changed their minds about ${sv(a.food)}. The willingness to be wrong about something you were sure of is a real skill.</p>`);
+  } else if (has('belief')) {
+    sentences.push(`<p>One of them used to believe ${sv(a.belief)} -- until they did not anymore. The willingness to revise what you were sure of is a real skill.</p>`);
+  }
+
+  // Block: envwords + question (pair 5)
+  if (has('envwords') && has('question')) {
+    sentences.push(`<p>Their ideal working environment, in three words: ${sv(a.envwords)}. Worth keeping in mind. And the question one of them wishes someone would ask more often: ${sv(a.question)}. Consider this your invitation.</p>`);
+  } else if (has('envwords')) {
+    sentences.push(`<p>Their ideal working environment, in three words: ${sv(a.envwords)}. Worth keeping in mind.</p>`);
+  } else if (has('question')) {
+    sentences.push(`<p>There is a question one of them wishes someone would ask more often: ${sv(a.question)}. Consider this your invitation.</p>`);
+  }
+
+  // Closer -- always present
+  sentences.push(`<p>That is who showed up. The chronicle is open. The rest gets written from here.</p>`);
+
+  return sentences.join('\n');
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* =============================================
+   RPG FLAVOR LABELS
+   ============================================= */
+
+const FUN_LABELS = [
+  { icon: "&#127800;", text: "Lore Offering" },
+  { icon: "&#127775;", text: "Lore Check" },
+  { icon: "&#128214;", text: "Chronicle Entry" },
+  { icon: "&#128301;", text: "Guild Oath" },
+  { icon: "&#127752;", text: "Origin Story" }
+];
+
+const TECH_LABELS = [
+  { icon: "&#9876;", text: "Combat Drill" },
+  { icon: "&#128736;", text: "Forge Trial" },
+  { icon: "&#128250;", text: "Arcane Quiz" },
+  { icon: "&#9967;", text: "Skill Check" },
+  { icon: "&#128293;", text: "Trial by Fire" }
+];
+
+function randomLabel(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/* =============================================
+   SESSION STATE
+   ============================================= */
+
+let groups = [];        // array of arrays of question objects
+let currentGroup = 0;
+let funAnswers = {};    // slot -> answer string
+
+/* =============================================
+   FISHER-YATES SHUFFLE
+   ============================================= */
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* =============================================
+   BUILD GROUPS
+   Hard rules:
+   - Exactly n groups (one per student). No student
+     answers more than 2 questions, ever.
+   - n <= 12: every student gets 1 fun + 1 tech.
+     Total = n*2. Fun slots used = n (one pair of
+     fun questions per 2 students, but each student
+     gets exactly 1 fun individually).
+     Mad lib story will render n/2 paragraphs (each
+     paragraph needs 2 slots from the same pair, so
+     we assign fun questions in pair-order so that
+     pairs are always split across exactly 2 students).
+   - n > 12: first 12 students get 1 fun each (covers
+     all 6 pairs = full story). Students 13+ get 1
+     tech each. Story renders all 6 paragraphs.
+   ============================================= */
+
+function buildGroups(n) {
+  /*
+   Pool: 12 fun + 13 tech = 25 questions.
+   Every student gets exactly 1 or 2 questions (never 0, never 3+).
+
+   Algorithm:
+   1. Decide how many total questions to use: total = min(n * 2, 25).
+   2. fun to use = min(12, n). tech to use = total - fun.
+   3. Every student gets 1 question in "round 1" (guaranteed coverage).
+      Round 1 assigns 1 question to each student:
+        - Students 0..(fun-1) get a fun question (random order).
+        - Students fun..(n-1) get a tech question.
+   4. Round 2 distributes remaining questions (fun leftover=0, tech leftover = techUsed - (n - funUsed)):
+        - Distribute remaining tech 1-per-student, starting from student 0, skipping if already at 2.
+   This guarantees every student has exactly 1 after round 1, and some get a 2nd in round 2.
+  */
+  const funUsed  = Math.min(12, n);
+  const total    = Math.min(n * 2, 25);
+  const techUsed = total - funUsed;
+
+  const funPool  = shuffle(FUN_QUESTIONS.map(q => ({ ...q, type: 'fun' }))).slice(0, funUsed);
+  const techPool = shuffle(TECH_QUESTIONS.map(q => ({ ...q, type: 'tech' }))).slice(0, techUsed);
+
+  const result = Array.from({ length: n }, () => []);
+
+  // Randomize which students get fun vs tech in round 1
+  const studentOrder = shuffle(Array.from({ length: n }, (_, i) => i));
+
+  // Round 1: first funUsed students (in shuffled order) get 1 fun each
+  //          remaining students get 1 tech each
+  let ti = 0;
+  for (let i = 0; i < n; i++) {
+    const s = studentOrder[i];
+    if (i < funUsed) {
+      result[s].push(funPool[i]);
+    } else {
+      result[s].push(techPool[ti++]);
+    }
+  }
+
+  // Round 2: distribute leftover tech (techUsed - (n - funUsed) remaining)
+  // to students who only have 1 question, round-robin until pool exhausted
+  let r2student = 0;
+  while (ti < techPool.length) {
+    // advance to a student who has exactly 1 question
+    while (r2student < n && result[studentOrder[r2student]].length >= 2) {
+      r2student++;
+    }
+    if (r2student >= n) break;
+    result[studentOrder[r2student]].push(techPool[ti++]);
+    r2student++;
+  }
+
+  // Sort each group: fun before tech
+  for (const g of result) {
+    g.sort((a, b) => (a.type === 'fun' ? -1 : 1));
+  }
+
+  return result;
+}
+
+/* =============================================
+   SESSION CONTROL
+   ============================================= */
+
+function startSession() {
+  const input = document.getElementById('recruit-count');
+  let n = parseInt(input.value, 10);
+  if (isNaN(n) || n < 6) n = 6;
+  if (n > 30) n = 30;
+  input.value = n;
+
+  groups = buildGroups(n);
+  currentGroup = 0;
+  funAnswers = {};
+
+  showScreen('screen-card');
+  renderGroup();
+}
+
+function saveGroupAnswers() {
+  const group = groups[currentGroup];
+  group.forEach((card, i) => {
+    if (card.type === 'fun') {
+      const inp = document.getElementById(`ans-${i}`);
+      if (inp) funAnswers[card.slot] = inp.value;
+    }
+  });
+}
+
+function nextGroup() {
+  saveGroupAnswers();
+  currentGroup++;
+  if (currentGroup >= groups.length) {
+    showFinale();
+  } else {
+    renderGroup();
+    document.getElementById('screen-card').scrollTop = 0;
+  }
+}
+
+function showFinale() {
+  document.getElementById('finale-story').innerHTML = buildStory(funAnswers);
+  showScreen('screen-finale');
+  document.getElementById('screen-finale').scrollTop = 0;
+}
+
+function renderGroup() {
+  const group = groups[currentGroup];
+  const totalGroups = groups.length;
+
+  // Progress
+  const pct = (currentGroup / totalGroups) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent =
+    `Recruit ${currentGroup + 1} of ${totalGroups}`;
+
+  // Build card HTML
+  const isLast = currentGroup === totalGroups - 1;
+  const nextLabel = isLast ? 'Complete the Rites' : 'Next Recruit';
+
+  let blocksHTML = '';
+  group.forEach((card, i) => {
+    const isFun = card.type === 'fun';
+    const labelData = isFun ? randomLabel(FUN_LABELS) : randomLabel(TECH_LABELS);
+    const typeClass = isFun ? 'type-fun' : 'type-tech';
+
+    let zoneHTML = '';
+    if (isFun) {
+      const savedVal = funAnswers[card.slot] ? escapeAttr(funAnswers[card.slot]) : '';
+      zoneHTML = `
+        <div class="madlib-hint">
+          <span aria-hidden="true">&#128218;</span>
+          <span>This answer will be used as: <strong>${escapeHtml(card.label)}</strong></span>
+        </div>
+        <label class="sr-only" for="ans-${i}">Type the recruit's answer</label>
+        <input
+          class="answer-input"
+          id="ans-${i}"
+          type="text"
+          placeholder="Type the recruit's answer..."
+          autocomplete="off"
+          spellcheck="false"
+          value="${savedVal}"
+          data-slot="${escapeAttr(card.slot)}"
+        />
+      `;
+    } else {
+      zoneHTML = `
+        <div class="reveal-zone">
+          <button class="btn-reveal" onclick="toggleReveal(this)" aria-expanded="false">
+            <span aria-hidden="true">&#128065;</span>
+            <span class="reveal-btn-label">Reveal Answer</span>
+          </button>
+          <div class="answer-reveal" role="region" aria-label="Expected answer">${escapeHtml(card.answer)}</div>
+        </div>
+      `;
+    }
+
+    blocksHTML += `
+      <div class="question-block">
+        <div class="card-type-label">
+          <span class="type-icon" aria-hidden="true">${labelData.icon}</span>
+          <span class="${typeClass}">${labelData.text}</span>
+        </div>
+        <h2 class="card-question">${escapeHtml(card.q)}</h2>
+        ${zoneHTML}
+      </div>
+    `;
+  });
+
+  const cardHTML = `
+    <div class="card" role="article">
+      <div class="recruit-header">Recruit ${currentGroup + 1} of ${totalGroups}</div>
+      ${blocksHTML}
+      <div class="card-footer">
+        <button class="btn-next" onclick="nextGroup()">
+          <span>${nextLabel}</span>
+          <span aria-hidden="true">&#8594;</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  const container = document.getElementById('card-container');
+  container.innerHTML = cardHTML;
+
+  // Trigger card animation re-fire
+  const cardEl = container.querySelector('.card');
+  cardEl.style.animation = 'none';
+  void cardEl.offsetWidth;
+  cardEl.style.animation = '';
+
+  // Focus first fun input if present
+  const firstInput = container.querySelector('.answer-input');
+  if (firstInput) setTimeout(() => firstInput.focus(), 200);
+}
+
+function toggleReveal(btn) {
+  const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+  const revealEl = btn.nextElementSibling;
+  const labelEl = btn.querySelector('.reveal-btn-label');
+  if (isExpanded) {
+    btn.setAttribute('aria-expanded', 'false');
+    revealEl.classList.remove('shown');
+    labelEl.textContent = 'Reveal Answer';
+  } else {
+    btn.setAttribute('aria-expanded', 'true');
+    revealEl.classList.add('shown');
+    labelEl.textContent = 'Hide Answer';
+  }
+}
+
+function restartSession() {
+  showScreen('screen-load');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.setAttribute('aria-hidden', 'true');
+  });
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  target.removeAttribute('aria-hidden');
+}
+
+function escapeAttr(str) {
+  return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* =============================================
+   KEYBOARD: Enter on load screen starts session
+   ============================================= */
+document.getElementById('recruit-count').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') startSession();
+});
+
+document.getElementById('recruit-count').addEventListener('blur', function() {
+  let v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 6) v = 6;
+  if (v > 30) v = 30;
+  this.value = v;
+});
+</script>
+</body>
+</html>

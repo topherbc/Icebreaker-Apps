@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance Review</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ed;
+    --bg-card: #ffffff;
+    --bg-panel: #eae7e1;
+    --text-primary: #1e2235;
+    --text-secondary: #4a5065;
+    --text-muted: #7a8099;
+    --accent-blue: #3d5a99;
+    --accent-blue-light: #e8edf7;
+    --accent-sage: #4a7c6f;
+    --accent-sage-light: #e6f0ed;
+    --accent-amber: #b06c1a;
+    --accent-amber-light: #fdf0e0;
+    --border: #d4cfc8;
+    --border-strong: #a09a92;
+    --shadow-sm: 0 1px 3px rgba(30,34,53,0.08);
+    --shadow-md: 0 4px 12px rgba(30,34,53,0.10);
+    --shadow-lg: 0 8px 28px rgba(30,34,53,0.13);
+    --radius: 10px;
+    --radius-lg: 16px;
+    --font-display: 'DM Sans', sans-serif;
+    --font-body: 'Crimson Pro', serif;
+    --font-ui: 'DM Sans', sans-serif;
+    --font-code: 'Courier New', Courier, monospace;
+
+    /* Syntax highlight colors -- warm, readable on the parchment code block bg */
+    --syn-keyword:  #2d5fa6;   /* blue   -- reserved words */
+    --syn-type:     #6b3d99;   /* purple -- String, int, double, boolean */
+    --syn-string:   #3a7a48;   /* green  -- string literals */
+    --syn-number:   #b06c1a;   /* amber  -- numeric literals */
+    --syn-comment:  #8a9ab0;   /* slate  -- // comments */
+    --syn-method:   #1e7a7a;   /* teal   -- method calls */
+
+    /* Department colors */
+    --dept-strings-bg: #e8edf7;
+    --dept-strings-accent: #3d5a99;
+    --dept-bullpen-bg: #fdf0e0;
+    --dept-bullpen-accent: #b06c1a;
+    --dept-switchboard-bg: #e6f0ed;
+    --dept-switchboard-accent: #4a7c6f;
+    --dept-floor-bg: #f0e8f5;
+    --dept-floor-accent: #6b3d99;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* ===== LOAD SCREEN ===== */
+  #load-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .load-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .load-eyebrow {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .load-title {
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .load-subtitle {
+    font-family: var(--font-body);
+    font-size: 22px;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .load-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 48px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .load-card label {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .load-card input[type="number"] {
+    width: 100%;
+    padding: 14px 18px;
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    text-align: center;
+    margin-bottom: 28px;
+    transition: border-color 0.15s;
+  }
+
+  .load-card input[type="number"]:focus {
+    border-color: var(--accent-blue);
+  }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 18px 32px;
+    background: var(--text-primary);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    min-height: 56px;
+  }
+
+  .btn-primary:hover { background: #2c3040; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  /* ===== STATION SCREEN ===== */
+  #station-screen { min-height: 100vh; padding: 32px 40px; flex-direction: column; align-items: center; }
+
+  .station-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .station-title-group h1 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .station-title-group p {
+    font-family: var(--font-body);
+    font-size: 19px;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .progress-summary {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 10px 18px;
+    background: var(--bg-panel);
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .dept-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+  }
+
+  .dept-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+  }
+
+  .dept-card:hover:not(.dept-cleared) {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .dept-card:active:not(.dept-cleared) { transform: translateY(0); }
+
+  .dept-card.dept-cleared {
+    cursor: default;
+    opacity: 0.72;
+  }
+
+  .dept-icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .dept-name {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .dept-topics {
+    font-family: var(--font-body);
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 99px;
+    border: 1.5px solid;
+  }
+
+  .badge-not-started {
+    color: var(--text-muted);
+    border-color: var(--border);
+    background: var(--bg-panel);
+  }
+
+  .badge-in-progress {
+    color: var(--accent-amber);
+    border-color: var(--accent-amber);
+    background: var(--accent-amber-light);
+  }
+
+  .badge-cleared {
+    color: var(--accent-sage);
+    border-color: var(--accent-sage);
+    background: var(--accent-sage-light);
+  }
+
+  /* Dept color accents */
+  .dept-strings { border-top: 5px solid var(--dept-strings-accent); }
+  .dept-bullpen { border-top: 5px solid var(--dept-bullpen-accent); }
+  .dept-switchboard { border-top: 5px solid var(--dept-switchboard-accent); }
+  .dept-floor { border-top: 5px solid var(--dept-floor-accent); }
+
+  /* ===== QUESTION SCREEN ===== */
+  #question-screen { min-height: 100vh; padding: 32px 40px; flex-direction: column; align-items: center; }
+
+  .q-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    width: 100%;
+    max-width: 860px;
+  }
+
+  .q-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 18px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    min-height: 48px;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .q-back-btn:hover { background: var(--bg-panel); color: var(--text-primary); }
+
+  .q-dept-label {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .q-progress {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 10px 18px;
+    background: var(--bg-panel);
+    border-radius: 99px;
+    border: 1px solid var(--border);
+  }
+
+  .q-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 48px;
+    max-width: 860px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .q-student-label {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .q-student-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-text {
+    font-family: var(--font-body);
+    font-size: 22px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .q-code-block {
+    background: #f0ede8;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    font-family: var(--font-code);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    margin-bottom: 28px;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* Syntax highlighting token spans */
+  .syn-keyword { color: var(--syn-keyword); font-weight: 700; }
+  .syn-type    { color: var(--syn-type);    font-weight: 700; }
+  .syn-string  { color: var(--syn-string); }
+  .syn-number  { color: var(--syn-number); }
+  .syn-comment { color: var(--syn-comment); font-style: italic; }
+  .syn-method  { color: var(--syn-method); }
+
+  /* Multiple choice / code trace options */
+  .mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .mc-btn {
+    padding: 16px 20px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-ui);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: default;
+    text-align: left;
+    min-height: 56px;
+    transition: background 0.12s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mc-btn .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-panel);
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 1.5px solid var(--border);
+  }
+
+  .mc-btn.correct-answer {
+    border-color: var(--accent-sage);
+    background: var(--accent-sage-light);
+  }
+
+  .mc-btn.correct-answer .option-letter {
+    background: var(--accent-sage);
+    color: #fff;
+    border-color: var(--accent-sage);
+  }
+
+  .mc-btn.correct-answer::after {
+    content: "CORRECT";
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent-sage);
+  }
+
+  /* Fill in the blank */
+  .fitb-block {
+    font-family: var(--font-code);
+    font-size: 16px;
+    line-height: 1.9;
+    background: #f0ede8;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-amber);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    white-space: pre-wrap;
+  }
+
+  .fitb-input {
+    display: inline-block;
+    font-family: var(--font-code);
+    font-size: 16px;
+    width: 180px;
+    padding: 2px 8px;
+    border: none;
+    border-bottom: 2px solid var(--accent-amber);
+    background: transparent;
+    color: var(--text-primary);
+    outline: none;
+    vertical-align: baseline;
+  }
+
+  .fitb-input.revealed {
+    border-bottom-color: var(--accent-sage);
+    background: var(--accent-sage-light);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1.5px solid var(--accent-sage);
+  }
+
+  .fitb-answer-label {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    color: var(--accent-sage);
+    font-weight: 700;
+    margin-top: 8px;
+    display: none;
+  }
+
+  /* Drag and drop */
+  .dnd-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .dnd-items-col h4, .dnd-targets-col h4 {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .dnd-item {
+    padding: 12px 16px;
+    background: var(--accent-blue-light);
+    border: 2px solid var(--accent-blue);
+    border-radius: var(--radius);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent-blue);
+    cursor: grab;
+    margin-bottom: 8px;
+    user-select: none;
+    transition: opacity 0.12s, box-shadow 0.12s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dnd-item:active { cursor: grabbing; }
+  .dnd-item.dragging { opacity: 0.4; }
+  .dnd-item.locked { cursor: default; opacity: 0.5; }
+
+  .dnd-target {
+    padding: 12px 16px;
+    background: var(--bg);
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--radius);
+    min-height: 50px;
+    margin-bottom: 8px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    color: var(--text-secondary);
+    transition: background 0.12s, border-color 0.12s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .dnd-target .target-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dnd-target.drag-over {
+    background: var(--accent-blue-light);
+    border-color: var(--accent-blue);
+  }
+
+  .dnd-target.matched {
+    background: var(--accent-sage-light);
+    border: 2px solid var(--accent-sage);
+  }
+
+  .dnd-target .matched-item {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-sage);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .match-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-sage);
+    color: #fff;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Answer reveal section */
+  .answer-reveal {
+    display: none;
+    background: var(--accent-sage-light);
+    border: 1.5px solid var(--accent-sage);
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    margin-bottom: 24px;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent-sage);
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .answer-reveal .answer-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .answer-reveal .answer-text { line-height: 1.5; }
+
+  .q-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-prev {
+    padding: 16px 24px;
+    background: none;
+    color: var(--text-secondary);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    min-height: 52px;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.12s, color 0.12s;
+    margin-right: auto;
+  }
+
+  .btn-prev:hover { background: var(--bg-panel); color: var(--text-primary); }
+
+  .btn-reveal {
+    padding: 16px 32px;
+    background: var(--text-primary);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    min-height: 52px;
+    transition: background 0.12s;
+  }
+
+  .btn-reveal:hover { background: #2c3040; }
+
+  .btn-next {
+    padding: 16px 32px;
+    background: var(--accent-blue);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    min-height: 52px;
+    display: none;
+    align-items: center;
+    transition: background 0.12s;
+  }
+
+  .btn-next:hover { background: #2d4a88; }
+
+  .btn-complete {
+    padding: 16px 32px;
+    background: var(--accent-sage);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    min-height: 52px;
+    display: none;
+    align-items: center;
+    transition: background 0.12s;
+  }
+
+  .btn-complete:hover { background: #3a6457; }
+
+  /* ===== COMPLETION SCREEN ===== */
+  #completion-screen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .completion-icon { font-size: 72px; margin-bottom: 28px; }
+
+  .completion-title {
+    font-family: var(--font-display);
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .completion-subtitle {
+    font-family: var(--font-body);
+    font-size: 22px;
+    color: var(--text-secondary);
+    font-style: italic;
+    max-width: 520px;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .completion-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .completion-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .dept-cleared-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .dept-cleared-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: var(--accent-sage-light);
+    border: 1.5px solid var(--accent-sage);
+    border-radius: var(--radius);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent-sage);
+  }
+
+  .btn-reset {
+    padding: 18px 40px;
+    background: var(--text-primary);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 17px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    min-height: 56px;
+    transition: background 0.12s;
+  }
+
+  .btn-reset:hover { background: #2c3040; }
+</style>
+</head>
+<body>
+
+<!-- ===== LOAD SCREEN ===== -->
+<div id="load-screen">
+  <div class="load-header">
+    <div class="load-eyebrow">Human Resources Division</div>
+    <h1 class="load-title">Performance Review</h1>
+    <p class="load-subtitle">End of Week Evaluation</p>
+  </div>
+  <div class="load-card">
+    <label for="emp-count">How many employees today?</label>
+    <input type="number" id="emp-count" value="25" min="6" max="30" autocomplete="off">
+    <button class="btn-primary" onclick="beginReview()">Begin Review</button>
+  </div>
+</div>
+
+<!-- ===== STATION SCREEN ===== -->
+<div id="station-screen">
+  <div class="station-header">
+    <div class="station-title-group">
+      <h1>Performance Review</h1>
+      <p>Select a department to begin evaluation</p>
+    </div>
+    <div class="progress-summary" id="progress-summary">0 / 4 Cleared</div>
+  </div>
+  <div class="dept-grid" id="dept-grid"></div>
+</div>
+
+<!-- ===== QUESTION SCREEN ===== -->
+<div id="question-screen">
+  <div class="q-header">
+    <button class="q-back-btn" onclick="goBackToStations()">&#8592; Departments</button>
+    <div class="q-dept-label" id="q-dept-label"></div>
+    <div class="q-progress" id="q-progress"></div>
+  </div>
+  <div class="q-card" id="q-card">
+    <div class="q-student-label">Employee</div>
+    <div class="q-student-name" id="q-student-name"></div>
+    <div id="q-content"></div>
+    <div class="answer-reveal" id="answer-reveal">
+      <span class="answer-icon">&#10003;</span>
+      <div class="answer-text" id="answer-text"></div>
+    </div>
+    <div class="q-actions">
+      <button class="btn-prev" id="btn-prev" onclick="prevQuestion()">&#8592; Previous</button>
+      <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">Reveal Answer</button>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next Employee</button>
+      <button class="btn-complete" id="btn-complete" onclick="completeStation()">Department Cleared</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COMPLETION SCREEN ===== -->
+<div id="completion-screen">
+  <div class="completion-icon">&#128203;</div>
+  <h1 class="completion-title">Reviews Complete</h1>
+  <p class="completion-subtitle">The team has been evaluated. Enjoy your weekend.</p>
+  <div class="dept-cleared-list">
+    <div class="dept-cleared-chip"><span>&#10003;</span> The String Suite</div>
+    <div class="dept-cleared-chip"><span>&#10003;</span> The Bullpen</div>
+    <div class="dept-cleared-chip"><span>&#10003;</span> The Switchboard</div>
+    <div class="dept-cleared-chip"><span>&#10003;</span> The Floor</div>
+  </div>
+  <button class="btn-reset" onclick="resetAll()">Start New Review</button>
+</div>
+
+<script>
+// =============================================
+// QUESTION BANK
+// =============================================
+const QUESTION_BANK = {
+  strings: [
+    {
+      id: "s1",
+      format: "mc",
+      question: "Which String method would you call to remove extra whitespace from both ends of the variable below?",
+      code: 'String meetingTitle = "  All-Hands Sync  ";',
+      options: [".strip()", ".trim()", ".clean()", ".normalize()"],
+      correct: 1,
+      answer: ".trim() removes leading and trailing whitespace from a String. The result would be \"All-Hands Sync\"."
+    },
+    {
+      id: "s2",
+      format: "trace",
+      question: "What does this code print?",
+      code: 'String employeeName = "margaret";\nSystem.out.println(employeeName.toUpperCase().substring(0, 3));',
+      options: ["MAR", "mar", "marg", "MARGARET"],
+      correct: 0,
+      answer: "First .toUpperCase() produces \"MARGARET\", then .substring(0, 3) extracts characters at index 0, 1, and 2, giving \"MAR\"."
+    },
+    {
+      id: "s3",
+      format: "fitb",
+      question: "Fill in the blank to print the number of characters in the department name.",
+      before: 'String department = "Engineering";\nSystem.out.println(department.',
+      blank: "length",
+      after: '());',
+      answers: ["length"],
+      answer: "department.length() returns the number of characters in the String, which is 11."
+    },
+    {
+      id: "s4",
+      format: "dnd",
+      question: "Match each String method to what it returns.",
+      pairs: [
+        { item: ".toLowerCase()", target: "Converts all characters to lowercase" },
+        { item: ".substring(2, 5)", target: "Returns characters at indexes 2, 3, and 4" },
+        { item: ".split(\",\")", target: "Returns a String array split on commas" },
+        { item: ".length()", target: "Returns the number of characters" }
+      ],
+      answer: "Each method: toLowerCase converts case, substring(2,5) slices indexes 2-4, split returns an array, length returns character count."
+    },
+    {
+      id: "s5",
+      format: "mc",
+      question: "A timesheet system stores a date as the String \"2024-03-15\". Which conversion correctly turns the hours worked value \"8\" into an int?",
+      code: 'String hoursStr = "8";',
+      options: ["int h = (int) hoursStr;", "int h = Integer.parseInt(hoursStr);", "int h = hoursStr.toInt();", "int h = int.parse(hoursStr);"],
+      correct: 1,
+      answer: "Integer.parseInt() is the correct method to convert a numeric String to a primitive int."
+    }
+  ],
+
+  bullpen: [
+    {
+      id: "b1",
+      format: "mc",
+      question: "In the class below, which members can be accessed from outside the class?",
+      code: 'class Employee {\n  private String name;\n  private double salary;\n  public String department;\n  public String getId() { return name; }\n}',
+      options: [
+        "name and salary only",
+        "department and getId() only",
+        "name, salary, department, and getId()",
+        "getId() only"
+      ],
+      correct: 1,
+      answer: "Only public members are accessible from outside the class. department (public field) and getId() (public method) are accessible. name and salary are private."
+    },
+    {
+      id: "b2",
+      format: "trace",
+      question: "After this code runs, what does manager.title hold?",
+      code: 'class Manager {\n  String title;\n  int reports;\n  Manager(String t, int r) {\n    this.title = t;\n    this.reports = r;\n  }\n}\nManager manager = new Manager("Director", 6);',
+      options: ['"Director"', '"Manager"', '"t"', 'null'],
+      correct: 0,
+      answer: "The constructor assigns the parameter t to this.title. When new Manager(\"Director\", 6) is called, t is \"Director\", so manager.title becomes \"Director\"."
+    },
+    {
+      id: "b3",
+      format: "fitb",
+      question: "Fill in the blank so the constructor correctly assigns the parameter to the instance variable.",
+      before: 'class Employee {\n  private String name;\n  Employee(String name) {\n    ',
+      blank: "this.name",
+      after: ' = name;\n  }\n}',
+      answers: ["this.name"],
+      answer: "this.name refers to the instance variable. Without \"this.\", Java would assign the parameter to itself, and the field would stay null."
+    },
+    {
+      id: "b4",
+      format: "mc",
+      question: "The Payroll system uses an Employee class with a private salary field. Which piece of code is missing for the class to follow proper encapsulation?",
+      code: 'class Employee {\n  private double salary;\n  public void setSalary(double s) {\n    salary = s;\n  }\n  // ??? \n}',
+      options: [
+        "A private setSalary method",
+        "A public getter: public double getSalary()",
+        "A public salary field",
+        "A second constructor"
+      ],
+      correct: 1,
+      answer: "Encapsulation requires both a setter (to write) and a getter (to read) for private fields. getSalary() is missing here."
+    },
+    {
+      id: "b5",
+      format: "dnd",
+      question: "Match each term to its definition.",
+      pairs: [
+        { item: "Constructor", target: "Called when an object is created with new" },
+        { item: "Encapsulation", target: "Hiding data behind private fields and public methods" },
+        { item: "this keyword", target: "Refers to the current object instance" },
+        { item: "Getter", target: "A public method that returns a private field value" }
+      ],
+      answer: "Constructor: called on new. Encapsulation: hiding data. this: refers to current instance. Getter: reads a private field."
+    }
+  ],
+
+  switchboard: [
+    {
+      id: "sw1",
+      format: "trace",
+      question: "What does this code print?",
+      code: 'String department = "Sales";\nswitch (department) {\n  case "HR":\n    System.out.println("People Ops");\n    break;\n  case "Sales":\n    System.out.println("Revenue Team");\n    break;\n  case "Eng":\n    System.out.println("Build Team");\n    break;\n  default:\n    System.out.println("Other");\n}',
+      options: ["People Ops", "Revenue Team", "Build Team", "Other"],
+      correct: 1,
+      answer: "department equals \"Sales\", so the \"Sales\" case matches and prints \"Revenue Team\". The break stops execution."
+    },
+    {
+      id: "sw2",
+      format: "mc",
+      question: "The break is missing from the \"Silver\" case. If tier is \"Silver\", what prints?",
+      code: 'String tier = "Silver";\nswitch (tier) {\n  case "Gold":\n    System.out.println("Priority Queue");\n    break;\n  case "Silver":\n    System.out.println("Standard Queue");\n  case "Bronze":\n    System.out.println("Hold Queue");\n    break;\n  default:\n    System.out.println("No Queue");\n}',
+      options: [
+        "Standard Queue",
+        "Standard Queue\nHold Queue",
+        "Hold Queue",
+        "No Queue"
+      ],
+      correct: 1,
+      answer: "Without a break after \"Silver\", execution falls through into the \"Bronze\" case and also prints \"Hold Queue\". Both lines print."
+    },
+    {
+      id: "sw3",
+      format: "fitb",
+      question: "Fill in the blank to complete the second overloaded method signature so it accepts an employee name instead of an ID number.",
+      before: 'static void greetEmployee(int id) {\n  System.out.println("ID: " + id);\n}\nstatic void greetEmployee(',
+      blank: "String name",
+      after: ') {\n  System.out.println("Name: " + name);\n}',
+      answers: ["String name"],
+      answer: "Overloading requires a different parameter type or count. String name creates a second version that accepts a String instead of an int."
+    },
+    {
+      id: "sw4",
+      format: "mc",
+      question: "The router has two overloaded methods. Which one gets called by the line at the bottom?",
+      code: 'static void route(String dept) {\n  System.out.println("Dept: " + dept);\n}\nstatic void route(int code) {\n  System.out.println("Code: " + code);\n}\n// elsewhere:\nroute(404);',
+      options: [
+        "route(String dept)",
+        "route(int code)",
+        "Both are called",
+        "It will not compile"
+      ],
+      correct: 1,
+      answer: "404 is an int literal, so Java resolves to route(int code). Method overloading is resolved by argument type at compile time."
+    },
+    {
+      id: "sw5",
+      format: "mc",
+      question: "Which of these overloaded method pairs would NOT compile?",
+      options: [
+        "log(String msg) and log(int code)",
+        "send(String to, String body) and send(String body)",
+        "print(int x) and print(int x)",
+        "process(double d) and process(String s)"
+      ],
+      correct: 2,
+      answer: "print(int x) and print(int x) have identical signatures. Java requires overloads to differ in parameter type, count, or order. Two identical signatures are a compile error."
+    }
+  ],
+
+  floor: [
+    {
+      id: "f1",
+      format: "trace",
+      question: "What does this code print?",
+      code: 'for (int i = 1; i <= 4; i++) {\n  System.out.println("Shift " + i);\n}',
+      options: [
+        "Shift 1\nShift 2\nShift 3\nShift 4",
+        "Shift 0\nShift 1\nShift 2\nShift 3",
+        "Shift 1\nShift 2\nShift 3",
+        "Shift 1\nShift 2\nShift 3\nShift 4\nShift 5"
+      ],
+      correct: 0,
+      answer: "i starts at 1, runs while i <= 4, and increments by 1. It prints Shift 1, Shift 2, Shift 3, and Shift 4 -- four times total."
+    },
+    {
+      id: "f2",
+      format: "mc",
+      question: "The while loop processes a task queue. When does it stop?",
+      code: 'int tasks = 8;\nwhile (tasks > 0) {\n  System.out.println("Processing task " + tasks);\n  tasks--;\n}',
+      options: [
+        "When tasks equals 1",
+        "When tasks equals 0",
+        "When tasks equals -1",
+        "It runs forever"
+      ],
+      correct: 1,
+      answer: "The condition is tasks > 0. After tasks-- brings it to 0, the condition is false and the loop ends. The last value printed is \"Processing task 1\"."
+    },
+    {
+      id: "f3",
+      format: "fitb",
+      question: "Fill in the blank to access the third employee in the array.",
+      before: 'String[] employees = {"Alice", "Bob", "Carol", "Dave"};\nSystem.out.println(employees[',
+      blank: "2",
+      after: ']);',
+      answers: ["2"],
+      answer: "Arrays use zero-based indexing. Index 0 = Alice, 1 = Bob, 2 = Carol. So employees[2] prints \"Carol\"."
+    },
+    {
+      id: "f4",
+      format: "mc",
+      question: "A do/while loop runs the morning standup check. The condition is false from the very start. How many times does the body execute?",
+      code: 'boolean teamOnline = false;\ndo {\n  System.out.println("Running standup check");\n} while (teamOnline);',
+      options: [
+        "Zero times",
+        "One time",
+        "Until teamOnline is set to true",
+        "It causes a compile error"
+      ],
+      correct: 1,
+      answer: "A do/while always executes the body at least once before checking the condition. Even though teamOnline is false, \"Running standup check\" prints exactly once."
+    },
+    {
+      id: "f5",
+      format: "dnd",
+      question: "Match each loop type to its defining characteristic.",
+      pairs: [
+        { item: "for loop", target: "Best when the number of iterations is known" },
+        { item: "while loop", target: "Checks the condition before each iteration" },
+        { item: "do/while loop", target: "Always runs the body at least once" },
+        { item: "for-each loop", target: "Iterates over every element in an array or list" }
+      ],
+      answer: "for: known count. while: checks first. do/while: runs at least once. for-each: iterates every element."
+    }
+  ]
+};
+
+// =============================================
+// STATE
+// =============================================
+let state = {
+  studentCount: 25,
+  students: [],
+  stations: {},
+  currentStation: null,
+  currentQIndex: 0,
+  dndState: {}
+};
+
+const DEPARTMENTS = [
+  { id: "strings", label: "The String Suite", icon: "&#128196;", topics: "String methods, type conversions, LocalDate", colorClass: "dept-strings" },
+  { id: "bullpen", label: "The Bullpen", icon: "&#128188;", topics: "Classes, constructors, access modifiers, this keyword, encapsulation", colorClass: "dept-bullpen" },
+  { id: "switchboard", label: "The Switchboard", icon: "&#128222;", topics: "Switch statements, method overloading", colorClass: "dept-switchboard" },
+  { id: "floor", label: "The Floor", icon: "&#128203;", topics: "Arrays, for loop, while loop, do/while", colorClass: "dept-floor" }
+];
+
+// =============================================
+// SETUP
+// =============================================
+function beginReview() {
+  const inp = document.getElementById("emp-count");
+  let val = parseInt(inp.value);
+  if (isNaN(val)) val = 25;
+  val = Math.max(6, Math.min(30, val));
+  inp.value = val;
+  state.studentCount = val;
+
+  setupStudents();
+  assignQuestions();
+  renderStations();
+  showScreen("station-screen");
+}
+
+function setupStudents() {
+  const names = generateNames(state.studentCount);
+  state.students = names;
+}
+
+function generateNames(n) {
+  const pool = [
+    "Alex", "Bailey", "Casey", "Dana", "Emery", "Finley", "Gray", "Harper",
+    "Indigo", "Jordan", "Kendall", "Lane", "Morgan", "Noel", "Oakley", "Parker",
+    "Quinn", "Reese", "Sage", "Taylor", "Uma", "Val", "Winter", "Xen", "Yara",
+    "Zion", "Avery", "Blake", "Cam", "Drew"
+  ];
+  const arr = pool.slice(0, n);
+  return fisherYates([...arr]);
+}
+
+function fisherYates(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function assignQuestions() {
+  const total = Math.min(state.studentCount, 20);
+  const qPerStation = Math.floor(total / 4);
+  const remainder = total - qPerStation * 4;
+
+  const deptKeys = ["strings", "bullpen", "switchboard", "floor"];
+  let studentIdx = 0;
+  const shuffledStudents = fisherYates([...Array(state.studentCount).keys()]);
+
+  state.stations = {};
+
+  deptKeys.forEach((key, di) => {
+    const pool = fisherYates([...QUESTION_BANK[key]]);
+    const count = qPerStation + (di < remainder ? 1 : 0);
+    const questions = pool.slice(0, count);
+
+    const cards = questions.map((q, qi) => {
+      const sIdx = shuffledStudents[studentIdx % shuffledStudents.length];
+      studentIdx++;
+      return { question: q, studentName: state.students[sIdx] || ("Employee " + (sIdx + 1)) };
+    });
+
+    state.stations[key] = {
+      cards,
+      status: "not-started", // not-started | in-progress | cleared
+      currentIdx: 0
+    };
+  });
+}
+
+// =============================================
+// RENDERING
+// =============================================
+function renderStations() {
+  const grid = document.getElementById("dept-grid");
+  grid.innerHTML = "";
+  let clearedCount = 0;
+
+  DEPARTMENTS.forEach(dept => {
+    const st = state.stations[dept.id];
+    if (st.status === "cleared") clearedCount++;
+    const badgeClass = st.status === "cleared" ? "badge-cleared" : st.status === "in-progress" ? "badge-in-progress" : "badge-not-started";
+    const badgeText = st.status === "cleared" ? "&#10003; Cleared" : st.status === "in-progress" ? "&#9679; In Progress" : "&#9675; Not Started";
+    const badgeLabel = st.status === "cleared" ? "Cleared" : st.status === "in-progress" ? "In Progress" : "Not Started";
+
+    const card = document.createElement("div");
+    card.className = "dept-card " + dept.colorClass + (st.status === "cleared" ? " dept-cleared" : "");
+    card.innerHTML = `
+      <span class="dept-icon">${dept.icon}</span>
+      <div class="dept-name">${dept.label}</div>
+      <div class="dept-topics">${dept.topics}</div>
+      <div class="status-badge ${badgeClass}">${badgeText}</div>
+    `;
+    if (st.status !== "cleared") {
+      card.onclick = () => enterStation(dept.id);
+    }
+    grid.appendChild(card);
+  });
+
+  document.getElementById("progress-summary").textContent = clearedCount + " / 4 Cleared";
+}
+
+function enterStation(deptId) {
+  state.currentStation = deptId;
+  if (state.stations[deptId].status === "not-started") {
+    state.stations[deptId].status = "in-progress";
+    state.stations[deptId].currentIdx = 0;
+  }
+  renderQuestion();
+  showScreen("question-screen");
+}
+
+function renderQuestion() {
+  const station = state.stations[state.currentStation];
+  const idx = station.currentIdx;
+  const card = station.cards[idx];
+  const dept = DEPARTMENTS.find(d => d.id === state.currentStation);
+
+  document.getElementById("q-dept-label").textContent = dept.label;
+  document.getElementById("q-progress").textContent = "Employee " + (idx + 1) + " of " + station.cards.length;
+  document.getElementById("q-student-name").textContent = card.studentName;
+
+  // Reset actions
+  document.getElementById("btn-prev").style.display = idx > 0 ? "inline-flex" : "none";
+  document.getElementById("btn-reveal").style.display = "";
+  document.getElementById("btn-next").style.display = "none";
+  document.getElementById("btn-complete").style.display = "none";
+
+  const reveal = document.getElementById("answer-reveal");
+  reveal.style.display = "none";
+
+  // Render content
+  const content = document.getElementById("q-content");
+  content.innerHTML = renderQuestionContent(card.question);
+
+  // Initialize drag and drop if needed
+  if (card.question.format === "dnd") {
+    initDnD(card.question);
+  }
+}
+
+function renderQuestionContent(q) {
+  let html = `<div class="q-text">${q.question}</div>`;
+
+  if (q.format === "mc") {
+    if (q.code) html += `<div class="q-code-block">${highlight(q.code)}</div>`;
+    html += `<div class="mc-options">`;
+    const letters = ["A", "B", "C", "D"];
+    q.options.forEach((opt, i) => {
+      html += `<div class="mc-btn" id="mc-opt-${i}"><span class="option-letter">${letters[i]}</span>${escapeHtml(opt)}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (q.format === "trace") {
+    html += `<div class="q-code-block">${highlight(q.code)}</div>`;
+    html += `<div class="mc-options">`;
+    const letters = ["A", "B", "C", "D"];
+    q.options.forEach((opt, i) => {
+      html += `<div class="mc-btn" id="mc-opt-${i}"><span class="option-letter">${letters[i]}</span><span style="white-space:pre">${escapeHtml(opt)}</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (q.format === "fitb") {
+    html += `<div class="fitb-block">${highlight(q.before)}<input class="fitb-input" id="fitb-input" type="text" autocomplete="off" spellcheck="false" placeholder="___"/>${highlight(q.after)}</div>`;
+    html += `<div class="fitb-answer-label" id="fitb-answer-label"></div>`;
+  }
+
+  if (q.format === "dnd") {
+    const shuffledItems = fisherYates([...q.pairs.map((p, i) => ({ ...p, origIdx: i }))]);
+    const shuffledTargets = fisherYates([...q.pairs.map((p, i) => ({ ...p, origIdx: i }))]);
+
+    html += `<div class="dnd-container">
+      <div class="dnd-items-col">
+        <h4>Methods / Terms</h4>
+        <div id="dnd-items">`;
+    shuffledItems.forEach((pair, i) => {
+      html += `<div class="dnd-item" id="dnd-item-${pair.origIdx}" draggable="true" data-idx="${pair.origIdx}">${pair.item}</div>`;
+    });
+    html += `</div></div>
+      <div class="dnd-targets-col">
+        <h4>Descriptions</h4>
+        <div id="dnd-targets">`;
+    shuffledTargets.forEach((pair, i) => {
+      html += `<div class="dnd-target" id="dnd-target-${pair.origIdx}" data-idx="${pair.origIdx}">
+        <div class="target-label">&#9651; ${pair.target}</div>
+      </div>`;
+    });
+    html += `</div></div></div>`;
+  }
+
+  return html;
+}
+
+function initDnD(q) {
+  state.dndState = {};
+  const items = document.querySelectorAll(".dnd-item");
+  const targets = document.querySelectorAll(".dnd-target");
+
+  items.forEach(item => {
+    item.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", item.dataset.idx);
+      item.classList.add("dragging");
+    });
+    item.addEventListener("dragend", e => {
+      item.classList.remove("dragging");
+    });
+  });
+
+  targets.forEach(target => {
+    target.addEventListener("dragover", e => {
+      e.preventDefault();
+      target.classList.add("drag-over");
+    });
+    target.addEventListener("dragleave", e => {
+      target.classList.remove("drag-over");
+    });
+    target.addEventListener("drop", e => {
+      e.preventDefault();
+      target.classList.remove("drag-over");
+      const itemIdx = e.dataTransfer.getData("text/plain");
+      const targetIdx = target.dataset.idx;
+      const item = document.getElementById("dnd-item-" + itemIdx);
+      if (!item || item.classList.contains("locked")) return;
+      // Check if target already has a match
+      if (target.classList.contains("matched")) return;
+
+      state.dndState[targetIdx] = itemIdx;
+
+      if (String(itemIdx) === String(targetIdx)) {
+        // Correct match
+        item.classList.add("locked");
+        item.draggable = false;
+        target.classList.add("matched");
+        const matchedHtml = `<div class="target-label">&#9651; ${q.pairs[targetIdx].target}</div>
+          <div class="matched-item"><span class="match-icon">&#10003;</span> ${q.pairs[targetIdx].item}</div>`;
+        target.innerHTML = matchedHtml;
+      } else {
+        // Wrong -- show briefly then reset
+        const origLabel = target.querySelector(".target-label").textContent;
+        target.style.borderColor = "#c0392b";
+        target.style.background = "#fdf0f0";
+        setTimeout(() => {
+          target.style.borderColor = "";
+          target.style.background = "";
+        }, 700);
+      }
+    });
+  });
+}
+
+function revealAnswer() {
+  const station = state.stations[state.currentStation];
+  const idx = station.currentIdx;
+  const card = station.cards[idx];
+  const q = card.question;
+
+  // Show answer highlight based on format
+  if (q.format === "mc" || q.format === "trace") {
+    const correctEl = document.getElementById("mc-opt-" + q.correct);
+    if (correctEl) correctEl.classList.add("correct-answer");
+  }
+
+  if (q.format === "fitb") {
+    const inp = document.getElementById("fitb-input");
+    if (inp) {
+      inp.value = q.answers[0];
+      inp.classList.add("revealed");
+      inp.readOnly = true;
+    }
+    const label = document.getElementById("fitb-answer-label");
+    if (label) { label.style.display = "block"; label.textContent = "Answer: " + q.answers[0]; }
+  }
+
+  if (q.format === "dnd") {
+    // Lock all remaining and show correct
+    q.pairs.forEach((pair, i) => {
+      const target = document.getElementById("dnd-target-" + i);
+      const item = document.getElementById("dnd-item-" + i);
+      if (target && !target.classList.contains("matched")) {
+        target.classList.add("matched");
+        target.innerHTML = `<div class="target-label">&#9651; ${pair.target}</div>
+          <div class="matched-item"><span class="match-icon">&#10003;</span> ${pair.item}</div>`;
+      }
+      if (item) { item.classList.add("locked"); item.draggable = false; }
+    });
+  }
+
+  // Show explanation
+  const revealDiv = document.getElementById("answer-reveal");
+  revealDiv.style.display = "flex";
+  document.getElementById("answer-text").textContent = q.answer;
+
+  // Toggle buttons
+  document.getElementById("btn-reveal").style.display = "none";
+  const isLast = idx === station.cards.length - 1;
+  if (isLast) {
+    document.getElementById("btn-complete").style.display = "inline-flex";
+  } else {
+    document.getElementById("btn-next").style.display = "inline-flex";
+  }
+}
+
+function prevQuestion() {
+  const station = state.stations[state.currentStation];
+  if (station.currentIdx > 0) {
+    station.currentIdx--;
+    renderQuestion();
+  }
+}
+
+function nextQuestion() {
+  const station = state.stations[state.currentStation];
+  station.currentIdx++;
+  renderQuestion();
+}
+
+function completeStation() {
+  state.stations[state.currentStation].status = "cleared";
+  renderStations();
+
+  const allCleared = Object.values(state.stations).every(s => s.status === "cleared");
+  if (allCleared) {
+    showScreen("completion-screen");
+  } else {
+    showScreen("station-screen");
+  }
+}
+
+function goBackToStations() {
+  renderStations();
+  showScreen("station-screen");
+}
+
+function resetAll() {
+  state = { studentCount: 25, students: [], stations: {}, currentStation: null, currentQIndex: 0, dndState: {} };
+  document.getElementById("emp-count").value = 25;
+  showScreen("load-screen");
+}
+
+// =============================================
+// SYNTAX HIGHLIGHTING
+// =============================================
+function highlight(code) {
+  // Escape HTML first
+  const safe = code
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  const KEYWORDS = new Set([
+    "switch","case","break","default","for","while","do",
+    "return","new","this","null","true","false",
+    "static","class","public","private","protected","final"
+  ]);
+  const TYPES = new Set(["String","int","double","boolean","char","long","float","void"]);
+
+  // Single-pass tokeniser: match the earliest token on each iteration
+  const TOKEN = /(\/\/[^\n]*)|(\"[^\"]*\")|(\b(?:switch|case|break|default|for|while|do|return|new|this|null|true|false|static|class|public|private|protected|final|String|int|double|boolean|char|long|float|void)\b)|(\b\d+(?:\.\d+)?\b)|([a-zA-Z_]\w*(?=\s*\())/g;
+
+  let result = "";
+  let last = 0;
+  let m;
+  while ((m = TOKEN.exec(safe)) !== null) {
+    // Append any literal text before this match
+    result += safe.slice(last, m.index);
+    last = TOKEN.lastIndex;
+
+    const [full, comment, str, kw, num, method] = m;
+    if (comment !== undefined) {
+      result += `<span class="syn-comment">${comment}</span>`;
+    } else if (str !== undefined) {
+      result += `<span class="syn-string">${str}</span>`;
+    } else if (kw !== undefined) {
+      const cls = TYPES.has(kw) ? "syn-type" : "syn-keyword";
+      result += `<span class="${cls}">${kw}</span>`;
+    } else if (num !== undefined) {
+      result += `<span class="syn-number">${num}</span>`;
+    } else if (method !== undefined) {
+      result += `<span class="syn-method">${method}</span>`;
+    } else {
+      result += full;
+    }
+  }
+  result += safe.slice(last);
+  return result;
+}
+
+
+function showScreen(id) {
+  ["load-screen", "station-screen", "question-screen", "completion-screen"].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = (s === id) ? "flex" : "none";
+  });
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+// =============================================
+// BLUR CLAMP
+// =============================================
+document.getElementById("emp-count").addEventListener("blur", function() {
+  let val = parseInt(this.value);
+  if (isNaN(val)) val = 25;
+  this.value = Math.max(6, Math.min(30, val));
+});
+
+// Init -- show only load screen
+showScreen("load-screen");
+</script>
+</body>
+</html>

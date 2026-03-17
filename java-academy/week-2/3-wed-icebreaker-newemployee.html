@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Employee Orientation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #F5F3EE;
+    --bg-card: #FDFCF9;
+    --navy: #1C2B3A;
+    --navy-mid: #2E4057;
+    --sage: #4A7C6F;
+    --sage-light: #6BA394;
+    --amber: #C97B2E;
+    --amber-light: #E8A44A;
+    --mist: #D9E4DF;
+    --slate: #5C6B7A;
+    --slate-light: #8A9BAA;
+    --border: #D6D0C4;
+    --border-card: #E4DDD3;
+    --fun-bg: #EEF4F1;
+    --fun-accent: #4A7C6F;
+    --tech-bg: #EBF0F5;
+    --tech-accent: #2E4057;
+    --shadow-card: 0 4px 24px rgba(28,43,58,0.10), 0 1px 4px rgba(28,43,58,0.06);
+    --shadow-lift: 0 12px 40px rgba(28,43,58,0.16), 0 2px 8px rgba(28,43,58,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; min-height: 100vh;
+    background: var(--bg);
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* ─── LOAD SCREEN ─── */
+  #load-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #load-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 80% 20%, rgba(74,124,111,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 20% 80%, rgba(46,64,87,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .load-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .load-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--mist);
+    color: var(--sage);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(74,124,111,0.2);
+  }
+
+  .load-badge svg {
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+  }
+
+  .load-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .load-title span {
+    color: var(--sage);
+  }
+
+  .load-subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-size: 22px;
+    color: var(--slate);
+    font-style: italic;
+    margin-bottom: 40px;
+    line-height: 1.4;
+  }
+
+  .load-divider {
+    width: 48px; height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 40px;
+  }
+
+  .load-form {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 20px;
+    padding: 36px;
+    box-shadow: var(--shadow-card);
+    width: 100%;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy-mid);
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+    text-align: left;
+  }
+
+  .form-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .form-input {
+    flex: 1;
+    height: 56px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  .form-input::-webkit-inner-spin-button,
+  .form-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .form-input:focus {
+    border-color: var(--sage);
+    box-shadow: 0 0 0 3px rgba(74,124,111,0.15);
+  }
+
+  .stepper-btn {
+    width: 56px; height: 56px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--navy);
+    font-size: 24px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .stepper-btn:hover {
+    background: var(--mist);
+    border-color: var(--sage);
+    color: var(--sage);
+  }
+
+  .form-hint {
+    font-size: 13px;
+    color: var(--slate-light);
+    text-align: left;
+    margin-bottom: 28px;
+    margin-top: -16px;
+  }
+
+  .begin-btn {
+    width: 100%;
+    height: 60px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(28,43,58,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .begin-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .begin-btn:hover {
+    background: var(--navy-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(28,43,58,0.28);
+  }
+
+  .begin-btn:active { transform: translateY(0); }
+
+  .load-footer {
+    margin-top: 28px;
+    font-size: 14px;
+    color: var(--slate-light);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .load-footer span {
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .pip {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    display: inline-block;
+  }
+
+  /* ─── CARD SCREEN ─── */
+  #card-screen {
+    display: none;
+    min-height: 100vh;
+    padding: 0;
+    flex-direction: column;
+  }
+
+  .deck-header {
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--border-card);
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 1px 8px rgba(28,43,58,0.06);
+  }
+
+  .deck-header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  .deck-progress {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--slate);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 100px;
+  }
+
+  .deck-progress strong {
+    color: var(--navy);
+    font-weight: 700;
+  }
+
+  .deck-body {
+    flex: 1;
+    padding: 48px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  /* ─── CARD GRID ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1400px;
+  }
+
+  /* ─── INDIVIDUAL CARD ─── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 18px;
+    padding: 28px 24px 24px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow 0.2s, transform 0.2s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 18px 18px 0 0;
+    background: var(--sage);
+  }
+
+  .card.fun::before { background: var(--sage); }
+  .card.tech::before { background: var(--sage); }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .card.fun .card-label,
+  .card.tech .card-label {
+    background: var(--fun-bg);
+    color: var(--fun-accent);
+    border: 1px solid rgba(74,124,111,0.2);
+  }
+
+  .card-num {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-light);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card-question {
+    font-family: 'Crimson Pro', serif;
+    font-size: 20px;
+    line-height: 1.45;
+    color: var(--navy);
+    flex: 1;
+  }
+
+  .card-question.hidden-q {
+    filter: blur(5px);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+
+  .card-slot {
+    display: none;
+  }
+
+  /* ─── TECH ANSWER KEY ─── */
+  .answer-key-area {
+    margin-top: 4px;
+  }
+
+  .answer-key-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-light);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.15s;
+  }
+
+  .answer-key-toggle:hover { color: var(--navy-mid); }
+
+  .answer-key-toggle svg {
+    width: 12px; height: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .answer-key-toggle.open svg { transform: rotate(90deg); }
+
+  .answer-key-text {
+    display: none;
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--navy-mid);
+    background: var(--tech-bg);
+    border: 1px solid rgba(46,64,87,0.12);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .answer-key-text.open { display: block; }
+
+  .reveal-btn {
+    height: 40px;
+    min-width: 100px;
+    padding: 0 18px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+
+  .reveal-btn { background: var(--sage); }
+  .reveal-btn:hover { background: #3d6b5e; }
+
+  .card.fun .reveal-btn,
+  .card.tech .reveal-btn { background: var(--sage); }
+  .card.fun .reveal-btn:hover,
+  .card.tech .reveal-btn:hover { background: #3d6b5e; }
+
+  .reveal-btn:active { transform: scale(0.97); }
+
+  .reveal-btn.revealed {
+    background: var(--sage);
+    color: #fff;
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+
+  .card.revealed-card {
+    opacity: 0.65;
+  }
+
+  /* ─── ANSWER INPUT ─── */
+  .answer-area {
+    display: none;
+    margin-top: 4px;
+  }
+
+  .answer-area.visible { display: block; }
+
+  .answer-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    color: var(--navy);
+    background: var(--bg);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 60px;
+  }
+
+  .answer-input:focus { border-color: var(--sage); }
+
+  /* ─── FINALE SECTION ─── */
+  #finale-section {
+    width: 100%;
+    max-width: 820px;
+  }
+
+  .finale-trigger {
+    width: 100%;
+    height: 64px;
+    background: linear-gradient(135deg, var(--sage) 0%, var(--sage-light) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(74,124,111,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .finale-trigger:hover { opacity: 0.92; transform: translateY(-1px); }
+  .finale-trigger:active { transform: translateY(0); }
+
+  .finale-trigger svg { width: 20px; height: 20px; }
+
+  /* ─── MAD LIB CARD ─── */
+  #madlib-card {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 24px;
+    padding: 48px 52px;
+    box-shadow: var(--shadow-lift);
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  #madlib-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--sage) 0%, var(--navy-mid) 100%);
+  }
+
+  .madlib-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .madlib-eyebrow::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .madlib-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+  }
+
+  .madlib-body {
+    font-family: 'Crimson Pro', serif;
+    font-size: 22px;
+    line-height: 1.75;
+    color: var(--navy);
+  }
+
+  .madlib-body p {
+    margin-bottom: 18px;
+  }
+
+  .madlib-body p:last-child { margin-bottom: 0; }
+
+  .slot-value {
+    color: var(--sage);
+    font-weight: 600;
+    font-style: italic;
+    border-bottom: 1.5px solid rgba(74,124,111,0.4);
+    padding-bottom: 1px;
+  }
+
+  .madlib-footer-rule {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0 24px;
+  }
+
+  .madlib-footer-text {
+    font-size: 13px;
+    color: var(--slate-light);
+    text-align: center;
+    font-style: italic;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  /* ─── RESET BUTTON ─── */
+  .reset-btn {
+    display: block;
+    margin: 0 auto;
+    height: 48px;
+    padding: 0 28px;
+    background: transparent;
+    color: var(--slate);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    margin-top: 32px;
+  }
+
+  .reset-btn:hover {
+    border-color: var(--slate);
+    color: var(--navy);
+    background: var(--bg);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeInUp 0.35s ease both; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  #madlib-card.show {
+    display: block;
+    animation: fadeInUp 0.5s ease both;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOAD SCREEN ═══ -->
+<div id="load-screen">
+  <div class="load-inner">
+    <div class="load-badge">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="2" y="2" width="12" height="12" rx="2"/>
+        <path d="M5 8h6M8 5v6"/>
+      </svg>
+      Java Bootcamp &mdash; Week 2
+    </div>
+
+    <h1 class="load-title">New Employee<br><span>Orientation</span></h1>
+    <p class="load-subtitle">Welcome aboard. Please take a seat.<br>We will get started shortly.</p>
+    <div class="load-divider"></div>
+
+    <div class="load-form">
+      <label class="form-label" for="hire-count">How many new hires today?</label>
+      <div class="form-row">
+        <button class="stepper-btn" id="dec-btn" aria-label="Decrease">&#x2212;</button>
+        <input
+          class="form-input"
+          type="number"
+          id="hire-count"
+          min="6"
+          max="30"
+          value="25"
+          aria-label="Number of students"
+        >
+        <button class="stepper-btn" id="inc-btn" aria-label="Increase">&#x2B;</button>
+      </div>
+      <p class="form-hint">Minimum 6 &middot; Maximum 30 new hires per session</p>
+      <button class="begin-btn" id="begin-btn">Begin Orientation</button>
+    </div>
+
+    <div class="load-footer">
+      <span><span class="pip" style="background:var(--sage)"></span>Hang out at the water cooler</span>
+      <span><span class="pip" style="background:var(--navy-mid)"></span> Hang out in the data center</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CARD SCREEN ═══ -->
+<div id="card-screen" style="display:none; flex-direction:column;">
+  <header class="deck-header">
+    <div class="deck-header-title">New Employee Orientation</div>
+    <div class="deck-progress">Card <strong id="progress-current">1</strong> of <strong id="progress-total">25</strong></div>
+  </header>
+
+  <div class="deck-body">
+    <div class="card-grid" id="card-grid"></div>
+
+    <div id="finale-section" style="width:100%; max-width:1400px;">
+      <button class="finale-trigger" id="finale-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        Generate Orientation Welcome Letter
+      </button>
+
+      <div id="madlib-card">
+        <div class="madlib-eyebrow">From the Desk of HR</div>
+        <div class="madlib-title">Your Official Orientation File</div>
+        <div class="madlib-body" id="madlib-body"></div>
+        <div class="madlib-footer-rule"></div>
+        <p class="madlib-footer-text">This document is confidential and has been filed in triplicate.</p>
+      </div>
+
+      <button class="reset-btn" id="reset-btn">Start New Session</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ DATA ═══
+
+const FUN_LABELS = ["Water Cooler", "Coffee Chat", "Lunch Table", "Elevator Pitch", "Onboarding Moment"];
+const TECH_LABELS = ["Code Review", "Stand Up", "Whiteboard Session", "Tech Screen", "Desk Check"];
+
+const FUN_QUESTIONS = [
+  { q: "What is a work habit you have that sounds weird but genuinely helps you focus?", slot: "a weird habit" },
+  { q: "What is the most useful piece of advice you have ever gotten about working with other people?", slot: "some advice" },
+  { q: "If your communication style were a type of meeting, what would it be?", slot: "a meeting type" },
+  { q: "What is something you always do before starting a big task?", slot: "a ritual" },
+  { q: "What is a skill you picked up in a completely unrelated job that you still use today?", slot: "a transferable skill" },
+  { q: "What is the most important thing you need to do your best work?", slot: "a necessity" },
+  { q: "If you could redesign one thing about how teams communicate, what would it be?", slot: "a change" },
+  { q: "What is your go-to strategy when you are completely stuck on a problem?", slot: "a strategy" },
+  { q: "What does a genuinely productive day feel like for you?", slot: "a feeling" },
+  { q: "What is something small that makes a workplace noticeably better?", slot: "a small thing" },
+  { q: "How do you know when you actually understand something versus just think you do?", slot: "a signal" },
+  { q: "What would your ideal team look like in three words?", slot: "three words" }
+];
+
+const TECH_QUESTIONS = [
+  { q: "An Employee class has a constructor that takes a name and a department. What keyword do you use to create a new Employee object?", answer: "The new keyword" },
+  { q: "A field is marked private. Can a method outside the class read it directly?", answer: "No, private fields cannot be accessed directly from outside the class" },
+  { q: "Inside a constructor, what does 'this.name = name' actually do?", answer: "It assigns the constructor parameter to the instance field with the same name" },
+  { q: "What is the difference between a getter and a setter?", answer: "A getter reads a field's value; a setter writes a new value to it" },
+  { q: "You have a StringBuilder called sb. You want to add the word 'hello' to it. What method do you call?", answer: "sb.append(\"hello\")" },
+  { q: "Why would you mark a field private instead of public?", answer: "To hide internal data and control how it is accessed or changed" },
+  { q: "A class has two fields: name and salary. Where do you set their initial values when the object is created?", answer: "Inside the constructor" },
+  { q: "What does encapsulation mean in plain terms?", answer: "Bundling data with the methods that operate on it, and restricting direct access to that data" },
+  { q: "If a class field is private, how does code outside the class change its value?", answer: "Through a public setter method" },
+  { q: "You call 'new Employee()'. What part of the class runs at that moment?", answer: "The constructor runs" },
+  { q: "What happens if you do not write a constructor for a class in Java?", answer: "Java provides a default no-argument constructor automatically" },
+  { q: "Can a class have more than one constructor? What is that called?", answer: "Yes, it is called constructor overloading" },
+  { q: "A StringBuilder starts empty. After calling append('Hello') and append(' World'), what does toString() return?", answer: "\"Hello World\"" }
+];
+
+// ═══ STATE ═══
+let slots = {};
+let revealedCount = 0;
+let totalCards = 0;
+
+// ═══ UTILITY ═══
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function randFrom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function clamp(v, min, max) {
+  return Math.min(Math.max(v, min), max);
+}
+
+// ═══ DISTRIBUTION ═══
+function buildCardPool(n) {
+  // Always use full 25-question pool (12 fun + 13 tech) when n <= 12
+  // For larger groups, proportional: fun = floor(12 * n/25), tech = n - fun
+  const minCards = 12;
+  const totalQ = Math.max(n, minCards);
+
+  const numFun = Math.min(12, Math.floor(12 * totalQ / 25));
+  const numTech = Math.min(13, totalQ - numFun);
+
+  const funPool = shuffle(FUN_QUESTIONS).slice(0, numFun);
+  const techPool = shuffle(TECH_QUESTIONS).slice(0, numTech);
+
+  const allQ = shuffle([
+    ...funPool.map(q => ({ ...q, type: 'fun' })),
+    ...techPool.map(q => ({ ...q, type: 'tech' }))
+  ]);
+
+  const cards = [];
+  for (let i = 0; i < allQ.length; i++) {
+    const studentNum = (i % n) + 1;
+    cards.push({ ...allQ[i], student: studentNum });
+  }
+
+  cards.sort((a, b) => a.student - b.student);
+  return cards;
+}
+
+// ═══ LOAD SCREEN LOGIC ═══
+const hireInput = document.getElementById('hire-count');
+const decBtn = document.getElementById('dec-btn');
+const incBtn = document.getElementById('inc-btn');
+const beginBtn = document.getElementById('begin-btn');
+
+decBtn.addEventListener('click', () => {
+  hireInput.value = clamp(parseInt(hireInput.value || 25) - 1, 6, 30);
+});
+
+incBtn.addEventListener('click', () => {
+  hireInput.value = clamp(parseInt(hireInput.value || 25) + 1, 6, 30);
+});
+
+hireInput.addEventListener('blur', () => {
+  let v = parseInt(hireInput.value);
+  if (isNaN(v)) v = 25;
+  hireInput.value = clamp(v, 6, 30);
+});
+
+hireInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') beginOrientation();
+});
+
+beginBtn.addEventListener('click', beginOrientation);
+
+function beginOrientation() {
+  let n = parseInt(hireInput.value);
+  if (isNaN(n)) n = 25;
+  n = clamp(n, 6, 30);
+
+  slots = {};
+  revealedCount = 0;
+
+  const cards = buildCardPool(n);
+  totalCards = cards.length;
+
+  document.getElementById('progress-total').textContent = totalCards;
+  document.getElementById('progress-current').textContent = '0';
+
+  renderCards(cards);
+
+  document.getElementById('load-screen').style.display = 'none';
+  const cs = document.getElementById('card-screen');
+  cs.style.display = 'flex';
+  document.getElementById('madlib-card').classList.remove('show');
+}
+
+// ═══ RENDER CARDS ═══
+function renderCards(cards) {
+  const grid = document.getElementById('card-grid');
+  grid.innerHTML = '';
+
+  cards.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = `card ${card.type}`;
+    div.style.animationDelay = `${Math.min(idx * 0.04, 0.6)}s`;
+    div.dataset.idx = idx;
+
+    const labelText = card.type === 'fun' ? randFrom(FUN_LABELS) : randFrom(TECH_LABELS);
+    const labelIcon = card.type === 'fun'
+      ? `<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6"/></svg>`
+      : `<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="2"/></svg>`;
+
+    // Fun cards: textarea with slot as placeholder
+    // Tech cards: hidden answer key toggle
+    const bottomArea = card.type === 'fun'
+      ? `<div class="answer-area"><textarea class="answer-input" placeholder="${card.slot || 'Type answer here...'}" rows="2" aria-label="Answer"></textarea></div>`
+      : `<div class="answer-key-area">
+           <button class="answer-key-toggle" aria-label="Show answer" aria-expanded="false">
+             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <polyline points="6 4 10 8 6 12"/>
+             </svg>
+             Show Answer
+           </button>
+           <div class="answer-key-text" role="status"></div>
+         </div>`;
+
+    div.innerHTML = `
+      <div class="card-top">
+        <span class="card-label">${labelIcon} ${labelText}</span>
+        <span class="card-num">${card.student}</span>
+      </div>
+      <p class="card-question hidden-q">${card.q}</p>
+      <div class="card-footer" style="justify-content: flex-end; margin-top:8px;">
+        <button class="reveal-btn" aria-label="Reveal question">Reveal</button>
+      </div>
+      ${bottomArea}
+    `;
+
+    const revBtn = div.querySelector('.reveal-btn');
+    const questionEl = div.querySelector('.card-question');
+    const answerArea = div.querySelector('.answer-area');
+    const answerKeyArea = div.querySelector('.answer-key-area');
+    const answerKeyToggle = div.querySelector('.answer-key-toggle');
+    const answerKeyText = div.querySelector('.answer-key-text');
+
+    // Answer key toggle (tech only)
+    if (answerKeyToggle) {
+      answerKeyToggle.style.display = 'none'; // hidden until revealed
+      answerKeyText.textContent = card.answer || '';
+      answerKeyToggle.addEventListener('click', () => {
+        const isOpen = answerKeyToggle.classList.toggle('open');
+        answerKeyText.classList.toggle('open', isOpen);
+        answerKeyToggle.setAttribute('aria-expanded', isOpen);
+        answerKeyToggle.querySelector('span') && (answerKeyToggle.querySelector('span').textContent = isOpen ? 'Hide Answer' : 'Show Answer');
+        // update button text node
+        answerKeyToggle.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = isOpen ? ' Hide Answer' : ' Show Answer'; });
+      });
+    }
+
+    revBtn.addEventListener('click', () => {
+      questionEl.classList.remove('hidden-q');
+      revBtn.textContent = 'Revealed';
+      revBtn.classList.add('revealed');
+      div.classList.add('revealed-card');
+
+      if (answerArea) answerArea.classList.add('visible');
+      if (answerKeyToggle) answerKeyToggle.style.display = 'flex';
+
+      revealedCount++;
+      document.getElementById('progress-current').textContent = revealedCount;
+
+      if (card.type === 'fun' && card.slot) {
+        const textarea = div.querySelector('.answer-input');
+        textarea.addEventListener('input', () => {
+          slots[card.slot] = textarea.value.trim();
+        });
+      }
+    });
+
+    grid.appendChild(div);
+  });
+}
+
+// ═══ FINALE ═══
+document.getElementById('finale-btn').addEventListener('click', generateMadLib);
+
+function generateMadLib() {
+  const card = document.getElementById('madlib-card');
+  const body = document.getElementById('madlib-body');
+
+  // Slot values (only use non-empty ones)
+  const s = (key) => slots[key] && slots[key].trim() ? slots[key].trim() : null;
+
+  const paragraphs = [];
+
+  // Para 1: Welcome
+  let p1 = 'Welcome to the team. Your orientation file has been reviewed, cross-referenced, and approved by the appropriate parties.';
+  const habit = s('a weird habit');
+  const feeling = s('a feeling');
+  if (habit) p1 += ` We were particularly interested to learn that <span class="slot-value">${habit}</span> is a core part of your workflow. The Productivity Subcommittee has already requested a presentation.`;
+  if (feeling) p1 += ` We are glad to hear that a productive day feels <span class="slot-value">${feeling}</span> to you. We will note this in the employee wellness portal under the category "Morale: Promising."`;
+  paragraphs.push(p1);
+
+  // Para 2: Contributions
+  const skill = s('a transferable skill');
+  const ritual = s('a ritual');
+  const necessity = s('a necessity');
+  let p2Parts = [];
+  if (skill) p2Parts.push(`You have listed <span class="slot-value">${skill}</span> as a transferable skill. This has been added to your official profile and will be mentioned at the next all-hands meeting whether you want it to be or not`);
+  if (ritual) p2Parts.push(`your pre-task ritual involves <span class="slot-value">${ritual}</span>, which the team finds either inspiring or deeply puzzling -- the jury is still out`);
+  if (necessity) p2Parts.push(`you have indicated that you require <span class="slot-value">${necessity}</span> to do your best work. A formal request has been submitted to Facilities. They said they will look into it`);
+  if (p2Parts.length > 0) {
+    paragraphs.push('The onboarding committee has noted the following for their records: ' + p2Parts.join('. Furthermore, ') + '.');
+  }
+
+  // Para 3: Communication
+  const meetingType = s('a meeting type');
+  const change = s('a change');
+  const threeWords = s('three words');
+  let p3Parts = [];
+  if (meetingType) p3Parts.push(`Your communication style has been officially classified as: <span class="slot-value">${meetingType}</span>. A calendar invite has already been sent`);
+  if (change) p3Parts.push(`You have proposed the following improvement to team communication: <span class="slot-value">${change}</span>. This has been escalated to the Subcommittee on Subcommittees, which meets quarterly, mostly to discuss whether it should meet quarterly`);
+  if (threeWords) p3Parts.push(`Your ideal team, in your own words: <span class="slot-value">${threeWords}</span>. HR finds this acceptable and has filed it under "Vision: Reasonable"`);
+  if (p3Parts.length > 0) {
+    paragraphs.push(p3Parts.join('. ') + '.');
+  }
+
+  // Para 4: Problem solving
+  const strategy = s('a strategy');
+  const advice = s('some advice');
+  const signal = s('a signal');
+  let p4Parts = [];
+  if (strategy) p4Parts.push(`when completely stuck, you rely on <span class="slot-value">${strategy}</span> -- this has been added to the internal knowledge base under "Wisdom: Field-Tested"`);
+  if (advice) p4Parts.push(`the most useful advice you have ever received about working with others is: <span class="slot-value">${advice}</span>. It has been laminated and posted in the break room next to the microwave`);
+  if (signal) p4Parts.push(`you know you truly understand something when <span class="slot-value">${signal}</span>. This will be referenced during your 90-day review`);
+  if (p4Parts.length > 0) {
+    paragraphs.push('For our permanent records: ' + p4Parts.join('. Additionally, ') + '.');
+  }
+
+  // Para 5: Small things
+  const smallThing = s('a small thing');
+  if (smallThing) {
+    paragraphs.push(`Finally, you noted that <span class="slot-value">${smallThing}</span> makes a workplace noticeably better. A memo has been drafted. The memo has been reviewed. The review of the memo is pending approval. Approval timelines are estimated at four to six business decades. We appreciate your patience and your vision.`);
+  }
+
+  // Closing -- always shown
+  paragraphs.push('Your access badge has been activated. Your desk plant is your responsibility. Should it perish, please see Facilities for the potted succulent replacement form (Form 7-B). We are genuinely delighted to have you on the team. Please enjoy the orientation binder. No one has ever read the orientation binder.');
+
+  body.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+  card.classList.add('show');
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ═══ RESET ═══
+document.getElementById('reset-btn').addEventListener('click', () => {
+  document.getElementById('card-screen').style.display = 'none';
+  document.getElementById('load-screen').style.display = 'flex';
+  document.getElementById('madlib-card').classList.remove('show');
+  slots = {};
+  revealedCount = 0;
+});
+</script>
+</body>
+</html>

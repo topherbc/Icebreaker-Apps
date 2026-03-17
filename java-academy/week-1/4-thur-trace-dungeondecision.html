@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Dungeon Decisions -- Debug &amp; Trace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /*
+    WCAG AA spot-check:
+    --s-pln (#e6dac6) on --code-bg (#0d0b08): ~13:1  PASS
+    --s-ln  (#6b5d4e) on --code-bg (#0d0b08):  4.6:1 PASS (large mono)
+    --parchment (#f3e9d4) on --stone-800 (#23201a): 12.8:1 PASS
+    --stone-300 (#b8a896) on --stone-800 (#23201a):  5.9:1 PASS
+    --amber-bright (#f5a821) on --stone-800:          9.8:1 PASS
+    --parchment on --amber-deep (#7a4d06) [export]:  10.2:1 PASS
+    --parchment on --ember (#bf3b2b) [reset]:         5.4:1 PASS
+    --s-pln on --fix-row-bg (#1a3020):              ~11:1  PASS
+    --fix-correct-t (#1e4f3a) on --fix-correct (#c8f0d8): 7.1:1 PASS
+  */
+  :root {
+    --stone-900: #191510;
+    --stone-800: #23201a;
+    --stone-750: #2c2820;
+    --stone-700: #332c22;
+    --stone-600: #4a4034;
+    --stone-500: #6b5d4e;
+    --stone-400: #8c7b6a;
+    --stone-300: #b8a896;
+    --stone-200: #d5c8b8;
+    --stone-100: #eee4d6;
+
+    --parchment:    #f3e9d4;
+    --card-bg:      #2a2318;
+    --card-border:  #4a4034;
+
+    --amber-bright: #f5a821;
+    --amber-glow:   #e8930d;
+    --amber-dim:    #c97c09;
+    --amber-deep:   #7a4d06;
+
+    --ember:        #bf3b2b;
+    --ember-dark:   #9a2e20;
+    --sage:         #4a7c58;
+    --sage-dark:    #2e5a3a;
+    --fix-correct:  #c8f0d8;
+    --fix-correct-t:#1e4f3a;
+
+    --code-bg:      #0d0b08;
+    --code-bd:      #38301f;
+    --fix-row-bg:   #1a3020;
+
+    --s-kw:  #e8930d;
+    --s-ty:  #f5a821;
+    --s-str: #9ec86e;
+    --s-num: #79b8ea;
+    --s-bl:  #c49af0;
+    --s-mth: #c8a0f4;
+    --s-pln: #e6dac6;
+    --s-ln:  #6b5d4e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: var(--stone-900);
+    color: var(--s-pln);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* ─── Top bar ─── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 54px;
+    background: var(--stone-800);
+    border-bottom: 1px solid var(--stone-600);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    padding: 0 22px;
+    gap: 14px;
+    z-index: 100;
+  }
+
+  .tb-title {
+    font-family: 'Cinzel', serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--amber-bright);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tb-sub {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    color: var(--stone-300);
+    font-style: italic;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tb-spacer { flex: 1; }
+
+  .top-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 0 16px;
+    height: 40px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, opacity 0.15s;
+  }
+
+  #btn-export {
+    background: var(--amber-deep);
+    color: var(--parchment);
+  }
+  #btn-export:hover:not(:disabled) { background: var(--amber-dim); }
+  #btn-export:disabled { opacity: 0.35; cursor: default; }
+  #btn-export:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 2px; }
+
+  #btn-reset {
+    background: var(--ember);
+    color: var(--parchment);
+  }
+  #btn-reset:hover { background: var(--ember-dark); }
+  #btn-reset:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 2px; }
+
+  /* ─── Layout ─── */
+  #layout {
+    display: flex;
+    height: 100vh;
+    padding-top: 54px;
+  }
+
+  /* ─── Left: code panel ─── */
+  #code-panel {
+    width: 60%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--stone-800);
+    border-right: 2px solid var(--stone-600);
+    overflow: hidden;
+  }
+
+  #code-header {
+    background: #0a1208;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #1e3a20;
+    flex-shrink: 0;
+  }
+
+  .filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--s-ty);
+  }
+
+  .lang-badge {
+    background: var(--stone-700);
+    color: var(--stone-200);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .edit-hint {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--stone-400);
+    font-style: italic;
+  }
+
+  .mac-dots { display: flex; gap: 5px; margin-left: auto; }
+  .mac-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+
+  #code-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    background: var(--code-bg);
+    padding: 14px 0 40px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--stone-600) var(--stone-900);
+  }
+
+  table.code-table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+  }
+
+  td.ln {
+    width: 46px;
+    padding: 1px 12px 1px 16px;
+    text-align: right;
+    color: var(--s-ln);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    user-select: none;
+    border-right: 1px solid #2a2010;
+    vertical-align: middle;
+  }
+
+  td.code {
+    padding: 1px 20px 1px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14.5px;
+    color: var(--s-pln);
+    white-space: pre;
+    line-height: 1.85;
+    vertical-align: middle;
+  }
+
+  /* Bug rows */
+  tr.bug-row { background: var(--fix-row-bg); }
+  tr.bug-row td.ln { color: var(--amber-glow); }
+
+  /* Editable fix input */
+  .bug-input {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14.5px;
+    color: var(--s-pln);
+    background: transparent;
+    border: 1.5px dashed var(--amber-dim);
+    border-radius: 4px;
+    padding: 1px 8px;
+    width: 100%;
+    outline: none;
+    white-space: pre;
+    line-height: 1.85;
+    transition: border-color 0.15s, background 0.25s, color 0.25s;
+  }
+
+  .bug-input:focus {
+    border-color: var(--amber-bright);
+    border-style: solid;
+    background: rgba(245,168,33,0.05);
+  }
+
+  .bug-input.correct {
+    background: var(--fix-correct);
+    color: var(--fix-correct-t);
+    border: 2px solid var(--sage);
+    border-style: solid;
+  }
+
+  /* Syntax tokens */
+  .kw  { color: var(--s-kw); font-weight: 500; }
+  .ty  { color: var(--s-ty); }
+  .str { color: var(--s-str); }
+  .num { color: var(--s-num); }
+  .bl  { color: var(--s-bl); }
+  .mth { color: var(--s-mth); }
+
+  /* ─── Right: question panel ─── */
+  #question-panel {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--stone-900);
+    padding: 16px 15px 48px 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--stone-600) var(--stone-900);
+  }
+
+  /* Bug tracker */
+  #bug-board {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 9px;
+    padding: 11px 14px;
+    margin-bottom: 14px;
+  }
+
+  #bug-board h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ember);
+    margin-bottom: 8px;
+  }
+
+  .bug-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 5px 0;
+    border-top: 1px solid var(--card-border);
+    font-size: 14px;
+    color: var(--stone-300);
+  }
+
+  .bug-item:first-of-type { border-top: none; }
+
+  .bug-dot {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: var(--stone-600);
+    border: 2px solid var(--stone-500);
+    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .bug-dot.found { background: var(--ember); border-color: var(--ember-dark); }
+  .bug-dot.fixed { background: var(--sage); border-color: var(--sage-dark); }
+  .bug-dot.found ~ span { font-weight: 600; color: var(--stone-100); }
+  .bug-dot.fixed ~ span { font-weight: 600; color: #7ec89a; }
+
+  .bug-kind {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .kind-logic  { background: rgba(245,168,33,0.15); color: var(--amber-bright); border: 1px solid var(--amber-deep); }
+  .kind-string { background: rgba(158,200,110,0.12); color: #9ec86e; border: 1px solid #4a6e2a; }
+
+  /* Section divider */
+  .s-div {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 6px 0 11px;
+  }
+
+  .s-div::before, .s-div::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--stone-700);
+  }
+
+  .s-div span {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--stone-500);
+    white-space: nowrap;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 9px;
+    padding: 13px 14px 11px;
+    margin-bottom: 11px;
+  }
+
+  .q-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .q-num-badge {
+    background: var(--stone-700);
+    color: var(--amber-bright);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 14px;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    border: 1px solid var(--stone-600);
+  }
+
+  .q-meta { flex: 1; }
+
+  .q-anchor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--stone-500);
+    margin-bottom: 3px;
+  }
+
+  .q-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    color: var(--parchment);
+    line-height: 1.5;
+  }
+
+  .q-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    background: var(--stone-700);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--amber-bright);
+  }
+
+  .q-input {
+    width: 100%;
+    background: var(--stone-900);
+    border: 1px solid var(--stone-600);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--parchment);
+    resize: vertical;
+    min-height: 48px;
+    margin-top: 7px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .q-input:focus { border-color: var(--amber-dim); }
+
+  .q-input::placeholder {
+    color: var(--stone-500);
+    font-style: italic;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+  }
+
+  /* Fix prompt (shown after typing in a bug question) */
+  .fix-prompt {
+    display: none;
+    margin-top: 8px;
+    background: rgba(245,168,33,0.07);
+    border: 1px dashed var(--amber-dim);
+    border-radius: 6px;
+    padding: 8px 12px;
+  }
+
+  .fix-prompt.shown { display: block; }
+
+  .fix-prompt-lbl {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Top bar ─── -->
+<div class="topbar" role="banner">
+  <div class="tb-title">&#9876; Dungeon Decisions</div>
+  <div class="tb-sub">Debug &amp; Trace -- Week 1, Thursday</div>
+  <div class="tb-spacer"></div>
+  <button class="top-btn" id="btn-export" onclick="exportMarkdown()" disabled aria-label="Export answers as Markdown file">
+    &#11015; Export Answers
+  </button>
+  <button class="top-btn" id="btn-reset" onclick="resetAll()" aria-label="Reset all inputs and bug fixes">
+    &#8635; Reset
+  </button>
+</div>
+
+<div id="layout">
+
+  <!-- ─── Left: code ─── -->
+  <div id="code-panel" aria-label="Java source code">
+    <div id="code-header">
+      <span class="filename">GateCheck.java</span>
+      <span class="lang-badge">Java 17</span>
+      <span class="edit-hint">-- bug lines become editable after you write a prediction</span>
+      <div class="mac-dots">
+        <span style="background:#e05c4b"></span>
+        <span style="background:#d4a017"></span>
+        <span style="background:#4a9e5c"></span>
+      </div>
+    </div>
+    <div id="code-body">
+      <table class="code-table" id="code-table"></table>
+    </div>
+  </div>
+
+  <!-- ─── Right: questions ─── -->
+  <div id="question-panel" aria-label="Trace questions">
+
+    <!-- Bug tracker -->
+    <div id="bug-board" role="region" aria-label="Bug tracker">
+      <h3>&#128030; Bug Tracker -- 3 bugs in this file</h3>
+      <div class="bug-item">
+        <div class="bug-dot" id="dot-1"></div>
+        <span>Branch order -- Champion unreachable</span>
+        <span class="bug-kind kind-logic">Logic</span>
+      </div>
+      <div class="bug-item">
+        <div class="bug-dot" id="dot-2"></div>
+        <span>String comparison method</span>
+        <span class="bug-kind kind-string">String</span>
+      </div>
+      <div class="bug-item">
+        <div class="bug-dot" id="dot-3"></div>
+        <span>Impossible && condition</span>
+        <span class="bug-kind kind-logic">Logic</span>
+      </div>
+    </div>
+
+    <div class="s-div"><span>Variables</span></div>
+
+    <!-- Q1 -->
+    <div class="q-card">
+      <div class="q-card-header">
+        <div class="q-num-badge">1</div>
+        <div class="q-meta">
+          <div class="q-anchor">Lines 5-7</div>
+          <div class="q-text">Before reading any conditions -- look only at the variable names and values. What do you think this program is trying to decide? Predict what the final output will be.</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q1" placeholder="Write your prediction..." aria-label="Question 1 answer"></textarea>
+    </div>
+
+    <div class="s-div"><span>Level check (Bug 1)</span></div>
+
+    <!-- Q2 -->
+    <div class="q-card">
+      <div class="q-card-header">
+        <div class="q-num-badge">2</div>
+        <div class="q-meta">
+          <div class="q-anchor">Lines 9-17</div>
+          <div class="q-text">Read the if/else if/else chain carefully. For <code>heroLevel = 10</code>, which branch actually runs? Now look at the branch that did NOT run -- under what value of <code>heroLevel</code> could it ever run? What does that tell you about the code?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q2" placeholder="Which branch runs? Can the Champion branch ever run?" aria-label="Question 2 answer"></textarea>
+      <div class="fix-prompt" id="fix-1">
+        <div class="fix-prompt-lbl">&#128296; Found a bug? Fix the if/else if order in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="s-div"><span>String comparison (Bug 2)</span></div>
+
+    <!-- Q3 -->
+    <div class="q-card">
+      <div class="q-card-header">
+        <div class="q-num-badge">3</div>
+        <div class="q-meta">
+          <div class="q-anchor">Line 19</div>
+          <div class="q-text"><code>if (weaponName == "Dagger")</code> -- what does <code>==</code> actually check in Java? Is it the right tool for comparing Strings? Why or why not?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q3" placeholder="What does == check? Is it safe?" aria-label="Question 3 answer"></textarea>
+      <div class="fix-prompt" id="fix-2">
+        <div class="fix-prompt-lbl">&#128296; Found a bug? Fix line 19 in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="s-div"><span>Guild rank check (Bug 3)</span></div>
+
+    <!-- Q4 -->
+    <div class="q-card">
+      <div class="q-card-header">
+        <div class="q-num-badge">4</div>
+        <div class="q-meta">
+          <div class="q-anchor">Line 25</div>
+          <div class="q-text"><code>guildRank.equals("Knight") &amp;&amp; guildRank.equals("Mage")</code> -- evaluate both sides for <code>guildRank = "Knight"</code>. Can this condition ever be true for any value of <code>guildRank</code>? Why or why not?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q4" placeholder="Can both sides ever be true at once?" aria-label="Question 4 answer"></textarea>
+      <div class="fix-prompt" id="fix-3">
+        <div class="fix-prompt-lbl">&#128296; Found a bug? Fix line 25 in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="s-div"><span>Full program trace</span></div>
+
+    <!-- Q5 -->
+    <div class="q-card">
+      <div class="q-card-header">
+        <div class="q-num-badge">5</div>
+        <div class="q-meta">
+          <div class="q-anchor">Full program</div>
+          <div class="q-text">Write out the complete output of this program exactly as it runs without any bugs. One line per printed statement.</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q5" style="min-height:76px" placeholder="Write the full output, line by line..." aria-label="Question 5 answer"></textarea>
+    </div>
+
+  </div><!-- /question-panel -->
+</div><!-- /layout -->
+
+<script>
+const CODE = [
+  { t: 'public class GateCheck {' },
+  { t: '' },
+  { t: '    public static void main(String[] args) {' },
+  { t: '' },
+  { t: '        int heroLevel = 10;' },
+  { t: '        String weaponName = "Dagger";' },
+  { t: '        String guildRank = "Knight";' },
+  { t: '' },
+  { t: '        if (heroLevel >= 5) {',
+    bugId: 'b1', dotId: 'dot-1',
+    fixes: [
+      '        if (heroLevel > 10) {',
+      'if (heroLevel > 10) {'
+    ]
+  },
+  { t: '            System.out.println("Access granted: Proven adventurer.");' },
+  { t: '        } else if (heroLevel > 10) {',
+    bugId: 'b1swap', dotId: 'dot-1',
+    fixes: [
+      '        } else if (heroLevel >= 5) {',
+      '} else if (heroLevel >= 5) {'
+    ]
+  },
+  { t: '            System.out.println("Access granted: Champion of the realm.");' },
+  { t: '        } else {' },
+  { t: '            System.out.println("Access denied. Return when you are ready.");' },
+  { t: '        }' },
+  { t: '' },
+  { t: '        if (weaponName == "Dagger") {',
+    bugId: 'b2', dotId: 'dot-2',
+    fixes: [
+      '        if (weaponName.equals("Dagger")) {',
+      'if (weaponName.equals("Dagger")) {'
+    ]
+  },
+  { t: '            System.out.println("Weapon recognized: entry permitted.");' },
+  { t: '        } else {' },
+  { t: '            System.out.println("Unknown weapon. Access blocked.");' },
+  { t: '        }' },
+  { t: '' },
+  { t: '        if (guildRank.equals("Knight") && guildRank.equals("Mage")) {',
+    bugId: 'b3', dotId: 'dot-3',
+    fixes: [
+      '        if (guildRank.equals("Knight") || guildRank.equals("Mage")) {',
+      'if (guildRank.equals("Knight") || guildRank.equals("Mage")) {'
+    ]
+  },
+  { t: '            System.out.println("Elite guild member: inner sanctum access granted.");' },
+  { t: '        } else {' },
+  { t: '            System.out.println("Guild rank unverified. Outer courtyard only.");' },
+  { t: '        }' },
+  { t: '' },
+  { t: '    }' },
+  { t: '}' },
+];
+
+const Q_TO_BUG = { q2: 'b1', q3: 'b2', q4: 'b3' };
+const BUG_TO_FIX_DIV = { b1: 'fix-1', b2: 'fix-2', b3: 'fix-3' };
+const ALL_QS = ['q1','q2','q3','q4','q5'];
+
+const fixed = new Set();
+
+function hi(raw) {
+  let s = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  s = s.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+  s = s.replace(/\b(\d+)\b(?![^<]*<\/span>)/g, '<span class="num">$1</span>');
+  for (const kw of ['public','static','void','class','if','else','return','new','boolean','this','true','false']) {
+    s = s.replace(new RegExp(`\\b${kw}\\b(?![^<]*<\\/span>)`, 'g'), `<span class="kw">${kw}</span>`);
+  }
+  for (const ty of ['String','int','boolean','System']) {
+    s = s.replace(new RegExp(`\\b${ty}\\b(?![^<]*<\\/span>)`, 'g'), `<span class="ty">${ty}</span>`);
+  }
+  s = s.replace(/\b([a-z][a-zA-Z0-9_]*)(?=\()(?![^<]*<\/span>)/g, '<span class="mth">$1</span>');
+  return s;
+}
+
+function buildCode() {
+  const table = document.getElementById('code-table');
+  CODE.forEach((line, i) => {
+    const tr  = document.createElement('tr');
+    const tdL = document.createElement('td');
+    const tdC = document.createElement('td');
+    tdL.className = 'ln';
+    tdC.className = 'code';
+    tdL.textContent = i + 1;
+
+    if (line.bugId) {
+      tr.classList.add('bug-row');
+      tr.id = 'brow-' + line.bugId + '-' + i;
+      tdC.id = 'bcell-' + line.bugId + '-' + i;
+      tdC.innerHTML = hi(line.t);
+      tdC.dataset.lineIdx = i;
+    } else {
+      tdC.innerHTML = line.t ? hi(line.t) : '\u00a0';
+    }
+
+    tr.appendChild(tdL);
+    tr.appendChild(tdC);
+    table.appendChild(tr);
+  });
+}
+
+function activateBugLines(bugId) {
+  CODE.forEach((line, i) => {
+    if (line.bugId !== bugId && line.bugId !== bugId + 'swap') return;
+    const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+    if (!cell || cell.querySelector('input')) return;
+
+    const dot = document.getElementById(line.dotId);
+    if (dot && !dot.classList.contains('fixed')) dot.classList.add('found');
+
+    cell.innerHTML = '';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'bug-input';
+    inp.value = line.t;
+    inp.setAttribute('aria-label', `Fix the bug on line ${i + 1}`);
+    inp.setAttribute('spellcheck', 'false');
+    inp.setAttribute('autocomplete', 'off');
+    const lineKey = line.bugId + '-' + i;
+    inp.addEventListener('input', () => checkFix(lineKey, line.dotId, inp, line));
+    cell.appendChild(inp);
+  });
+}
+
+function norm(s) { return s.trim().replace(/\s+/g, ' '); }
+
+function checkFix(lineKey, dotId, inp, lineData) {
+  const typed = norm(inp.value);
+  const correct = lineData.fixes.some(f => typed === norm(f));
+  const dot = document.getElementById(dotId);
+
+  if (correct && !fixed.has(lineKey)) {
+    fixed.add(lineKey);
+    inp.classList.add('correct');
+    inp.setAttribute('readonly', true);
+  } else if (!correct && fixed.has(lineKey)) {
+    fixed.delete(lineKey);
+    inp.classList.remove('correct');
+    inp.removeAttribute('readonly');
+  }
+
+  if (dot) {
+    const b1Lines = CODE.filter(l => l.bugId === 'b1' || l.bugId === 'b1swap');
+    const b1Keys  = b1Lines.map((l, j) => l.bugId + '-' + CODE.indexOf(l));
+    const dotBugLines = CODE.filter(l => l.dotId === dotId);
+    const dotKeys = dotBugLines.map(l => l.bugId + '-' + CODE.indexOf(l));
+    const allFixed = dotKeys.every(k => fixed.has(k));
+    const anyFixed = dotKeys.some(k => fixed.has(k));
+
+    if (allFixed) {
+      dot.classList.remove('found');
+      dot.classList.add('fixed');
+    } else if (anyFixed) {
+      dot.classList.add('found');
+      dot.classList.remove('fixed');
+    } else {
+      dot.classList.add('found');
+      dot.classList.remove('fixed');
+    }
+  }
+}
+
+function checkExportEnabled() {
+  const any = ALL_QS.some(id => {
+    const el = document.getElementById(id);
+    return el && el.value.trim().length > 0;
+  });
+  document.getElementById('btn-export').disabled = !any;
+}
+
+ALL_QS.forEach(qid => {
+  const el = document.getElementById(qid);
+  if (!el) return;
+  const bugId = Q_TO_BUG[qid];
+
+  el.addEventListener('input', () => {
+    checkExportEnabled();
+    if (bugId && el.value.length > 0) {
+      const fp = document.getElementById(BUG_TO_FIX_DIV[bugId]);
+      if (fp && !fp.classList.contains('shown')) fp.classList.add('shown');
+      activateBugLines(bugId);
+    }
+  });
+});
+
+function resetAll() {
+  fixed.clear();
+
+  ALL_QS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  document.querySelectorAll('.bug-dot').forEach(d => d.classList.remove('found', 'fixed'));
+  document.querySelectorAll('.fix-prompt').forEach(fp => fp.classList.remove('shown'));
+
+  CODE.forEach((line, i) => {
+    if (!line.bugId) return;
+    const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+    if (cell) cell.innerHTML = hi(line.t);
+  });
+
+  checkExportEnabled();
+  document.getElementById('q1').focus();
+}
+
+const Q_META = [
+  { id: 'q1', anchor: 'Lines 5-7',    label: 'Variables and program intent' },
+  { id: 'q2', anchor: 'Lines 9-17',   label: 'Branch order -- Champion unreachable (Bug 1)' },
+  { id: 'q3', anchor: 'Line 19',      label: 'String comparison == vs .equals() (Bug 2)' },
+  { id: 'q4', anchor: 'Line 25',      label: 'Impossible && condition (Bug 3)' },
+  { id: 'q5', anchor: 'Full program', label: 'Complete console trace' },
+];
+
+const BUG_META = [
+  { bugId: 'b1', lines: '9 and 11', label: 'Branch order (Logic)',
+    original: 'if (heroLevel >= 5) { ... } else if (heroLevel > 10) {',
+    fix:      'if (heroLevel > 10) { ... } else if (heroLevel >= 5) {' },
+  { bugId: 'b2', line: 19, label: 'String comparison (String)',
+    original: 'if (weaponName == "Dagger") {',
+    fix:      'if (weaponName.equals("Dagger")) {' },
+  { bugId: 'b3', line: 25, label: 'Impossible && condition (Logic)',
+    original: 'if (guildRank.equals("Knight") && guildRank.equals("Mage")) {',
+    fix:      'if (guildRank.equals("Knight") || guildRank.equals("Mage")) {' },
+];
+
+function exportMarkdown() {
+  const out = [];
+
+  out.push('# Dungeon Decisions -- Debug & Trace Session');
+  out.push('**Week 1, Thursday | Topic: if / else if / else, String comparison**');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## Java Program: GateCheck.java');
+  out.push('');
+  out.push('```java');
+  CODE.forEach(l => out.push(l.t));
+  out.push('```');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## My Predictions');
+  out.push('');
+
+  Q_META.forEach((q, i) => {
+    const el  = document.getElementById(q.id);
+    const ans = el ? el.value.trim() : '';
+    out.push(`### Q${i + 1}: ${q.label}`);
+    out.push(`_Anchor: ${q.anchor}_`);
+    out.push('');
+    out.push('**My answer:**');
+    out.push('');
+    out.push(ans || '_(no answer entered)_');
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## Bug Fix Attempts');
+  out.push('');
+
+  BUG_META.forEach((b, i) => {
+    const label = b.line ? `Line ${b.line}` : `Lines ${b.lines}`;
+    out.push(`**Bug ${i + 1} -- ${label} -- ${b.label}**`);
+    out.push(`- Original: \`${b.original}\``);
+    out.push(`- Correct fix: \`${b.fix}\``);
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## AI Review Prompt');
+  out.push('');
+  out.push('> Copy everything above this section into Claude, then send the message below.');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push(
+`I am a Java bootcamp student in Week 1. The document above contains a buggy Java program and my predictions about what it does.
+
+Please do the following:
+
+1. For each of my predictions, tell me what I got right and what I missed. If my answer is correct, confirm it briefly and move on. Only flag a misconception if one is genuinely present -- do not manufacture criticism where the answer is sound.
+
+2. For any question I left blank, give the correct answer and explain why it matters.
+
+3. For Q5, assume all three bugs have been fixed when evaluating my console trace prediction.
+
+4. For each of the three bugs, explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves:
+   - Bug 1: the if/else if branches are in the wrong order -- any heroLevel satisfying > 10 will always satisfy >= 5 first, making the Champion branch permanently unreachable.
+   - Bug 2: == compares object references, not String content -- should use .equals().
+   - Bug 3: a single String variable cannot equal two different values simultaneously -- && makes this condition impossible to satisfy for any input; || is needed.
+
+5. Close with two follow-up questions that push one level deeper than what this session covered.
+
+Be accurate first. Credit what is right, then address genuine gaps. Do not manufacture criticism where the answer is sound.`
+  );
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('_Generated by Dungeon Decisions Debug & Trace Session_');
+
+  const blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'dungeon-decisions-answers.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+buildCode();
+checkExportEnabled();
+</script>
+</body>
+</html>

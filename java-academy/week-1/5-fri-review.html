@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guild Entrance -- Friday Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --stone: #1a1714;
+    --stone-mid: #252118;
+    --stone-light: #2e2920;
+    --stone-border: #3d3528;
+    --amber: #d4891a;
+    --amber-glow: #e8a030;
+    --amber-dim: #9a6212;
+    --parchment: #f0e8d0;
+    --parchment-mid: #e8dcc0;
+    --parchment-dark: #c8b890;
+    --ink: #2a1f0e;
+    --ink-light: #4a3820;
+    --text-ui: #c8b890;
+    --text-muted: #7a6848;
+    --cleared-color: #4a8a4a;
+    --cleared-bg: #1a2e1a;
+    --progress-color: #8a6a20;
+    --progress-bg: #2a2010;
+    --red-warn: #c84a2a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--stone);
+    color: var(--text-ui);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(212,137,26,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(212,137,26,0.03) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23000'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23ffffff08'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23ffffff06'/%3E%3C/svg%3E");
+  }
+
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ---- LOAD SCREEN ---- */
+  #screen-load {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .gate-ornament {
+    width: 320px;
+    margin: 0 auto 32px;
+    opacity: 0.35;
+  }
+
+  .load-title {
+    font-family: 'Cinzel', serif;
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--amber-glow);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 40px rgba(212,137,26,0.4), 0 2px 0 rgba(0,0,0,0.8);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .load-subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-size: 22px;
+    color: var(--parchment-dark);
+    font-style: italic;
+    letter-spacing: 0.05em;
+    margin-bottom: 48px;
+  }
+
+  .load-divider {
+    width: 400px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amber-dim), transparent);
+    margin: 0 auto 48px;
+  }
+
+  .load-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .form-label {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    color: var(--parchment-dark);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .recruit-input {
+    width: 120px;
+    height: 64px;
+    background: var(--stone-mid);
+    border: 2px solid var(--amber-dim);
+    border-radius: 4px;
+    color: var(--amber-glow);
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .recruit-input:focus { border-color: var(--amber-glow); }
+
+  .btn-primary {
+    background: linear-gradient(180deg, #e8a030 0%, #b87018 100%);
+    border: none;
+    border-radius: 6px;
+    color: var(--ink);
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0 48px;
+    height: 60px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(212,137,26,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.15s;
+    min-width: 200px;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(180deg, #f0b040 0%, #c88028 100%);
+    box-shadow: 0 6px 28px rgba(212,137,26,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* ---- STATION SCREEN ---- */
+  #screen-stations {
+    padding: 32px 48px;
+  }
+
+  .station-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .station-header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--amber-glow);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 30px rgba(212,137,26,0.3);
+    margin-bottom: 8px;
+  }
+
+  .station-header p {
+    font-family: 'Crimson Pro', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--parchment-dark);
+  }
+
+  .station-header .station-progress-bar {
+    margin: 16px auto 0;
+    max-width: 360px;
+    height: 6px;
+    background: var(--stone-border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .station-progress-fill {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .stations-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex: 1;
+    align-content: center;
+  }
+
+  .station-card {
+    background: var(--stone-mid);
+    border: 2px solid var(--stone-border);
+    border-radius: 8px;
+    padding: 28px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .station-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(212,137,26,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .station-card:hover:not(.cleared):not(.in-progress-active) {
+    border-color: var(--amber);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(212,137,26,0.2);
+  }
+
+  .station-card.cleared {
+    border-color: var(--cleared-color);
+    background: var(--cleared-bg);
+    cursor: default;
+    opacity: 0.75;
+  }
+
+  .station-card.in-progress-active {
+    border-color: var(--progress-color);
+    background: var(--progress-bg);
+    cursor: pointer;
+  }
+
+  .station-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+
+  .station-name {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--amber-glow);
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .station-topic {
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: var(--parchment-dark);
+    flex: 1;
+    line-height: 1.5;
+  }
+
+  .station-badge {
+    margin-top: 16px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .badge-not-started {
+    background: var(--stone-light);
+    border: 1px solid var(--stone-border);
+    color: var(--text-muted);
+  }
+
+  .badge-in-progress {
+    background: var(--progress-bg);
+    border: 1px solid var(--progress-color);
+    color: #d4a840;
+  }
+
+  .badge-cleared {
+    background: var(--cleared-bg);
+    border: 1px solid var(--cleared-color);
+    color: #6aaa6a;
+  }
+
+  /* ---- QUESTION SCREEN ---- */
+  #screen-question {
+    padding: 32px 60px;
+  }
+
+  .question-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--stone-border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    padding: 0 20px;
+    height: 40px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-back:hover { border-color: var(--amber-dim); color: var(--text-ui); }
+
+  .q-station-label {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--amber);
+    letter-spacing: 0.06em;
+  }
+
+  .q-progress {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+
+  .q-progress-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .q-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--stone-border);
+    background: transparent;
+    transition: all 0.2s;
+  }
+  .q-dot.done { background: var(--cleared-color); border-color: var(--cleared-color); }
+  .q-dot.active { background: var(--amber); border-color: var(--amber); transform: scale(1.3); }
+
+  .question-card {
+    background: var(--parchment);
+    border: 2px solid var(--parchment-dark);
+    border-radius: 10px;
+    padding: 40px 48px;
+    max-width: 860px;
+    margin: 0 auto;
+    color: var(--ink);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--amber-dim), var(--amber-glow), var(--amber-dim));
+    border-radius: 10px 10px 0 0;
+  }
+
+  .recruit-name {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    opacity: 0.7;
+  }
+
+  .question-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 24px;
+    color: var(--ink);
+    line-height: 1.55;
+    margin-bottom: 28px;
+  }
+
+  .code-block {
+    background: #1e1a14;
+    border: 1px solid #3d3020;
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 17px;
+    color: #e8d8b0;
+    line-height: 1.6;
+    margin: 16px 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* Multiple choice / code trace */
+  .mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .mc-btn {
+    background: var(--parchment-mid);
+    border: 2px solid var(--parchment-dark);
+    border-radius: 6px;
+    color: var(--ink);
+    font-family: 'Crimson Pro', serif;
+    font-size: 19px;
+    padding: 14px 20px;
+    cursor: default;
+    text-align: left;
+    min-height: 56px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mc-btn .opt-letter {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--amber-dim);
+    min-width: 22px;
+  }
+
+  .mc-btn.revealed-correct {
+    background: #e8f4e8;
+    border-color: #4a8a4a;
+    font-weight: 600;
+  }
+
+  .mc-btn.revealed-correct::after {
+    content: ' [CORRECT]';
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #2a6a2a;
+    margin-left: auto;
+  }
+
+  /* Fill in blank */
+  .fitb-code {
+    background: #1e1a14;
+    border: 1px solid #3d3020;
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    color: #e8d8b0;
+    line-height: 2;
+    margin: 16px 0;
+    white-space: pre-wrap;
+  }
+
+  .fitb-input {
+    background: #2a2010;
+    border: 2px solid var(--amber-dim);
+    border-radius: 3px;
+    color: var(--amber-glow);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 17px;
+    padding: 2px 8px;
+    width: 120px;
+    outline: none;
+    vertical-align: middle;
+  }
+
+  .fitb-input.revealed-correct {
+    background: #1a2e1a;
+    border-color: #4a8a4a;
+    color: #7adc7a;
+  }
+
+  .fitb-input.revealed-wrong {
+    background: #2e1a1a;
+    border-color: #c84a2a;
+    color: #dc7a7a;
+  }
+
+  .fitb-answer-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink-light);
+    margin-top: 8px;
+    display: none;
+  }
+  .fitb-answer-label.shown { display: block; }
+
+  /* Drag and drop */
+  .dnd-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .dnd-items-col h3, .dnd-targets-col h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    color: var(--ink-light);
+    margin-bottom: 10px;
+  }
+
+  .dnd-item {
+    background: var(--parchment-mid);
+    border: 2px solid var(--parchment-dark);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    color: var(--ink);
+    cursor: grab;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+    user-select: none;
+    min-height: 52px;
+  }
+
+  .dnd-item:hover { border-color: var(--amber-dim); }
+  .dnd-item.dragging { opacity: 0.5; cursor: grabbing; }
+  .dnd-item.locked { background: #e8f0e8; border-color: #4a8a4a; cursor: default; }
+
+  .dnd-item .item-icon { font-size: 18px; }
+
+  .dnd-target {
+    background: #e8e0c8;
+    border: 2px dashed var(--parchment-dark);
+    border-radius: 6px;
+    padding: 10px 14px;
+    min-height: 54px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    color: var(--ink-light);
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .dnd-target.drag-over { border-color: var(--amber); background: #f0e8d0; }
+
+  .dnd-target .target-label {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--ink-light);
+    min-width: 80px;
+    font-weight: 600;
+  }
+
+  .dnd-target .placed-item {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dnd-target.revealed-correct .placed-item { color: #2a6a2a; }
+  .dnd-target.revealed-wrong .placed-item { color: #8a2020; }
+
+  .dnd-target .match-indicator {
+    margin-left: auto;
+    font-size: 18px;
+    display: none;
+  }
+  .dnd-target.revealed-correct .match-indicator { display: block; }
+  .dnd-target.revealed-wrong .match-indicator { display: block; }
+
+  /* Answer panel */
+  .answer-panel {
+    background: #e8f0e8;
+    border: 2px solid #4a8a4a;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 20px;
+    display: none;
+  }
+
+  .answer-panel.shown { display: block; }
+
+  .answer-panel-label {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: #2a6a2a;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .answer-panel-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 20px;
+    color: #1a4a1a;
+  }
+
+  /* Action buttons */
+  .question-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 32px;
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn-reveal {
+    background: linear-gradient(180deg, #5a8a5a 0%, #3a6a3a 100%);
+    border: none;
+    border-radius: 6px;
+    color: #e8f4e8;
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 0 40px;
+    height: 56px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    transition: all 0.15s;
+  }
+  .btn-reveal:hover { background: linear-gradient(180deg, #6a9a6a 0%, #4a7a4a 100%); transform: translateY(-1px); }
+  .btn-reveal:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  .btn-next {
+    background: linear-gradient(180deg, #e8a030 0%, #b87018 100%);
+    border: none;
+    border-radius: 6px;
+    color: var(--ink);
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 0 40px;
+    height: 56px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(212,137,26,0.3);
+    transition: all 0.15s;
+    display: none;
+  }
+  .btn-next.shown { display: flex; align-items: center; gap: 8px; }
+  .btn-next:hover { background: linear-gradient(180deg, #f0b040 0%, #c88028 100%); transform: translateY(-1px); }
+
+  /* ---- COMPLETION SCREEN ---- */
+  #screen-complete {
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+  }
+
+  .complete-emblem {
+    font-size: 80px;
+    margin-bottom: 24px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .complete-title {
+    font-family: 'Cinzel', serif;
+    font-size: 52px;
+    font-weight: 900;
+    color: var(--amber-glow);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 40px rgba(212,137,26,0.5);
+    margin-bottom: 16px;
+  }
+
+  .complete-quote {
+    font-family: 'Crimson Pro', serif;
+    font-size: 26px;
+    font-style: italic;
+    color: var(--parchment);
+    max-width: 600px;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+
+  .complete-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    color: var(--text-muted);
+    margin-bottom: 48px;
+  }
+
+  .complete-stations {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 40px;
+    font-size: 28px;
+  }
+
+  /* Gate SVG ornament */
+  .gate-svg {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 24px;
+    display: block;
+    opacity: 0.25;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stations-grid { grid-template-columns: repeat(3, 1fr); }
+    .mc-options { grid-template-columns: 1fr; }
+    .dnd-container { grid-template-columns: 1fr; }
+    .load-title { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOAD SCREEN -->
+<div id="screen-load" class="screen active">
+  <svg class="gate-svg" viewBox="0 0 480 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="10" width="8" height="100" fill="#d4891a"/>
+    <rect x="452" y="10" width="8" height="100" fill="#d4891a"/>
+    <rect x="20" y="10" width="440" height="8" fill="#d4891a"/>
+    <path d="M80 90 Q80 40 120 40 Q160 40 160 90" stroke="#d4891a" stroke-width="4" fill="none"/>
+    <path d="M200 90 Q200 20 240 20 Q280 20 280 90" stroke="#d4891a" stroke-width="4" fill="none"/>
+    <path d="M320 90 Q320 40 360 40 Q400 40 400 90" stroke="#d4891a" stroke-width="4" fill="none"/>
+    <circle cx="80" cy="90" r="6" fill="#d4891a"/>
+    <circle cx="160" cy="90" r="6" fill="#d4891a"/>
+    <circle cx="200" cy="90" r="6" fill="#d4891a"/>
+    <circle cx="280" cy="90" r="6" fill="#d4891a"/>
+    <circle cx="320" cy="90" r="6" fill="#d4891a"/>
+    <circle cx="400" cy="90" r="6" fill="#d4891a"/>
+    <circle cx="240" cy="18" r="8" fill="#d4891a"/>
+    <line x1="28" y1="18" x2="452" y2="18" stroke="#9a6212" stroke-width="1" stroke-dasharray="4 4"/>
+  </svg>
+  <h1 class="load-title">Guild Entrance</h1>
+  <p class="load-subtitle">The Examiner awaits. Prove yourselves worthy.</p>
+  <div class="load-divider"></div>
+  <div class="load-form">
+    <div>
+      <div class="form-label">How many recruits today?</div>
+      <input type="number" id="recruit-count" class="recruit-input" value="25" min="6" max="30">
+    </div>
+    <button class="btn-primary" onclick="beginEntrance()">Begin the Entrance</button>
+  </div>
+</div>
+
+<!-- STATION SCREEN -->
+<div id="screen-stations" class="screen">
+  <div class="station-header">
+    <h1>Guild Entrance Examination</h1>
+    <p id="station-subtitle">Five stations stand between your guild and these gates.</p>
+    <div class="station-progress-bar">
+      <div class="station-progress-fill" id="station-progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="stations-grid" id="stations-grid"></div>
+</div>
+
+<!-- QUESTION SCREEN -->
+<div id="screen-question" class="screen">
+  <div class="question-nav">
+    <button class="btn-back" onclick="returnToStations()">&#8592; Stations</button>
+    <span class="q-station-label" id="q-station-label"></span>
+    <span class="q-progress" id="q-progress-label"></span>
+  </div>
+  <div class="q-progress-dots" id="q-progress-dots"></div>
+  <div class="question-card" id="question-card-inner"></div>
+  <div class="question-actions">
+    <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">Reveal Answer</button>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next Recruit &#8594;</button>
+  </div>
+</div>
+
+<!-- COMPLETION SCREEN -->
+<div id="screen-complete" class="screen">
+  <div class="complete-emblem">&#9812;</div>
+  <div class="complete-title">Gates Open</div>
+  <p class="complete-quote">"The gates open. The Examiner nods. You may pass."</p>
+  <p class="complete-sub">All five stations cleared. The guild accepts these recruits.</p>
+  <div class="complete-stations" id="complete-stations"></div>
+  <button class="btn-primary" onclick="resetAll()">Begin Again</button>
+</div>
+
+<script>
+// ============================================================
+//  QUESTION BANK -- 25 questions, 5 per station
+// ============================================================
+
+const STATIONS = [
+  {
+    id: 'vault',
+    name: 'The Vault',
+    icon: '&#128220;',
+    topic: 'Data types and variable declaration',
+    questions: [
+      // Q1 -- multiple choice
+      {
+        format: 'mc',
+        text: 'A recruit\'s name will be stored in a variable. Which data type is the correct choice?',
+        options: ['int recruitName', 'String recruitName', 'boolean recruitName', 'double recruitName'],
+        answer: 1,
+        explanation: 'String is used for text values. int, boolean, and double are for numbers and true/false.'
+      },
+      // Q2 -- fill in the blank
+      {
+        format: 'fitb',
+        text: 'Complete the variable declaration for a warrior\'s hit points:',
+        code: '____ hp = 100;',
+        blanks: ['int'],
+        explanation: 'int (integer) is the right type for whole-number values like hit points.'
+      },
+      // Q3 -- code trace
+      {
+        format: 'trace',
+        text: 'What is the value stored in isAlive after this line runs?',
+        code: 'boolean isAlive = false;',
+        options: ['0', 'null', 'false', '"false"'],
+        answer: 2,
+        explanation: 'boolean stores true or false (not quoted, not 0). The value is false.'
+      },
+      // Q4 -- multiple choice
+      {
+        format: 'mc',
+        text: 'Which of the following declarations contains a type mismatch?',
+        options: [
+          'int goldCount = 42;',
+          'double stamina = 3.5;',
+          'int playerName = "Aldric";',
+          'boolean isAlive = true;'
+        ],
+        answer: 2,
+        explanation: 'int cannot hold a String value. playerName = "Aldric" is a type mismatch; it should be declared as a String.'
+      },
+      // Q5 -- drag and drop
+      {
+        format: 'dnd',
+        text: 'Match each guild value to its correct Java data type.',
+        items: [
+          { id: 'a', label: '42', icon: '&#128290;' },
+          { id: 'b', label: '"Kira"', icon: '&#128290;' },
+          { id: 'c', label: 'true', icon: '&#128290;' },
+          { id: 'd', label: '1.75', icon: '&#128290;' }
+        ],
+        targets: [
+          { id: 't1', label: 'int', accepts: 'a' },
+          { id: 't2', label: 'String', accepts: 'b' },
+          { id: 't3', label: 'boolean', accepts: 'c' },
+          { id: 't4', label: 'double', accepts: 'd' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'forge',
+    name: 'The Forge',
+    icon: '&#128293;',
+    topic: 'Methods: arguments, return types, and invoktion',
+    questions: [
+      // Q1 -- multiple choice
+      {
+        format: 'mc',
+        text: 'A method is declared as shown below. What does this method return?',
+        code: 'static int getGold() {\n    return 50;\n}',
+        options: [
+          'Nothing -- it has no parameters',
+          'The word "gold"',
+          'The integer 50',
+          'A String containing "50"'
+        ],
+        answer: 2,
+        explanation: 'The return type is int and the method returns 50, so it hands back the integer value 50 to wherever it was called.'
+      },
+      // Q2 -- code trace
+      {
+        format: 'trace',
+        text: 'What does this code print?',
+        code: 'static String greet(String name) {\n    return "Welcome, " + name;\n}\n\n// in main:\nSystem.out.println(greet("Aldric"));',
+        options: [
+          'greet("Aldric")',
+          'Welcome, name',
+          'Welcome, Aldric',
+          'Nothing -- greet is never called'
+        ],
+        answer: 2,
+        explanation: 'greet is called with "Aldric". Inside, name holds "Aldric", so the method returns "Welcome, Aldric", which println then prints.'
+      },
+      // Q3 -- fill in the blank
+      {
+        format: 'fitb',
+        text: 'Fill in the return type so this method compiles correctly:',
+        code: 'static ____ describeRank(int level) {\n    return "Novice";\n}',
+        blanks: ['String'],
+        explanation: 'The method returns a String literal, so the return type must be String.'
+      },
+      // Q4 -- multiple choice
+      {
+        format: 'mc',
+        text: 'A guild method is defined as: static void announceVictory(). What does void mean here?',
+        options: [
+          'The method takes no arguments',
+          'The method returns nothing',
+          'The method is empty and does nothing',
+          'The method can only be called once'
+        ],
+        answer: 1,
+        explanation: 'void means the method does not return a value. It may still do work (like printing), it just hands nothing back to the caller.'
+      },
+      // Q5 -- drag and drop
+      {
+        format: 'dnd',
+        text: 'Match each method signature part to its role.',
+        items: [
+          { id: 'a', label: 'int', icon: '&#128290;' },
+          { id: 'b', label: 'healPlayer', icon: '&#128290;' },
+          { id: 'c', label: 'int amount', icon: '&#128290;' },
+          { id: 'd', label: 'return', icon: '&#128290;' }
+        ],
+        targets: [
+          { id: 't1', label: 'Return type', accepts: 'a' },
+          { id: 't2', label: 'Method name', accepts: 'b' },
+          { id: 't3', label: 'Parameter', accepts: 'c' },
+          { id: 't4', label: 'Sends value back', accepts: 'd' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'gate',
+    name: 'The Gate',
+    icon: '&#128682;',
+    topic: 'Conditions and if/else logic',
+    questions: [
+      // Q1 -- code trace
+      {
+        format: 'trace',
+        text: 'What gets printed?',
+        code: 'int hp = 80;\nif (hp > 50) {\n    System.out.println("Standing");\n} else {\n    System.out.println("Fallen");\n}',
+        options: ['Fallen', 'Standing', 'Nothing', 'Error'],
+        answer: 1,
+        explanation: 'hp is 80, which is greater than 50, so the if-branch runs and prints "Standing".'
+      },
+      // Q2 -- multiple choice
+      {
+        format: 'mc',
+        text: 'Which condition is always true, regardless of the value of level?',
+        options: [
+          'level > 10',
+          'level == level',
+          'level < 0',
+          'level != level'
+        ],
+        answer: 1,
+        explanation: 'level == level compares a value to itself, which is always true. This is a tautology.'
+      },
+      // Q3 -- fill in the blank
+      {
+        format: 'fitb',
+        text: 'Fill in the blank so the gate opens only when the player has level 5 or higher:',
+        code: 'if (level ____ 5) {\n    System.out.println("Gate opens");\n}',
+        blanks: ['>='],
+        explanation: '>= means "greater than or equal to", which includes level 5 and above.'
+      },
+      // Q4 -- multiple choice
+      {
+        format: 'mc',
+        text: 'A recruit has hp = 0. Which branch runs?',
+        code: 'if (hp > 0) {\n    System.out.println("Alive");\n} else if (hp == 0) {\n    System.out.println("Critical");\n} else {\n    System.out.println("Fallen");\n}',
+        options: ['"Alive"', '"Critical"', '"Fallen"', 'None of them'],
+        answer: 1,
+        explanation: 'hp is 0. The first condition (hp > 0) is false. The second condition (hp == 0) is true, so "Critical" prints.'
+      },
+      // Q5 -- drag and drop
+      {
+        format: 'dnd',
+        text: 'Match each condition to the correct description.',
+        items: [
+          { id: 'a', label: 'hp != 0', icon: '&#128290;' },
+          { id: 'b', label: 'level >= 10', icon: '&#128290;' },
+          { id: 'c', label: 'hasWeapon == false', icon: '&#128290;' },
+          { id: 'd', label: 'gold < 5', icon: '&#128290;' }
+        ],
+        targets: [
+          { id: 't1', label: 'HP is not zero', accepts: 'a' },
+          { id: 't2', label: 'Level 10 or above', accepts: 'b' },
+          { id: 't3', label: 'No weapon equipped', accepts: 'c' },
+          { id: 't4', label: 'Fewer than 5 gold', accepts: 'd' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'herald',
+    name: 'The Herald',
+    icon: '&#128226;',
+    topic: 'System.out.println and String output',
+    questions: [
+      // Q1 -- multiple choice
+      {
+        format: 'mc',
+        text: 'Which line correctly prints a message to the console?',
+        options: [
+          'system.out.println("Rally!");',
+          'System.out.Println("Rally!");',
+          'System.out.println("Rally!");',
+          'System.Out.println("Rally!");'
+        ],
+        answer: 2,
+        explanation: 'Java is case-sensitive. System must be capitalized, out is lowercase, and println is all lowercase.'
+      },
+      // Q2 -- code trace
+      {
+        format: 'trace',
+        text: 'What does this print?',
+        code: 'String title = "Champion";\nSystem.out.println("Guild " + title);',
+        options: ['Guild', 'Champion', 'Guild Champion', 'Guild + title'],
+        answer: 2,
+        explanation: 'The + operator concatenates strings. "Guild " + "Champion" produces "Guild Champion".'
+      },
+      // Q3 -- fill in the blank
+      {
+        format: 'fitb',
+        text: 'Complete the line to print the value of the variable rank:',
+        code: 'System.out.println(____ + rank);',
+        blanks: ['"Rank: "'],
+        explanation: 'A string literal in quotes followed by + and the variable name will concatenate and print both.'
+      },
+      // Q4 -- code trace
+      {
+        format: 'trace',
+        text: 'What does this print?',
+        code: 'int gold = 7;\nSystem.out.println("Gold: " + gold);',
+        options: ['Gold: gold', '"Gold: " + 7', 'Gold: 7', 'Error'],
+        answer: 2,
+        explanation: 'Java converts the int to a String when concatenated with a String literal. The output is Gold: 7.'
+      },
+      // Q5 -- drag and drop
+      {
+        format: 'dnd',
+        text: 'Match each println statement to what it outputs.',
+        items: [
+          { id: 'a', label: 'println("Halt!")', icon: '&#128290;' },
+          { id: 'b', label: 'println(3 + 4)', icon: '&#128290;' },
+          { id: 'c', label: 'println("Score: " + 9)', icon: '&#128290;' },
+          { id: 'd', label: 'println("" + 3 + 4)', icon: '&#128290;' }
+        ],
+        targets: [
+          { id: 't1', label: 'Halt!', accepts: 'a' },
+          { id: 't2', label: '7', accepts: 'b' },
+          { id: 't3', label: 'Score: 9', accepts: 'c' },
+          { id: 't4', label: '34', accepts: 'd' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'scribe',
+    name: 'The Scribe',
+    icon: '&#128394;',
+    topic: 'Scanner basics',
+    questions: [
+      // Q1 -- multiple choice
+      {
+        format: 'mc',
+        text: 'Which line correctly creates a Scanner that reads from the keyboard?',
+        options: [
+          'Scanner sc = new Scanner();',
+          'Scanner sc = new Scanner(System.in);',
+          'Scanner sc = Scanner.create(System.in);',
+          'new Scanner sc = System.in;'
+        ],
+        answer: 1,
+        explanation: 'Scanner sc = new Scanner(System.in); is the correct syntax. System.in connects it to keyboard input.'
+      },
+      // Q2 -- multiple choice
+      {
+        format: 'mc',
+        text: 'A recruit is filling out an intake form. The first field is their full name (may include spaces). Which Scanner method should the scribe use?',
+        options: ['sc.nextInt()', 'sc.next()', 'sc.nextLine()', 'sc.nextChar()'],
+        answer: 2,
+        explanation: 'nextLine() reads an entire line including spaces. next() only reads one word. The others read numbers or do not exist.'
+      },
+      // Q3 -- fill in the blank
+      {
+        format: 'fitb',
+        text: 'Fill in the method to read the recruit\'s age as a whole number:',
+        code: 'int age = sc.____();',
+        blanks: ['nextInt'],
+        explanation: 'nextInt() reads the next integer from input. It is the correct choice for whole number fields.'
+      },
+      // Q4 -- code trace
+      {
+        format: 'trace',
+        text: 'A scribe runs this code and the recruit types their age and presses Enter, then types their name. What happens when nextLine() is called?',
+        code: 'int age = sc.nextInt();\nString name = sc.nextLine();',
+        options: [
+          'name stores the recruit\'s name correctly',
+          'name stores an empty string due to the leftover newline',
+          'The program crashes',
+          'name stores the age again'
+        ],
+        answer: 1,
+        explanation: 'nextInt() reads the number but leaves the newline in the buffer. nextLine() immediately consumes that newline and returns an empty string -- this is the CRLF / newline-skip bug.'
+      },
+      // Q5 -- drag and drop
+      {
+        format: 'dnd',
+        text: 'Match each Scanner method to its correct description.',
+        items: [
+          { id: 'a', label: 'nextLine()', icon: '&#128290;' },
+          { id: 'b', label: 'nextInt()', icon: '&#128290;' },
+          { id: 'c', label: 'next()', icon: '&#128290;' },
+          { id: 'd', label: 'new Scanner(System.in)', icon: '&#128290;' }
+        ],
+        targets: [
+          { id: 't1', label: 'Reads a full line', accepts: 'a' },
+          { id: 't2', label: 'Reads a whole number', accepts: 'b' },
+          { id: 't3', label: 'Reads one word (no spaces)', accepts: 'c' },
+          { id: 't4', label: 'Creates the Scanner object', accepts: 'd' }
+        ]
+      }
+    ]
+  }
+];
+
+// ============================================================
+//  APP STATE
+// ============================================================
+
+let state = {
+  studentCount: 25,
+  assignments: [],      // [{stationId, questionIdx}] per student slot
+  stationOrder: [],
+  stationStatus: {},    // id -> 'not-started' | 'in-progress' | 'cleared'
+  currentStationId: null,
+  currentStudentIndex: 0,   // within station
+  currentRevealed: false,
+  stationStudentSlots: {}   // stationId -> [studentNumbers]
+};
+
+// ============================================================
+//  SETUP & DISTRIBUTION
+// ============================================================
+
+function fisherYates(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function beginEntrance() {
+  const input = document.getElementById('recruit-count');
+  let count = parseInt(input.value);
+  if (isNaN(count)) count = 25;
+  count = Math.max(6, Math.min(30, count));
+  state.studentCount = count;
+
+  const total = Math.min(count, 25);
+  const perStation = Math.floor(total / 5);
+  const remainder = total % 5;
+
+  // build per-station question lists
+  state.stationStudentSlots = {};
+  state.assignments = [];
+
+  // student indices 1..total, shuffled
+  let studentNums = Array.from({length: total}, (_, i) => i + 1);
+  fisherYates(studentNums);
+  let studentPtr = 0;
+
+  STATIONS.forEach((station, si) => {
+    const qCount = perStation + (si < remainder ? 1 : 0);
+    const qIndices = fisherYates([0,1,2,3,4]).slice(0, Math.max(1, qCount));
+    const slots = [];
+    for (let i = 0; i < Math.max(1, qCount); i++) {
+      const sNum = studentNums[studentPtr % total];
+      studentPtr++;
+      slots.push({ studentNum: sNum, questionIdx: qIndices[i] });
+    }
+    state.stationStudentSlots[station.id] = slots;
+    state.stationStatus[station.id] = 'not-started';
+  });
+
+  showScreen('stations');
+  renderStations();
+}
+
+function renderStations() {
+  const grid = document.getElementById('stations-grid');
+  grid.innerHTML = '';
+  let clearedCount = 0;
+
+  STATIONS.forEach(station => {
+    const status = state.stationStatus[station.id];
+    if (status === 'cleared') clearedCount++;
+
+    const card = document.createElement('div');
+    card.className = 'station-card' +
+      (status === 'cleared' ? ' cleared' : '') +
+      (status === 'in-progress' ? ' in-progress-active' : '');
+
+    let badgeClass = 'badge-not-started';
+    let badgeIcon = '&#9675;';
+    let badgeText = 'Not Started';
+    if (status === 'in-progress') { badgeClass = 'badge-in-progress'; badgeIcon = '&#9670;'; badgeText = 'In Progress'; }
+    if (status === 'cleared') { badgeClass = 'badge-cleared'; badgeIcon = '&#10003;'; badgeText = 'Cleared'; }
+
+    card.innerHTML = `
+      <div class="station-icon">${station.icon}</div>
+      <div class="station-name">${station.name}</div>
+      <div class="station-topic">${station.topic}</div>
+      <div class="station-badge ${badgeClass}">${badgeIcon} ${badgeText}</div>
+    `;
+
+    if (status !== 'cleared') {
+      card.onclick = () => enterStation(station.id);
+    }
+
+    grid.appendChild(card);
+  });
+
+  document.getElementById('station-progress-fill').style.width = (clearedCount / 5 * 100) + '%';
+
+  const allCleared = clearedCount === 5;
+  if (allCleared) {
+    setTimeout(() => showScreen('complete'), 600);
+    renderComplete();
+  }
+}
+
+// ============================================================
+//  STATION ENTRY
+// ============================================================
+
+function enterStation(stationId) {
+  state.currentStationId = stationId;
+  state.currentStudentIndex = 0;
+  state.currentRevealed = false;
+  if (state.stationStatus[stationId] === 'not-started') {
+    state.stationStatus[stationId] = 'in-progress';
+  }
+  showScreen('question');
+  renderQuestionCard();
+}
+
+function returnToStations() {
+  showScreen('stations');
+  renderStations();
+}
+
+// ============================================================
+//  QUESTION RENDERING
+// ============================================================
+
+function renderQuestionCard() {
+  const station = STATIONS.find(s => s.id === state.currentStationId);
+  const slots = state.stationStudentSlots[state.currentStationId];
+  const totalInStation = slots.length;
+  const idx = state.currentStudentIndex;
+  const slot = slots[idx];
+  const q = station.questions[slot.questionIdx];
+
+  document.getElementById('q-station-label').textContent = station.name;
+  document.getElementById('q-progress-label').textContent =
+    'Recruit ' + (idx + 1) + ' of ' + totalInStation;
+
+  // dots
+  const dotsEl = document.getElementById('q-progress-dots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < totalInStation; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot' + (i < idx ? ' done' : '') + (i === idx ? ' active' : '');
+    dotsEl.appendChild(dot);
+  }
+
+  // reset buttons
+  const revealBtn = document.getElementById('btn-reveal');
+  const nextBtn = document.getElementById('btn-next');
+  revealBtn.disabled = false;
+  revealBtn.style.display = '';
+  nextBtn.className = 'btn-next';
+  state.currentRevealed = false;
+
+  // set next button text
+  if (idx === totalInStation - 1) {
+    nextBtn.innerHTML = 'Station Complete &#10003;';
+  } else {
+    nextBtn.innerHTML = 'Next Recruit &#8594;';
+  }
+
+  const inner = document.getElementById('question-card-inner');
+  inner.innerHTML = `<div class="recruit-name">RECRUIT #${slot.studentNum}</div>` + buildQuestionHTML(q, q.format);
+}
+
+function buildQuestionHTML(q, format) {
+  let html = '';
+
+  if (format === 'mc') {
+    html += `<div class="question-text">${q.text}</div>`;
+    if (q.code) html += `<div class="code-block">${escapeHtml(q.code)}</div>`;
+    const letters = ['A', 'B', 'C', 'D'];
+    html += `<div class="mc-options" id="mc-opts">`;
+    q.options.forEach((opt, i) => {
+      html += `<div class="mc-btn" id="mc-opt-${i}"><span class="opt-letter">${letters[i]}.</span> ${escapeHtml(opt)}</div>`;
+    });
+    html += `</div>`;
+    html += `<div class="answer-panel" id="answer-panel"><div class="answer-panel-label">EXAMINER'S NOTE</div><div class="answer-panel-text">${q.explanation}</div></div>`;
+
+  } else if (format === 'trace') {
+    html += `<div class="question-text">${q.text}</div>`;
+    html += `<div class="code-block">${escapeHtml(q.code)}</div>`;
+    const letters = ['A', 'B', 'C', 'D'];
+    html += `<div class="mc-options" id="mc-opts">`;
+    q.options.forEach((opt, i) => {
+      html += `<div class="mc-btn" id="mc-opt-${i}"><span class="opt-letter">${letters[i]}.</span> ${escapeHtml(opt)}</div>`;
+    });
+    html += `</div>`;
+    html += `<div class="answer-panel" id="answer-panel"><div class="answer-panel-label">EXAMINER'S NOTE</div><div class="answer-panel-text">${q.explanation}</div></div>`;
+
+  } else if (format === 'fitb') {
+    html += `<div class="question-text">${q.text}</div>`;
+    // build code block with inputs
+    let codeWithInputs = q.code;
+    q.blanks.forEach((blank, i) => {
+      const inputSize = Math.max(blank.length + 2, 8);
+      codeWithInputs = codeWithInputs.replace('____',
+        `<input class="fitb-input" id="fitb-inp-${i}" type="text" autocomplete="off" spellcheck="false" style="width:${inputSize * 11}px" placeholder="${'_'.repeat(Math.min(blank.length, 6))}">`);
+    });
+    html += `<div class="fitb-code">${codeWithInputs}</div>`;
+    html += `<div class="fitb-answer-label" id="fitb-label">Answer: ${q.blanks.join(', ')}</div>`;
+    html += `<div class="answer-panel" id="answer-panel"><div class="answer-panel-label">EXAMINER'S NOTE</div><div class="answer-panel-text">${q.explanation}</div></div>`;
+
+  } else if (format === 'dnd') {
+    html += `<div class="question-text">${q.text}</div>`;
+    html += buildDnDHTML(q);
+    html += `<div class="answer-panel" id="answer-panel"><div class="answer-panel-label">EXAMINER'S NOTE</div><div class="answer-panel-text">Correct matches are locked in place. Verify each pair with the class.</div></div>`;
+  }
+
+  return html;
+}
+
+function buildDnDHTML(q) {
+  // shuffle items for display
+  const shuffled = fisherYates([...q.items]);
+  let html = `<div class="dnd-container" id="dnd-container">`;
+  html += `<div class="dnd-items-col"><h3>DRAG THESE</h3>`;
+  shuffled.forEach(item => {
+    html += `<div class="dnd-item" id="dnd-item-${item.id}" draggable="true" data-item-id="${item.id}">
+      <span class="item-icon">${item.icon}</span> ${escapeHtml(item.label)}
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="dnd-targets-col"><h3>DROP HERE</h3>`;
+  q.targets.forEach(target => {
+    html += `<div class="dnd-target" id="dnd-target-${target.id}" data-target-id="${target.id}" data-accepts="${target.accepts}">
+      <span class="target-label">${escapeHtml(target.label)}</span>
+      <div class="placed-item" id="placed-${target.id}"></div>
+      <span class="match-indicator" id="ind-${target.id}"></span>
+    </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function setupDnD() {
+  const items = document.querySelectorAll('.dnd-item');
+  const targets = document.querySelectorAll('.dnd-target');
+  let draggedId = null;
+
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => {
+      if (item.classList.contains('locked')) { e.preventDefault(); return; }
+      draggedId = item.dataset.itemId;
+      setTimeout(() => item.classList.add('dragging'), 0);
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+    });
+  });
+
+  targets.forEach(target => {
+    target.addEventListener('dragover', e => {
+      e.preventDefault();
+      target.classList.add('drag-over');
+    });
+    target.addEventListener('dragleave', () => {
+      target.classList.remove('drag-over');
+    });
+    target.addEventListener('drop', e => {
+      e.preventDefault();
+      target.classList.remove('drag-over');
+      if (!draggedId) return;
+
+      const placedEl = target.querySelector('.placed-item');
+
+      // return old occupant to items column if there was one
+      const prevId = target.dataset.placedItem;
+      if (prevId) {
+        const prevItem = document.getElementById('dnd-item-' + prevId);
+        if (prevItem) {
+          prevItem.style.display = 'flex';
+          prevItem.classList.remove('locked');
+        }
+      }
+
+      // snap new item
+      const draggedEl = document.getElementById('dnd-item-' + draggedId);
+      placedEl.textContent = draggedEl.querySelector('.item-icon').textContent + ' ' + draggedEl.textContent.trim();
+      draggedEl.style.display = 'none';
+      target.dataset.placedItem = draggedId;
+      draggedId = null;
+    });
+  });
+}
+
+// ============================================================
+//  REVEAL
+// ============================================================
+
+function revealAnswer() {
+  if (state.currentRevealed) return;
+  state.currentRevealed = true;
+
+  const station = STATIONS.find(s => s.id === state.currentStationId);
+  const slots = state.stationStudentSlots[state.currentStationId];
+  const slot = slots[state.currentStudentIndex];
+  const q = station.questions[slot.questionIdx];
+
+  const revealBtn = document.getElementById('btn-reveal');
+  const nextBtn = document.getElementById('btn-next');
+  revealBtn.disabled = true;
+  nextBtn.classList.add('shown');
+
+  if (q.format === 'mc' || q.format === 'trace') {
+    const correctEl = document.getElementById('mc-opt-' + q.answer);
+    if (correctEl) correctEl.classList.add('revealed-correct');
+    const panel = document.getElementById('answer-panel');
+    if (panel) panel.classList.add('shown');
+
+  } else if (q.format === 'fitb') {
+    q.blanks.forEach((blank, i) => {
+      const inp = document.getElementById('fitb-inp-' + i);
+      if (inp) {
+        const val = inp.value.trim();
+        inp.classList.add(val === blank ? 'revealed-correct' : 'revealed-wrong');
+        inp.disabled = true;
+      }
+    });
+    const lbl = document.getElementById('fitb-label');
+    if (lbl) lbl.classList.add('shown');
+    const panel = document.getElementById('answer-panel');
+    if (panel) panel.classList.add('shown');
+
+  } else if (q.format === 'dnd') {
+    const targets = document.querySelectorAll('.dnd-target');
+    targets.forEach(target => {
+      const accepts = target.dataset.accepts;
+      const placed = target.dataset.placedItem;
+      const indEl = document.getElementById('ind-' + target.dataset.targetId);
+      if (placed === accepts) {
+        target.classList.add('revealed-correct');
+        if (indEl) indEl.textContent = '[OK]';
+      } else if (placed) {
+        target.classList.add('revealed-wrong');
+        if (indEl) indEl.textContent = '[X]';
+      }
+      // lock items
+      const items = document.querySelectorAll('.dnd-item');
+      items.forEach(i => i.setAttribute('draggable', 'false'));
+    });
+    const panel = document.getElementById('answer-panel');
+    if (panel) panel.classList.add('shown');
+  }
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+
+function nextQuestion() {
+  const slots = state.stationStudentSlots[state.currentStationId];
+  const totalInStation = slots.length;
+
+  if (state.currentStudentIndex === totalInStation - 1) {
+    // complete this station
+    state.stationStatus[state.currentStationId] = 'cleared';
+    showScreen('stations');
+    renderStations();
+  } else {
+    state.currentStudentIndex++;
+    state.currentRevealed = false;
+    renderQuestionCard();
+    // setup DnD if needed
+    const station = STATIONS.find(s => s.id === state.currentStationId);
+    const slot = slots[state.currentStudentIndex];
+    const q = station.questions[slot.questionIdx];
+    if (q.format === 'dnd') setTimeout(setupDnD, 50);
+  }
+}
+
+// ============================================================
+//  COMPLETION
+// ============================================================
+
+function renderComplete() {
+  const icons = document.getElementById('complete-stations');
+  icons.innerHTML = STATIONS.map(s => `<span title="${s.name}">${s.icon}</span>`).join('');
+}
+
+function resetAll() {
+  state = {
+    studentCount: 25, assignments: [], stationOrder: [],
+    stationStatus: {}, currentStationId: null,
+    currentStudentIndex: 0, currentRevealed: false, stationStudentSlots: {}
+  };
+  document.getElementById('recruit-count').value = 25;
+  showScreen('load');
+}
+
+// ============================================================
+//  SCREEN MANAGEMENT
+// ============================================================
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+
+  // setup DnD after rendering question if needed
+  if (id === 'question') {
+    const station = STATIONS.find(s => s.id === state.currentStationId);
+    const slot = state.stationStudentSlots[state.currentStationId][state.currentStudentIndex];
+    const q = station.questions[slot.questionIdx];
+    if (q.format === 'dnd') setTimeout(setupDnD, 50);
+  }
+}
+
+// ============================================================
+//  HELPERS
+// ============================================================
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Input clamp on blur
+document.getElementById('recruit-count').addEventListener('blur', function() {
+  let v = parseInt(this.value);
+  if (isNaN(v)) v = 25;
+  this.value = Math.max(6, Math.min(30, v));
+});
+
+// Enter key on load screen
+document.getElementById('recruit-count').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') beginEntrance();
+});
+</script>
+</body>
+</html>

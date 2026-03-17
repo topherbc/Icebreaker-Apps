@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Hero HQ // Villain Tracker Debug Session</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===== CSS VARIABLES ===== */
+  :root {
+    --bg-base:       #0d0f1a;
+    --bg-panel:      #131629;
+    --bg-card:       #1a1e35;
+    --bg-code:       #0a0c14;
+    --bg-input:      #1e2238;
+    --bg-editable:   #1c1a0e;
+
+    --accent-red:    #e8334a;
+    --accent-blue:   #3b8aff;
+    --accent-yellow: #f5c842;
+    --accent-green:  #3ecf72;
+
+    --text-primary:  #e8eaf2;
+    --text-secondary:#9aa0bb;
+    --text-muted:    #5c6380;
+    --text-code:     #c9d1f0;
+
+    --dot-gray:      #3a3f58;
+    --dot-red:       #e8334a;
+    --dot-green:     #3ecf72;
+
+    --border-subtle: #252a42;
+    --border-accent: #3b8aff44;
+
+    --font-display:  'Anton', sans-serif;
+    --font-ui:       'DM Sans', sans-serif;
+    --font-mono:     'JetBrains Mono', monospace;
+    --font-heading:  'Barlow Condensed', sans-serif;
+
+    /* syntax colors -- all verified WCAG AA on #0a0c14 bg */
+    --syn-keyword:   #ff79c6; /* contrast 6.3:1 */
+    --syn-type:      #8be9fd; /* contrast 10.2:1 */
+    --syn-string:    #f1fa8c; /* contrast 13.1:1 */
+    --syn-comment:   #7a8099; /* contrast 3.2:1 -- used only for line nums */
+    --syn-method:    #50fa7b; /* contrast 8.7:1 */
+    --syn-number:    #bd93f9; /* contrast 5.1:1 */
+    --syn-var:       #c9d1f0; /* contrast 10.4:1 */
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 18px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== HEADER ===== */
+  .hq-header {
+    background: var(--bg-panel);
+    border-bottom: 2px solid var(--accent-red);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px #00000066;
+  }
+
+  .hq-logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--accent-red);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .hq-logo span {
+    color: var(--accent-blue);
+  }
+
+  .hq-subtitle {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-left: 2px solid var(--border-subtle);
+    padding-left: 20px;
+  }
+
+  .hq-week-tag {
+    margin-left: auto;
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ===== BUG TRACKER BOARD ===== */
+  .bug-board {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .bug-board-label {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .bug-dots {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .bug-dot-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bug-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--dot-gray);
+    transition: background 0.4s, box-shadow 0.4s;
+    flex-shrink: 0;
+  }
+
+  .bug-dot.identified {
+    background: var(--dot-red);
+    box-shadow: 0 0 10px var(--dot-red);
+  }
+
+  .bug-dot.fixed {
+    background: var(--dot-green);
+    box-shadow: 0 0 10px var(--dot-green);
+  }
+
+  .bug-dot-label {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .board-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .progress-pill {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+  }
+
+  .progress-pill span {
+    color: var(--accent-blue);
+  }
+
+  .btn {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    min-height: 48px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn:disabled:active { transform: none; }
+
+  .btn-export {
+    background: var(--accent-blue);
+    color: #fff;
+  }
+
+  .btn-export:not(:disabled):hover { opacity: 0.85; }
+
+  .btn-reset {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .btn-reset:hover { border-color: var(--text-muted); color: var(--text-primary); }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main-layout {
+    display: flex;
+    height: calc(100vh - 112px);
+    overflow: hidden;
+  }
+
+  /* ===== LEFT PANEL -- CODE ===== */
+  .left-panel {
+    width: 60%;
+    background: var(--bg-code);
+    border-right: 1px solid var(--border-subtle);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .code-header {
+    background: var(--bg-panel);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .code-filename {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--accent-yellow);
+    font-weight: 500;
+  }
+
+  .code-tag {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .code-block {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 1.8;
+    padding: 20px 0;
+    counter-reset: line;
+  }
+
+  .code-line {
+    display: flex;
+    align-items: flex-start;
+    padding: 1px 0;
+    position: relative;
+  }
+
+  .code-line:hover {
+    background: #ffffff06;
+  }
+
+  .line-num {
+    width: 52px;
+    min-width: 52px;
+    text-align: right;
+    color: var(--text-muted);
+    padding-right: 20px;
+    user-select: none;
+    font-size: 13px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .line-content {
+    flex: 1;
+    padding-right: 20px;
+    white-space: pre;
+  }
+
+  /* Editable bug lines */
+  .code-line.editable {
+    background: var(--bg-editable);
+    border-left: 3px solid var(--accent-yellow);
+  }
+
+  .code-line.editable .line-num {
+    color: var(--accent-yellow);
+  }
+
+  .code-line.editable input.line-edit {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--accent-yellow);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 0;
+    caret-color: var(--accent-yellow);
+  }
+
+  .code-line.editable.fixed {
+    background: #0d1f14;
+    border-left-color: var(--dot-green);
+  }
+
+  .code-line.editable.fixed input.line-edit {
+    color: var(--dot-green);
+  }
+
+  .bug-callout {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent-yellow);
+    padding: 0 10px;
+    white-space: nowrap;
+    align-self: center;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  .code-line.editable.fixed .bug-callout {
+    color: var(--dot-green);
+  }
+
+  /* syntax colors */
+  .kw  { color: var(--syn-keyword); }
+  .ty  { color: var(--syn-type); }
+  .st  { color: var(--syn-string); }
+  .mt  { color: var(--syn-method); }
+  .nm  { color: var(--syn-number); }
+  .vr  { color: var(--syn-var); }
+  .cm  { color: #5c6380; font-style: italic; }
+
+  /* ===== RIGHT PANEL -- QUESTIONS ===== */
+  .right-panel {
+    width: 40%;
+    background: var(--bg-panel);
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .section-divider {
+    padding: 14px 24px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    background: var(--bg-base);
+    z-index: 5;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .section-icon.red { background: #e8334a22; color: var(--accent-red); }
+  .section-icon.blue { background: #3b8aff22; color: var(--accent-blue); }
+  .section-icon.yellow { background: #f5c84222; color: var(--accent-yellow); }
+
+  .section-title {
+    font-family: var(--font-heading);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .question-block {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .question-anchor {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent-blue);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    display: block;
+  }
+
+  .question-text {
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  .prediction-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 17px;
+    line-height: 1.5;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .prediction-input:focus {
+    border-color: var(--accent-blue);
+  }
+
+  .prediction-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .prediction-input.has-content {
+    border-color: #3b8aff55;
+  }
+
+  /* scrollbars */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hq-header" role="banner">
+  <div class="hq-logo">Hero <span>HQ</span></div>
+  <div class="hq-subtitle">Debug Session // Villain Tracker</div>
+  <div class="hq-week-tag">Week 3 &nbsp;&bull;&nbsp; Thursday</div>
+</header>
+
+<!-- BUG TRACKER BOARD -->
+<div class="bug-board" role="region" aria-label="Bug tracker board">
+  <div class="bug-board-label">Bug Tracker</div>
+  <div class="bug-dots" role="list" aria-label="Bug status indicators">
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-0" aria-label="Bug 1 status: not yet identified"></div>
+      <span class="bug-dot-label">Bug 1</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-1" aria-label="Bug 2 status: not yet identified"></div>
+      <span class="bug-dot-label">Bug 2</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-2" aria-label="Bug 3 status: not yet identified"></div>
+      <span class="bug-dot-label">Bug 3</span>
+    </div>
+  </div>
+  <div class="board-actions">
+    <div class="progress-pill" id="progress-pill" aria-live="polite">Questions answered: <span id="progress-count">0</span> / 6</div>
+    <button class="btn btn-reset" id="btn-reset" onclick="resetAll()" aria-label="Reset all inputs and bug tracker">Reset All</button>
+    <button class="btn btn-export" id="btn-export" onclick="exportPredictions()" disabled aria-label="Export student predictions as markdown file">Export Predictions</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- LEFT PANEL: CODE -->
+  <div class="left-panel" role="region" aria-label="Java source code panel">
+    <div class="code-header">
+      <span class="code-filename">VillainTracker.java</span>
+      <span class="code-tag">3 bugs hidden</span>
+    </div>
+    <div class="code-block" role="code" aria-label="VillainTracker source code">
+
+      <!-- Line 1: import ArrayList -->
+      <div class="code-line" id="cl-1">
+        <span class="line-num">1</span>
+        <span class="line-content"><span class="kw">import</span> java.util.<span class="ty">ArrayList</span>;</span>
+      </div>
+
+      <!-- Line 2: import HashMap -->
+      <div class="code-line" id="cl-2">
+        <span class="line-num">2</span>
+        <span class="line-content"><span class="kw">import</span> java.util.<span class="ty">HashMap</span>;</span>
+      </div>
+
+      <!-- Line 3: blank -->
+      <div class="code-line" id="cl-3">
+        <span class="line-num">3</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- Line 4: class declaration -->
+      <div class="code-line" id="cl-4">
+        <span class="line-num">4</span>
+        <span class="line-content"><span class="kw">public class</span> <span class="ty">VillainTracker</span> {</span>
+      </div>
+
+      <!-- Line 5: blank -->
+      <div class="code-line" id="cl-5">
+        <span class="line-num">5</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- Line 6: main method -->
+      <div class="code-line" id="cl-6">
+        <span class="line-num">6</span>
+        <span class="line-content">    <span class="kw">public static void</span> <span class="mt">main</span>(<span class="ty">String</span>[] args) {</span>
+      </div>
+
+      <!-- Line 7: blank -->
+      <div class="code-line" id="cl-7">
+        <span class="line-num">7</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- BUG 1 -- Line 8: raw ArrayList (missing <String>) -->
+      <div class="code-line editable" id="cl-8" data-bug-index="0">
+        <span class="line-num">8</span>
+        <input
+          class="line-edit"
+          id="edit-8"
+          type="text"
+          value="        ArrayList villains = new ArrayList();"
+          aria-label="Editable code line 8 -- fix the bug"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          oninput="handleBugEdit(0, this.value)"
+        />
+        <span class="bug-callout" aria-hidden="true">Fix line 8</span>
+      </div>
+
+      <!-- Line 9: blank -->
+      <div class="code-line" id="cl-9">
+        <span class="line-num">9</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- Line 10: add villain 1 -->
+      <div class="code-line" id="cl-10">
+        <span class="line-num">10</span>
+        <span class="line-content">        villains.<span class="mt">add</span>(<span class="st">"Shadow Mox"</span>);</span>
+      </div>
+
+      <!-- Line 11: add villain 2 -->
+      <div class="code-line" id="cl-11">
+        <span class="line-num">11</span>
+        <span class="line-content">        villains.<span class="mt">add</span>(<span class="st">"Plague Vesper"</span>);</span>
+      </div>
+
+      <!-- Line 12: add villain 3 -- key used in bug 2 -->
+      <div class="code-line" id="cl-12">
+        <span class="line-num">12</span>
+        <span class="line-content">        villains.<span class="mt">add</span>(<span class="st">"Doctor Nullius"</span>);</span>
+      </div>
+
+      <!-- Line 13: blank -->
+      <div class="code-line" id="cl-13">
+        <span class="line-num">13</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- Line 14: HashMap declaration -->
+      <div class="code-line" id="cl-14">
+        <span class="line-num">14</span>
+        <span class="line-content">        <span class="ty">HashMap</span>&lt;<span class="ty">String</span>, <span class="ty">String</span>&gt; threatLevels = <span class="kw">new</span> <span class="ty">HashMap</span>&lt;&gt;();</span>
+      </div>
+
+      <!-- Line 15: blank -->
+      <div class="code-line" id="cl-15">
+        <span class="line-num">15</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- Line 16: put villain 1 -->
+      <div class="code-line" id="cl-16">
+        <span class="line-num">16</span>
+        <span class="line-content">        threatLevels.<span class="mt">put</span>(<span class="st">"Shadow Mox"</span>, <span class="st">"HIGH"</span>);</span>
+      </div>
+
+      <!-- Line 17: put villain 2 -->
+      <div class="code-line" id="cl-17">
+        <span class="line-num">17</span>
+        <span class="line-content">        threatLevels.<span class="mt">put</span>(<span class="st">"Plague Vesper"</span>, <span class="st">"CRITICAL"</span>);</span>
+      </div>
+
+      <!-- BUG 2 -- Line 18: key casing mismatch on put -- "Doctor Nullius" added correctly,
+           but the .get() on line 25 uses "doctor nullius" (bug is on the get side) -->
+      <!-- Actually: put is correct, get is bugged. Put stays normal, get line is editable. -->
+      <!-- Line 18: put villain 3 -- correct -->
+      <div class="code-line" id="cl-18">
+        <span class="line-num">18</span>
+        <span class="line-content">        threatLevels.<span class="mt">put</span>(<span class="st">"Doctor Nullius"</span>, <span class="st">"EXTREME"</span>);</span>
+      </div>
+
+      <!-- Line 19: blank -->
+      <div class="code-line" id="cl-19">
+        <span class="line-num">19</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- Line 20: System.out.println header -->
+      <div class="code-line" id="cl-20">
+        <span class="line-num">20</span>
+        <span class="line-content">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="st">"--- Villain Threat Report ---"</span>);</span>
+      </div>
+
+      <!-- Line 21: blank -->
+      <div class="code-line" id="cl-21">
+        <span class="line-num">21</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- BUG 3 -- Line 22: loop variable is Object instead of String -->
+      <div class="code-line editable" id="cl-22" data-bug-index="2">
+        <span class="line-num">22</span>
+        <input
+          class="line-edit"
+          id="edit-22"
+          type="text"
+          value="        for (Object villain : villains) {"
+          aria-label="Editable code line 22 -- fix the bug"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          oninput="handleBugEdit(2, this.value)"
+        />
+        <span class="bug-callout" aria-hidden="true">Fix line 22</span>
+      </div>
+
+      <!-- Line 23: blank -->
+      <div class="code-line" id="cl-23">
+        <span class="line-num">23</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- BUG 2 -- Line 24: get uses wrong case -->
+      <div class="code-line editable" id="cl-24" data-bug-index="1">
+        <span class="line-num">24</span>
+        <input
+          class="line-edit"
+          id="edit-24"
+          type="text"
+          value='            String threat = threatLevels.get("doctor nullius");'
+          aria-label="Editable code line 24 -- fix the bug"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          oninput="handleBugEdit(1, this.value)"
+        />
+        <span class="bug-callout" aria-hidden="true">Fix line 24</span>
+      </div>
+
+      <!-- Line 25: blank -->
+      <div class="code-line" id="cl-25">
+        <span class="line-num">25</span>
+        <span class="line-content"> </span>
+      </div>
+
+      <!-- Line 26: println -->
+      <div class="code-line" id="cl-26">
+        <span class="line-num">26</span>
+        <span class="line-content">            <span class="ty">System</span>.out.<span class="mt">println</span>(villain + <span class="st">": "</span> + threat);</span>
+      </div>
+
+      <!-- Line 27: close for -->
+      <div class="code-line" id="cl-27">
+        <span class="line-num">27</span>
+        <span class="line-content">        }</span>
+      </div>
+
+      <!-- Line 28: close main -->
+      <div class="code-line" id="cl-28">
+        <span class="line-num">28</span>
+        <span class="line-content">    }</span>
+      </div>
+
+      <!-- Line 29: close class -->
+      <div class="code-line" id="cl-29">
+        <span class="line-num">29</span>
+        <span class="line-content">}</span>
+      </div>
+
+    </div><!-- end code-block -->
+  </div><!-- end left-panel -->
+
+  <!-- RIGHT PANEL: QUESTIONS -->
+  <div class="right-panel" role="region" aria-label="Guided questions panel">
+
+    <!-- SECTION 1: DECLARATIONS -->
+    <div class="section-divider">
+      <div class="section-icon red" aria-hidden="true">&#9632;</div>
+      <span class="section-title">Section 1: Declarations</span>
+    </div>
+
+    <!-- Q1 -->
+    <div class="question-block">
+      <span class="question-anchor">Anchored to: ArrayList declaration (line 8)</span>
+      <p class="question-text">This ArrayList is missing something in its declaration. Before moving on -- what is missing and why does it matter in Java?</p>
+      <textarea
+        class="prediction-input"
+        id="q1"
+        placeholder="Type your prediction here..."
+        oninput="handleInput(this)"
+        aria-label="Your prediction for question 1"
+      ></textarea>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-block">
+      <span class="question-anchor">Anchored to: ArrayList add calls (lines 10-12)</span>
+      <p class="question-text">Three items are added to the list. What is the index of the last item? What happens if you try to access index 3?</p>
+      <textarea
+        class="prediction-input"
+        id="q2"
+        placeholder="Type your prediction here..."
+        oninput="handleInput(this)"
+        aria-label="Your prediction for question 2"
+      ></textarea>
+    </div>
+
+    <!-- SECTION 2: HASHMAP -->
+    <div class="section-divider">
+      <div class="section-icon blue" aria-hidden="true">&#9632;</div>
+      <span class="section-title">Section 2: HashMap</span>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-block">
+      <span class="question-anchor">Anchored to: HashMap declaration (line 14)</span>
+      <p class="question-text">This HashMap maps one type to another. What are the key and value types, and what does each represent?</p>
+      <textarea
+        class="prediction-input"
+        id="q3"
+        placeholder="Type your prediction here..."
+        oninput="handleInput(this)"
+        aria-label="Your prediction for question 3"
+      ></textarea>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-block">
+      <span class="question-anchor">Anchored to: HashMap put and get calls (lines 16-18, 24)</span>
+      <p class="question-text">Look carefully at the keys being added. Now look at how they are retrieved later. Will every lookup succeed? Type your reasoning.</p>
+      <textarea
+        class="prediction-input"
+        id="q4"
+        placeholder="Type your prediction here..."
+        oninput="handleInput(this)"
+        aria-label="Your prediction for question 4"
+      ></textarea>
+    </div>
+
+    <!-- SECTION 3: THE LOOP -->
+    <div class="section-divider">
+      <div class="section-icon yellow" aria-hidden="true">&#9632;</div>
+      <span class="section-title">Section 3: The Loop</span>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-block">
+      <span class="question-anchor">Anchored to: enhanced for loop (line 22)</span>
+      <p class="question-text">The loop variable is declared as a specific type. Is that type correct given how the ArrayList was declared? Predict what prints for each iteration -- including any surprises.</p>
+      <textarea
+        class="prediction-input"
+        id="q5"
+        placeholder="Type your prediction here..."
+        oninput="handleInput(this)"
+        aria-label="Your prediction for question 5"
+      ></textarea>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question-block">
+      <span class="question-anchor">Anchored to: full program</span>
+      <p class="question-text">All three bugs considered -- write out what this program outputs right now. Then write what it should output when all three are fixed.</p>
+      <textarea
+        class="prediction-input"
+        id="q6"
+        placeholder="Type your prediction here..."
+        oninput="handleInput(this)"
+        aria-label="Your prediction for question 6"
+        style="min-height: 130px;"
+      ></textarea>
+    </div>
+
+  </div><!-- end right-panel -->
+
+</div><!-- end main-layout -->
+
+<script>
+// ===== BUG DEFINITIONS =====
+// Bug 0: raw ArrayList -- fix: ArrayList<String> villains = new ArrayList<>();  OR  ArrayList<String> villains = new ArrayList<String>();
+// Bug 1: casing mismatch in get -- fix: replace "doctor nullius" with "villain" variable (the correct fix)
+//        Actually the correct fix is to use `villain` as the key, not a hardcoded string with wrong case.
+//        Accept: threatLevels.get(villain)  -- this is the structurally correct fix.
+//        Also accept: threatLevels.get("Doctor Nullius") -- acceptable partial fix
+// Bug 2: Object loop var -- fix: String villain : villains
+
+const BUGS = [
+  {
+    // Bug 0: raw ArrayList, line 8
+    dotIndex: 0,
+    lineEl: 'cl-8',
+    inputEl: 'edit-8',
+    identified: false,
+    fixed: false,
+    originalValue: '        ArrayList villains = new ArrayList();',
+    // Normalized valid fixes -- must contain both ArrayList<String> and new ArrayList
+    validate: (val) => {
+      const v = val.replace(/\s+/g, ' ').trim().toLowerCase();
+      // Must contain ArrayList<String> (generics added)
+      return v.includes('arraylist<string>') && v.includes('new arraylist');
+    }
+  },
+  {
+    // Bug 1: casing mismatch in get, line 24
+    dotIndex: 1,
+    lineEl: 'cl-24',
+    inputEl: 'edit-24',
+    identified: false,
+    fixed: false,
+    originalValue: '            String threat = threatLevels.get("doctor nullius");',
+    validate: (val) => {
+      const v = val.replace(/\s+/g, ' ').trim();
+      // Accept: threatLevels.get(villain) -- use the loop variable
+      // Accept: threatLevels.get("Doctor Nullius") -- fix the case
+      // Reject: anything still containing "doctor nullius" lowercase
+      if (v.toLowerCase().includes('"doctor nullius"')) return false;
+      return (
+        v.includes('threatLevels.get(villain)') ||
+        v.includes('threatLevels.get("Doctor Nullius")')
+      );
+    }
+  },
+  {
+    // Bug 2: Object loop var, line 22
+    dotIndex: 2,
+    lineEl: 'cl-22',
+    inputEl: 'edit-22',
+    identified: false,
+    fixed: false,
+    originalValue: '        for (Object villain : villains) {',
+    validate: (val) => {
+      const v = val.replace(/\s+/g, ' ').trim().toLowerCase();
+      return v.includes('for (string villain') || v.includes('for(string villain');
+    }
+  }
+];
+
+// ===== INPUT TRACKING =====
+const inputAnswered = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false };
+
+function handleInput(el) {
+  const key = el.id;
+  const hasContent = el.value.trim().length > 0;
+  inputAnswered[key] = hasContent;
+  el.classList.toggle('has-content', hasContent);
+  updateProgress();
+  updateExportButton();
+}
+
+function updateProgress() {
+  const count = Object.values(inputAnswered).filter(Boolean).length;
+  document.getElementById('progress-count').textContent = count;
+}
+
+function updateExportButton() {
+  const anyContent = Object.values(inputAnswered).some(Boolean);
+  const btn = document.getElementById('btn-export');
+  btn.disabled = !anyContent;
+}
+
+// ===== BUG TRACKING =====
+function handleBugEdit(bugIndex, value) {
+  const bug = BUGS[bugIndex];
+  const dot = document.getElementById('dot-' + bug.dotIndex);
+  const lineEl = document.getElementById(bug.lineEl);
+
+  const isChanged = value.trim() !== bug.originalValue.trim();
+  const isFixed = bug.validate(value);
+
+  if (isFixed) {
+    bug.identified = true;
+    bug.fixed = true;
+    dot.className = 'bug-dot fixed';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: fixed');
+    lineEl.classList.add('fixed');
+    lineEl.classList.remove('identified-only');
+  } else if (isChanged) {
+    bug.identified = true;
+    bug.fixed = false;
+    dot.className = 'bug-dot identified';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: identified');
+    lineEl.classList.remove('fixed');
+  } else {
+    bug.identified = false;
+    bug.fixed = false;
+    dot.className = 'bug-dot';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: not yet identified');
+    lineEl.classList.remove('fixed');
+  }
+}
+
+// ===== RESET =====
+function resetAll() {
+  // Reset question inputs
+  ['q1','q2','q3','q4','q5','q6'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('has-content');
+    inputAnswered[id] = false;
+  });
+
+  // Reset bug lines
+  BUGS.forEach((bug, i) => {
+    const input = document.getElementById(bug.inputEl);
+    input.value = bug.originalValue;
+    bug.identified = false;
+    bug.fixed = false;
+
+    const dot = document.getElementById('dot-' + bug.dotIndex);
+    dot.className = 'bug-dot';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: not yet identified');
+
+    const lineEl = document.getElementById(bug.lineEl);
+    lineEl.classList.remove('fixed', 'identified-only');
+  });
+
+  updateProgress();
+  updateExportButton();
+}
+
+// ===== EXPORT =====
+function exportPredictions() {
+  const questions = [
+    {
+      id: 'q1',
+      anchor: 'ArrayList declaration (line 8)',
+      text: 'This ArrayList is missing something in its declaration. Before moving on -- what is missing and why does it matter in Java?'
+    },
+    {
+      id: 'q2',
+      anchor: 'ArrayList add calls (lines 10-12)',
+      text: 'Three items are added to the list. What is the index of the last item? What happens if you try to access index 3?'
+    },
+    {
+      id: 'q3',
+      anchor: 'HashMap declaration (line 14)',
+      text: 'This HashMap maps one type to another. What are the key and value types, and what does each represent?'
+    },
+    {
+      id: 'q4',
+      anchor: 'HashMap put and get calls (lines 16-18, 24)',
+      text: 'Look carefully at the keys being added. Now look at how they are retrieved later. Will every lookup succeed? Type your reasoning.'
+    },
+    {
+      id: 'q5',
+      anchor: 'Enhanced for loop (line 22)',
+      text: 'The loop variable is declared as a specific type. Is that type correct given how the ArrayList was declared? Predict what prints for each iteration -- including any surprises.'
+    },
+    {
+      id: 'q6',
+      anchor: 'Full program',
+      text: 'All three bugs considered -- write out what this program outputs right now. Then write what it should output when all three are fixed.'
+    }
+  ];
+
+  const bugLines = BUGS.map((bug, i) => {
+    const input = document.getElementById(bug.inputEl);
+    const status = bug.fixed ? 'Fixed' : bug.identified ? 'Identified (attempt in progress)' : 'Not yet addressed';
+    return `### Bug ${i + 1} (line ${bug.lineEl.replace('cl-', '')})\n- Status: ${status}\n- Current value: \`${input.value.trim()}\``;
+  }).join('\n\n');
+
+  const answers = questions.map(q => {
+    const val = document.getElementById(q.id).value.trim();
+    return `### Q${q.id.replace('q','')} -- ${q.anchor}\n**Question:** ${q.text}\n\n**Student prediction:**\n${val || '(no response)'}`;
+  }).join('\n\n---\n\n');
+
+  const aiPrompt = `---
+
+## AI Review Prompt
+
+Review these student predictions about Java ArrayList and HashMap behavior. For each prediction, note what is correct, what is incomplete, and what misconception if any is present. Focus on collections, generics, and loop variable types. The program contains three structural bugs: (1) a raw-type ArrayList missing String generics, (2) a HashMap .get() call using a lowercase key that does not match the original casing, and (3) an enhanced for loop using Object as the variable type instead of String. Evaluate whether the student identified each bug, and whether their predicted output accounts for null returns from .get() when keys do not match.`;
+
+  const md = `# Hero HQ -- Villain Tracker Debug Session\n## Week 3, Thursday -- Student Predictions\n\n---\n\n## Bug Tracker\n\n${bugLines}\n\n---\n\n## Guided Questions\n\n${answers}\n\n${aiPrompt}\n`;
+
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'villain-tracker-predictions.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Initialize export button state
+updateExportButton();
+</script>
+</body>
+</html>

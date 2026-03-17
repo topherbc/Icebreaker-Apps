@@ -1,0 +1,146 @@
+name: Generate Index Page
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'index.html'   # prevents infinite loop when action commits back
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate index.html
+        run: |
+          python3 - <<'EOF'
+          import os, re, glob
+          from pathlib import Path
+
+          def nice_name(filepath):
+              stem = Path(filepath).stem
+              # strip leading digit-dash prefixes like "3-wed-" or "4-thur-"
+              name = re.sub(r'^[\d]+-[a-z]+-', '', stem)
+              name = name.replace('-', ' ').replace('_', ' ')
+              return name.title()
+
+          def nice_group(dirpath):
+              parts = Path(dirpath).parts
+              return ' / '.join(p.replace('-', ' ').replace('_', ' ').title() for p in parts)
+
+          # Collect all html files except index.html itself
+          all_files = sorted(f.replace('\\', '/') for f in glob.glob('**/*.html', recursive=True)
+                             if f not in ('index.html',))
+
+          # Group by parent directory
+          groups = {}
+          for f in all_files:
+              parent = str(Path(f).parent)
+              groups.setdefault(parent, []).append(f)
+
+          # Build card sections
+          sections = ''
+          for group, files in sorted(groups.items()):
+              label = 'Misc' if group == '.' else nice_group(group)
+              cards = ''
+              for f in files:
+                  name = nice_name(f)
+                  cards += f'<a class="card" href="{f}">{name}</a>\n'
+              sections += f'<section><h2>{label}</h2><div class="cards">{cards}</div></section>\n'
+
+          html = f"""<!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Icebreaker Apps</title>
+          <style>
+            *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+            body {{
+              font-family: system-ui, sans-serif;
+              background: #0f1117;
+              color: #e2e8f0;
+              min-height: 100vh;
+              padding: 2rem 1rem 4rem;
+            }}
+            header {{
+              text-align: center;
+              margin-bottom: 3rem;
+            }}
+            header h1 {{
+              font-size: 2rem;
+              font-weight: 700;
+              letter-spacing: -0.5px;
+              color: #f8fafc;
+            }}
+            header p {{
+              color: #64748b;
+              margin-top: 0.4rem;
+              font-size: 0.95rem;
+            }}
+            section {{
+              max-width: 900px;
+              margin: 0 auto 2.5rem;
+            }}
+            section h2 {{
+              font-size: 0.8rem;
+              text-transform: uppercase;
+              letter-spacing: 1.5px;
+              color: #475569;
+              border-bottom: 1px solid #1e293b;
+              padding-bottom: 0.5rem;
+              margin-bottom: 1rem;
+            }}
+            .cards {{
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+              gap: 0.75rem;
+            }}
+            .card {{
+              display: block;
+              background: #1e293b;
+              color: #cbd5e1;
+              text-decoration: none;
+              padding: 1rem 1.25rem;
+              border-radius: 8px;
+              border: 1px solid #334155;
+              font-size: 0.9rem;
+              transition: background 0.15s, color 0.15s, border-color 0.15s;
+            }}
+            .card:hover {{
+              background: #334155;
+              color: #f1f5f9;
+              border-color: #4f6080;
+            }}
+          </style>
+          </head>
+          <body>
+          <header>
+            <h1>Icebreaker Apps</h1>
+            <p>Select an app below to open it.</p>
+          </header>
+          {sections}
+          </body>
+          </html>"""
+
+          # Dedent (strip leading spaces from heredoc)
+          lines = html.split('\n')
+          dedented = '\n'.join(l[10:] if l.startswith(' ' * 10) else l for l in lines)
+
+          with open('index.html', 'w') as fh:
+              fh.write(dedented)
+
+          print("index.html written.")
+          EOF
+
+      - name: Commit index.html
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --staged --quiet || git commit -m "chore: regenerate index.html"
+          git push

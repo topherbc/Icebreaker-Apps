@@ -965,7 +965,10 @@ function exportMarkdown() {
 
   BUG_META.forEach((b, i) => {
     const label = b.line ? `Line ${b.line}` : `Lines ${b.lines}`;
+    const bugLines = CODE.filter(l => l.bugId === b.bugId || l.bugId === b.bugId + 'swap');
+    const wasFixed = bugLines.length > 0 && bugLines.every(l => fixed.has(l.bugId + '-' + CODE.indexOf(l)));
     out.push(`**Bug ${i + 1} -- ${label} -- ${b.label}**`);
+    out.push(`- Status: ${wasFixed ? 'Fixed correctly' : 'Not yet fixed'}`);
     out.push(`- Original: \`${b.original}\``);
     out.push(`- Correct fix: \`${b.fix}\``);
     out.push('');
@@ -975,12 +978,13 @@ function exportMarkdown() {
   out.push('');
   out.push('## AI Review Prompt');
   out.push('');
-  out.push('> Copy everything above this section into Claude, then send the message below.');
+  out.push('> Copy everything above this section into Claude, ChatGPT, or Gemini,');
+  out.push('> then send the message below exactly as written.');
   out.push('');
   out.push('---');
   out.push('');
   out.push(
-`I am a Java bootcamp student in Week 1. The document above contains a buggy Java program and my predictions about what it does.
+`I am a Java bootcamp student. The document above contains a buggy Java program and my predictions about what it does.
 
 Please do the following:
 
@@ -988,14 +992,11 @@ Please do the following:
 
 2. For any question I left blank, give the correct answer and explain why it matters.
 
-3. For Q5, assume all three bugs have been fixed when evaluating my console trace prediction.
+3. For the final question, assume all three bugs have been fixed when evaluating my console trace prediction.
 
-4. For each of the three bugs, explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves:
-   - Bug 1: the if/else if branches are in the wrong order -- any heroLevel satisfying > 10 will always satisfy >= 5 first, making the Champion branch permanently unreachable.
-   - Bug 2: == compares object references, not String content -- should use .equals().
-   - Bug 3: a single String variable cannot equal two different values simultaneously -- && makes this condition impossible to satisfy for any input; || is needed.
+4. For each of the bugs: explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves.
 
-5. Close with two follow-up questions that push one level deeper than what this session covered.
+5. Close with two or three follow-up questions I should think about before our class discussion -- questions that push me one level deeper than what the session covered.
 
 Be accurate first. Credit what is right, then address genuine gaps. Do not manufacture criticism where the answer is sound.`
   );

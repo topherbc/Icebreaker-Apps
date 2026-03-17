@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Neon Bytes &amp; Labs // Character Engine Debug</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23080a10'/><rect x='2' y='14' width='4' height='4' fill='%2300ff88'/><rect x='6' y='12' width='4' height='8' fill='%2300ff88'/><rect x='10' y='10' width='4' height='12' fill='%2300ff88'/><rect x='14' y='8' width='4' height='14' fill='%2300ff88'/><rect x='18' y='10' width='4' height='12' fill='%2300ff88'/><rect x='22' y='12' width='4' height='8' fill='%2300ff88'/><rect x='26' y='14' width='4' height='4' fill='%2300ff88'/><rect x='12' y='4' width='2' height='2' fill='%23ff2d78'/><rect x='18' y='4' width='2' height='2' fill='%23ff2d78'/><rect x='10' y='6' width='2' height='2' fill='%23ff2d78'/><rect x='20' y='6' width='2' height='2' fill='%23ff2d78'/></svg>">
+<script>(function(){var t=localStorage.getItem('nb-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg-base:       #080a10;
+  --bg-panel:      #0d0f1a;
+  --bg-card:       #111422;
+  --bg-code:       #060810;
+  --bg-input:      #0e1020;
+  --bg-editable:   #131008;
+
+  --accent-green:  #00ff88;
+  --accent-pink:   #ff2d78;
+  --accent-cyan:   #00e5ff;
+  --accent-yellow: #ffe600;
+  --accent-purple: #c77dff;
+
+  --text-primary:  #e8eaf5;
+  --text-secondary:#8892b0;
+  --text-muted:    #4a5070;
+  --text-code:     #c9d1f0;
+
+  --dot-gray:      #2a2e48;
+  --dot-red:       #ff2d78;
+  --dot-green:     #00ff88;
+
+  --border-subtle: #1c1f35;
+
+  --font-pixel:    'Press Start 2P', monospace;
+  --font-ui:       'DM Sans', sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+
+  --syn-keyword:   #ff2d78;
+  --syn-type:      #00e5ff;
+  --syn-string:    #ffe600;
+  --syn-annotation:#c77dff;
+  --syn-method:    #00ff88;
+  --syn-number:    #ff9d00;
+  --syn-var:       #c9d1f0;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-size: 18px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.07) 3px,
+    rgba(0,0,0,0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ===== HEADER ===== */
+.nb-header {
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--accent-green);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 0 30px rgba(0,255,136,0.12), 0 4px 20px #00000088;
+}
+
+.nb-logo {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--accent-green);
+  letter-spacing: 1px;
+  line-height: 1.4;
+  text-shadow: 0 0 12px var(--accent-green);
+}
+
+.nb-logo span {
+  color: var(--accent-pink);
+  text-shadow: 0 0 12px var(--accent-pink);
+}
+
+.nb-subtitle {
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-left: 2px solid var(--border-subtle);
+  padding-left: 20px;
+}
+
+.nb-week-tag {
+  margin-left: auto;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ===== BUG BOARD ===== */
+.bug-board {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.bug-board-label {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.bug-dots {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.bug-dot-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bug-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  background: var(--dot-gray);
+  transition: background 0.3s, box-shadow 0.3s;
+  flex-shrink: 0;
+}
+
+.bug-dot.identified {
+  background: var(--dot-red);
+  box-shadow: 0 0 10px var(--dot-red);
+}
+
+.bug-dot.fixed {
+  background: var(--dot-green);
+  box-shadow: 0 0 10px var(--dot-green);
+}
+
+.bug-dot-label {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.board-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.progress-pill {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+}
+
+.progress-pill span { color: var(--accent-cyan); }
+
+.btn {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 22px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  min-height: 48px;
+  transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn:disabled:active { transform: none; }
+
+.btn-export {
+  background: var(--accent-cyan);
+  color: #060810;
+}
+.btn-export:not(:disabled):hover {
+  opacity: 0.85;
+  box-shadow: 0 0 16px rgba(0,229,255,0.4);
+}
+
+.btn-reset {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+.btn-reset:hover { border-color: var(--text-muted); color: var(--text-primary); }
+
+.btn-theme {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  width: 48px;
+  padding: 0;
+  font-size: 18px;
+}
+.btn-theme:hover { border-color: var(--text-muted); color: var(--text-primary); }
+.btn-theme:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: 2px; }
+
+/* ===== MAIN LAYOUT ===== */
+.main-layout {
+  display: flex;
+  height: calc(100vh - 112px);
+  overflow: hidden;
+}
+
+/* ===== LEFT PANEL ===== */
+.left-panel {
+  width: 60%;
+  background: var(--bg-code);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* ===== FILE TABS ===== */
+.file-tabs {
+  display: flex;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.file-tabs::-webkit-scrollbar { height: 3px; }
+.file-tabs::-webkit-scrollbar-thumb { background: var(--border-subtle); }
+
+.file-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 18px;
+  height: 40px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  user-select: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.file-tab:hover {
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.03);
+}
+
+.file-tab.active {
+  color: var(--accent-yellow);
+  border-bottom-color: var(--accent-yellow);
+  background: rgba(255,230,0,0.04);
+}
+
+/* Bug indicator pip on tab */
+.tab-bug-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
+  background: var(--dot-gray);
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.tab-bug-pip.has-identified {
+  background: var(--dot-red);
+  box-shadow: 0 0 6px var(--dot-red);
+}
+
+.tab-bug-pip.all-fixed {
+  background: var(--dot-green);
+  box-shadow: 0 0 6px var(--dot-green);
+}
+
+.tab-bug-pip.no-bug {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== CODE PANE ===== */
+.code-pane {
+  flex: 1;
+  overflow-y: auto;
+  display: none;
+}
+
+.code-pane.active { display: block; }
+
+.code-block {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.9;
+  padding: 16px 0;
+}
+
+.code-line {
+  display: flex;
+  align-items: flex-start;
+  padding: 1px 0;
+}
+
+.code-line:hover { background: rgba(255,255,255,0.025); }
+
+.line-num {
+  width: 48px;
+  min-width: 48px;
+  text-align: right;
+  color: var(--text-muted);
+  padding-right: 18px;
+  user-select: none;
+  font-size: 12px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.line-content {
+  flex: 1;
+  padding-right: 20px;
+  white-space: pre;
+}
+
+/* Editable bug lines */
+.code-line.editable {
+  background: var(--bg-editable);
+  border-left: 3px solid var(--accent-yellow);
+}
+
+.code-line.editable .line-num {
+  color: var(--accent-yellow);
+}
+
+.code-line.editable input.line-edit {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--accent-yellow);
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 0;
+  caret-color: #ffffff;
+  color-scheme: dark;
+}
+
+.code-line.editable input.line-edit:focus {
+  caret-color: #ffffff;
+  background: rgba(255,255,255,0.04);
+}
+
+.code-line.editable.fixed {
+  background: #041209;
+  border-left-color: var(--dot-green);
+}
+
+.code-line.editable.fixed input.line-edit {
+  color: var(--dot-green);
+  caret-color: #ffffff;
+}
+
+.bug-callout {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent-yellow);
+  padding: 0 10px;
+  white-space: nowrap;
+  align-self: center;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.code-line.editable.fixed .bug-callout { color: var(--dot-green); }
+
+/* syntax */
+.kw  { color: var(--syn-keyword); }
+.ty  { color: var(--syn-type); }
+.st  { color: var(--syn-string); }
+.an  { color: var(--syn-annotation); }
+.mt  { color: var(--syn-method); }
+.nm  { color: var(--syn-number); }
+.vr  { color: var(--syn-var); }
+
+/* ===== RIGHT PANEL ===== */
+.right-panel {
+  width: 40%;
+  background: var(--bg-panel);
+  overflow-y: auto;
+}
+
+.section-divider {
+  padding: 12px 24px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-base);
+  z-index: 5;
+}
+
+.section-pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.section-pip.green  { background: var(--accent-green);  box-shadow: 0 0 8px var(--accent-green); }
+.section-pip.pink   { background: var(--accent-pink);   box-shadow: 0 0 8px var(--accent-pink); }
+.section-pip.yellow { background: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
+
+.section-title {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.question-block {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.question-anchor {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.question-text {
+  font-size: 18px;
+  color: var(--text-primary);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.ic { font-family: var(--font-mono); font-size: 16px; color: var(--accent-cyan); }
+
+.prediction-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 17px;
+  line-height: 1.5;
+  padding: 12px 14px;
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.prediction-input:focus { border-color: var(--accent-cyan); }
+.prediction-input::placeholder { color: var(--text-muted); }
+.prediction-input.has-content { border-color: rgba(0,229,255,0.35); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ===== LIGHT MODE ===== */
+html { color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+html[data-theme="light"] body               { background: #f0f2f8; color: #1a1c2e; }
+html[data-theme="light"] body::before       { display: none; }
+html[data-theme="light"] .nb-header         { background: #ffffff; border-bottom-color: #00925a; box-shadow: 0 4px 20px #00000022; }
+html[data-theme="light"] .nb-logo           { color: #00925a; text-shadow: none; }
+html[data-theme="light"] .nb-logo span      { color: #cc1055; text-shadow: none; }
+html[data-theme="light"] .nb-subtitle       { color: #4a527a; border-left-color: #d0d4e6; }
+html[data-theme="light"] .nb-week-tag       { color: #6a708a; }
+html[data-theme="light"] .bug-board         { background: #f4f5fc; border-bottom-color: #d0d4e6; }
+html[data-theme="light"] .bug-board-label   { color: #4a527a; }
+html[data-theme="light"] .bug-dot           { background: #c0c4d8; }
+html[data-theme="light"] .bug-dot.identified{ background: #cc1055; box-shadow: none; }
+html[data-theme="light"] .bug-dot.fixed     { background: #00925a; box-shadow: none; }
+html[data-theme="light"] .bug-dot-label     { color: #6a708a; }
+html[data-theme="light"] .progress-pill     { color: #6a708a; border-color: #d0d4e6; }
+html[data-theme="light"] .progress-pill span{ color: #0077aa; }
+html[data-theme="light"] .btn-reset         { color: #4a527a; border-color: #d0d4e6; }
+html[data-theme="light"] .btn-theme         { color: #4a527a; border-color: #d0d4e6; }
+html[data-theme="light"] .btn-export        { background: #0077aa; color: #fff; }
+html[data-theme="light"] .left-panel        { background: #f8f9fe; }
+html[data-theme="light"] .file-tabs         { background: #ecedf8; border-bottom-color: #d0d4e6; }
+html[data-theme="light"] .file-tab          { color: #8890b0; border-right-color: #d0d4e6; }
+html[data-theme="light"] .file-tab:hover    { color: #4a527a; background: rgba(0,0,0,0.04); }
+html[data-theme="light"] .file-tab.active   { color: #8a6800; border-bottom-color: #c09000; background: rgba(192,144,0,0.06); }
+html[data-theme="light"] .tab-bug-pip       { background: #c0c4d8; }
+html[data-theme="light"] .tab-bug-pip.has-identified { background: #cc1055; box-shadow: none; }
+html[data-theme="light"] .tab-bug-pip.all-fixed      { background: #00925a; box-shadow: none; }
+html[data-theme="light"] .code-block        { background: #f8f9fe; }
+html[data-theme="light"] .code-line:hover   { background: rgba(0,0,0,0.04); }
+html[data-theme="light"] .line-num          { color: #9099ba; }
+html[data-theme="light"] .line-content      { color: #1a1c2e; }
+html[data-theme="light"] .kw                { color: #cc1055; }
+html[data-theme="light"] .ty                { color: #0077aa; }
+html[data-theme="light"] .st                { color: #8a6800; }
+html[data-theme="light"] .an                { color: #7038c8; }
+html[data-theme="light"] .mt                { color: #007a40; }
+html[data-theme="light"] .nm                { color: #c05a00; }
+html[data-theme="light"] .vr                { color: #1a2060; }
+html[data-theme="light"] .code-line.editable                       { background: #fffbe6; border-left-color: #c09000; }
+html[data-theme="light"] .code-line.editable .line-num             { color: #8a6800; }
+html[data-theme="light"] .code-line.editable input.line-edit       { color: #8a6800; caret-color: #1a1c2e; color-scheme: light; }
+html[data-theme="light"] .code-line.editable input.line-edit:focus { background: rgba(0,0,0,0.04); caret-color: #1a1c2e; }
+html[data-theme="light"] .code-line.editable.fixed                 { background: #eafdf2; border-left-color: #007a40; }
+html[data-theme="light"] .code-line.editable.fixed input.line-edit { color: #007a40; caret-color: #1a1c2e; }
+html[data-theme="light"] .bug-callout                              { color: #8a6800; }
+html[data-theme="light"] .code-line.editable.fixed .bug-callout    { color: #007a40; }
+html[data-theme="light"] .right-panel       { background: #f0f2f8; }
+html[data-theme="light"] .section-divider   { background: #f0f2f8; border-bottom-color: #d0d4e6; }
+html[data-theme="light"] .section-pip.green  { background: #00925a; box-shadow: none; }
+html[data-theme="light"] .section-pip.pink   { background: #cc1055; box-shadow: none; }
+html[data-theme="light"] .section-pip.yellow { background: #8a6800; box-shadow: none; }
+html[data-theme="light"] .section-title     { color: #4a527a; }
+html[data-theme="light"] .question-block    { border-bottom-color: #d0d4e6; }
+html[data-theme="light"] .question-anchor   { color: #0077aa; }
+html[data-theme="light"] .ic                { color: #0077aa; }
+html[data-theme="light"] .question-text     { color: #1a1c2e; }
+html[data-theme="light"] .prediction-input  { background: #e8eaf8; border-color: #d0d4e6; color: #1a1c2e; }
+html[data-theme="light"] .prediction-input::placeholder { color: #8890b0; }
+html[data-theme="light"] .prediction-input:focus { border-color: #0077aa; }
+html[data-theme="light"] .prediction-input.has-content { border-color: rgba(0,119,170,0.5); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="nb-header" role="banner">
+  <div class="nb-logo">Neon <span>Bytes &amp; Labs</span></div>
+  <div class="nb-subtitle">Character Engine // Inheritance Debug</div>
+  <div class="nb-week-tag">Week 6 &nbsp;&bull;&nbsp; Tuesday</div>
+  <button class="btn btn-theme" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode">
+    <span id="theme-icon" aria-hidden="true">☀</span>
+  </button>
+</header>
+
+<!-- BUG BOARD -->
+<div class="bug-board" role="region" aria-label="Bug tracker board">
+  <div class="bug-board-label">Bug Tracker</div>
+  <div class="bug-dots" role="list" aria-label="Bug status indicators">
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-0" aria-label="Bug 1 status: not yet identified"></div>
+      <span class="bug-dot-label">Bug 1</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-1" aria-label="Bug 2 status: not yet identified"></div>
+      <span class="bug-dot-label">Bug 2</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-2" aria-label="Bug 3 status: not yet identified"></div>
+      <span class="bug-dot-label">Bug 3</span>
+    </div>
+  </div>
+  <div class="board-actions">
+    <div class="progress-pill" id="progress-pill" aria-live="polite">Questions answered: <span id="progress-count">0</span> / 7</div>
+    <button class="btn btn-reset" id="btn-reset" onclick="resetAll()" aria-label="Reset all inputs and bug tracker">Reset All</button>
+    <button class="btn btn-export" id="btn-export" onclick="exportPredictions()" disabled aria-label="Export student predictions as markdown file">Export Predictions</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- LEFT PANEL: TABBED CODE -->
+  <div class="left-panel" role="region" aria-label="Java source code panel">
+
+    <!-- FILE TABS -->
+    <div class="file-tabs" role="tablist" aria-label="Java source files">
+
+      <button class="file-tab active" id="tab-gamecharacter" role="tab"
+        aria-selected="true" aria-controls="pane-gamecharacter"
+        onclick="switchTab('gamecharacter')">
+        <span class="tab-bug-pip no-bug" id="tabpip-gamecharacter" aria-hidden="true"></span>
+        GameCharacter.java
+      </button>
+
+      <button class="file-tab" id="tab-hero" role="tab"
+        aria-selected="false" aria-controls="pane-hero"
+        onclick="switchTab('hero')">
+        <span class="tab-bug-pip" id="tabpip-hero" aria-hidden="true"></span>
+        Hero.java
+      </button>
+
+      <button class="file-tab" id="tab-villain" role="tab"
+        aria-selected="false" aria-controls="pane-villain"
+        onclick="switchTab('villain')">
+        <span class="tab-bug-pip" id="tabpip-villain" aria-hidden="true"></span>
+        Villain.java
+      </button>
+
+      <button class="file-tab" id="tab-characterengine" role="tab"
+        aria-selected="false" aria-controls="pane-characterengine"
+        onclick="switchTab('characterengine')">
+        <span class="tab-bug-pip no-bug" id="tabpip-characterengine" aria-hidden="true"></span>
+        CharacterEngine.java
+      </button>
+
+    </div>
+
+    <!-- PANE: GameCharacter.java -->
+    <div class="code-pane active" id="pane-gamecharacter" role="tabpanel" aria-labelledby="tab-gamecharacter">
+      <div class="code-block">
+
+        <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="kw">public class</span> <span class="ty">GameCharacter</span> {</span></div>
+        <div class="code-line"><span class="line-num">2</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">3</span><span class="line-content">    <span class="kw">protected</span> <span class="ty">String</span> <span class="vr">name</span>;</span></div>
+        <div class="code-line"><span class="line-num">4</span><span class="line-content">    <span class="kw">protected</span> <span class="kw">int</span> <span class="vr">health</span>;</span></div>
+        <div class="code-line"><span class="line-num">5</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">6</span><span class="line-content">    <span class="kw">public</span> <span class="ty">GameCharacter</span>(<span class="ty">String</span> <span class="vr">name</span>, <span class="kw">int</span> <span class="vr">health</span>) {</span></div>
+        <div class="code-line"><span class="line-num">7</span><span class="line-content">        <span class="kw">this</span>.<span class="vr">name</span> = <span class="vr">name</span>;</span></div>
+        <div class="code-line"><span class="line-num">8</span><span class="line-content">        <span class="kw">this</span>.<span class="vr">health</span> = <span class="vr">health</span>;</span></div>
+        <div class="code-line"><span class="line-num">9</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">10</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">11</span><span class="line-content">    <span class="kw">public</span> <span class="ty">String</span> <span class="mt">getStatus</span>() {</span></div>
+        <div class="code-line"><span class="line-num">12</span><span class="line-content">        <span class="kw">return</span> <span class="vr">name</span> + <span class="st">" [HP: "</span> + <span class="vr">health</span> + <span class="st">"]"</span>;</span></div>
+        <div class="code-line"><span class="line-num">13</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">14</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">15</span><span class="line-content">    <span class="kw">public void</span> <span class="mt">move</span>() {</span></div>
+        <div class="code-line"><span class="line-num">16</span><span class="line-content">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="vr">name</span> + <span class="st">" moves."</span>);</span></div>
+        <div class="code-line"><span class="line-num">17</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">18</span><span class="line-content">}</span></div>
+
+      </div>
+    </div>
+
+    <!-- PANE: Hero.java -->
+    <div class="code-pane" id="pane-hero" role="tabpanel" aria-labelledby="tab-hero">
+      <div class="code-block">
+
+        <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="kw">class</span> <span class="ty">Hero</span> <span class="kw">extends</span> <span class="ty">GameCharacter</span> {</span></div>
+        <div class="code-line"><span class="line-num">2</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">3</span><span class="line-content">    <span class="kw">int</span> <span class="vr">powerLevel</span>;</span></div>
+        <div class="code-line"><span class="line-num">4</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">5</span><span class="line-content">    <span class="kw">public</span> <span class="ty">Hero</span>(<span class="ty">String</span> <span class="vr">name</span>, <span class="kw">int</span> <span class="vr">health</span>, <span class="kw">int</span> <span class="vr">powerLevel</span>) {</span></div>
+
+        <!-- BUG 1: lines 6 and 7 are swapped -- students swap them back -->
+        <div class="code-line editable" id="cl-hero-bug1a" data-bug-index="0">
+          <span class="line-num">6</span>
+          <input class="line-edit" id="edit-hero-bug1a" type="text"
+            value="        this.powerLevel = powerLevel;"
+            aria-label="Editable code line 6 in Hero.java -- fix the bug"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            oninput="handleBugEdit(0)" />
+          <span class="bug-callout" aria-hidden="true">Fix lines 6-7</span>
+        </div>
+
+        <div class="code-line editable" id="cl-hero-bug1b" data-bug-index="0">
+          <span class="line-num">7</span>
+          <input class="line-edit" id="edit-hero-bug1b" type="text"
+            value="        super(name, health);"
+            aria-label="Editable code line 7 in Hero.java -- fix the bug"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            oninput="handleBugEdit(0)" />
+          <span class="bug-callout" aria-hidden="true"></span>
+        </div>
+
+        <div class="code-line"><span class="line-num">8</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">9</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">10</span><span class="line-content">    <span class="an">@Override</span></span></div>
+        <div class="code-line"><span class="line-num">11</span><span class="line-content">    <span class="kw">public void</span> <span class="mt">move</span>() {</span></div>
+        <div class="code-line"><span class="line-num">12</span><span class="line-content">        <span class="kw">super</span>.<span class="mt">move</span>();</span></div>
+        <div class="code-line"><span class="line-num">13</span><span class="line-content">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="vr">name</span> + <span class="st">" dashes forward!"</span>);</span></div>
+        <div class="code-line"><span class="line-num">14</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">15</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">16</span><span class="line-content">    <span class="kw">public void</span> <span class="mt">useAbility</span>() {</span></div>
+
+        <!-- BUG 3: super.name syntax error -->
+        <div class="code-line editable" id="cl-hero-bug3" data-bug-index="2">
+          <span class="line-num">17</span>
+          <input class="line-edit" id="edit-hero-bug3" type="text"
+            value='        System.out.println(super.name + " power: " + powerLevel + "!");'
+            aria-label="Editable code line 17 in Hero.java -- fix the bug"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            oninput="handleBugEdit(2)" />
+          <span class="bug-callout" aria-hidden="true">Fix line 17</span>
+        </div>
+
+        <div class="code-line"><span class="line-num">18</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">19</span><span class="line-content">}</span></div>
+
+      </div>
+    </div>
+
+    <!-- PANE: Villain.java -->
+    <div class="code-pane" id="pane-villain" role="tabpanel" aria-labelledby="tab-villain">
+      <div class="code-block">
+
+        <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="kw">class</span> <span class="ty">Villain</span> <span class="kw">extends</span> <span class="ty">GameCharacter</span> {</span></div>
+        <div class="code-line"><span class="line-num">2</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">3</span><span class="line-content">    <span class="kw">int</span> <span class="vr">threatRating</span>;</span></div>
+        <div class="code-line"><span class="line-num">4</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">5</span><span class="line-content">    <span class="kw">public</span> <span class="ty">Villain</span>(<span class="ty">String</span> <span class="vr">name</span>, <span class="kw">int</span> <span class="vr">health</span>, <span class="kw">int</span> <span class="vr">threatRating</span>) {</span></div>
+        <div class="code-line"><span class="line-num">6</span><span class="line-content">        <span class="kw">super</span>(<span class="vr">name</span>, <span class="vr">health</span>);</span></div>
+        <div class="code-line"><span class="line-num">7</span><span class="line-content">        <span class="kw">this</span>.<span class="vr">threatRating</span> = <span class="vr">threatRating</span>;</span></div>
+        <div class="code-line"><span class="line-num">8</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">9</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">10</span><span class="line-content">    <span class="an">@Override</span></span></div>
+
+        <!-- BUG 2: String return type instead of void -->
+        <div class="code-line editable" id="cl-villain-bug2" data-bug-index="1">
+          <span class="line-num">11</span>
+          <input class="line-edit" id="edit-villain-bug2" type="text"
+            value="    public String move() {"
+            aria-label="Editable code line 11 in Villain.java -- fix the bug"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            oninput="handleBugEdit(1, this.value)" />
+          <span class="bug-callout" aria-hidden="true">Fix line 11</span>
+        </div>
+
+        <div class="code-line"><span class="line-num">12</span><span class="line-content">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="vr">name</span> + <span class="st">" creeps silently."</span>);</span></div>
+        <div class="code-line"><span class="line-num">13</span><span class="line-content">        <span class="kw">return</span> <span class="st">"moved"</span>;</span></div>
+        <div class="code-line"><span class="line-num">14</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">15</span><span class="line-content">}</span></div>
+
+      </div>
+    </div>
+
+    <!-- PANE: CharacterEngine.java -->
+    <div class="code-pane" id="pane-characterengine" role="tabpanel" aria-labelledby="tab-characterengine">
+      <div class="code-block">
+
+        <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="kw">class</span> <span class="ty">CharacterEngine</span> {</span></div>
+        <div class="code-line"><span class="line-num">2</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">3</span><span class="line-content">    <span class="kw">public static void</span> <span class="mt">main</span>(<span class="ty">String</span>[] <span class="vr">args</span>) {</span></div>
+        <div class="code-line"><span class="line-num">4</span><span class="line-content">        <span class="ty">Hero</span> <span class="vr">hero</span> = <span class="kw">new</span> <span class="ty">Hero</span>(<span class="st">"Zara"</span>, <span class="nm">80</span>, <span class="nm">5</span>);</span></div>
+        <div class="code-line"><span class="line-num">5</span><span class="line-content">        <span class="ty">Villain</span> <span class="vr">villain</span> = <span class="kw">new</span> <span class="ty">Villain</span>(<span class="st">"Mordex"</span>, <span class="nm">60</span>, <span class="nm">9</span>);</span></div>
+        <div class="code-line"><span class="line-num">6</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">7</span><span class="line-content">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="vr">hero</span>.<span class="mt">getStatus</span>());</span></div>
+        <div class="code-line"><span class="line-num">8</span><span class="line-content">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="vr">villain</span>.<span class="mt">getStatus</span>());</span></div>
+        <div class="code-line"><span class="line-num">9</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">10</span><span class="line-content">        <span class="vr">hero</span>.<span class="mt">move</span>();</span></div>
+        <div class="code-line"><span class="line-num">11</span><span class="line-content">        <span class="vr">villain</span>.<span class="mt">move</span>();</span></div>
+        <div class="code-line"><span class="line-num">12</span><span class="line-content"> </span></div>
+        <div class="code-line"><span class="line-num">13</span><span class="line-content">        <span class="vr">hero</span>.<span class="mt">useAbility</span>();</span></div>
+        <div class="code-line"><span class="line-num">14</span><span class="line-content">    }</span></div>
+        <div class="code-line"><span class="line-num">15</span><span class="line-content">}</span></div>
+
+      </div>
+    </div>
+
+  </div><!-- end left-panel -->
+
+  <!-- RIGHT PANEL: QUESTIONS -->
+  <div class="right-panel" role="region" aria-label="Guided questions panel">
+
+    <div class="section-divider">
+      <div class="section-pip green" aria-hidden="true"></div>
+      <span class="section-title">Section 1: The Base Class</span>
+    </div>
+
+    <div class="question-block">
+      <span class="question-anchor">GameCharacter.java -- fields (lines 3-4)</span>
+      <p class="question-text">The fields are marked <span class="ic">protected</span> rather than <span class="ic">private</span>. What does protected mean for a subclass? What would break if they were private?</p>
+      <textarea class="prediction-input" id="q1" placeholder="Type your prediction here..."
+        oninput="handleInput(this)" aria-label="Your prediction for question 1"></textarea>
+    </div>
+
+    <div class="question-block">
+      <span class="question-anchor">GameCharacter.java -- getStatus() (lines 11-13)</span>
+      <p class="question-text">Predict exactly what <span class="ic">getStatus()</span> returns when called on the Hero named Zara with 80 health. Write the exact String.</p>
+      <textarea class="prediction-input" id="q2" placeholder="Type your prediction here..."
+        oninput="handleInput(this)" aria-label="Your prediction for question 2"></textarea>
+    </div>
+
+    <div class="section-divider">
+      <div class="section-pip pink" aria-hidden="true"></div>
+      <span class="section-title">Section 2: The Subclasses</span>
+    </div>
+
+    <div class="question-block">
+      <span class="question-anchor">Hero.java -- constructor (lines 5-8)</span>
+      <p class="question-text">Read the Hero constructor carefully. There is a structural problem with the order of statements. What is it, and why does Java enforce that rule?</p>
+      <textarea class="prediction-input" id="q3" placeholder="Type your prediction here..."
+        oninput="handleInput(this)" aria-label="Your prediction for question 3"></textarea>
+    </div>
+
+    <div class="question-block">
+      <span class="question-anchor">Villain.java -- @Override (lines 10-14)</span>
+      <p class="question-text">The Villain class overrides <span class="ic">move()</span>. Look at the method signature carefully. What is structurally wrong with this override compared to the parent class?</p>
+      <textarea class="prediction-input" id="q4" placeholder="Type your prediction here..."
+        oninput="handleInput(this)" aria-label="Your prediction for question 4"></textarea>
+    </div>
+
+    <div class="question-block">
+      <span class="question-anchor">Hero.java -- useAbility() (line 17)</span>
+      <p class="question-text">The field <span class="ic">name</span> is declared in GameCharacter, not Hero. What does <span class="ic">super.name</span> actually mean in Java, and why does it not work here? What is the correct way for a subclass to access a <span class="ic">protected</span> field from its parent?</p>
+      <textarea class="prediction-input" id="q5" placeholder="Type your prediction here..."
+        oninput="handleInput(this)" aria-label="Your prediction for question 5"></textarea>
+    </div>
+
+    <div class="section-divider">
+      <div class="section-pip yellow" aria-hidden="true"></div>
+      <span class="section-title">Section 3: The Full Hierarchy</span>
+    </div>
+
+    <div class="question-block">
+      <span class="question-anchor">CharacterEngine.java -- main method (lines 7-13)</span>
+      <p class="question-text">After all three bugs are fixed, look at each method call in main. For each one, write which class actually executes that method -- GameCharacter, Hero, or Villain -- and explain why.</p>
+      <textarea class="prediction-input" id="q6" placeholder="Type your prediction here..."
+        oninput="handleInput(this)" aria-label="Your prediction for question 6" style="min-height:120px;"></textarea>
+    </div>
+
+    <div class="question-block">
+      <span class="question-anchor">All four files -- full program</span>
+      <p class="question-text">After all three bugs are fixed, write the exact console output this program produces from top to bottom.</p>
+      <textarea class="prediction-input" id="q7" placeholder="Type your prediction here..."
+        oninput="handleInput(this)" aria-label="Your prediction for question 7" style="min-height:140px;"></textarea>
+    </div>
+
+  </div><!-- end right-panel -->
+
+</div><!-- end main-layout -->
+
+<script>
+// ===== TAB SWITCHING =====
+const TABS = ['gamecharacter', 'hero', 'villain', 'characterengine'];
+
+function switchTab(id) {
+  TABS.forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === id);
+    document.getElementById('tab-' + t).setAttribute('aria-selected', t === id ? 'true' : 'false');
+    document.getElementById('pane-' + t).classList.toggle('active', t === id);
+  });
+}
+
+// ===== BUG DEFINITIONS =====
+// Bug 0 -- Hero.java lines 6-7: super() and this.powerLevel are swapped
+//   Fix: line 6 = super(name, health);  AND  line 7 = this.powerLevel = powerLevel;
+//   Both lines are editable; bug validates when both are in the correct order.
+// Bug 1 -- Villain.java line 11: public String move() {
+//   Fix: public void move() {
+// Bug 2 -- Hero.java line 18: super.name
+//   Fix: name (direct protected field access)
+
+const BUGS = [
+  {
+    dotIndex: 0,
+    tabId: 'hero',
+    // Two line elements and two inputs for the swap bug
+    lineElIds: ['cl-hero-bug1a', 'cl-hero-bug1b'],
+    inputElIds: ['edit-hero-bug1a', 'edit-hero-bug1b'],
+    originalValues: ['        this.powerLevel = powerLevel;', '        super(name, health);'],
+    identified: false,
+    fixed: false,
+    // Validate reads both inputs; fixed when line 6 = super(...) and line 7 = this.powerLevel
+    validate: () => {
+      const v6 = document.getElementById('edit-hero-bug1a').value.replace(/\s+/g,' ').trim();
+      const v7 = document.getElementById('edit-hero-bug1b').value.replace(/\s+/g,' ').trim();
+      return /super\s*\(\s*name\s*,\s*health\s*\)\s*;/.test(v6) &&
+             /this\s*\.\s*powerLevel\s*=\s*powerLevel\s*;/.test(v7);
+    },
+    isChanged: () => {
+      const v6 = document.getElementById('edit-hero-bug1a').value.trim();
+      const v7 = document.getElementById('edit-hero-bug1b').value.trim();
+      return v6 !== '        this.powerLevel = powerLevel;'.trim() ||
+             v7 !== '        super(name, health);'.trim();
+    }
+  },
+  {
+    dotIndex: 1,
+    tabId: 'villain',
+    lineElIds: ['cl-villain-bug2'],
+    inputElIds: ['edit-villain-bug2'],
+    originalValues: ['    public String move() {'],
+    identified: false,
+    fixed: false,
+    validate: () => {
+      const v = document.getElementById('edit-villain-bug2').value.replace(/\s+/g,' ').trim();
+      return /public\s+void\s+move\s*\(\s*\)\s*\{/.test(v);
+    },
+    isChanged: () => {
+      return document.getElementById('edit-villain-bug2').value.trim() !== '    public String move() {'.trim();
+    }
+  },
+  {
+    dotIndex: 2,
+    tabId: 'hero',
+    lineElIds: ['cl-hero-bug3'],
+    inputElIds: ['edit-hero-bug3'],
+    originalValues: ['        System.out.println(super.name + " power: " + powerLevel + "!");'],
+    identified: false,
+    fixed: false,
+    validate: () => {
+      const v = document.getElementById('edit-hero-bug3').value.replace(/\s+/g,' ').trim();
+      return !v.includes('super.name') && v.includes('println') && /\bname\b/.test(v) && v.includes('powerLevel');
+    },
+    isChanged: () => {
+      return document.getElementById('edit-hero-bug3').value.trim() !==
+        '        System.out.println(super.name + " power: " + powerLevel + "!");'.trim();
+    }
+  }
+];
+
+// Which bugs live in which tab
+const TAB_BUGS = {
+  gamecharacter: [],
+  hero: [0, 2],
+  villain: [1],
+  characterengine: []
+};
+
+function updateTabPip(tabId) {
+  const bugIndices = TAB_BUGS[tabId];
+  const pip = document.getElementById('tabpip-' + tabId);
+  if (!pip || bugIndices.length === 0) return;
+
+  const allFixed = bugIndices.every(i => BUGS[i].fixed);
+  const anyIdentified = bugIndices.some(i => BUGS[i].identified);
+
+  if (allFixed) {
+    pip.className = 'tab-bug-pip all-fixed';
+  } else if (anyIdentified) {
+    pip.className = 'tab-bug-pip has-identified';
+  } else {
+    pip.className = 'tab-bug-pip';
+  }
+}
+
+// ===== INPUT TRACKING =====
+const inputAnswered = { q1: false, q2: false, q3: false, q4: false, q5: false, q6: false, q7: false };
+
+function handleInput(el) {
+  const key = el.id;
+  const hasContent = el.value.trim().length > 0;
+  inputAnswered[key] = hasContent;
+  el.classList.toggle('has-content', hasContent);
+  updateProgress();
+  updateExportButton();
+}
+
+function updateProgress() {
+  document.getElementById('progress-count').textContent =
+    Object.values(inputAnswered).filter(Boolean).length;
+}
+
+function updateExportButton() {
+  document.getElementById('btn-export').disabled =
+    !Object.values(inputAnswered).some(Boolean);
+}
+
+// ===== BUG TRACKING =====
+function handleBugEdit(bugIndex) {
+  const bug = BUGS[bugIndex];
+  const dot = document.getElementById('dot-' + bug.dotIndex);
+
+  const isFixed = bug.validate();
+  const changed = bug.isChanged();
+
+  if (isFixed) {
+    bug.identified = true;
+    bug.fixed = true;
+    dot.className = 'bug-dot fixed';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: fixed');
+    bug.lineElIds.forEach(id => document.getElementById(id).classList.add('fixed'));
+  } else if (changed) {
+    bug.identified = true;
+    bug.fixed = false;
+    dot.className = 'bug-dot identified';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: identified');
+    bug.lineElIds.forEach(id => document.getElementById(id).classList.remove('fixed'));
+  } else {
+    bug.identified = false;
+    bug.fixed = false;
+    dot.className = 'bug-dot';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: not yet identified');
+    bug.lineElIds.forEach(id => document.getElementById(id).classList.remove('fixed'));
+  }
+
+  updateTabPip(bug.tabId);
+}
+
+// ===== RESET =====
+function resetAll() {
+  ['q1','q2','q3','q4','q5','q6','q7'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('has-content');
+    inputAnswered[id] = false;
+  });
+
+  BUGS.forEach((bug) => {
+    bug.inputElIds.forEach((id, i) => {
+      document.getElementById(id).value = bug.originalValues[i];
+    });
+    bug.identified = false;
+    bug.fixed = false;
+    const dot = document.getElementById('dot-' + bug.dotIndex);
+    dot.className = 'bug-dot';
+    dot.setAttribute('aria-label', 'Bug ' + (bug.dotIndex + 1) + ' status: not yet identified');
+    bug.lineElIds.forEach(id => document.getElementById(id).classList.remove('fixed'));
+    updateTabPip(bug.tabId);
+  });
+
+  updateProgress();
+  updateExportButton();
+}
+
+// ===== EXPORT METADATA =====
+const CODE_FILES = [
+  {
+    name: 'GameCharacter.java',
+    lines: [
+      'public class GameCharacter {',
+      '',
+      '    protected String name;',
+      '    protected int health;',
+      '',
+      '    public GameCharacter(String name, int health) {',
+      '        this.name = name;',
+      '        this.health = health;',
+      '    }',
+      '',
+      '    public String getStatus() {',
+      '        return name + " [HP: " + health + "]";',
+      '    }',
+      '',
+      '    public void move() {',
+      '        System.out.println(name + " moves.");',
+      '    }',
+      '}',
+    ]
+  },
+  {
+    name: 'Hero.java',
+    lines: [
+      'class Hero extends GameCharacter {',
+      '',
+      '    int powerLevel;',
+      '',
+      '    public Hero(String name, int health, int powerLevel) {',
+      '        this.powerLevel = powerLevel;',
+      '        super(name, health);',
+      '    }',
+      '',
+      '    @Override',
+      '    public void move() {',
+      '        super.move();',
+      '        System.out.println(name + " dashes forward!");',
+      '    }',
+      '',
+      '    public void useAbility() {',
+      '        System.out.println(super.name + " power: " + powerLevel + "!");',
+      '    }',
+      '}',
+    ]
+  },
+  {
+    name: 'Villain.java',
+    lines: [
+      'class Villain extends GameCharacter {',
+      '',
+      '    int threatRating;',
+      '',
+      '    public Villain(String name, int health, int threatRating) {',
+      '        super(name, health);',
+      '        this.threatRating = threatRating;',
+      '    }',
+      '',
+      '    @Override',
+      '    public String move() {',
+      '        System.out.println(name + " creeps silently.");',
+      '        return "moved";',
+      '    }',
+      '}',
+    ]
+  },
+  {
+    name: 'CharacterEngine.java',
+    lines: [
+      'class CharacterEngine {',
+      '',
+      '    public static void main(String[] args) {',
+      '        Hero hero = new Hero("Zara", 80, 5);',
+      '        Villain villain = new Villain("Mordex", 60, 9);',
+      '',
+      '        System.out.println(hero.getStatus());',
+      '        System.out.println(villain.getStatus());',
+      '',
+      '        hero.move();',
+      '        villain.move();',
+      '',
+      '        hero.useAbility();',
+      '    }',
+      '}',
+    ]
+  },
+];
+
+const Q_META = [
+  { id: 'q1', anchor: 'GameCharacter.java -- fields (lines 3-4)',       label: 'protected vs private fields' },
+  { id: 'q2', anchor: 'GameCharacter.java -- getStatus() (lines 11-13)', label: 'getStatus() return value' },
+  { id: 'q3', anchor: 'Hero.java -- constructor (lines 5-8)',             label: 'super() call order in constructor (Bug 1)' },
+  { id: 'q4', anchor: 'Villain.java -- @Override (lines 10-14)',          label: '@Override return type mismatch (Bug 2)' },
+  { id: 'q5', anchor: 'Hero.java -- useAbility() (line 17)',              label: 'super.name field access (Bug 3)' },
+  { id: 'q6', anchor: 'CharacterEngine.java -- main method (lines 7-13)', label: 'Method dispatch hierarchy' },
+  { id: 'q7', anchor: 'All four files -- full program',                   label: 'Full console trace (all bugs fixed)' },
+];
+
+const BUG_META = [
+  { bugIndex: 0, file: 'Hero.java',    lines: '6-7', label: 'Constructor super() call order (Syntax)',
+    original: 'this.powerLevel = powerLevel; / super(name, health);',
+    fix:      'super(name, health); / this.powerLevel = powerLevel;' },
+  { bugIndex: 1, file: 'Villain.java', line: 11,     label: '@Override return type mismatch (Syntax)',
+    original: 'public String move() {',
+    fix:      'public void move() {' },
+  { bugIndex: 2, file: 'Hero.java',    line: 17,     label: 'super.name field access (Syntax)',
+    original: 'System.out.println(super.name + " power: " + powerLevel + "!");',
+    fix:      'System.out.println(name + " power: " + powerLevel + "!");' },
+];
+
+// ===== EXPORT =====
+function exportPredictions() {
+  const out = [];
+
+  out.push('# Neon Bytes & Labs // Character Engine Debug Session');
+  out.push('**Week 6, Tuesday | Topic: Inheritance, @Override, super, extends, protected**');
+  out.push('');
+  out.push('---');
+  out.push('');
+
+  CODE_FILES.forEach(f => {
+    out.push(`## Java Program: ${f.name}`);
+    out.push('');
+    out.push('```java');
+    f.lines.forEach(l => out.push(l));
+    out.push('```');
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## My Predictions');
+  out.push('');
+
+  Q_META.forEach((q, i) => {
+    const el  = document.getElementById(q.id);
+    const ans = el ? el.value.trim() : '';
+    out.push(`### Q${i + 1}: ${q.label}`);
+    out.push(`_Anchor: ${q.anchor}_`);
+    out.push('');
+    out.push('**My answer:**');
+    out.push('');
+    out.push(ans || '_(no answer entered)_');
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## Bug Fix Attempts');
+  out.push('');
+
+  BUG_META.forEach((b, i) => {
+    const wasFixed = BUGS[b.bugIndex].fixed;
+    const loc = b.line ? `Line ${b.line}` : `Lines ${b.lines}`;
+    out.push(`**${b.file} ${loc} -- ${b.label}**`);
+    out.push(`- Status: ${wasFixed ? 'Fixed correctly' : 'Not yet fixed'}`);
+    out.push(`- Original code: \`${b.original}\``);
+    out.push(`- Correct fix:   \`${b.fix}\``);
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## AI Review Prompt');
+  out.push('');
+  out.push('> Copy everything above this section into Claude, ChatGPT, or Gemini,');
+  out.push('> then send the message below exactly as written.');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push(
+`I am a Java bootcamp student. The document above contains a buggy Java program and my predictions about what it does.
+
+Please do the following:
+
+1. For each of my predictions, tell me what I got right and what I missed. If my answer is correct, confirm it briefly and move on. Only flag a misconception if one is genuinely present -- do not manufacture criticism where the answer is sound.
+
+2. For any question I left blank, give the correct answer and explain why it matters.
+
+3. For the final question, assume all three bugs have been fixed when evaluating my console trace prediction.
+
+4. For each of the bugs: explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves.
+
+5. Close with two or three follow-up questions I should think about before our class discussion -- questions that push me one level deeper than what the session covered.
+
+Be accurate first. Credit what is right, then address genuine gaps. Do not manufacture criticism where the answer is sound.`
+  );
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('_Generated by Neon Bytes & Labs Character Engine Debug Session_');
+
+  const blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'character-engine-answers.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+updateExportButton();
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(t);
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('nb-theme', t);
+  const icon = document.getElementById('theme-icon');
+  const btn  = document.getElementById('theme-toggle');
+  if (t === 'dark') {
+    icon.textContent = '☀';
+    btn.setAttribute('aria-label', 'Switch to light mode');
+  } else {
+    icon.textContent = '🌙';
+    btn.setAttribute('aria-label', 'Switch to dark mode');
+  }
+}
+setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+</script>
+</body>
+</html>

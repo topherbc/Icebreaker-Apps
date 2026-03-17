@@ -1023,55 +1023,118 @@ function resetAll() {
   updateExportButton();
 }
 
+// ===== EXPORT METADATA =====
+const CODE_LINES = [
+  'import java.util.ArrayList;',
+  'import java.util.HashMap;',
+  '',
+  'public class VillainTracker {',
+  '',
+  '    public static void main(String[] args) {',
+  '',
+  '        ArrayList villains = new ArrayList();',
+  '',
+  '        villains.add("Shadow Mox");',
+  '        villains.add("Plague Vesper");',
+  '        villains.add("Doctor Nullius");',
+  '',
+  '        HashMap<String, String> threatLevels = new HashMap<>();',
+  '',
+  '        threatLevels.put("Shadow Mox", "HIGH");',
+  '        threatLevels.put("Plague Vesper", "CRITICAL");',
+  '        threatLevels.put("Doctor Nullius", "EXTREME");',
+  '',
+  '        System.out.println("--- Villain Threat Report ---");',
+  '',
+  '        for (Object villain : villains) {',
+  '',
+  '            String threat = threatLevels.get("doctor nullius");',
+  '',
+  '            System.out.println(villain + ": " + threat);',
+  '        }',
+  '',
+  '    }',
+  '}',
+];
+
+const Q_META = [
+  { id: 'q1', anchor: 'Line 8',           label: 'ArrayList generics declaration' },
+  { id: 'q2', anchor: 'Lines 10-12',      label: 'ArrayList indexing' },
+  { id: 'q3', anchor: 'Line 14',          label: 'HashMap key/value types' },
+  { id: 'q4', anchor: 'Lines 16-18, 24',  label: 'HashMap null return behavior' },
+  { id: 'q5', anchor: 'Line 22',          label: 'Enhanced for-loop type mismatch (Bug 3)' },
+  { id: 'q6', anchor: 'Full program',     label: 'Full console trace (all bugs fixed)' },
+];
+
+const BUG_META = [
+  { bugIndex: 0, line: 8,  label: 'Raw ArrayList (generics missing)',
+    original: 'ArrayList villains = new ArrayList();',
+    fix:      'ArrayList<String> villains = new ArrayList<>();' },
+  { bugIndex: 1, line: 24, label: 'HashMap key casing mismatch (Logic)',
+    original: 'String threat = threatLevels.get("doctor nullius");',
+    fix:      'String threat = threatLevels.get(villain);' },
+  { bugIndex: 2, line: 22, label: 'Enhanced for-loop type mismatch (Type safety)',
+    original: 'for (Object villain : villains) {',
+    fix:      'for (String villain : villains) {' },
+];
+
 // ===== EXPORT =====
 function exportPredictions() {
-  const questions = [
-    {
-      id: 'q1',
-      anchor: 'ArrayList declaration (line 8)',
-      text: 'This ArrayList is missing something in its declaration. Before moving on -- what is missing and why does it matter in Java?'
-    },
-    {
-      id: 'q2',
-      anchor: 'ArrayList add calls (lines 10-12)',
-      text: 'Three items are added to the list. What is the index of the last item? What happens if you try to access index 3?'
-    },
-    {
-      id: 'q3',
-      anchor: 'HashMap declaration (line 14)',
-      text: 'This HashMap maps one type to another. What are the key and value types, and what does each represent?'
-    },
-    {
-      id: 'q4',
-      anchor: 'HashMap put and get calls (lines 16-18, 24)',
-      text: 'When a HashMap .get() call uses a key that does not exist in the map, what does Java return? What does that mean for how the output line prints?'
-    },
-    {
-      id: 'q5',
-      anchor: 'Enhanced for loop (line 22)',
-      text: 'Walk through what happens when this loop runs as written. What does Java actually know about each element? Why is Object the wrong choice here, and what makes your fix correct?'
-    },
-    {
-      id: 'q6',
-      anchor: 'Full program',
-      text: 'You have identified all three bugs and written your fixes above. Now write the exact output this program should produce once all three are corrected.'
-    }
-  ];
+  const out = [];
 
-  const bugLines = BUGS.map((bug, i) => {
-    const input = document.getElementById(bug.inputEl);
-    const status = bug.fixed ? 'Fixed' : bug.identified ? 'Identified (attempt in progress)' : 'Not yet addressed';
-    return `### Bug ${i + 1} (line ${bug.lineEl.replace('cl-', '')})\n- Status: ${status}\n- Current value: \`${input.value.trim()}\``;
-  }).join('\n\n');
+  out.push('# Hero HQ -- Villain Tracker Debug Session');
+  out.push('**Week 3, Thursday | Topic: ArrayList, HashMap, enhanced for-loop**');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## Java Program: VillainTracker.java');
+  out.push('');
+  out.push('```java');
+  CODE_LINES.forEach(l => out.push(l));
+  out.push('```');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## My Predictions');
+  out.push('');
 
-  const answers = questions.map(q => {
-    const val = document.getElementById(q.id).value.trim();
-    return `### Q${q.id.replace('q','')} -- ${q.anchor}\n**Question:** ${q.text}\n\n**Student prediction:**\n${val || '(no response)'}`;
-  }).join('\n\n---\n\n');
+  Q_META.forEach((q, i) => {
+    const el  = document.getElementById(q.id);
+    const ans = el ? el.value.trim() : '';
+    out.push(`### Q${i + 1}: ${q.label}`);
+    out.push(`_Anchor: ${q.anchor}_`);
+    out.push('');
+    out.push('**My answer:**');
+    out.push('');
+    out.push(ans || '_(no answer entered)_');
+    out.push('');
+  });
 
-  const aiPrompt = `## AI Review Prompt
-  
-I am a Java bootcamp student. The document above contains a buggy Java program and my predictions about what it does.
+  out.push('---');
+  out.push('');
+  out.push('## Bug Fix Attempts');
+  out.push('');
+
+  BUG_META.forEach((b, i) => {
+    const wasFixed = BUGS[b.bugIndex].fixed;
+    out.push(`**Line ${b.line} -- ${b.label}**`);
+    out.push(`- Status: ${wasFixed ? 'Fixed correctly' : 'Not yet fixed'}`);
+    out.push(`- Original code: \`${b.original}\``);
+    out.push(`- Correct fix:   \`${b.fix}\``);
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## AI Review Prompt');
+  out.push('');
+  out.push('> Copy everything above this section into Claude, ChatGPT, or Gemini,');
+  out.push('> then send the message below exactly as written.');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push(
+`I am a Java bootcamp student. The document above contains a buggy Java program and my predictions about what it does.
 
 Please do the following:
 
@@ -1086,15 +1149,17 @@ Please do the following:
 5. Close with two or three follow-up questions I should think about before our class discussion -- questions that push me one level deeper than what the session covered.
 
 Be accurate first. Credit what is right, then address genuine gaps. Do not manufacture criticism where the answer is sound.`
-  ;
+  );
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('_Generated by Hero HQ Villain Tracker Debug Session_');
 
-  const md = `# Hero HQ -- Villain Tracker Debug Session\n## Week 3, Thursday -- Student Predictions\n\n---\n\n## Bug Tracker\n\n${bugLines}\n\n---\n\n## Guided Questions\n\n${answers}\n\n${aiPrompt}\n`;
-
-  const blob = new Blob([md], { type: 'text/markdown' });
+  const blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'villain-tracker-predictions.md';
+  a.download = 'villain-tracker-answers.md';
   a.click();
   URL.revokeObjectURL(url);
 }

@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1080">
 <title>Island Logic -- Debug &amp; Trace Session</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%231e5f74'/><ellipse cx='16' cy='27' rx='12' ry='5' fill='%23f0c040'/><path d='M16 27 Q15 21 18 12' stroke='%238B5E3C' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M18 12 Q11 8 7 11' stroke='%232d6a4f' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M18 12 Q25 9 27 13' stroke='%232d6a4f' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M18 12 Q18 5 20 3' stroke='%232d6a4f' stroke-width='3' stroke-linecap='round' fill='none'/></svg>">
+<script>(function(){var t=localStorage.getItem('claude-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=DM+Sans:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -125,7 +127,7 @@
   #layout {
     display: flex;
     height: 100vh;
-    padding-top: 56px;
+    padding-top: 104px;
   }
 
   /* LEFT: CODE PANEL */
@@ -211,9 +213,9 @@
     vertical-align: middle;
   }
 
-  /* Bug rows */
-  tr.bug-row { background: var(--fix-row-bg); }
-  tr.bug-row td.ln { color: #f5a97a; }
+  /* Bug rows -- yellow highlight */
+  tr.bug-row { background: #1e1c0a; }
+  tr.bug-row td.ln { color: var(--gold-light); border-left: 3px solid var(--code-str); }
   tr.bug-row td.code { padding-right: 12px; }
 
   /* Editable input inside bug row */
@@ -279,73 +281,79 @@
     font-style: italic;
   }
 
-  /* Bug board */
-  #bug-board {
+  /* ─── Bug tracker bar ─── */
+  .bug-bar {
+    position: fixed;
+    top: 56px;
+    left: 0; right: 0;
+    z-index: 90;
     background: var(--card-bg);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 11px 14px;
-    margin-bottom: 14px;
+    border-bottom: 1.5px solid var(--border);
+    padding: 0 20px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
     box-shadow: 0 2px 8px var(--shadow);
   }
 
-  #bug-board h3 {
+  .bug-bar-label {
     font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
     font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--coral);
-    margin-bottom: 7px;
+    flex-shrink: 0;
   }
 
-  .bug-item {
+  .bug-dots {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .bug-dot-wrap {
     display: flex;
     align-items: center;
-    gap: 9px;
-    padding: 5px 0;
-    border-top: 1px solid var(--border);
-    font-size: 14px;
-    color: var(--text-mid);
+    gap: 7px;
   }
-
-  .bug-item:first-of-type { border-top: none; }
 
   .bug-dot {
     width: 13px; height: 13px;
     border-radius: 50%;
-    background: #ddd;
-    border: 2px solid #bbb;
+    background: #ccc;
+    border: 2px solid #aaa;
     flex-shrink: 0;
     transition: background 0.35s, border-color 0.35s;
   }
 
   .bug-dot.found { background: var(--coral); border-color: var(--coral-dark); }
   .bug-dot.fixed { background: #3aae5c; border-color: #2a8e4c; }
-  .bug-dot.found + span { font-weight: 600; }
-  .bug-dot.fixed + span { font-weight: 600; color: #1e4f3a; }
 
-  .bug-kind {
-    font-size: 10px;
+  .bug-dot-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 1px 5px;
-    border-radius: 3px;
-    margin-left: auto;
-    flex-shrink: 0;
+    color: var(--text-light);
   }
 
-  .kind-logic  { background: #fef3e2; color: #c45800; border: 1px solid #f5c98c; }
-  .kind-syntax { background: #fce8e8; color: #a33822; border: 1px solid #f5a897; }
+  .bug-dot.found + .bug-dot-label { font-weight: 700; color: var(--text-main); }
+  .bug-dot.fixed + .bug-dot-label { font-weight: 700; color: #1e4f3a; }
 
   /* Section divider */
   .section-divider {
     display: flex;
     align-items: center;
     gap: 9px;
-    margin: 4px 0 11px 0;
+    margin: 0 0 11px 0;
+    padding: 4px 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--sand-light);
   }
 
   .section-divider .sdlabel {
@@ -466,6 +474,73 @@
     text-transform: uppercase;
     color: #7aad8a;
   }
+
+  /* ===== THEME TOGGLE BUTTON ===== */
+  html { color-scheme: light; }
+  .btn-theme {
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--palm-dark);
+    color: #fff8ee;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .btn-theme:hover { background: var(--palm); }
+  .btn-theme:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+
+  /* ===== DARK MODE ===== */
+  html[data-theme="dark"] { color-scheme: dark; }
+  html[data-theme="dark"] body                   { background: #121a0f; }
+  html[data-theme="dark"] #topbar                { background: var(--ocean-dark); }
+  html[data-theme="dark"] .bug-bar               { background: #1c2a1c; border-bottom-color: #2a4a30; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  html[data-theme="dark"] .bug-bar-label         { color: var(--coral); }
+  html[data-theme="dark"] .bug-dot               { background: #3a5a40; border-color: #2a4a30; }
+  html[data-theme="dark"] .bug-dot-label         { color: #7aad8a; }
+  html[data-theme="dark"] .bug-dot.found + .bug-dot-label { color: #e8f4ea; }
+  html[data-theme="dark"] .bug-dot.fixed + .bug-dot-label { color: #3aae5c; }
+  html[data-theme="dark"] #question-panel        { background: #121a0f; }
+  html[data-theme="dark"] #q-panel-header h2     { color: #a8d8b0; }
+  html[data-theme="dark"] #q-panel-header p      { color: #5a9e7a; }
+  html[data-theme="dark"] .section-divider       { background: #121a0f; }
+  html[data-theme="dark"] .section-divider::before,
+  html[data-theme="dark"] .section-divider::after { background: #2a4a30; }
+  html[data-theme="dark"] .sdlabel               { color: #5a9e7a; }
+  html[data-theme="dark"] .q-card                { background: #1c2a1c; border-color: #2a4a30; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  html[data-theme="dark"] .q-number              { background: var(--ocean-dark); }
+  html[data-theme="dark"] .q-anchor              { color: #5a9e7a; }
+  html[data-theme="dark"] .q-text                { color: #e8f4ea; }
+  html[data-theme="dark"] .q-text code           { background: #0f2a1e; color: var(--gold-light); }
+  html[data-theme="dark"] .q-input               { background: #162010; border-color: #2a4a30; color: #e8f4ea; }
+  html[data-theme="dark"] .q-input::placeholder  { color: #5a9e7a; }
+  html[data-theme="dark"] .q-input:focus         { border-color: var(--ocean); }
+  html[data-theme="dark"] .fix-prompt            { background: #162e1f; border-color: #4a9e5c; }
+  html[data-theme="dark"] .fix-prompt-label      { color: #7aad8a; }
+  html[data-theme="dark"] .btn-theme             { background: var(--palm); }
+  html[data-theme="dark"] .btn-theme:hover       { background: var(--palm-dark); }
+
+  /* ===== LIGHT MODE code panel ===== */
+  html[data-theme="light"] #code-panel            { background: #f0f8f2; border-right-color: var(--border); }
+  html[data-theme="light"] #code-header           { background: #e0f0e8; border-bottom-color: #b8d8c0; }
+  html[data-theme="light"] .filename              { color: var(--palm-dark); }
+  html[data-theme="light"] #code-body             { background: #f0f8f2; }
+  html[data-theme="light"] td.ln                  { color: #4a8060; border-right-color: #b8d8c0; }
+  html[data-theme="light"] td.code                { color: #1a3a22; }
+  html[data-theme="light"] .kw                    { color: #005c80; }
+  html[data-theme="light"] .ty                    { color: #2a6040; }
+  html[data-theme="light"] .str                   { color: #8a5800; }
+  html[data-theme="light"] .num                   { color: #8a4000; }
+  html[data-theme="light"] tr.bug-row             { background: #fef6e4; }
+  html[data-theme="light"] tr.bug-row td.ln       { color: #9a5800; border-left-color: #d4a000; }
+  html[data-theme="light"] .bug-input             { color: #1a3a22; border-color: var(--palm); }
+  html[data-theme="light"] .bug-input.correct     { background: var(--fix-correct); color: var(--fix-correct-t); }
 </style>
 </head>
 <body>
@@ -474,10 +549,32 @@
   <h1>&#127965; Island Logic</h1>
   <span class="subtitle">Debug &amp; Trace Session</span>
   <div style="flex:1"></div>
+  <button class="btn-theme" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch to dark mode">
+    <span id="theme-icon" aria-hidden="true">🌙</span>
+  </button>
   <button class="top-btn" id="export-btn" onclick="exportMarkdown()" disabled>
     &#11015; Export Answers
   </button>
   <button class="top-btn" id="reset-btn" onclick="resetAll()">&#x21BA; Reset</button>
+</div>
+
+<!-- ─── Bug tracker bar ─── -->
+<div class="bug-bar" role="region" aria-label="Bug tracker">
+  <span class="bug-bar-label">&#128030; Bug Tracker</span>
+  <div class="bug-dots" role="list">
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-1" aria-label="Bug 1 status: not yet identified"></div>
+      <span class="bug-dot-label">Derived getter</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-2" aria-label="Bug 2 status: not yet identified"></div>
+      <span class="bug-dot-label">isWinning() threshold</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-3" aria-label="Bug 3 status: not yet identified"></div>
+      <span class="bug-dot-label">applyBonus overload</span>
+    </div>
+  </div>
 </div>
 
 <div id="layout">
@@ -503,25 +600,6 @@
     <div id="q-panel-header">
       <h2>Senior Dev Review</h2>
       <p>Read the code. Commit to a prediction. Then reveal.</p>
-    </div>
-
-    <div id="bug-board">
-      <h3>&#128030; Bug Tracker -- 3 bugs in this file</h3>
-      <div class="bug-item">
-        <div class="bug-dot" id="dot-1"></div>
-        <span>Derived getter output</span>
-        <span class="bug-kind kind-logic">Logic</span>
-      </div>
-      <div class="bug-item">
-        <div class="bug-dot" id="dot-2"></div>
-        <span>isWinning() threshold</span>
-        <span class="bug-kind kind-logic">Logic</span>
-      </div>
-      <div class="bug-item">
-        <div class="bug-dot" id="dot-3"></div>
-        <span>applyBonus overload</span>
-        <span class="bug-kind kind-syntax">Syntax</span>
-      </div>
     </div>
 
     <div class="section-divider"><span class="sdlabel">Contestant class</span></div>
@@ -947,9 +1025,9 @@ Please do the following:
 
 2. For any question I left blank, give the correct answer and explain why it matters.
 
-3. For Q7, assume all three bugs have been fixed when evaluating my console trace prediction.
+3. For the final question, assume all three bugs have been fixed when evaluating my console trace prediction.
 
-4. For each of the three bugs: explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves.
+4. For each of the bugs: explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves.
 
 5. Close with two or three follow-up questions I should think about before our class discussion -- questions that push me one level deeper than what the session covered.
 
@@ -972,6 +1050,27 @@ Be accurate first. Credit what is right, then address genuine gaps. Do not manuf
 /* INIT */
 buildCode();
 checkExportEnabled();
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(t);
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('claude-theme', t);
+  const icon = document.getElementById('theme-icon');
+  const btn  = document.getElementById('theme-toggle');
+  if (t === 'dark') {
+    if (icon) icon.textContent = '☀';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to light mode');
+  } else {
+    if (icon) icon.textContent = '🌙';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to dark mode');
+  }
+}
+setTheme(document.documentElement.getAttribute('data-theme') || 'light');
 </script>
 </body>
 </html>

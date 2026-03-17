@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1080">
 <title>Dungeon Decisions -- Debug &amp; Trace</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='3' fill='%2323201a'/><path d='M7 30 L7 14 A9 9 0 0 1 25 14 L25 30 Z' fill='%23c97c09'/><path d='M10 30 L10 16 A6 6 0 0 1 22 16 L22 30 Z' fill='%230d0b08'/></svg>">
+<script>(function(){var t=localStorage.getItem('claude-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -146,7 +148,7 @@
   #layout {
     display: flex;
     height: 100vh;
-    padding-top: 54px;
+    padding-top: 102px;
   }
 
   /* ─── Left: code panel ─── */
@@ -236,9 +238,9 @@
     vertical-align: middle;
   }
 
-  /* Bug rows */
-  tr.bug-row { background: var(--fix-row-bg); }
-  tr.bug-row td.ln { color: var(--amber-glow); }
+  /* Bug rows -- yellow highlight */
+  tr.bug-row { background: #1c1a0e; }
+  tr.bug-row td.ln { color: var(--amber-glow); border-left: 3px solid var(--amber-dim); }
 
   /* Editable fix input */
   .bug-input {
@@ -287,36 +289,43 @@
     scrollbar-color: var(--stone-600) var(--stone-900);
   }
 
-  /* Bug tracker */
-  #bug-board {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 9px;
-    padding: 11px 14px;
-    margin-bottom: 14px;
+  /* ─── Bug tracker bar ─── */
+  .bug-bar {
+    position: fixed;
+    top: 54px;
+    left: 0; right: 0;
+    z-index: 90;
+    background: var(--stone-800);
+    border-bottom: 1px solid var(--stone-600);
+    padding: 0 22px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
 
-  #bug-board h3 {
+  .bug-bar-label {
     font-family: 'Cinzel', serif;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ember);
-    margin-bottom: 8px;
+    flex-shrink: 0;
   }
 
-  .bug-item {
+  .bug-dots {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .bug-dot-wrap {
     display: flex;
     align-items: center;
-    gap: 9px;
-    padding: 5px 0;
-    border-top: 1px solid var(--card-border);
-    font-size: 14px;
-    color: var(--stone-300);
+    gap: 7px;
   }
-
-  .bug-item:first-of-type { border-top: none; }
 
   .bug-dot {
     width: 13px; height: 13px;
@@ -329,30 +338,30 @@
 
   .bug-dot.found { background: var(--ember); border-color: var(--ember-dark); }
   .bug-dot.fixed { background: var(--sage); border-color: var(--sage-dark); }
-  .bug-dot.found ~ span { font-weight: 600; color: var(--stone-100); }
-  .bug-dot.fixed ~ span { font-weight: 600; color: #7ec89a; }
 
-  .bug-kind {
+  .bug-dot-label {
     font-family: 'Cinzel', serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin-left: auto;
-    flex-shrink: 0;
+    color: var(--stone-400);
   }
 
-  .kind-logic  { background: rgba(245,168,33,0.15); color: var(--amber-bright); border: 1px solid var(--amber-deep); }
-  .kind-string { background: rgba(158,200,110,0.12); color: #9ec86e; border: 1px solid #4a6e2a; }
+  .bug-dot.found + .bug-dot-label { color: var(--stone-100); }
+  .bug-dot.fixed + .bug-dot-label { color: #7ec89a; }
 
   /* Section divider */
   .s-div {
     display: flex;
     align-items: center;
     gap: 9px;
-    margin: 6px 0 11px;
+    margin: 0 0 11px;
+    padding: 6px 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--stone-900);
   }
 
   .s-div::before, .s-div::after {
@@ -475,6 +484,74 @@
     text-transform: uppercase;
     color: var(--amber-dim);
   }
+
+  /* ===== THEME TOGGLE BUTTON ===== */
+  html { color-scheme: dark; }
+  .btn-theme {
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--stone-600);
+    color: var(--stone-300);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-theme:hover { background: var(--stone-700); border-color: var(--stone-500); }
+  .btn-theme:focus-visible { outline: 2px solid var(--amber-bright); outline-offset: 2px; }
+
+  /* ===== LIGHT MODE ===== */
+  html[data-theme="light"] { color-scheme: light; }
+  html[data-theme="light"] body                  { background: #f5ede0; color: #1a1208; }
+  html[data-theme="light"] #question-panel        { background: #f5ede0; }
+  html[data-theme="light"] .s-div                 { background: #f5ede0; }
+  html[data-theme="light"] .s-div::before,
+  html[data-theme="light"] .s-div::after          { background: #c8b8a0; }
+  html[data-theme="light"] .s-div span            { color: #8a7060; }
+  html[data-theme="light"] .q-card                { background: #ffffff; border-color: #d8c8b0; box-shadow: 0 2px 8px rgba(60,40,10,0.08); }
+  html[data-theme="light"] .q-num-badge           { background: #332c22; color: var(--amber-bright); border-color: var(--stone-600); }
+  html[data-theme="light"] .q-anchor              { color: #6a5040; }
+  html[data-theme="light"] .q-text                { color: #1e1008; }
+  html[data-theme="light"] .q-text code           { background: #ede0cc; color: var(--amber-deep); }
+  html[data-theme="light"] .q-input               { background: #f0e8d8; border-color: #c8b0a0; color: #1e1008; }
+  html[data-theme="light"] .q-input::placeholder  { color: #8a7060; font-style: italic; }
+  html[data-theme="light"] .q-input:focus         { border-color: var(--amber-dim); }
+  html[data-theme="light"] .fix-prompt            { background: rgba(245,168,33,0.08); border-color: var(--amber-dim); }
+  html[data-theme="light"] .fix-prompt-lbl        { color: var(--amber-deep); }
+  /* Topbar and bug bar switch to warm parchment */
+  html[data-theme="light"] .topbar                { background: #f5ede0; border-bottom-color: #c8b8a0; box-shadow: 0 2px 16px rgba(60,40,10,0.12); }
+  html[data-theme="light"] .tb-title              { color: var(--amber-deep); }
+  html[data-theme="light"] .tb-sub                { color: #6a5040; }
+  html[data-theme="light"] .btn-theme             { color: #3a2818; border-color: #c8b8a0; background: transparent; }
+  html[data-theme="light"] .bug-bar               { background: #f0e4d0; border-bottom-color: #c8b8a0; box-shadow: 0 2px 8px rgba(60,40,10,0.1); }
+  html[data-theme="light"] .bug-bar-label         { color: var(--amber-deep); }
+  html[data-theme="light"] .bug-dot               { background: #c8b8a0; border-color: #a09080; }
+  html[data-theme="light"] .bug-dot-label         { color: #6a5040; }
+  /* Code panel switches to warm parchment */
+  html[data-theme="light"] #code-panel            { background: #faf5ec; border-right-color: #c8b8a0; }
+  html[data-theme="light"] #code-header           { background: #f0e4d0; border-bottom-color: #c8b8a0; }
+  html[data-theme="light"] .filename              { color: var(--amber-deep); }
+  html[data-theme="light"] .lang-badge            { background: #e8d8c0; color: #3a2818; }
+  html[data-theme="light"] .edit-hint             { color: #8a7060; }
+  html[data-theme="light"] #code-body             { background: #faf5ec; }
+  html[data-theme="light"] td.ln                  { color: #8a7060; border-right-color: #d8c8b0; }
+  html[data-theme="light"] td.code                { color: #1a1208; }
+  html[data-theme="light"] .kw                    { color: #9a4000; }
+  html[data-theme="light"] .ty                    { color: #7a3e00; }
+  html[data-theme="light"] .str                   { color: #3a7000; }
+  html[data-theme="light"] .num                   { color: #0055aa; }
+  html[data-theme="light"] .bl                    { color: #5500cc; }
+  html[data-theme="light"] .mth                   { color: #5500cc; }
+  html[data-theme="light"] tr.bug-row             { background: #fef6e4; }
+  html[data-theme="light"] tr.bug-row td.ln       { color: #9a5800; border-left-color: #c97c09; }
+  html[data-theme="light"] .bug-input             { color: #1a1208; border-color: var(--amber-dim); }
+  html[data-theme="light"] .bug-input.correct     { background: var(--fix-correct); color: var(--fix-correct-t); }
 </style>
 </head>
 <body>
@@ -484,12 +561,34 @@
   <div class="tb-title">&#9876; Dungeon Decisions</div>
   <div class="tb-sub">Debug &amp; Trace -- Week 1, Thursday</div>
   <div class="tb-spacer"></div>
+  <button class="btn-theme" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode">
+    <span id="theme-icon" aria-hidden="true">☀</span>
+  </button>
   <button class="top-btn" id="btn-export" onclick="exportMarkdown()" disabled aria-label="Export answers as Markdown file">
     &#11015; Export Answers
   </button>
   <button class="top-btn" id="btn-reset" onclick="resetAll()" aria-label="Reset all inputs and bug fixes">
     &#8635; Reset
   </button>
+</div>
+
+<!-- ─── Bug tracker bar ─── -->
+<div class="bug-bar" role="region" aria-label="Bug tracker">
+  <span class="bug-bar-label">&#128030; Bug Tracker</span>
+  <div class="bug-dots" role="list">
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-1" aria-label="Bug 1 status: not yet identified"></div>
+      <span class="bug-dot-label">Branch order</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-2" aria-label="Bug 2 status: not yet identified"></div>
+      <span class="bug-dot-label">String comparison</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-3" aria-label="Bug 3 status: not yet identified"></div>
+      <span class="bug-dot-label">Impossible &amp;&amp;</span>
+    </div>
+  </div>
 </div>
 
 <div id="layout">
@@ -513,26 +612,6 @@
 
   <!-- ─── Right: questions ─── -->
   <div id="question-panel" aria-label="Trace questions">
-
-    <!-- Bug tracker -->
-    <div id="bug-board" role="region" aria-label="Bug tracker">
-      <h3>&#128030; Bug Tracker -- 3 bugs in this file</h3>
-      <div class="bug-item">
-        <div class="bug-dot" id="dot-1"></div>
-        <span>Branch order -- Champion unreachable</span>
-        <span class="bug-kind kind-logic">Logic</span>
-      </div>
-      <div class="bug-item">
-        <div class="bug-dot" id="dot-2"></div>
-        <span>String comparison method</span>
-        <span class="bug-kind kind-string">String</span>
-      </div>
-      <div class="bug-item">
-        <div class="bug-dot" id="dot-3"></div>
-        <span>Impossible && condition</span>
-        <span class="bug-kind kind-logic">Logic</span>
-      </div>
-    </div>
 
     <div class="s-div"><span>Variables</span></div>
 
@@ -936,6 +1015,27 @@ Be accurate first. Credit what is right, then address genuine gaps. Do not manuf
 
 buildCode();
 checkExportEnabled();
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(t);
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('claude-theme', t);
+  const icon = document.getElementById('theme-icon');
+  const btn  = document.getElementById('theme-toggle');
+  if (t === 'dark') {
+    if (icon) icon.textContent = '☀';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to light mode');
+  } else {
+    if (icon) icon.textContent = '🌙';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to dark mode');
+  }
+}
+setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
 </script>
 </body>
 </html>

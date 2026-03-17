@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1080">
 <title>Hero HQ // Villain Tracker Debug Session</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='14' r='11' fill='%23e8334a'/><rect x='9' y='22' width='14' height='8' rx='3' fill='%23e8334a'/><circle cx='12' cy='13' r='2.5' fill='%230d0f1a'/><circle cx='20' cy='13' r='2.5' fill='%230d0f1a'/><rect x='11' y='24' width='2.5' height='5' rx='1' fill='%230d0f1a'/><rect x='15' y='23' width='2.5' height='6' rx='1' fill='%230d0f1a'/><rect x='19' y='24' width='2.5' height='5' rx='1' fill='%230d0f1a'/></svg>">
+<script>(function(){var t=localStorage.getItem('claude-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -462,6 +464,62 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ===== THEME TOGGLE BUTTON ===== */
+  html { color-scheme: dark; }
+  .btn-theme {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    width: 48px;
+    padding: 0;
+    font-size: 18px;
+  }
+  .btn-theme:not(:disabled):hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .btn-theme:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+
+  /* ===== LIGHT MODE ===== */
+  html[data-theme="light"] { color-scheme: light; }
+  html[data-theme="light"] body             { background: #f0f2f8; color: #1c1e2e; }
+  html[data-theme="light"] .hq-header       { background: #ffffff; }
+  html[data-theme="light"] .hq-subtitle     { color: #4a5278; border-left-color: #d0d4e6; }
+  html[data-theme="light"] .hq-week-tag     { color: #6a708a; }
+  html[data-theme="light"] .bug-board       { background: #f4f5fc; border-bottom-color: #d0d4e6; }
+  html[data-theme="light"] .bug-board-label { color: #4a5278; }
+  html[data-theme="light"] .bug-dot         { background: #c0c4d6; border-color: #a0a8c0; }
+  html[data-theme="light"] .bug-dot-label   { color: #6a708a; }
+  html[data-theme="light"] .progress-pill   { color: #6a708a; border-color: #d0d4e6; }
+  html[data-theme="light"] .btn-reset       { color: #4a5278; border-color: #d0d4e6; }
+  html[data-theme="light"] .btn-theme       { color: #4a5278; border-color: #d0d4e6; }
+  html[data-theme="light"] .right-panel     { background: #f0f2f8; }
+  html[data-theme="light"] .section-divider { background: #f0f2f8; border-bottom-color: #d0d4e6; }
+  html[data-theme="light"] .section-title   { color: #4a5278; }
+  html[data-theme="light"] .question-block  { border-bottom-color: #d0d4e6; }
+  html[data-theme="light"] .question-anchor { color: #2a6fdd; }
+  html[data-theme="light"] .question-text   { color: #1c1e2e; }
+  html[data-theme="light"] .prediction-input { background: #e8eaf8; border-color: #d0d4e6; color: #1c1e2e; }
+  html[data-theme="light"] .prediction-input::placeholder { color: #6a708a; }
+  html[data-theme="light"] .prediction-input:focus { border-color: var(--accent-blue); }
+  html[data-theme="light"] .left-panel      { background: #f0f2f8; }
+  html[data-theme="light"] .code-header     { background: #e8eaf4; border-bottom-color: #d0d4e6; }
+  html[data-theme="light"] .code-filename   { color: #7a6000; }
+  html[data-theme="light"] .code-tag        { color: #6a708a; }
+  html[data-theme="light"] .line-num        { color: #8890b0; }
+  html[data-theme="light"] .line-content    { color: #1c1e2e; }
+  html[data-theme="light"] .kw              { color: #c0135a; }
+  html[data-theme="light"] .ty              { color: #0077aa; }
+  html[data-theme="light"] .st              { color: #7c6400; }
+  html[data-theme="light"] .mt              { color: #1a7a3a; }
+  html[data-theme="light"] .nm              { color: #7c3ae0; }
+  html[data-theme="light"] .vr              { color: #2a3060; }
+  html[data-theme="light"] .cm              { color: #8890b0; }
+  html[data-theme="light"] .code-line:hover { background: rgba(0,0,0,0.04); }
+  html[data-theme="light"] .code-line.editable                      { background: #fef8e6; border-left-color: var(--accent-yellow); }
+  html[data-theme="light"] .code-line.editable input.line-edit      { color: #8a6000; }
+  html[data-theme="light"] .code-line.editable.fixed                { background: #eafdf0; border-left-color: var(--dot-green); }
+  html[data-theme="light"] .code-line.editable.fixed input.line-edit { color: #1a7a3a; }
+  html[data-theme="light"] .bug-callout                             { color: #8a6000; }
+  html[data-theme="light"] .code-line.editable.fixed .bug-callout   { color: var(--dot-green); }
 </style>
 </head>
 <body>
@@ -471,6 +529,9 @@
   <div class="hq-logo">Hero <span>HQ</span></div>
   <div class="hq-subtitle">Debug Session // Villain Tracker</div>
   <div class="hq-week-tag">Week 3 &nbsp;&bull;&nbsp; Thursday</div>
+  <button class="btn btn-theme" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode">
+    <span id="theme-icon" aria-hidden="true">☀</span>
+  </button>
 </header>
 
 <!-- BUG TRACKER BOARD -->
@@ -772,7 +833,7 @@
     <!-- Q4 -->
     <div class="question-block">
       <span class="question-anchor">Anchored to: HashMap put and get calls (lines 16-18, 24)</span>
-      <p class="question-text">Look carefully at the keys being added. Now look at how they are retrieved later. Will every lookup succeed? Type your reasoning.</p>
+      <p class="question-text">When a HashMap .get() call uses a key that does not exist in the map, what does Java return? What does that mean for how the output line prints?</p>
       <textarea
         class="prediction-input"
         id="q4"
@@ -791,7 +852,7 @@
     <!-- Q5 -->
     <div class="question-block">
       <span class="question-anchor">Anchored to: enhanced for loop (line 22)</span>
-      <p class="question-text">The loop variable is declared as a specific type. Is that type correct given how the ArrayList was declared? Predict what prints for each iteration -- including any surprises.</p>
+      <p class="question-text">Walk through what happens when this loop runs as written. What does Java actually know about each element? Why is Object the wrong choice here, and what makes your fix correct?</p>
       <textarea
         class="prediction-input"
         id="q5"
@@ -804,7 +865,7 @@
     <!-- Q6 -->
     <div class="question-block">
       <span class="question-anchor">Anchored to: full program</span>
-      <p class="question-text">All three bugs considered -- write out what this program outputs right now. Then write what it should output when all three are fixed.</p>
+      <p class="question-text">You have identified all three bugs and written your fixes above. Now write the exact output this program should produce once all three are corrected.</p>
       <textarea
         class="prediction-input"
         id="q6"
@@ -983,17 +1044,17 @@ function exportPredictions() {
     {
       id: 'q4',
       anchor: 'HashMap put and get calls (lines 16-18, 24)',
-      text: 'Look carefully at the keys being added. Now look at how they are retrieved later. Will every lookup succeed? Type your reasoning.'
+      text: 'When a HashMap .get() call uses a key that does not exist in the map, what does Java return? What does that mean for how the output line prints?'
     },
     {
       id: 'q5',
       anchor: 'Enhanced for loop (line 22)',
-      text: 'The loop variable is declared as a specific type. Is that type correct given how the ArrayList was declared? Predict what prints for each iteration -- including any surprises.'
+      text: 'Walk through what happens when this loop runs as written. What does Java actually know about each element? Why is Object the wrong choice here, and what makes your fix correct?'
     },
     {
       id: 'q6',
       anchor: 'Full program',
-      text: 'All three bugs considered -- write out what this program outputs right now. Then write what it should output when all three are fixed.'
+      text: 'You have identified all three bugs and written your fixes above. Now write the exact output this program should produce once all three are corrected.'
     }
   ];
 
@@ -1008,11 +1069,24 @@ function exportPredictions() {
     return `### Q${q.id.replace('q','')} -- ${q.anchor}\n**Question:** ${q.text}\n\n**Student prediction:**\n${val || '(no response)'}`;
   }).join('\n\n---\n\n');
 
-  const aiPrompt = `---
+  const aiPrompt = `## AI Review Prompt
+  
+I am a Java bootcamp student. The document above contains a buggy Java program and my predictions about what it does.
 
-## AI Review Prompt
+Please do the following:
 
-Review these student predictions about Java ArrayList and HashMap behavior. For each prediction, note what is correct, what is incomplete, and what misconception if any is present. Focus on collections, generics, and loop variable types. The program contains three structural bugs: (1) a raw-type ArrayList missing String generics, (2) a HashMap .get() call using a lowercase key that does not match the original casing, and (3) an enhanced for loop using Object as the variable type instead of String. Evaluate whether the student identified each bug, and whether their predicted output accounts for null returns from .get() when keys do not match.`;
+1. For each of my predictions, tell me what I got right and what I missed. If my answer is correct, confirm it briefly and move on. Only flag a misconception if one is genuinely present -- do not manufacture criticism where the answer is sound.
+
+2. For any question I left blank, give the correct answer and explain why it matters.
+
+3. For the final question, assume all three bugs have been fixed when evaluating my console trace prediction.
+
+4. For each of the bugs: explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves.
+
+5. Close with two or three follow-up questions I should think about before our class discussion -- questions that push me one level deeper than what the session covered.
+
+Be accurate first. Credit what is right, then address genuine gaps. Do not manufacture criticism where the answer is sound.`
+  ;
 
   const md = `# Hero HQ -- Villain Tracker Debug Session\n## Week 3, Thursday -- Student Predictions\n\n---\n\n## Bug Tracker\n\n${bugLines}\n\n---\n\n## Guided Questions\n\n${answers}\n\n${aiPrompt}\n`;
 
@@ -1027,6 +1101,27 @@ Review these student predictions about Java ArrayList and HashMap behavior. For 
 
 // Initialize export button state
 updateExportButton();
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(t);
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('claude-theme', t);
+  const icon = document.getElementById('theme-icon');
+  const btn  = document.getElementById('theme-toggle');
+  if (t === 'dark') {
+    if (icon) icon.textContent = '☀';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to light mode');
+  } else {
+    if (icon) icon.textContent = '🌙';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to dark mode');
+  }
+}
+setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
 </script>
 </body>
 </html>

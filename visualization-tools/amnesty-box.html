@@ -461,7 +461,10 @@
     <div class="header-eyebrow">Anonymous Feedback</div>
     <div class="header-title">The Amnesty Box</div>
   </div>
-  <div class="live-count"><span id="noteCount">0</span> notes on the board</div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+    <div class="live-count"><span id="noteCount">0</span> notes on the board</div>
+    <div id="sessionBadge" style="display:none;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--cork-dark);background:rgba(0,0,0,0.08);border-radius:4px;padding:3px 8px;">Session <span id="sessionNum"></span></div>
+  </div>
 </header>
 
 <!-- SUBMIT -->
@@ -524,9 +527,12 @@
 
 <script>
   // ── CONFIG ──────────────────────────────────────────────────────
-  const ABLY_KEY      = '%%ABLY_API_KEY%%';   // injected by GitHub Actions
-  const CHANNEL_NAME  = 'amnesty-wall';
-  const CLEAR_PASS    = 'bootcamp';            // change to your preferred password
+  const ABLY_KEY      = 'ABLY_PART_1ABLY_PART_2ABLY_PART_3ABLY_PART_4ABLY_PART_5';  // injected by GitHub Actions
+
+  // Session routing: read from URL hash e.g. amnesty-box.html#5
+  const SESSION       = (location.hash.replace('#', '') || '').replace(/[^1-9]/g, '');
+  const CHANNEL_NAME  = SESSION ? `amnesty-wall-${SESSION}` : 'amnesty-wall';
+  const CLEAR_PASS    = SESSION ? `111${SESSION}` : 'bootcamp';
   const MAX_CHARS     = 280;
 
   // ── STATE ────────────────────────────────────────────────────────
@@ -710,6 +716,10 @@
   });
 
   // ── INIT ──────────────────────────────────────────────────────────
+  if (SESSION) {
+    document.getElementById('sessionBadge').style.display = 'block';
+    document.getElementById('sessionNum').textContent = SESSION;
+  }
   initAbly();
 </script>
 </body>

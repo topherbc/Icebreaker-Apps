@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amnesty Box -- What Do You Wish We Spent More Time On?</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='10' width='24' height='20' rx='2' fill='%23fef9c3' stroke='%23c4a882' stroke-width='1.5'/><circle cx='16' cy='8' r='5' fill='%23c0392b'/><line x1='16' y1='13' x2='16' y2='30' stroke='%23a02020' stroke-width='2'/><line x1='7' y1='17' x2='25' y2='17' stroke='%23c4a882' stroke-width='1' opacity='0.6'/><line x1='7' y1='21' x2='22' y2='21' stroke='%23c4a882' stroke-width='1' opacity='0.6'/><line x1='7' y1='25' x2='20' y2='25' stroke='%23c4a882' stroke-width='1' opacity='0.6'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,7 +22,7 @@
     --cork-dark:    #a8885e;
     --ink:          #2c2418;
     --ink-soft:     #5a4f3e;
-    --ink-faint:    #9a8c78;
+    --ink-faint:    #6b5f4e;  /* was #9a8c78 — darkened to pass WCAG AA 4.5:1 on --bg */
     --note-1:       #fef9c3;
     --note-2:       #fce7d6;
     --note-3:       #ddf4e8;
@@ -77,7 +78,7 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--cork-dark);
+    color: var(--ink);  /* was --cork-dark (#a8885e) — only 1.5:1 on cork; ink gives 7:1 */
     margin-bottom: 4px;
   }
 
@@ -387,7 +388,7 @@
 
   .session-picker-sub {
     font-size: 15px;
-    color: var(--ink-soft);
+    color: var(--ink);  /* --ink-soft is 3.6:1 on cork backdrop — fails AA; use ink (7:1) */
     text-align: center;
     margin-top: -16px;
   }
@@ -596,8 +597,9 @@
   const MAX_CHARS = 280;
 
   // ── SESSION ──────────────────────────────────────────────────────
-  // Derived from URL hash: amnesty-box.html#5 → session 5
-  const SESSION      = (location.hash.replace('#', '')).replace(/[^1-9]/g, '');
+  // Derived from query param: amnesty-box.html?s=5 → session 5
+  // Query params (unlike hash) trigger a real page reload on navigation
+  const SESSION      = (new URLSearchParams(location.search).get('s') || '').replace(/[^1-9]/g, '');
   const CHANNEL_NAME = `amnesty-wall-${SESSION || '0'}`;
   const CLEAR_PASS   = SESSION ? `111${SESSION}` : 'bootcamp';
 
@@ -632,7 +634,7 @@
       btn.className = 'session-btn';
       btn.textContent = i;
       btn.addEventListener('click', () => {
-        window.location.href = window.location.href.split('#')[0] + '#' + i;
+        window.location.href = window.location.pathname + '?s=' + i;
       });
       sessionGrid.appendChild(btn);
     }

@@ -1,0 +1,330 @@
+{
+  "id": "week-2",
+  "title": "Core Java",
+  "labels": [
+    { "id": "input",         "name": "Input",         "desc": "Data coming in from a user",                                                            "example": "Scanner sc = new Scanner(System.in);\nString name = sc.nextLine();" },
+    { "id": "output",        "name": "Output",        "desc": "Something printed or displayed",                                                         "example": "System.out.println(\"Hello, \" + name);" },
+    { "id": "variable",      "name": "Variable",      "desc": "A named holder for a single value",                                                      "example": "int count = 0;\nString title = \"Manager\";" },
+    { "id": "condition",     "name": "Condition",     "desc": "A decision or branch based on a value",                                                  "example": "if (score >= 70) {\n    System.out.println(\"Passed\");\n}" },
+    { "id": "loop",          "name": "Loop",          "desc": "Something that repeats one or more times",                                               "example": "for (int i = 0; i < items.length; i++) {\n    System.out.println(items[i]);\n}" },
+    { "id": "method",        "name": "Method",        "desc": "A named, reusable block of behavior on a class",                                         "example": "public String getTitle() {\n    return title;\n}" },
+    { "id": "class",         "name": "Class",         "desc": "A blueprint for creating objects with shared structure and behavior",                     "example": "public class Car {\n    private String make;\n}" },
+    { "id": "object",        "name": "Object",        "desc": "An instance of a class with its own data",                                               "example": "Car myCar = new Car();\nmyCar.setMake(\"Toyota\");" },
+    { "id": "array",         "name": "Array",         "desc": "A fixed-size collection of items",                                                       "example": "int[] scores = new int[5];\nscores[0] = 92;" },
+    { "id": "computation",   "name": "Computation",   "desc": "A calculation that produces a result",                                                   "example": "double avg = total / count;\ndouble root = Math.sqrt(value);" },
+    { "id": "encapsulation", "name": "Encapsulation", "desc": "Keeping internal details protected and only reachable through controlled access",         "example": "private double price;\npublic double getPrice() { return price; }\npublic void setPrice(double price) { this.price = price; }" }
+  ],
+  "prompts": [
+    {
+      "title": "Vehicle Blueprint",
+      "statement": "A used car dealership needs a consistent way to represent any vehicle in their system. Every vehicle carries the same information — an ID, make and model, color, odometer reading, and price — and none of that should be directly reachable or changeable without going through the right channels.",
+      "expectedTags": [
+        {
+          "phrase": "a consistent way to represent any vehicle in their system",
+          "labels": ["class"],
+          "explanation": "The dealership needs a single template that defines what every vehicle looks like — a shared blueprint that any individual vehicle can be built from.",
+          "codeSnippets": {
+            "class": "public class Vehicle {\n    // fields, constructor, getters/setters\n}"
+          }
+        },
+        {
+          "phrase": "Every vehicle carries the same information — an ID, make and model, color, odometer reading, and price",
+          "labels": ["object", "variable"],
+          "explanation": "Each individual vehicle is its own record with its own copy of those values. Each piece of information is a named holder for a single value belonging to that vehicle.",
+          "codeSnippets": {
+            "object": "Vehicle v = new Vehicle(1, \"Toyota Camry\", \"Blue\", 32000, 18500);",
+            "variable": "private int id;\nprivate String makeModel;\nprivate String color;\nprivate double odometer;\nprivate double price;"
+          }
+        },
+        {
+          "phrase": "none of that should be directly reachable or changeable without going through the right channels",
+          "labels": ["encapsulation", "method"],
+          "explanation": "The vehicle's details are kept protected from the outside. The only way to read or update them is through a controlled path — a defined channel the rest of the program must use.",
+          "codeSnippets": {
+            "encapsulation": "private int id;\nprivate double price;",
+            "method": "public int getId() { return id; }\npublic void setId(int id) { this.id = id; }\npublic double getPrice() { return price; }\npublic void setPrice(double price) { this.price = price; }"
+          }
+        }
+      ],
+      "code": "public class Vehicle {\n    private int id;\n    private String makeModel;\n    private String color;\n    private double odometer;\n    private double price;\n\n    public Vehicle(int id, String makeModel, String color, double odometer, double price) {\n        this.id = id;\n        this.makeModel = makeModel;\n        this.color = color;\n        this.odometer = odometer;\n        this.price = price;\n    }\n\n    public int getId() { return id; }\n    public void setId(int id) { this.id = id; }\n    public String getMakeModel() { return makeModel; }\n    public void setMakeModel(String makeModel) { this.makeModel = makeModel; }\n    public double getPrice() { return price; }\n    public void setPrice(double price) { this.price = price; }\n    // ... remaining getters/setters follow the same pattern\n}"
+    },
+    {
+      "title": "Vehicle Inventory",
+      "statement": "The dealership lot holds a maximum of 20 cars. Six vehicles are already on the lot when the program starts, and the system always needs to know the current count.",
+      "expectedTags": [
+        {
+          "phrase": "holds a maximum of 20 cars",
+          "labels": ["array"],
+          "explanation": "The lot has a hard upper limit, so the collection that holds the vehicles must be fixed in size from the start.",
+          "codeSnippets": {
+            "array": "Vehicle[] inventory = new Vehicle[20];"
+          }
+        },
+        {
+          "phrase": "Six vehicles are already on the lot when the program starts",
+          "labels": ["object", "array"],
+          "explanation": "Each of those six vehicles is an individual record placed into the collection — six distinct entries that occupy six slots from the beginning.",
+          "codeSnippets": {
+            "object": "new Vehicle(1, \"Toyota Camry\", \"Blue\", 32000, 18500)",
+            "array": "inventory[0] = new Vehicle(1, \"Toyota Camry\", \"Blue\", 32000, 18500);\ninventory[1] = new Vehicle(2, \"Honda Civic\", \"Red\", 45000, 14200);\n// ... six vehicles total"
+          }
+        },
+        {
+          "phrase": "the system always needs to know the current count",
+          "labels": ["variable", "computation"],
+          "explanation": "The running total must be tracked as a named value that reflects how many vehicles are present at any given moment.",
+          "codeSnippets": {
+            "variable": "int count = 6;",
+            "computation": "count++; // incremented after each vehicle is added"
+          }
+        }
+      ],
+      "code": "Vehicle[] inventory = new Vehicle[20];\ninventory[0] = new Vehicle(1, \"Toyota Camry\", \"Blue\", 32000, 18500);\ninventory[1] = new Vehicle(2, \"Honda Civic\", \"Red\", 45000, 14200);\ninventory[2] = new Vehicle(3, \"Ford F-150\", \"Black\", 28000, 31000);\ninventory[3] = new Vehicle(4, \"Chevrolet Malibu\", \"White\", 61000, 11800);\ninventory[4] = new Vehicle(5, \"Nissan Altima\", \"Silver\", 39000, 16400);\ninventory[5] = new Vehicle(6, \"Hyundai Elantra\", \"Gray\", 22000, 15900);\nint count = 6;"
+    },
+    {
+      "title": "Menu-Driven Program",
+      "statement": "A dealership front desk application shows staff a list of actions to choose from. Whatever number they pick drives what the program does next, and the menu comes back after every action until they choose to quit.",
+      "expectedTags": [
+        {
+          "phrase": "shows staff a list of actions to choose from",
+          "labels": ["output", "input"],
+          "explanation": "The available options must be displayed so staff can see them, and then the program must wait for the staff member to indicate their selection.",
+          "codeSnippets": {
+            "output": "System.out.println(\"1. List vehicles\");\nSystem.out.println(\"2. Search vehicles\");\nSystem.out.println(\"3. Add vehicle\");\nSystem.out.println(\"4. Quit\");",
+            "input": "System.out.print(\"Enter choice: \");\nchoice = scanner.nextInt();"
+          }
+        },
+        {
+          "phrase": "Whatever number they pick drives what the program does next",
+          "labels": ["condition"],
+          "explanation": "Each possible choice leads to a different path — the program branches based on which number was entered.",
+          "codeSnippets": {
+            "condition": "switch (choice) {\n    case 1 -> listVehicles();\n    case 2 -> searchVehicles();\n    case 3 -> addVehicle();\n}"
+          }
+        },
+        {
+          "phrase": "the menu comes back after every action until they choose to quit",
+          "labels": ["loop", "condition"],
+          "explanation": "The whole sequence repeats — show, pick, respond — and that cycle continues until a specific choice signals it should stop.",
+          "codeSnippets": {
+            "loop": "do {\n    // show menu, get choice, execute action\n} while (choice != 4);",
+            "condition": "while (choice != 4)"
+          }
+        }
+      ],
+      "code": "Scanner scanner = new Scanner(System.in);\nint choice;\ndo {\n    System.out.println(\"1. List vehicles\");\n    System.out.println(\"2. Search vehicles\");\n    System.out.println(\"3. Add vehicle\");\n    System.out.println(\"4. Quit\");\n    System.out.print(\"Enter choice: \");\n    choice = scanner.nextInt();\n    switch (choice) {\n        case 1 -> listVehicles();\n        case 2 -> searchVehicles();\n        case 3 -> addVehicle();\n    }\n} while (choice != 4);"
+    },
+    {
+      "title": "Vehicle Search",
+      "statement": "A customer wants to find vehicles by make and model. The program asks what they're looking for, checks every vehicle on the lot, and reports back anything that fits.",
+      "expectedTags": [
+        {
+          "phrase": "asks what they're looking for",
+          "labels": ["output", "input"],
+          "explanation": "The program must prompt the customer with a question, then wait to receive what they type in response.",
+          "codeSnippets": {
+            "output": "System.out.print(\"Enter make/model to search: \");",
+            "input": "String search = scanner.nextLine().toLowerCase();"
+          }
+        },
+        {
+          "phrase": "checks every vehicle on the lot",
+          "labels": ["loop", "array"],
+          "explanation": "Every slot in the collection must be visited one by one so none are missed during the search.",
+          "codeSnippets": {
+            "loop": "for (int i = 0; i < count; i++) {\n    // check each vehicle\n}",
+            "array": "inventory[i].getMakeModel()"
+          }
+        },
+        {
+          "phrase": "reports back anything that fits",
+          "labels": ["condition", "output"],
+          "explanation": "Each vehicle is evaluated against what the customer entered — only the ones that match get surfaced and shown.",
+          "codeSnippets": {
+            "condition": "if (inventory[i].getMakeModel().toLowerCase().contains(search)) {",
+            "output": "System.out.println(inventory[i].getId() + \" - \" + inventory[i].getMakeModel()\n    + \" - $\" + inventory[i].getPrice());"
+          }
+        }
+      ],
+      "code": "System.out.print(\"Enter make/model to search: \");\nString search = scanner.nextLine().toLowerCase();\nSystem.out.println(\"Results:\");\nfor (int i = 0; i < count; i++) {\n    if (inventory[i].getMakeModel().toLowerCase().contains(search)) {\n        System.out.println(inventory[i].getId() + \" - \" + inventory[i].getMakeModel()\n            + \" - $\" + inventory[i].getPrice());\n    }\n}"
+    },
+    {
+      "title": "Add a Vehicle",
+      "statement": "A new car just arrived at the lot. A staff member enters its details, but if the lot is already at capacity the program should say so and stop there. If there's room, the vehicle joins the rest and the running total updates.",
+      "expectedTags": [
+        {
+          "phrase": "if the lot is already at capacity",
+          "labels": ["condition", "computation"],
+          "explanation": "Before anything else happens, the current count must be compared against the maximum — a decision that determines which path follows.",
+          "codeSnippets": {
+            "condition": "if (count >= inventory.length) {",
+            "computation": "count >= inventory.length"
+          }
+        },
+        {
+          "phrase": "the program should say so and stop there",
+          "labels": ["output", "condition"],
+          "explanation": "When the lot is full, the staff member must be informed and no further action should take place — the program takes the branch that ends with a message.",
+          "codeSnippets": {
+            "output": "System.out.println(\"Inventory is full — cannot add vehicle.\");",
+            "condition": "if (count >= inventory.length) {\n    System.out.println(\"Inventory is full.\");\n    // no further action\n}"
+          }
+        },
+        {
+          "phrase": "A staff member enters its details",
+          "labels": ["input"],
+          "explanation": "The details of the new vehicle come from the staff member typing them in.",
+          "codeSnippets": {
+            "input": "System.out.print(\"ID: \"); int id = scanner.nextInt(); scanner.nextLine();\nSystem.out.print(\"Make/Model: \"); String makeModel = scanner.nextLine();\nSystem.out.print(\"Color: \"); String color = scanner.nextLine();"
+          }
+        },
+        {
+          "phrase": "the vehicle joins the rest",
+          "labels": ["object", "array"],
+          "explanation": "A new individual vehicle record is placed into the collection alongside the existing ones.",
+          "codeSnippets": {
+            "object": "new Vehicle(id, makeModel, color, odometer, price)",
+            "array": "inventory[count] = new Vehicle(id, makeModel, color, odometer, price);"
+          }
+        },
+        {
+          "phrase": "the running total updates",
+          "labels": ["variable", "computation"],
+          "explanation": "The value tracking how many vehicles are on the lot must be recalculated and updated to reflect the addition.",
+          "codeSnippets": {
+            "variable": "int count = 6; // starts at 6, updated after each addition",
+            "computation": "count++;"
+          }
+        }
+      ],
+      "code": "if (count >= inventory.length) {\n    System.out.println(\"Inventory is full — cannot add vehicle.\");\n} else {\n    System.out.print(\"ID: \"); int id = scanner.nextInt(); scanner.nextLine();\n    System.out.print(\"Make/Model: \"); String makeModel = scanner.nextLine();\n    System.out.print(\"Color: \"); String color = scanner.nextLine();\n    System.out.print(\"Odometer: \"); double odometer = scanner.nextDouble();\n    System.out.print(\"Price: \"); double price = scanner.nextDouble();\n    inventory[count] = new Vehicle(id, makeModel, color, odometer, price);\n    count++;\n    System.out.println(\"Vehicle added.\");\n}"
+    },
+    {
+      "title": "Library Book",
+      "statement": "A library needs a consistent way to represent any book in its collection. Each book has an ID, ISBN, and title, and at any moment is either on the shelf or checked out to a patron. Its details should not be reachable from outside without going through the right channels, and checking out or returning a book should work the same way every time.",
+      "expectedTags": [
+        {
+          "phrase": "a consistent way to represent any book in its collection",
+          "labels": ["class"],
+          "explanation": "The library needs a single template that defines what every book looks like — a shared blueprint that any individual book can be built from.",
+          "codeSnippets": {
+            "class": "public class Book {\n    // fields, constructor, methods\n}"
+          }
+        },
+        {
+          "phrase": "Each book has an ID, ISBN, and title, and at any moment is either on the shelf or checked out to a patron",
+          "labels": ["object", "variable"],
+          "explanation": "Each individual book is its own record with its own values for those details. Each piece of information — including its current status — is a named holder for a single value.",
+          "codeSnippets": {
+            "object": "Book b = new Book(1, \"978-0-13-468599-1\", \"Clean Code\");",
+            "variable": "private int id;\nprivate String isbn;\nprivate String title;\nprivate boolean checkedOut;\nprivate String borrower;"
+          }
+        },
+        {
+          "phrase": "Its details should not be reachable from outside without going through the right channels",
+          "labels": ["encapsulation"],
+          "explanation": "The book's information is kept protected so that nothing outside can access or change it directly — any interaction must come through a controlled path.",
+          "codeSnippets": {
+            "encapsulation": "private int id;\nprivate String isbn;\nprivate String title;\npublic int getId() { return id; }\npublic String getTitle() { return title; }"
+          }
+        },
+        {
+          "phrase": "checking out or returning a book should work the same way every time",
+          "labels": ["method"],
+          "explanation": "These two transitions are defined behaviors that apply consistently to any book — reusable actions that always follow the same steps.",
+          "codeSnippets": {
+            "method": "public void checkOut(String patron) {\n    this.checkedOut = true;\n    this.borrower = patron;\n}\n\npublic void checkIn() {\n    this.checkedOut = false;\n    this.borrower = null;\n}"
+          }
+        }
+      ],
+      "code": "public class Book {\n    private int id;\n    private String isbn;\n    private String title;\n    private boolean checkedOut;\n    private String borrower;\n\n    public Book(int id, String isbn, String title) {\n        this.id = id;\n        this.isbn = isbn;\n        this.title = title;\n        this.checkedOut = false;\n    }\n\n    public void checkOut(String patron) {\n        this.checkedOut = true;\n        this.borrower = patron;\n    }\n\n    public void checkIn() {\n        this.checkedOut = false;\n        this.borrower = null;\n    }\n\n    public boolean isCheckedOut() { return checkedOut; }\n    public int getId() { return id; }\n    public String getTitle() { return title; }\n}"
+    },
+    {
+      "title": "Check Out a Book",
+      "statement": "A library patron wants to borrow a book. The system shows only what is currently available, the patron says who they are and which book they want, and the system finds it and records it under their name.",
+      "expectedTags": [
+        {
+          "phrase": "shows only what is currently available",
+          "labels": ["loop", "array", "condition", "output"],
+          "explanation": "Every book in the collection must be examined one by one, a decision made about whether it qualifies, and the ones that do get displayed to the patron.",
+          "codeSnippets": {
+            "loop": "for (int i = 0; i < bookCount; i++) {\n    // check each book\n}",
+            "array": "books[i].isCheckedOut()",
+            "condition": "if (!books[i].isCheckedOut()) {",
+            "output": "System.out.println(books[i].getId() + \" | \" + books[i].getTitle());"
+          }
+        },
+        {
+          "phrase": "the patron says who they are and which book they want",
+          "labels": ["input"],
+          "explanation": "Both pieces of information — the patron's name and their selection — come from what the patron types in.",
+          "codeSnippets": {
+            "input": "System.out.print(\"Enter book ID: \");\nint selectedId = scanner.nextInt(); scanner.nextLine();\nSystem.out.print(\"Your name: \");\nString patron = scanner.nextLine();"
+          }
+        },
+        {
+          "phrase": "the system finds it",
+          "labels": ["loop", "condition"],
+          "explanation": "The collection must be visited one entry at a time, checking each book until the matching one is identified.",
+          "codeSnippets": {
+            "loop": "for (int i = 0; i < bookCount; i++) {",
+            "condition": "if (books[i].getId() == selectedId && !books[i].isCheckedOut()) {"
+          }
+        },
+        {
+          "phrase": "records it under their name",
+          "labels": ["method", "object"],
+          "explanation": "The individual book record is updated through its defined checkout behavior, which ties the patron's name to that specific book.",
+          "codeSnippets": {
+            "method": "books[i].checkOut(patron);",
+            "object": "books[i] // the specific Book object being updated"
+          }
+        }
+      ],
+      "code": "System.out.println(\"Available books:\");\nfor (int i = 0; i < bookCount; i++) {\n    if (!books[i].isCheckedOut()) {\n        System.out.println(books[i].getId() + \" | \" + books[i].getTitle());\n    }\n}\nSystem.out.print(\"Enter book ID: \");\nint selectedId = scanner.nextInt(); scanner.nextLine();\nSystem.out.print(\"Your name: \");\nString patron = scanner.nextLine();\nfor (int i = 0; i < bookCount; i++) {\n    if (books[i].getId() == selectedId && !books[i].isCheckedOut()) {\n        books[i].checkOut(patron);\n        System.out.println(\"Checked out to \" + patron);\n    }\n}"
+    },
+    {
+      "title": "Validated Input",
+      "statement": "A math utility needs a valid positive number before it can do anything useful. The program keeps asking until it gets one, telling the user why each rejected entry doesn't qualify, and then delivers the result once a good number is provided.",
+      "expectedTags": [
+        {
+          "phrase": "a valid positive number",
+          "labels": ["input", "variable"],
+          "explanation": "A number needs to come from the user — it must be provided externally and held so the program can evaluate and eventually use it.",
+          "codeSnippets": {
+            "input": "System.out.print(\"Enter a positive number: \");\nnumber = scanner.nextDouble();",
+            "variable": "double number;"
+          }
+        },
+        {
+          "phrase": "keeps asking until it gets one",
+          "labels": ["loop", "condition"],
+          "explanation": "The request for a number repeats, and the cycle only ends when the value provided meets the requirement — a decision determines whether to continue or stop.",
+          "codeSnippets": {
+            "loop": "do {\n    // ask for input\n} while (number <= 0);",
+            "condition": "while (number <= 0)"
+          }
+        },
+        {
+          "phrase": "telling the user why each rejected entry doesn't qualify",
+          "labels": ["output", "condition"],
+          "explanation": "When the number fails the check, the user must be shown a message explaining it — a response that only happens on the branch where the value was unacceptable.",
+          "codeSnippets": {
+            "output": "System.out.println(\"That's not positive. Try again.\");",
+            "condition": "if (number <= 0) System.out.println(\"That's not positive. Try again.\");"
+          }
+        },
+        {
+          "phrase": "delivers the result once a good number is provided",
+          "labels": ["computation", "output"],
+          "explanation": "After a valid number is in hand, a value is derived from it mathematically and then shown to the user.",
+          "codeSnippets": {
+            "computation": "Math.sqrt(number)",
+            "output": "System.out.printf(\"Square root: %.4f%n\", Math.sqrt(number));"
+          }
+        }
+      ],
+      "code": "Scanner scanner = new Scanner(System.in);\ndouble number;\ndo {\n    System.out.print(\"Enter a positive number: \");\n    number = scanner.nextDouble();\n    if (number <= 0) System.out.println(\"That's not positive. Try again.\");\n} while (number <= 0);\nSystem.out.printf(\"Square root: %.4f%n\", Math.sqrt(number));"
+    }
+  ]
+}

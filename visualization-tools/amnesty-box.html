@@ -362,6 +362,64 @@
     50%       { opacity: 0.4; }
   }
 
+  /* ── SESSION PICKER ── */
+  .session-picker-backdrop {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: rgba(196, 168, 130, 0.92);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .session-picker-title {
+    font-family: var(--font-hand);
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .session-picker-sub {
+    font-size: 15px;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: -16px;
+  }
+
+  .session-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .session-btn {
+    width: 88px;
+    height: 88px;
+    border-radius: 8px;
+    border: none;
+    background: white;
+    box-shadow: var(--shadow-note);
+    font-family: var(--font-hand);
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+
+  .session-btn:hover {
+    transform: scale(1.08) rotate(-1deg);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  }
+
+  .session-btn:active { transform: scale(0.96); }
+
   /* ── CLEAR MODAL ── */
   .modal-backdrop {
     display: none;
@@ -505,6 +563,13 @@
   </div>
 </section>
 
+<!-- SESSION PICKER -->
+<div class="session-picker-backdrop" id="sessionPicker">
+  <div class="session-picker-title">The Amnesty Box</div>
+  <div class="session-picker-sub">Choose your session</div>
+  <div class="session-grid" id="sessionGrid"></div>
+</div>
+
 <!-- STATUS -->
 <div class="status-bar">
   <div class="status-dot connecting" id="statusDot"></div>
@@ -527,17 +592,18 @@
 
 <script>
   // ── CONFIG ──────────────────────────────────────────────────────
-  const ABLY_KEY      = '9K3Yww.CdrKNA:0rAn91BzUR72SFbIX3ZjdzmwkMm1U1J4QmPY6z61dWE';  // injected by GitHub Actions
+  const ABLY_KEY  = '9K3Yww.CdrKNA:0rAn91BzUR72SFbIX3ZjdzmwkMm1U1J4QmPY6z61dWE';  // injected by GitHub Actions
+  const MAX_CHARS = 280;
 
-  // Session routing: read from URL hash e.g. amnesty-box.html#5
-  const SESSION       = (location.hash.replace('#', '') || '').replace(/[^1-9]/g, '');
-  const CHANNEL_NAME  = SESSION ? `amnesty-wall-${SESSION}` : 'amnesty-wall';
-  const CLEAR_PASS    = SESSION ? `111${SESSION}` : 'bootcamp';
-  const MAX_CHARS     = 280;
+  // ── SESSION ──────────────────────────────────────────────────────
+  // Derived from URL hash: amnesty-box.html#5 → session 5
+  const SESSION      = (location.hash.replace('#', '')).replace(/[^1-9]/g, '');
+  const CHANNEL_NAME = `amnesty-wall-${SESSION || '0'}`;
+  const CLEAR_PASS   = SESSION ? `111${SESSION}` : 'bootcamp';
 
   // ── STATE ────────────────────────────────────────────────────────
-  let notes      = [];   // { id, text, ts }
-  let hasPosted  = false;
+  let notes     = [];
+  let hasPosted = false;
 
   // ── DOM REFS ──────────────────────────────────────────────────────
   const textarea      = document.getElementById('noteInput');
@@ -555,6 +621,27 @@
   const clearError    = document.getElementById('clearError');
   const modalCancel   = document.getElementById('modalCancel');
   const modalConfirm  = document.getElementById('modalConfirm');
+  const sessionPicker = document.getElementById('sessionPicker');
+  const sessionGrid   = document.getElementById('sessionGrid');
+
+  // ── SESSION PICKER ────────────────────────────────────────────────
+  if (!SESSION) {
+    // Build 1-9 session buttons
+    for (let i = 1; i <= 9; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'session-btn';
+      btn.textContent = i;
+      btn.addEventListener('click', () => {
+        window.location.href = window.location.href.split('#')[0] + '#' + i;
+      });
+      sessionGrid.appendChild(btn);
+    }
+  } else {
+    // Hide picker, show session badge
+    sessionPicker.style.display = 'none';
+    document.getElementById('sessionBadge').style.display = 'block';
+    document.getElementById('sessionNum').textContent = SESSION;
+  }
 
   // ── TEXTAREA CHAR COUNT ───────────────────────────────────────────
   textarea.addEventListener('input', () => {
@@ -568,7 +655,6 @@
     noteCountEl.textContent = notes.length;
     if (notes.length === 0) {
       emptyState.style.display = 'block';
-      // remove all note elements
       [...notesGrid.querySelectorAll('.note')].forEach(n => n.remove());
       return;
     }
@@ -622,27 +708,7 @@
 
     channel = ably.channels.get(CHANNEL_NAME);
 
-    // Request history on join
-    channel.history({ limit: 100 }, (err, page) => {
-      if (err) return;
-      // History comes newest-first; reverse to get chronological
-      const historical = page.items.reverse();
-      for (const msg of historical) {
-        if (msg.name === 'note') {
-          const note = msg.data;
-          if (!notes.find(n => n.id === note.id)) {
-            notes.push(note);
-            addNoteToDOM(note, false);
-          }
-        } else if (msg.name === 'clear') {
-          // If a clear happened after our notes, wipe
-          clearAllNotes();
-        }
-      }
-      renderNotes();
-    });
-
-    // Live events
+    // Live events only — history not enabled on this key
     channel.subscribe('note', (msg) => {
       const note = msg.data;
       if (!notes.find(n => n.id === note.id)) {
@@ -716,11 +782,8 @@
   });
 
   // ── INIT ──────────────────────────────────────────────────────────
-  if (SESSION) {
-    document.getElementById('sessionBadge').style.display = 'block';
-    document.getElementById('sessionNum').textContent = SESSION;
-  }
-  initAbly();
+  // Only connect to Ably once a session is selected
+  if (SESSION) initAbly();
 </script>
 </body>
 </html>

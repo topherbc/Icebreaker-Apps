@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Program the Monkey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍌</text></svg>">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --border: #d4d0c8;
+  --border-strong: #9c9888;
+  --text: #1a1814;
+  --text-muted: #6b6860;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --success: #16a34a;
+  --error: #dc2626;
+  --error-bg: #fef2f2;
+  --btn-h: 48px;
+  --run-h: 56px;
+  --radius: 6px;
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ===========================
+   LANDING
+   =========================== */
+#screen-landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 24px;
+}
+.landing-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 48px 56px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.landing-header { text-align: center; }
+.landing-emoji { font-size: 56px; line-height: 1; display: block; margin-bottom: 12px; }
+.landing-title { font-size: 32px; font-weight: 700; margin-bottom: 6px; }
+.landing-subtitle { font-size: 18px; color: var(--text-muted); }
+
+.section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 8px;
+}
+
+/* Example button */
+.example-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #f59e0b;
+  border-radius: var(--radius);
+  background: #fffbeb;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  color: #92400e;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  text-align: left;
+  min-height: var(--btn-h);
+}
+.example-btn:hover { background: #fef3c7; box-shadow: 0 0 0 3px rgba(245,158,11,0.18); }
+.example-btn .ex-desc { font-size: 14px; font-weight: 400; color: #b45309; display: block; margin-top: 2px; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+
+/* Form fields */
+.field { display: flex; flex-direction: column; gap: 8px; }
+
+.cohort-select, .room-input, .name-input {
+  width: 100%;
+  padding: 0 16px;
+  height: var(--btn-h);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.cohort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6860' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+.cohort-select:focus, .room-input:focus, .name-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+.cohort-select.has-value, .room-input.has-value, .name-input.has-value { border-color: var(--accent); }
+.room-input { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+.room-input::placeholder { font-weight: 400; letter-spacing: normal; text-transform: none; }
+
+.phase-buttons { display: flex; flex-direction: column; gap: 10px; }
+.phase-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  text-align: left;
+  min-height: var(--btn-h);
+}
+.phase-btn:hover { border-color: var(--accent); background: #eff6ff; }
+.phase-btn.selected { border-color: var(--accent); background: #eff6ff; color: var(--accent); font-weight: 600; }
+.phase-btn .phase-icon { font-size: 22px; }
+.phase-btn .phase-desc { font-size: 14px; color: var(--text-muted); display: block; font-weight: 400; margin-top: 2px; }
+.phase-btn.selected .phase-desc { color: var(--accent); opacity: 0.8; }
+
+.join-btn {
+  width: 100%;
+  height: var(--btn-h);
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.join-btn:hover:not(:disabled) { background: var(--accent-hover); }
+.join-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Fade-in animation for steps */
+.fade-in { animation: fadeSlideIn 0.18s ease; }
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===========================
+   EXAMPLE PAGE
+   =========================== */
+#screen-example {
+  display: none;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===========================
+   APP PAGE
+   =========================== */
+#screen-app {
+  display: none;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Shared: top bar */
+.top-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.top-bar-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.top-bar-badge {
+  font-size: 13px;
+  font-weight: 600;
+  background: #eff6ff;
+  color: var(--accent);
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid #bfdbfe;
+}
+.top-bar-badge.amber {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+.top-bar-muted { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+.top-bar-spacer { flex: 1; }
+.back-btn {
+  padding: 0 14px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.back-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border-strong); }
+
+/* Shared: grid picker bar */
+.grid-picker {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.grid-picker-label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-right: 4px; text-transform: uppercase; letter-spacing: 0.07em; }
+.grid-tab {
+  padding: 0 14px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.grid-tab:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
+.grid-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+/* Shared: three-zone layout */
+.zones {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Zone 1: Grid */
+.zone-grid {
+  flex: 0 0 52%;
+  padding: 16px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border-right: 1px solid var(--border);
+}
+.grid-label-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.grid-label { font-size: 15px; font-weight: 600; color: var(--text-muted); }
+
+#canvas-container, #canvas-container-ex {
+  position: relative;
+  display: inline-block;
+}
+.grid-canvas {
+  display: block;
+  border: 2px solid var(--border-strong);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.status-bar { width: 100%; min-height: 32px; display: flex; align-items: center; }
+.status-msg {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 4px;
+  display: none;
+}
+.status-msg.error { display: block; background: var(--error-bg); color: var(--error); border: 1px solid #fca5a5; }
+.status-msg.success { display: block; background: #f0fdf4; color: var(--success); border: 1px solid #86efac; }
+.status-msg.info { display: block; background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe; }
+
+/* Success overlay */
+.success-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.90);
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+  animation: fadeIn 0.3s ease;
+}
+.success-overlay.visible { display: flex; }
+.success-big { font-size: 60px; animation: bounce 0.5s ease; }
+.success-text { font-size: 24px; font-weight: 700; color: var(--success); }
+.success-sub { font-size: 15px; color: var(--text-muted); }
+@keyframes bounce { 0%{transform:scale(0.3)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* Zone 2: Editor */
+.zone-editor {
+  flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 10px;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.zone-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.editor-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color 0.15s;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+}
+
+.line-gutter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  line-height: 1.65;
+  padding: 12px 8px 12px 8px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid var(--border);
+  min-width: 32px;
+  overflow: hidden;
+  flex-shrink: 0;
+  white-space: pre;
+}
+
+.cmd-editor {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 12px;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+  background: transparent;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow: auto;
+}
+
+#syntax-errors {
+  font-size: 13px;
+  color: var(--error);
+  max-height: 56px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.syntax-err-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.err-line-num {
+  font-weight: 700;
+  font-family: monospace;
+  background: #fef2f2;
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 1px solid #fca5a5;
+  font-size: 12px;
+}
+
+.editor-controls { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.run-btn {
+  height: var(--run-h);
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.run-btn:hover:not(:disabled) { background: #15803d; }
+.run-btn:disabled { background: #6b7280; cursor: not-allowed; }
+.reset-btn {
+  height: var(--btn-h);
+  background: transparent;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reset-btn:hover { border-color: var(--error); color: var(--error); background: var(--error-bg); }
+.step-counter { text-align: center; font-size: 14px; color: var(--text-muted); font-weight: 500; }
+.step-counter strong { color: var(--text); font-size: 17px; }
+
+/* Zone 3: Commands reference (replaces chat) */
+.zone-commands {
+  flex: 0 0 18%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+/* Room info block */
+.room-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  flex-shrink: 0;
+}
+.room-block-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-muted); margin-bottom: 2px; }
+.room-block-code { font-size: 19px; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; font-family: monospace; }
+.room-block-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+/* Members */
+.members-block { flex-shrink: 0; }
+#members-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 500;
+}
+.member-row.typing { border-color: var(--accent); }
+.member-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.member-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.typing-dot { font-size: 11px; color: var(--accent); font-weight: 700; }
+
+/* Commands reference block */
+.cmd-ref {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  overflow-y: auto;
+}
+.cmd-ref-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-muted); margin-bottom: 10px; }
+.cmd-ref-list { display: flex; flex-direction: column; gap: 0; }
+.cmd-ref-item {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.3;
+}
+.cmd-ref-item:last-child { border-bottom: none; }
+.cmd-ref-section {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 8px 0 4px;
+}
+.cmd-ref-section:first-child { padding-top: 0; }
+
+#example-mission-block,
+#app-mission-block {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  border: 2px solid var(--accent);
+}
+
+#example-cmd-ref-block,
+#app-cmd-ref-block {
+  border: 2px solid var(--accent);
+}
+
+/* Confetti */
+.confetti-piece {
+  position: fixed;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 1000;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* Phase toggle in grid picker */
+.phase-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.phase-toggle-btn {
+  padding: 0 14px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.phase-toggle-btn:first-child { border-right: 1px solid var(--border); }
+.phase-toggle-btn:hover { background: #eff6ff; color: var(--accent); }
+.phase-toggle-btn.active { background: var(--accent); color: #fff; font-weight: 700; }
+
+.picker-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+/* Turn system */
+.turn-banner {
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.turn-banner.your-turn { display: flex; background: #f0fdf4; color: #15803d; border: 2px solid #86efac; }
+.turn-banner.waiting   { display: flex; background: #eff6ff; color: #1d4ed8; border: 2px solid #bfdbfe; }
+.turn-banner-icon { font-size: 18px; flex-shrink: 0; }
+
+.member-row.active-turn { border-color: #16a34a; background: #f0fdf4; }
+.member-row.active-turn .member-name { color: #15803d; font-weight: 700; }
+.turn-pip {
+  width: 8px; height: 8px; border-radius: 50%; background: #16a34a; flex-shrink: 0;
+  animation: turnPulse 1.2s ease-in-out infinite;
+}
+@keyframes turnPulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.7); }
+}
+
+.conn-badge {  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+.conn-badge.connected { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
+.conn-badge.connecting { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+.conn-badge.disconnected { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+</style>
+</head>
+<body>
+
+<!-- ===================================================
+     SCREEN: LANDING
+     =================================================== -->
+<div id="screen-landing">
+  <div class="landing-card">
+    <div class="landing-header">
+      <span class="landing-emoji">🐒</span>
+      <h1 class="landing-title">Program the Monkey</h1>
+      <p class="landing-subtitle">Write commands to move the monkey</p>
+    </div>
+
+    <!-- Instructor Example button -->
+    <button class="example-btn" onclick="openExample()">
+      <span style="font-size:22px">📋</span>
+      <span>
+        Instruction Example
+        <span class="ex-desc">Follow along with your instructor</span>
+      </span>
+    </button>
+
+    <div class="divider">or join your group</div>
+
+    <!-- Step 1: Your name -->
+    <div class="field fade-in">
+      <div class="section-label">Your name</div>
+      <input class="name-input" id="name-input" type="text" placeholder="Enter your name..."
+        maxlength="40" aria-label="Your name" oninput="checkJoinReady()">
+    </div>
+
+    <!-- Step 2: Cohort -->
+    <div class="field fade-in">
+      <div class="section-label">Cohort</div>
+      <select class="cohort-select" id="cohort-select" aria-label="Cohort number" onchange="selectCohort(this.value)">
+        <option value="">Select your cohort...</option>
+        <option value="1">Cohort 1</option>
+        <option value="2">Cohort 2</option>
+        <option value="3">Cohort 3</option>
+        <option value="4">Cohort 4</option>
+        <option value="5">Cohort 5</option>
+        <option value="6">Cohort 6</option>
+        <option value="7">Cohort 7</option>
+        <option value="8">Cohort 8</option>
+        <option value="9">Cohort 9</option>
+      </select>
+    </div>
+
+    <!-- Step 3: Group code (revealed after cohort) -->
+    <div class="field fade-in" id="join-section" style="display:none">
+      <div class="section-label">Group code</div>
+      <input class="room-input" id="room-code-input" type="text" placeholder="Group A, B, C..."
+        maxlength="20" aria-label="Group code"
+        oninput="checkJoinReady()" onkeydown="if(event.key==='Enter')joinRoom()">
+    </div>
+
+    <button class="join-btn" id="join-btn" onclick="joinRoom()" disabled>Join Group</button>
+  </div>
+</div>
+
+<!-- ===================================================
+     SCREEN: INSTRUCTION EXAMPLE
+     =================================================== -->
+<div id="screen-example">
+  <div class="top-bar">
+    <div class="top-bar-title">🐒 Program the Monkey</div>
+    <span class="top-bar-badge amber">Instruction Example</span>
+    <div class="top-bar-spacer"></div>
+    <button class="back-btn" onclick="closeExample()">Back to Home</button>
+  </div>
+
+  <div class="grid-picker" id="example-grid-picker"></div>
+
+  <div class="zones">
+    <!-- Grid zone -->
+    <div class="zone-grid">
+      <div class="grid-label-row">
+        <div class="grid-label" id="example-grid-label">Example</div>
+      </div>
+      <div id="canvas-container-ex">
+        <canvas id="example-canvas" class="grid-canvas"></canvas>
+        <div class="success-overlay" id="example-success-overlay">
+          <div class="success-big">🎉</div>
+          <div class="success-text">Success!</div>
+          <div class="success-sub" id="example-success-sub"></div>
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-msg" id="example-status-msg"></div>
+      </div>
+    </div>
+
+    <!-- Editor zone -->
+    <div class="zone-editor">
+      <div class="zone-label">Commands</div>
+      <div class="editor-wrapper" id="example-editor-wrapper">
+        <div class="line-gutter" id="example-line-gutter"></div>
+        <textarea class="cmd-editor" id="example-cmd-editor" spellcheck="false"
+          placeholder="Step 3&#10;Turn right&#10;Step 2&#10;Eat banana" aria-label="Command editor"></textarea>
+      </div>
+      <div id="example-syntax-errors"></div>
+      <div class="editor-controls">
+        <button class="run-btn" id="example-run-btn" onclick="runCommands('example')">
+          <span>&#9654;</span> Run
+        </button>
+        <button class="reset-btn" onclick="resetGrid('example')">Reset</button>
+        <div class="step-counter">Steps used: <strong id="example-step-count">0</strong></div>
+      </div>
+    </div>
+
+    <!-- Commands reference zone -->
+    <div class="zone-commands">
+      <div class="cmd-ref" id="example-mission-block" style="display:none">
+        <div class="cmd-ref-title">Mission</div>
+        <div id="example-mission-text" style="font-size:14px;color:var(--text);line-height:1.5;padding:2px 0;font-weight:700;"></div>
+      </div>
+
+      <div class="cmd-ref" id="example-cmd-ref-block">
+        <div class="cmd-ref-title">Available Commands</div>
+        <div class="cmd-ref-list" id="example-cmd-ref-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     SCREEN: STUDENT APP
+     =================================================== -->
+<div id="screen-app">
+  <div class="top-bar">
+    <div class="top-bar-title">🐒 Program the Monkey</div>
+    <span class="top-bar-badge" id="tb-cohort"></span>
+    <span class="top-bar-badge" id="tb-room"></span>
+    <span class="conn-badge connecting" id="conn-badge">Connecting...</span>
+    <div class="top-bar-spacer"></div>
+    <button class="back-btn" onclick="leaveRoom()">Leave Room</button>
+  </div>
+
+  <div class="grid-picker" id="app-grid-picker">
+    <div class="phase-toggle">
+      <button class="phase-toggle-btn active" id="phase-toggle-1" onclick="switchPhase(1)" aria-pressed="true">🍌 Phase 1</button>
+      <button class="phase-toggle-btn" id="phase-toggle-2" onclick="switchPhase(2)" aria-pressed="false">🧺 Phase 2</button>
+    </div>
+    <div class="picker-divider"></div>
+    <span class="grid-picker-label">Exercise:</span>
+    <span id="app-grid-tabs"></span>
+  </div>
+
+  <div class="zones">
+    <!-- Grid zone -->
+    <div class="zone-grid">
+      <div class="grid-label-row">
+        <div class="grid-label" id="app-grid-label">Exercise</div>
+      </div>
+      <div class="turn-banner" id="app-turn-banner">
+        <span class="turn-banner-icon" id="app-turn-icon"></span>
+        <span id="app-turn-text"></span>
+      </div>
+      <div id="canvas-container">
+        <canvas id="app-canvas" class="grid-canvas"></canvas>
+        <div class="success-overlay" id="app-success-overlay">
+          <div class="success-big">🎉</div>
+          <div class="success-text">Success!</div>
+          <div class="success-sub" id="app-success-sub"></div>
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-msg" id="app-status-msg"></div>
+      </div>
+    </div>
+
+    <!-- Editor zone -->
+    <div class="zone-editor">
+      <div class="zone-label">Commands</div>
+      <div class="editor-wrapper" id="app-editor-wrapper">
+        <div class="line-gutter" id="app-line-gutter"></div>
+        <textarea class="cmd-editor" id="app-cmd-editor" spellcheck="false"
+          placeholder="Step 3&#10;Turn right&#10;Step 2&#10;Eat banana" aria-label="Command editor"></textarea>
+      </div>
+      <div id="app-syntax-errors"></div>
+      <div class="editor-controls">
+        <button class="run-btn" id="app-run-btn" onclick="runCommands('app')">
+          <span>&#9654;</span> Run
+        </button>
+        <button class="reset-btn" onclick="resetGrid('app')">Reset</button>
+        <div class="step-counter">Steps used: <strong id="app-step-count">0</strong></div>
+      </div>
+    </div>
+
+    <!-- Commands reference + room info zone -->
+    <div class="zone-commands">
+      <div class="room-block">
+        <div class="room-block-label">Room</div>
+        <div class="room-block-code" id="room-badge-code"></div>
+        <div class="room-block-sub" id="room-badge-sub"></div>
+      </div>
+
+      <div class="members-block">
+        <div class="zone-label">Group</div>
+        <div id="members-list"></div>
+      </div>
+
+      <div class="cmd-ref" id="app-mission-block" style="display:none">
+        <div class="cmd-ref-title">Mission</div>
+        <div id="app-mission-text" style="font-size:14px;color:var(--text);line-height:1.5;padding:2px 0;font-weight:700;"></div>
+      </div>
+
+      <div class="cmd-ref" id="app-cmd-ref-block">
+        <div class="cmd-ref-title">Available Commands</div>
+        <div class="cmd-ref-list" id="app-cmd-ref-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// GRID DATA
+// All monkey starting directions are dir=0 (facing right)
+// Coordinate: col=x (0=left), row=y (0=top)
+// =====================================================================
+const _kp1 = '9K3Yw';
+const GRIDS = [
+  // --- EXAMPLE GRIDS (instructor page only) ---
+  {
+    id: 'ex-p1-1',
+    label: 'Example 1: Straight Run',
+    phase: 1,
+    isExample: true,
+    cols: 8, rows: 10,
+    // Monkey top-left, facing right. Banana on right side same row.
+    monkey: { col: 0, row: 4, dir: 0 },
+    banana: { col: 7, row: 4 },
+    basket: null,
+    barriers: [],
+    note: null
+  },
+  {
+    id: 'ex-p1-2',
+    label: 'Example 2: Around the Wall',
+    phase: 1,
+    isExample: true,
+    cols: 10, rows: 14,
+    monkey: { col: 0, row: 2, dir: 0 },
+    banana: { col: 9, row: 6 },
+    basket: null,
+    barriers: [
+      // Vertical wall at col 4, rows 0-5 (top segment)
+      {col:4,row:0},{col:4,row:1},{col:4,row:2},{col:4,row:3},{col:4,row:4},{col:4,row:5},
+      // Gap at row 6
+      // Vertical wall at col 4, rows 7-12 (bottom segment)
+      {col:4,row:7},{col:4,row:8},{col:4,row:9},{col:4,row:10},{col:4,row:11},{col:4,row:12}
+    ],
+    note: null
+  },
+  {
+    id: 'ex-p2-1',
+    label: 'Example 3: Banana in Basket',
+    phase: 2,
+    isExample: true,
+    cols: 10, rows: 10,
+    // Monkey left side row 5, facing right. Banana top-right. Basket bottom-right.
+    monkey: { col: 0, row: 5, dir: 0 },
+    banana: { col: 8, row: 0 },
+    basket: { col: 8, row: 5 },
+    barriers: [],
+    note: null
+  },
+
+  // --- PHASE 1 STUDENT EXERCISES ---
+  {
+    id: 'p1-ex1',
+    label: 'Exercise 1',
+    phase: 1,
+    isExample: false,
+    // Original: monkey top-left facing right, 3-wide horizontal barrier mid-grid, banana bottom-left
+    // Grid is ~10 wide x 13 tall. Arrow points right into col 0 row 1.
+    // Barrier: 3 cells wide at row 4, cols 2-4 (mid-left area).
+    // Banana: col 0 row 10 (bottom-left, arrow points right into it).
+    // All start facing right (dir=0) — monkey already was facing right.
+    cols: 10, rows: 13,
+    monkey: { col: 0, row: 1, dir: 0 },
+    banana: { col: 0, row: 10 },
+    basket: null,
+    barriers: [
+      {col:2,row:4},{col:3,row:4},{col:4,row:4},
+      {col:5,row:1},{col:5,row:2}
+    ],
+    note: null
+  },
+  {
+    id: 'p1-ex2',
+    label: 'Exercise 2',
+    phase: 1,
+    isExample: false,
+    // Original: monkey left row 2 facing right. Complex bracket barrier. Banana bottom-right area.
+    // Grid ~13 wide x 13 tall.
+    // Barrier shape from image: top single block col 9 row 0;
+    //   right vertical col 9 rows 2-4; inner vertical col 5 rows 2-4;
+    //   bottom inner row col 5-9 row 5; left horizontal rows col 0-4 row 4.
+    cols: 13, rows: 13,
+    monkey: { col: 0, row: 2, dir: 0 },
+    banana: { col: 9, row: 11 },
+    basket: null,
+    barriers: [
+      {col:9,row:0},
+      {col:5,row:1},
+      {col:5,row:2},{col:7,row:2},{col:9,row:2},
+      {col:5,row:3},{col:9,row:3},
+      {col:5,row:4},{col:9,row:4},
+      {col:0,row:4},{col:1,row:4},{col:2,row:4},{col:3,row:4},{col:4,row:4},
+      {col:5,row:5},{col:6,row:5},{col:7,row:5},{col:8,row:5},{col:9,row:5}
+    ],
+    note: null
+  },
+
+  // --- PHASE 2 STUDENT EXERCISES ---
+  {
+    id: 'p2-ex1',
+    label: 'Exercise 1',
+    phase: 2,
+    isExample: false,
+    // Phase 2 Ex1 from screenshot: complex barrier, monkey top-left facing down originally.
+    // Redesigned: monkey top-left col 1 row 0 facing RIGHT.
+    // Basket top-right col 9 row 2. Banana bottom-center col 6 row 14.
+    cols: 15, rows: 15,
+    monkey: { col: 0, row: 1, dir: 0 },
+    banana: { col: 6, row: 14 },
+    basket: { col: 13, row: 1 },
+    barriers: [
+      // T/cross shape upper-mid area
+      {col:5,row:1},
+      {col:5,row:2},{col:6,row:2},
+      {col:5,row:3},{col:5,row:4},{col:5,row:5},
+      // Right-side horizontal arm
+      {col:9,row:4},{col:10,row:4},{col:11,row:4},{col:12,row:4},{col:14,row:4},
+      {col:12,row:5},
+      // Long horizontal bar mid-low
+      {col:1,row:7},{col:2,row:7},{col:3,row:7},{col:4,row:7},{col:5,row:7},
+      {col:6,row:7},{col:7,row:7},{col:8,row:7},{col:9,row:7},
+      // Left column drop
+      {col:1,row:8},{col:1,row:9},{col:1,row:10},
+      // Right column drop
+      {col:9,row:8},{col:9,row:9},{col:9,row:10},{col:9,row:11},{col:9,row:12},{col:9,row:13}
+    ],
+    note: null
+  },
+  {
+    id: 'p2-ex2',
+    label: 'Exercise 2',
+    phase: 2,
+    isExample: false,
+    // From screenshot: banana col 2 row 0, basket col 2 row 11.
+    // Original monkey was right-side facing left. Redesigned: monkey LEFT side facing right.
+    // Two horizontal barrier rows with gaps.
+    // Missing square: original "3 above monkey" (row 9 monkey → row 6).
+    //   Monkey now at col 0 row 9 facing right → 3 above = row 6, col 0.
+    // Upper bar row 3: cols 0-1 + 3-11 (gap at col 2)
+    // Lower bar row 7: cols 0-6 + 8-10 (gap at col 7, col 11 open)
+    // Extra barrier at col 0 row 6 (3 above monkey)
+    cols: 12, rows: 12,
+    monkey: { col: 0, row: 9, dir: 0 },
+    banana: { col: 2, row: 0 },
+    basket: { col: 2, row: 11 },
+    barriers: [
+      // Upper horizontal row 3, gap at col 2
+      {col:0,row:3},{col:1,row:3},
+      {col:3,row:3},{col:4,row:3},{col:5,row:3},{col:6,row:3},{col:7,row:3},{col:8,row:3},{col:9,row:3},{col:10,row:3},{col:11,row:3},
+      // Lower horizontal row 7, gap at col 7 and col 11
+      {col:0,row:7},{col:1,row:7},{col:2,row:7},{col:3,row:7},{col:4,row:7},{col:5,row:7},{col:6,row:7},
+      {col:8,row:7},{col:9,row:7},{col:10,row:7},
+      // Extra block 3 above monkey (monkey row 9 → row 6, col 0)
+      {col:0,row:6}
+    ],
+    note: null
+  },
+  {
+    id: 'p2-ex3',
+    label: 'Exercise 3',
+    phase: 2,
+    isExample: false,
+    // Three distinct paths — optimal B=32 steps, A=36, C=38.
+    // Monkey col 0 row 6 facing right. Banana col 11 row 2. Basket col 2 row 10.
+    // Vertical wall at col 6, rows 2-11, three passages:
+    //   Top open (rows 0-1): route A over the top — 36 steps
+    //   Upper gap (rows 3-4 clear): route B through upper gap — 32 steps (optimal)
+    //   Lower gap (rows 8-9 clear): route C through lower gap — 38 steps
+    cols: 13, rows: 13,
+    monkey: { col: 0, row: 6, dir: 0 },
+    banana: { col: 11, row: 2 },
+    basket: { col: 2, row: 10 },
+    barriers: [
+      // Vertical wall col 6, rows 2-11, gaps at rows 3-4 and rows 8-9
+      {col:6,row:2},
+      // row 3 and 4 are gaps — skip
+      {col:6,row:5},{col:6,row:6},{col:6,row:7},
+      // rows 8 and 9 are gaps — skip
+      {col:6,row:10},{col:6,row:11},
+      // Smiley face bottom-right corner — eyes + U-shaped mouth
+      // Eyes
+      {col:9,row:9},{col:11,row:9},
+      // Mouth (wide U-shape: rising corners, 3-wide bottom)
+      {col:8,row:11},{col:12,row:11},
+      {col:9,row:12},{col:10,row:12},{col:11,row:12}
+    ],
+    note: 'Goal: get the banana into the basket. There are multiple ways — find the fewest steps.'
+  }
+];
+
+// =====================================================================
+// STATE
+// =====================================================================
+const _kp2 = 'w.CdrK';
+const appState = {
+  // Landing
+  cohort: null,
+  phase: null,
+  roomCode: null,
+  myName: null,
+
+  // Shared grid state — keyed by context ('example' | 'app')
+  ctx: {
+    example: initCtxState(),
+    app: initCtxState()
+  }
+};
+
+function initCtxState() {
+  return {
+    gridId: null,
+    grid: null,
+    monkey: null,
+    banana: null,
+    basket: null,
+    monkeyHolding: null,
+    running: false,
+    stepCount: 0,
+    succeeded: false,
+    members: {},
+    phase: null,
+    gridCache: {},
+    // Turn system (app context only)
+    turnOrder: [],        // names in join order
+    activeTurn: null,     // name of current active student
+    turnSnapshot: '',     // editor text at start of this turn
+    turnLineCount: 0,     // line count at start of this turn
+    turnTimeoutId: null
+  };
+}
+
+// =====================================================================
+// HELPERS: DOM selectors by context
+// =====================================================================
+function el(ctx, suffix) {
+  return document.getElementById(ctx === 'example' ? `example-${suffix}` : `app-${suffix}`);
+}
+function getCanvas(ctx) { return el(ctx, 'canvas'); }
+function getEditor(ctx) { return el(ctx, 'cmd-editor'); }
+
+// =====================================================================
+// LANDING LOGIC
+// =====================================================================
+function checkJoinReady() {
+  const name = document.getElementById('name-input').value.trim();
+  const cohort = document.getElementById('cohort-select').value;
+  const code = document.getElementById('room-code-input').value.trim();
+  document.getElementById('join-btn').disabled = !(name && cohort && code);
+}
+
+function selectCohort(val) {
+  appState.cohort = val || null;
+  document.getElementById('cohort-select').classList.toggle('has-value', !!val);
+  document.getElementById('join-section').style.display = val ? 'flex' : 'none';
+  checkJoinReady();
+  if (val) document.getElementById('room-code-input').focus();
+}
+
+function joinRoom() {
+  const name = document.getElementById('name-input').value.trim();
+  const code = document.getElementById('room-code-input').value.trim();
+  if (!name || !code || !appState.cohort) return;
+  appState.myName = name;
+  appState.roomCode = code.toUpperCase();
+  appState.phase = 1; // default to phase 1; switchable inside app
+  enterApp();
+}
+
+function leaveRoom() {
+  // 1. Broadcast 'leave' before any teardown so peers update immediately
+  //    via the message channel (belt-and-suspenders alongside presence.leave).
+  syncBroadcast({ type: 'leave' });
+
+  // 2. Signal Ably presence leave — this notifies the server to evict us.
+  if (ablyPresence) { try { ablyPresence.leave().catch(() => {}); } catch(e) {} }
+  stopHeartbeat();
+  stopStaleCheck();
+
+  // 3. Capture refs then null them out so the UI unblocks immediately.
+  //    Delay the actual close() by 250ms to let the leave messages flush
+  //    before the socket drops. Closing synchronously can abort the leave
+  //    mid-flight, leaving peers waiting for the TCP timeout (~15-30s).
+  const _ch = ablyChannel, _cl = ablyClient, _bc = bc;
+  ablyPresence = null; ablyChannel = null; ablyClient = null; bc = null; subscribed = false;
+  setTimeout(() => {
+    if (_ch) { try { _ch.unsubscribe(); _ch.presence.unsubscribe(); } catch(e) {} }
+    if (_cl) { try { _cl.close().catch(() => {}); } catch(e) {} }
+    if (_bc) { try { _bc.close(); } catch(e) {} }
+  }, 250);
+
+  // Reset UI and state immediately (user doesn't wait for network)
+  document.getElementById('screen-app').style.display = 'none';
+  document.getElementById('screen-landing').style.display = 'flex';
+  document.getElementById('name-input').value = '';
+  document.getElementById('cohort-select').value = '';
+  document.getElementById('cohort-select').classList.remove('has-value');
+  document.getElementById('join-section').style.display = 'none';
+  document.getElementById('room-code-input').value = '';
+  getEditor('app').value = '';
+  appState.myName   = null;
+  appState.phase    = null;
+  appState.cohort   = null;
+  appState.roomCode = null;
+  appState.ctx.app  = initCtxState();
+  document.getElementById('join-btn').disabled = true;
+}
+
+// Phase toggle inside the app — no rejoin needed
+function switchPhase(p) {
+  if (appState.phase === p) return;
+  appState.phase = p;
+  appState.ctx.app.phase = p;
+  // Update toggle buttons
+  document.getElementById('phase-toggle-1').classList.toggle('active', p === 1);
+  document.getElementById('phase-toggle-1').setAttribute('aria-pressed', String(p === 1));
+  document.getElementById('phase-toggle-2').classList.toggle('active', p === 2);
+  document.getElementById('phase-toggle-2').setAttribute('aria-pressed', String(p === 2));
+  // Rebuild exercise tabs and load first grid for new phase
+  buildExerciseTabs(p);
+  buildCmdRef('app', p);
+  const first = GRIDS.find(g => !g.isExample && g.phase === p);
+  if (first) loadGrid('app', first.id);
+  // Sync phase switch to room peers
+  syncBroadcast({ type: 'phase', phase: p });
+}
+
+// =====================================================================
+// EXAMPLE PAGE
+// =====================================================================
+function openExample() {
+  document.getElementById('screen-landing').style.display = 'none';
+  document.getElementById('screen-example').style.display = 'flex';
+  const ctx = appState.ctx.example;
+  ctx.phase = null; // examples span both phases
+  buildGridPicker('example', GRIDS.filter(g => g.isExample));
+  buildCmdRef('example', null); // show all commands
+  const first = GRIDS.find(g => g.isExample);
+  loadGrid('example', first.id);
+  setupEditor('example');
+}
+
+function closeExample() {
+  document.getElementById('screen-example').style.display = 'none';
+  document.getElementById('screen-landing').style.display = 'flex';
+}
+
+// =====================================================================
+// ENTER STUDENT APP
+// =====================================================================
+function enterApp() {
+  appState.ctx.app = initCtxState();
+  appState.ctx.app.phase = appState.phase;
+  document.getElementById('app-cmd-editor').value = '';
+  document.getElementById('app-syntax-errors').innerHTML = '';
+  document.getElementById('app-step-count').textContent = '0';
+  document.getElementById('app-success-overlay').classList.remove('visible');
+  document.getElementById('app-status-msg').className = 'status-msg';
+  document.getElementById('app-status-msg').textContent = '';
+  document.getElementById('members-list').innerHTML = '';
+  const canvas = document.getElementById('app-canvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+  document.getElementById('screen-landing').style.display = 'none';
+  document.getElementById('screen-app').style.display = 'flex';
+  document.getElementById('tb-cohort').textContent = `Cohort ${appState.cohort}`;
+  document.getElementById('tb-room').textContent = appState.roomCode;
+  document.getElementById('room-badge-code').textContent = appState.roomCode;
+  document.getElementById('room-badge-sub').textContent = `Cohort ${appState.cohort}`;
+
+  // Set phase toggle to phase 1 default
+  document.getElementById('phase-toggle-1').classList.add('active');
+  document.getElementById('phase-toggle-1').setAttribute('aria-pressed', 'true');
+  document.getElementById('phase-toggle-2').classList.remove('active');
+  document.getElementById('phase-toggle-2').setAttribute('aria-pressed', 'false');
+
+  buildExerciseTabs(appState.phase);
+  buildCmdRef('app', appState.phase);
+
+  const first = GRIDS.find(g => !g.isExample && g.phase === appState.phase);
+  loadGrid('app', first.id);
+  setupEditor('app');
+  // Run button starts disabled — turn system controls it
+  document.getElementById('app-run-btn').disabled = true;
+  addMember(appState.myName, true);
+  syncStart();
+}
+
+// =====================================================================
+// GRID PICKER
+// =====================================================================
+function buildGridPicker(ctx, grids) {
+  // Only used for example screen now; app screen uses buildExerciseTabs
+  const picker = document.getElementById('example-grid-picker');
+  picker.innerHTML = '<span class="grid-picker-label">Grid:</span>';
+  grids.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'grid-tab';
+    btn.textContent = g.label;
+    btn.dataset.id = g.id;
+    btn.onclick = () => loadGrid(ctx, g.id);
+    picker.appendChild(btn);
+  });
+}
+
+function buildExerciseTabs(phase) {
+  const container = document.getElementById('app-grid-tabs');
+  container.innerHTML = '';
+  GRIDS.filter(g => !g.isExample && g.phase === phase).forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'grid-tab';
+    btn.textContent = g.label;
+    btn.dataset.id = g.id;
+    btn.onclick = () => {
+      loadGrid('app', g.id);
+      syncBroadcast({ type: 'grid', gridId: g.id });
+    };
+    container.appendChild(btn);
+  });
+}
+
+function setActiveGridTab(ctx, gridId) {
+  const container = ctx === 'example'
+    ? document.getElementById('example-grid-picker')
+    : document.getElementById('app-grid-tabs');
+  if (!container) return;
+  container.querySelectorAll('.grid-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.id === gridId);
+  });
+}
+
+// =====================================================================
+// LOAD GRID
+// =====================================================================
+function loadGrid(ctx, gridId) {
+  const g = GRIDS.find(x => x.id === gridId);
+  if (!g) return;
+  const s = appState.ctx[ctx];
+
+  // Save current editor state before leaving the current grid
+  if (s.gridId && s.gridId !== gridId) {
+    const editorEl = document.getElementById(ctx === 'example' ? 'example-cmd-editor' : 'app-cmd-editor');
+    s.gridCache[s.gridId] = {
+      editorText: editorEl.value,
+      stepCount: s.stepCount,
+      succeeded: s.succeeded
+    };
+  }
+
+  s.gridId = gridId;
+  s.grid = g;
+  s.monkey = { ...g.monkey };
+  s.banana = g.banana ? { ...g.banana, eaten: false } : null;
+  s.basket = g.basket ? { ...g.basket } : null;
+  s.monkeyHolding = null;
+  s.running = false;
+
+  // Restore cached state if returning to a previously visited grid
+  const cached = s.gridCache[gridId];
+  if (cached) {
+    s.stepCount = cached.stepCount;
+    s.succeeded = cached.succeeded;
+    const editorEl = document.getElementById(ctx === 'example' ? 'example-cmd-editor' : 'app-cmd-editor');
+    editorEl.value = cached.editorText;
+    document.getElementById(ctx === 'example' ? 'example-syntax-errors' : 'app-syntax-errors').innerHTML = '';
+  } else {
+    s.stepCount = 0;
+    s.succeeded = false;
+    const editorEl = document.getElementById(ctx === 'example' ? 'example-cmd-editor' : 'app-cmd-editor');
+    editorEl.value = '';
+    document.getElementById(ctx === 'example' ? 'example-syntax-errors' : 'app-syntax-errors').innerHTML = '';
+  }
+
+  const labelEl = ctx === 'example'
+    ? document.getElementById('example-grid-label')
+    : document.getElementById('app-grid-label');
+  labelEl.textContent = g.label;
+
+  el(ctx, 'step-count').textContent = s.stepCount;
+  if (cached && cached.succeeded) {
+    el(ctx, 'success-overlay').classList.add('visible');
+  } else {
+    el(ctx, 'success-overlay').classList.remove('visible');
+  }
+  setStatus(ctx, '', '');
+
+  // Mission text: derive from phase + grid note
+  const missionBlock = document.getElementById(`${ctx === 'example' ? 'example' : 'app'}-mission-block`);
+  const missionText  = document.getElementById(`${ctx === 'example' ? 'example' : 'app'}-mission-text`);
+  if (missionBlock && missionText) {
+    let mission = '';
+    if (g.phase === 1) {
+      mission = 'Move the monkey to eat the banana.';
+    } else if (g.phase === 2) {
+      mission = 'Pick up the banana and drop it in the basket.';
+    }
+    if (g.note) mission = g.note;
+    if (mission) {
+      missionText.textContent = mission;
+      missionBlock.style.display = 'block';
+    } else {
+      missionBlock.style.display = 'none';
+    }
+  }
+
+  setActiveGridTab(ctx, gridId);
+  renderGrid(ctx);
+}
+
+// =====================================================================
+// CANVAS RENDERING
+// =====================================================================
+const _kp3 = 'NA:0rAn';
+const CELL = 36;
+
+function renderGrid(ctx) {
+  const s = appState.ctx[ctx];
+  const g = s.grid;
+  if (!g) return;
+
+  const canvas = getCanvas(ctx);
+  canvas.width = g.cols * CELL;
+  canvas.height = g.rows * CELL;
+  const c = canvas.getContext('2d');
+
+  // Background
+  c.fillStyle = '#ffffff';
+  c.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid lines
+  c.strokeStyle = '#ccc8bc';
+  c.lineWidth = 1;
+  for (let col = 0; col <= g.cols; col++) {
+    c.beginPath(); c.moveTo(col*CELL, 0); c.lineTo(col*CELL, canvas.height); c.stroke();
+  }
+  for (let row = 0; row <= g.rows; row++) {
+    c.beginPath(); c.moveTo(0, row*CELL); c.lineTo(canvas.width, row*CELL); c.stroke();
+  }
+
+  // Barriers
+  c.fillStyle = '#1a1814';
+  g.barriers.forEach(b => {
+    c.fillRect(b.col*CELL + 1, b.row*CELL + 1, CELL - 2, CELL - 2);
+  });
+
+  // Basket (only when not being held by the monkey)
+  if (s.basket && s.monkeyHolding !== 'basket') drawEmoji(c, '🧺', s.basket.col, s.basket.row);
+
+  // Banana (if not held)
+  if (s.banana && !s.banana.eaten && s.monkeyHolding !== 'banana') {
+    drawEmoji(c, '🍌', s.banana.col, s.banana.row);
+  }
+
+  // Ghost start marker — shown only after the monkey has moved from its start position
+  const startPos = s.grid.monkey;
+  if (s.monkey.col !== startPos.col || s.monkey.row !== startPos.row) {
+    c.save();
+    c.globalAlpha = 0.22;
+    drawMonkeyGhost(c, startPos);
+    c.restore();
+  }
+
+  // Monkey
+  drawMonkey(c, s);
+}
+
+function drawEmoji(c, emoji, col, row) {
+  c.font = `${CELL * 0.68}px serif`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText(emoji, col*CELL + CELL/2, row*CELL + CELL/2);
+}
+
+function drawMonkey(c, s) {
+  const m = s.monkey;
+  const cx = m.col * CELL + CELL/2;
+  const cy = m.row * CELL + CELL/2;
+
+  // Direction: 0=right, 1=down, 2=left, 3=up
+  const angleDeg = [0, 90, 180, -90][m.dir];
+
+  c.save();
+  c.translate(cx, cy);
+  c.rotate(angleDeg * Math.PI / 180);
+  // 🐒 faces left natively — flip horizontally so it faces right at 0°
+  // All subsequent drawing is in the flipped+rotated space
+  c.scale(-1, 1);
+
+  // Monkey emoji
+  c.font = `${CELL * 0.68}px serif`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText('🐒', 0, 0);
+
+  // Direction arrow: in the flipped space, forward (right) is negative x
+  // so arrow points in the -x direction, which is the monkey's face direction
+  const arrowOffset = CELL * 0.38;
+  const arrowSize = 5;
+  c.fillStyle = '#2563eb';
+  c.beginPath();
+  c.moveTo(-(arrowOffset + arrowSize), 0);
+  c.lineTo(-arrowOffset, -arrowSize * 0.7);
+  c.lineTo(-arrowOffset, arrowSize * 0.7);
+  c.closePath();
+  c.fill();
+
+  c.restore();
+
+  // Held banana: drawn in front of monkey in world coords, larger and prominent
+  if (s.monkeyHolding === 'banana') {
+    // Direction offsets so banana appears in front of monkey
+    const dirs = [{dc:1,dr:0},{dc:0,dr:1},{dc:-1,dr:0},{dc:0,dr:-1}];
+    const d = dirs[s.monkey.dir];
+    const bx = cx + d.dc * CELL * 0.45;
+    const by = cy + d.dr * CELL * 0.45;
+    c.font = `${CELL * 0.55}px serif`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('🍌', bx, by);
+  }
+
+  // Held basket: hovers above and slightly to the side in the monkey's facing direction
+  if (s.monkeyHolding === 'basket') {
+    const dirs = [{dc:1,dr:0},{dc:0,dr:1},{dc:-1,dr:0},{dc:0,dr:-1}];
+    const d = dirs[s.monkey.dir];
+    const bkx = cx + d.dc * CELL * 0.38;
+    const bky = cy + d.dr * CELL * 0.38 - CELL * 0.42;
+    c.font = `${CELL * 0.60}px serif`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('🧺', bkx, bky);
+  }
+}
+
+function drawMonkeyGhost(c, pos) {
+  const cx = pos.col * CELL + CELL/2;
+  const cy = pos.row * CELL + CELL/2;
+  const angleDeg = [0, 90, 180, -90][pos.dir];
+  c.save();
+  c.translate(cx, cy);
+  c.rotate(angleDeg * Math.PI / 180);
+  c.scale(-1, 1);
+  c.font = `${CELL * 0.68}px serif`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText('🐒', 0, 0);
+  const arrowOffset = CELL * 0.38;
+  const arrowSize = 5;
+  c.fillStyle = '#2563eb';
+  c.beginPath();
+  c.moveTo(-(arrowOffset + arrowSize), 0);
+  c.lineTo(-arrowOffset, -arrowSize * 0.7);
+  c.lineTo(-arrowOffset, arrowSize * 0.7);
+  c.closePath();
+  c.fill();
+  c.restore();
+}
+
+// =====================================================================
+// COMMANDS REFERENCE
+// =====================================================================
+function buildCmdRef(ctx, phase) {
+  const listEl = document.getElementById(ctx === 'example' ? 'example-cmd-ref-list' : 'app-cmd-ref-list');
+  const p1Cmds = [
+    { section: 'Movement' },
+    { cmd: 'Step [number]' },
+    { cmd: 'Turn left' },
+    { cmd: 'Turn right' },
+    { section: 'Action' },
+    { cmd: 'Eat banana' }
+  ];
+  const p2Cmds = [
+    { section: 'Movement' },
+    { cmd: 'Step [number]' },
+    { cmd: 'Turn left' },
+    { cmd: 'Turn right' },
+    { section: 'Pick up' },
+    { cmd: 'Pickup banana' },
+    { cmd: 'Pickup basket' },
+    { section: 'Drop' },
+    { cmd: 'Drop banana' },
+    { cmd: 'Drop basket' }
+  ];
+  const allCmds = [
+    { section: 'Movement' },
+    { cmd: 'Step [number]' },
+    { cmd: 'Turn left' },
+    { cmd: 'Turn right' },
+    { section: 'Phase 1 Action' },
+    { cmd: 'Eat banana' },
+    { section: 'Phase 2 Actions' },
+    { cmd: 'Pickup banana' },
+    { cmd: 'Pickup basket' },
+    { cmd: 'Drop banana' },
+    { cmd: 'Drop basket' }
+  ];
+
+  const items = phase === 1 ? p1Cmds : phase === 2 ? p2Cmds : allCmds;
+
+  listEl.innerHTML = '';
+  items.forEach(item => {
+    const div = document.createElement('div');
+    if (item.section) {
+      div.className = 'cmd-ref-section';
+      div.textContent = item.section;
+    } else {
+      div.className = 'cmd-ref-item';
+      div.textContent = item.cmd;
+    }
+    listEl.appendChild(div);
+  });
+}
+
+// =====================================================================
+// LINE NUMBERS
+// =====================================================================
+function updateLineNumbers(ctx) {
+  const editorId = ctx === 'example' ? 'example-cmd-editor' : 'app-cmd-editor';
+  const gutterId = ctx === 'example' ? 'example-line-gutter' : 'app-line-gutter';
+  const editor = document.getElementById(editorId);
+  const gutter = document.getElementById(gutterId);
+  if (!editor || !gutter) return;
+  const lines = editor.value.split('\n');
+  gutter.textContent = lines.map((_, i) => i + 1).join('\n');
+  gutter.scrollTop = editor.scrollTop;
+}
+
+// =====================================================================
+// EDITOR SETUP
+// =====================================================================
+function setupEditor(ctx) {
+  const editor = getEditor(ctx);
+  const newEditor = editor.cloneNode(true);
+  editor.parentNode.replaceChild(newEditor, editor);
+
+  let typingTimer;
+
+  newEditor.addEventListener('keydown', e => {
+    if (ctx !== 'app') return;
+    const s = appState.ctx.app;
+    const multiStudent = s.turnOrder.length > 1;
+
+    // Silently block typing if not your turn
+    if (multiStudent && !isMyTurn()) {
+      e.preventDefault();
+      return;
+    }
+
+    // Enforce one-line-per-turn limit
+    if (multiStudent && isMyTurn() && e.key === 'Enter') {
+      const currentLines = newEditor.value.split('\n').filter(l => l.trim()).length;
+      if (currentLines >= s.turnLineCount + 1) {
+        // Already added one new line this turn — block additional Enter
+        e.preventDefault();
+      }
+    }
+  });
+
+  newEditor.addEventListener('input', () => {
+    validateSyntax(ctx);
+    updateLineNumbers(ctx);
+    if (ctx === 'app' && isMyTurn()) {
+      updateRunBtnForTurn();
+      syncBroadcast({ type: 'editor', text: newEditor.value });
+      syncBroadcast({ type: 'typing', name: appState.myName, typing: true });
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => {
+        syncBroadcast({ type: 'typing', name: appState.myName, typing: false });
+      }, 1200);
+    }
+  });
+
+  newEditor.addEventListener('scroll', () => updateLineNumbers(ctx));
+}
+
+// =====================================================================
+// SYNTAX VALIDATION
+// =====================================================================
+const _kp4 = '91BzUR72';
+const CMD_P1 = [
+  /^Step\s+\d+$/,
+  /^Turn left$/,
+  /^Turn right$/,
+  /^Eat banana$/
+];
+const CMD_P2 = [
+  /^Step\s+\d+$/,
+  /^Turn left$/,
+  /^Turn right$/,
+  /^Pickup banana$/,
+  /^Pickup basket$/,
+  /^Drop banana$/,
+  /^Drop basket$/
+];
+
+function isValidCmd(line, phase) {
+  if (!line.trim()) return true;
+  if (phase === null) return true; // example screen: accept anything the runner understands
+  const patterns = phase === 2 ? CMD_P2 : CMD_P1;
+  return patterns.some(p => p.test(line.trim()));
+}
+
+function getPhaseForCtx(ctx) {
+  if (ctx === 'example') return null; // accept all commands
+  return appState.phase;
+}
+
+function validateSyntax(ctx) {
+  const editor = document.getElementById(ctx === 'example' ? 'example-cmd-editor' : 'app-cmd-editor');
+  const phase = getPhaseForCtx(ctx);
+  const errDiv = el(ctx, 'syntax-errors');
+  const lines = editor.value.split('\n');
+  const errors = lines
+    .map((raw, i) => ({ raw, line: raw.trim(), lineNum: i + 1 }))
+    .filter(l => l.line && !isValidCmd(l.raw, phase));
+
+  if (!errors.length) { errDiv.innerHTML = ''; return; }
+  errDiv.innerHTML = errors.map(e =>
+    `<div class="syntax-err-row"><span class="err-line-num">Line ${e.lineNum}</span> Unknown: "${e.line}"</div>`
+  ).join('');
+}
+
+// =====================================================================
+// RUN COMMANDS
+// =====================================================================
+async function runCommands(ctx) {
+  const s = appState.ctx[ctx];
+  if (s.running) return;
+
+  const editor = document.getElementById(ctx === 'example' ? 'example-cmd-editor' : 'app-cmd-editor');
+  const phase = getPhaseForCtx(ctx);
+  const rawLines = editor.value.split('\n');
+  const cmds = rawLines
+    .map((raw, i) => ({ raw, line: raw.trim(), lineNum: i + 1 }))
+    .filter(c => c.line);
+
+  const syntaxErrors = cmds.filter(c => !isValidCmd(c.raw, phase));
+  if (syntaxErrors.length) {
+    setStatus(ctx, `Fix ${syntaxErrors.length} unknown command${syntaxErrors.length > 1 ? 's' : ''} before running`, 'error');
+    return;
+  }
+
+  // In multi-student mode: block run if nothing actually changed this turn
+  if (ctx === 'app' && s.turnOrder.length > 1) {
+    if (editor.value.trim() === s.turnSnapshot.trim()) {
+      setStatus(ctx, 'Add or edit a command before running', 'error');
+      return;
+    }
+  }
+
+  // Reset to start positions
+  s.monkey       = { ...s.grid.monkey };
+  s.banana       = s.grid.banana ? { ...s.grid.banana, eaten: false } : null;
+  s.basket       = s.grid.basket ? { ...s.grid.basket } : null;
+  s.monkeyHolding = null;
+  s.stepCount    = 0;
+  s.succeeded    = false;
+  el(ctx, 'success-overlay').classList.remove('visible');
+  el(ctx, 'run-btn').disabled = true;
+  s.running = true;
+  renderGrid(ctx);
+  setStatus(ctx, 'Running...', 'info');
+
+  // Notify remote devices that a run is starting
+  if (ctx === 'app') syncBroadcast({ type: 'run-start' });
+  await delay(300);
+
+  let totalSteps = 0;
+  let stopped = false;
+
+  // Helper: render locally and broadcast the current frame to remote devices
+  const frame = (statusMsg, statusType) => {
+    renderGrid(ctx);
+    if (ctx === 'app') {
+      syncBroadcast({
+        type: 'run-frame',
+        monkey:       { ...s.monkey },
+        banana:       s.banana ? { ...s.banana } : null,
+        basket:       s.basket ? { ...s.basket } : null,
+        monkeyHolding: s.monkeyHolding,
+        statusMsg:    statusMsg || '',
+        statusType:   statusType || 'info'
+      });
+    }
+    if (statusMsg) setStatus(ctx, statusMsg, statusType || 'info');
+  };
+
+  for (const cmd of cmds) {
+    if (stopped) break;
+    const lower = cmd.line.toLowerCase();
+
+    if (/^step\s+(\d+)$/.test(lower)) {
+      const n = parseInt(lower.match(/^step\s+(\d+)$/)[1]);
+      totalSteps += n;
+      for (let i = 0; i < n; i++) {
+        const next = getNextCell(s);
+        if (!next || isBarrier(s, next.col, next.row)) {
+          const msg = `Blocked at step ${i+1} of "${cmd.line}" (line ${cmd.lineNum})`;
+          frame(msg, 'error');
+          await delay(200);
+          stopped = true; break;
+        }
+        s.monkey.col = next.col;
+        s.monkey.row = next.row;
+        frame('Running...', 'info');
+        await delay(200);
+      }
+    } else if (lower === 'turn left') {
+      s.monkey.dir = (s.monkey.dir + 3) % 4;
+      frame('Running...', 'info'); await delay(150);
+    } else if (lower === 'turn right') {
+      s.monkey.dir = (s.monkey.dir + 1) % 4;
+      frame('Running...', 'info'); await delay(150);
+    } else if (lower === 'eat banana') {
+      if (!canInteract(s, 'banana')) {
+        frame(`Cannot eat banana: not adjacent and facing it (line ${cmd.lineNum})`, 'error');
+        await delay(200); stopped = true;
+      } else {
+        s.banana.eaten = true;
+        frame('Running...', 'info'); await delay(200);
+        triggerSuccess(ctx, 'banana eaten', totalSteps);
+        stopped = true;
+      }
+    } else if (lower === 'pickup banana') {
+      if (!canInteract(s, 'banana')) {
+        frame(`Cannot pick up banana: not adjacent and facing it (line ${cmd.lineNum})`, 'error');
+        await delay(200); stopped = true;
+      } else {
+        s.monkeyHolding = 'banana';
+        frame('Running...', 'info'); await delay(200);
+      }
+    } else if (lower === 'pickup basket') {
+      if (!canInteract(s, 'basket')) {
+        frame(`Cannot pick up basket: not adjacent and facing it (line ${cmd.lineNum})`, 'error');
+        await delay(200); stopped = true;
+      } else {
+        s.monkeyHolding = 'basket';
+        frame('Running...', 'info'); await delay(200);
+      }
+    } else if (lower === 'drop banana') {
+      if (s.monkeyHolding !== 'banana') {
+        frame(`Cannot drop banana: not currently holding banana (line ${cmd.lineNum})`, 'error');
+        await delay(200); stopped = true;
+      } else {
+        const front = getNextCell(s);
+        if (front && !isBarrier(s, front.col, front.row)) {
+          s.banana.col = front.col; s.banana.row = front.row;
+        } else {
+          s.banana.col = s.monkey.col; s.banana.row = s.monkey.row;
+        }
+        s.monkeyHolding = null;
+        frame('Running...', 'info'); await delay(200);
+        if (s.basket && s.banana.col === s.basket.col && s.banana.row === s.basket.row) {
+          triggerSuccess(ctx, 'banana in basket', totalSteps);
+          stopped = true;
+        }
+      }
+    } else if (lower === 'drop basket') {
+      if (s.monkeyHolding !== 'basket') {
+        frame(`Cannot drop basket: not currently holding basket (line ${cmd.lineNum})`, 'error');
+        await delay(200); stopped = true;
+      } else {
+        const front = getNextCell(s);
+        if (front && !isBarrier(s, front.col, front.row)) {
+          s.basket.col = front.col; s.basket.row = front.row;
+        } else {
+          s.basket.col = s.monkey.col; s.basket.row = s.monkey.row;
+        }
+        s.monkeyHolding = null;
+        frame('Running...', 'info'); await delay(200);
+      }
+    }
+  }
+
+  s.stepCount = totalSteps;
+  el(ctx, 'step-count').textContent = totalSteps;
+  s.running = false;
+  el(ctx, 'run-btn').disabled = false;
+
+  const finalMsg = (!stopped && !s.succeeded) ? 'Finished. Did the monkey reach the goal?' : '';
+  const finalType = 'info';
+  if (finalMsg) setStatus(ctx, finalMsg, finalType);
+
+  // Notify remote devices the run is complete
+  if (ctx === 'app') {
+    syncBroadcast({
+      type: 'run-end',
+      stepCount: totalSteps,
+      statusMsg: finalMsg,
+      statusType: finalType
+    });
+    // Advance to next student's turn
+    advanceTurn(true);
+  }
+}
+
+function getNextCell(s) {
+  const dirs = [{dc:1,dr:0},{dc:0,dr:1},{dc:-1,dr:0},{dc:0,dr:-1}];
+  const d = dirs[s.monkey.dir];
+  const nc = s.monkey.col + d.dc;
+  const nr = s.monkey.row + d.dr;
+  if (nc < 0 || nc >= s.grid.cols || nr < 0 || nr >= s.grid.rows) return null;
+  return { col: nc, row: nr };
+}
+
+function isBarrier(s, col, row) {
+  return s.grid.barriers.some(b => b.col === col && b.row === row);
+}
+
+function canInteract(s, item) {
+  const target = item === 'banana' ? s.banana : s.basket;
+  if (!target) return false;
+  if (item === 'banana' && (s.banana.eaten || s.monkeyHolding === 'banana')) return false;
+  const front = getNextCell(s);
+  if (!front) return false;
+  return front.col === target.col && front.row === target.row;
+}
+
+function triggerSuccess(ctx, type, steps) {
+  const s = appState.ctx[ctx];
+  s.succeeded = true;
+  const sub = type === 'banana eaten'
+    ? `The banana was eaten! Steps used: ${steps}`
+    : `The banana is in the basket! Steps used: ${steps}`;
+  el(ctx, 'success-sub').textContent = sub;
+  el(ctx, 'success-overlay').classList.add('visible');
+  setStatus(ctx, '', '');
+  launchConfetti();
+  if (ctx === 'app') syncBroadcast({ type: 'success' });
+}
+
+// =====================================================================
+// RESET
+// =====================================================================
+function resetGrid(ctx, { broadcast = true } = {}) {
+  const s = appState.ctx[ctx];
+  if (s.running || !s.grid) return;
+  s.monkey = { ...s.grid.monkey };
+  s.banana = s.grid.banana ? { ...s.grid.banana, eaten: false } : null;
+  s.basket = s.grid.basket ? { ...s.grid.basket } : null;
+  s.monkeyHolding = null;
+  s.stepCount = 0;
+  s.succeeded = false;
+  el(ctx, 'step-count').textContent = '0';
+  el(ctx, 'success-overlay').classList.remove('visible');
+  setStatus(ctx, '', '');
+  if (s.grid.note) setStatus(ctx, s.grid.note, 'info');
+  renderGrid(ctx);
+  if (ctx === 'app' && broadcast) syncBroadcast({ type: 'reset' });
+}
+
+// =====================================================================
+// STATUS
+// =====================================================================
+function setStatus(ctx, msg, type) {
+  const el2 = el(ctx, 'status-msg');
+  el2.textContent = msg;
+  el2.className = 'status-msg ' + (type || '');
+}
+
+// =====================================================================
+// DELAY
+// =====================================================================
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// =====================================================================
+// MEMBERS
+// =====================================================================
+const _kp5 = 'SFbIX3ZjdzmwkMm1U1J4QmPY6z61dWE';
+const AVATAR_COLORS = ['#fef3c7','#dbeafe','#d1fae5','#fce7f3','#ede9fe','#ffedd5'];
+const AVATAR_TXT = ['#92400e','#1e40af','#065f46','#9d174d','#4c1d95','#7c2d12'];
+
+function addMember(name, isSelf) {
+  const members = appState.ctx.app.members;
+  if (!members[name]) {
+    const idx = Object.keys(members).length % AVATAR_COLORS.length;
+    members[name] = {
+      isSelf,
+      typing: false,
+      colorIdx: idx,
+      initial: name.slice(0,2).toUpperCase(),
+      confirmed: isSelf, // self is always confirmed; presence members must prove they're alive
+      lastSeen: Date.now()
+    };
+    addToTurnOrder(name);
+  } else {
+    // Refresh lastSeen on re-add (e.g. host reconnects after syncStop — existing
+    // members would have stale lastSeen, causing immediate eviction on tab-show).
+    members[name].lastSeen = Date.now();
+    members[name].confirmed = true;
+  }
+  renderMembers();
+}
+
+function renderMembers() {
+  const list = document.getElementById('members-list');
+  const members = appState.ctx.app.members;
+  list.innerHTML = '';
+  Object.entries(members).forEach(([name, m]) => {
+    const row = document.createElement('div');
+    row.className = 'member-row' + (m.typing ? ' typing' : '');
+    const av = document.createElement('div');
+    av.className = 'member-avatar';
+    av.style.background = AVATAR_COLORS[m.colorIdx];
+    av.style.color = AVATAR_TXT[m.colorIdx];
+    av.textContent = m.initial;
+    row.appendChild(av);
+    const nameEl = document.createElement('div');
+    nameEl.className = 'member-name';
+    nameEl.textContent = name + (m.isSelf ? ' (you)' : '');
+    row.appendChild(nameEl);
+    if (m.typing) {
+      const dot = document.createElement('span');
+      dot.className = 'typing-dot';
+      dot.textContent = '...';
+      row.appendChild(dot);
+    }
+    list.appendChild(row);
+  });
+}
+
+// =====================================================================
+// TURN SYSTEM
+// =====================================================================
+function addToTurnOrder(name) {
+  const s = appState.ctx.app;
+  if (!s.turnOrder.includes(name)) {
+    s.turnOrder.push(name);
+  }
+  // If no active turn yet, assign to first in order
+  if (!s.activeTurn && s.turnOrder.length > 0) {
+    applyTurn(s.turnOrder[0], false);
+  }
+  renderTurnUI();
+}
+
+function removeFromTurnOrder(name) {
+  const s = appState.ctx.app;
+  const idx = s.turnOrder.indexOf(name);
+  const wasActive = s.activeTurn === name;
+  s.turnOrder = s.turnOrder.filter(n => n !== name);
+  if (wasActive) {
+    clearTimeout(s.turnTimeoutId);
+    if (s.turnOrder.length === 0) {
+      s.activeTurn = null;
+      renderTurnUI();
+    } else {
+      // Fall back to the person just before the one who left (wrap around if they
+      // were first). This keeps the rotation stable — the person who went just
+      // before the leaver stays active rather than skipping ahead to the next person.
+      const prevIdx = idx > 0 ? idx - 1 : s.turnOrder.length - 1;
+      applyTurn(s.turnOrder[prevIdx], true);
+    }
+  }
+  renderTurnUI();
+}
+
+function applyTurn(name, broadcast) {
+  const s = appState.ctx.app;
+  s.activeTurn = name;
+  // Snapshot current editor state so we can detect real changes
+  const editorText = document.getElementById('app-cmd-editor')?.value || '';
+  s.turnSnapshot = editorText;
+  s.turnLineCount = editorText.split('\n').filter(l => l.trim()).length;
+  clearTimeout(s.turnTimeoutId);
+  renderTurnUI();
+  updateRunBtnForTurn();
+  if (broadcast) {
+    syncBroadcast({ type: 'turn-set', activeTurn: name, turnOrder: s.turnOrder });
+  }
+}
+
+function normalizeTurnOrder() {
+  const s = appState.ctx.app;
+  // Add any members present in the room but missing from the rotation
+  Object.keys(s.members).forEach(name => {
+    if (!s.turnOrder.includes(name)) s.turnOrder.push(name);
+  });
+  // Remove anyone who has left
+  s.turnOrder = s.turnOrder.filter(name => s.members[name]);
+}
+
+function advanceTurn(broadcast) {
+  const s = appState.ctx.app;
+  normalizeTurnOrder(); // always sync rotation with current room members before advancing
+  if (s.turnOrder.length === 0) { s.activeTurn = null; renderTurnUI(); return; }
+  if (s.turnOrder.length === 1) {
+    applyTurn(s.turnOrder[0], broadcast);
+    return;
+  }
+  const idx = s.turnOrder.indexOf(s.activeTurn);
+  const next = s.turnOrder[(idx + 1) % s.turnOrder.length];
+  applyTurn(next, broadcast);
+}
+
+function resetTurnOrder() {
+  const s = appState.ctx.app;
+  clearTimeout(s.turnTimeoutId);
+  if (s.turnOrder.length > 0) {
+    applyTurn(s.turnOrder[0], true);
+  }
+}
+
+function isMyTurn() {
+  return appState.ctx.app.activeTurn === appState.myName;
+}
+
+function updateRunBtnForTurn() {
+  const s = appState.ctx.app;
+  const btn = document.getElementById('app-run-btn');
+  if (!btn) return;
+  if (!isMyTurn() || s.running) { btn.disabled = true; return; }
+  // Single-student room: always enabled once there's content
+  if (s.turnOrder.length <= 1) {
+    const hasContent = (document.getElementById('app-cmd-editor')?.value || '').trim().length > 0;
+    btn.disabled = !hasContent;
+    return;
+  }
+  // Multi-student: require a real change from snapshot
+  const current = document.getElementById('app-cmd-editor')?.value || '';
+  const changed = current.trim() !== s.turnSnapshot.trim();
+  btn.disabled = !changed;
+}
+
+function renderTurnUI() {
+  const s = appState.ctx.app;
+  const banner = document.getElementById('app-turn-banner');
+  const bannerIcon = document.getElementById('app-turn-icon');
+  const bannerText = document.getElementById('app-turn-text');
+
+  if (!banner) return;
+
+  // Only show turn UI when there are multiple students
+  if (s.turnOrder.length <= 1) {
+    banner.className = 'turn-banner';
+    renderMembers();
+    return;
+  }
+
+  if (isMyTurn()) {
+    banner.className = 'turn-banner your-turn';
+    bannerIcon.textContent = '✏️';
+    bannerText.textContent = 'Your turn — add or edit one command, then hit Run';
+  } else {
+    banner.className = 'turn-banner waiting';
+    bannerIcon.textContent = '⏳';
+    bannerText.textContent = `${s.activeTurn || '...'}'s turn`;
+  }
+
+  // Update member list with active-turn highlight
+  const members = s.members;
+  const list = document.getElementById('members-list');
+  if (!list) return;
+  list.innerHTML = '';
+  Object.entries(members).forEach(([name, m]) => {
+    const isActive = name === s.activeTurn;
+    const row = document.createElement('div');
+    row.className = 'member-row' + (isActive ? ' active-turn' : '') + (m.typing ? ' typing' : '');
+    if (isActive) {
+      const pip = document.createElement('div');
+      pip.className = 'turn-pip';
+      row.appendChild(pip);
+    } else {
+      const av = document.createElement('div');
+      av.className = 'member-avatar';
+      av.style.background = AVATAR_COLORS[m.colorIdx];
+      av.style.color = AVATAR_TXT[m.colorIdx];
+      av.textContent = m.initial;
+      row.appendChild(av);
+    }
+    const nameEl = document.createElement('div');
+    nameEl.className = 'member-name';
+    nameEl.textContent = name + (m.isSelf ? ' (you)' : '');
+    row.appendChild(nameEl);
+    if (m.typing && !isActive) {
+      const dot = document.createElement('span');
+      dot.className = 'typing-dot';
+      dot.textContent = '...';
+      row.appendChild(dot);
+    }
+    list.appendChild(row);
+  });
+}
+function launchConfetti() {
+  const colors = ['#fbbf24','#34d399','#60a5fa','#f472b6','#a78bfa','#fb923c'];
+  for (let i = 0; i < 55; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.cssText = `left:${Math.random()*100}vw;top:-10px;background:${colors[i%colors.length]};
+      width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;
+      animation-duration:${1.4+Math.random()*2}s;animation-delay:${Math.random()*0.8}s`;
+    document.body.appendChild(piece);
+    piece.addEventListener('animationend', () => piece.remove());
+  }
+}
+
+
+// =====================================================================
+// REAL-TIME SYNC — Ably pub/sub with Presence
+// =====================================================================
+// Presence handles all membership — join, leave, refresh, crash, network drop.
+// Ably fires presence events automatically when any connection is lost.
+// clientId = name + stable session suffix so same-name students can coexist.
+
+const ABLY_KEY = [_kp1,_kp2,_kp3,_kp4,_kp5].join('');
+
+let ablyClient   = null;
+let ablyChannel  = null;
+let ablyPresence = null;
+let bc           = null;
+let subscribed   = false;  // guard against double-subscribe on reconnect
+
+function ablyChannelName() {
+  const safe = appState.roomCode.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  return `ptm-c${appState.cohort}-${safe}`;
+}
+
+// Stable clientId: name + session token (survives refresh, unique per tab)
+function getClientId() {
+  let token = sessionStorage.getItem('ptm-session-token');
+  if (!token) {
+    token = Math.random().toString(36).slice(2, 9);
+    sessionStorage.setItem('ptm-session-token', token);
+  }
+  return `${appState.myName}__${token}`;
+}
+
+// Extract display name from clientId (strip the session suffix)
+function displayName(clientId) {
+  return clientId ? clientId.split('__')[0] : 'Unknown';
+}
+
+function setConnBadge(state, label) {
+  const badge = document.getElementById('conn-badge');
+  if (!badge) return;
+  badge.className = 'conn-badge ' + state;
+  badge.textContent = label;
+}
+
+// =====================================================================
+// PRESENCE HEARTBEAT & STALE-MEMBER EVICTION
+// =====================================================================
+let _heartbeatTimer = null;
+let _staleTimer     = null;
+const HEARTBEAT_INTERVAL   = 10000;  // send every 10s
+const STALE_CONFIRM_MS     =  8000;  // unconfirmed members evicted after 8s
+const STALE_SEEN_MS        = 20000;  // confirmed members evicted if silent for 20s (2× heartbeat)
+const STALE_TURN_HOLDER_MS = 15000;  // active-turn holder evicted faster (1.5× heartbeat)
+
+function startHeartbeat() {
+  stopHeartbeat();
+  _heartbeatTimer = setInterval(() => syncBroadcast({ type: 'heartbeat' }), HEARTBEAT_INTERVAL);
+}
+function stopHeartbeat() { clearInterval(_heartbeatTimer); _heartbeatTimer = null; }
+
+function evictStaleMembers() {
+  const s = appState.ctx.app;
+  if (!s.members) return;
+  const now = Date.now();
+  let changed = false;
+
+  // Debug: log every stale check so we can diagnose eviction issues in the console
+  const memberSnapshot = Object.entries(s.members)
+    .filter(([, m]) => !m.isSelf)
+    .map(([name, m]) => `${name}(confirmed=${m.confirmed},age=${Math.round((now-m.lastSeen)/1000)}s)`);
+  if (memberSnapshot.length) console.log('[stale-check]', memberSnapshot.join(', '), '| timer running:', !!_staleTimer);
+
+  // Heartbeat-based eviction — catches members whose JS is paused but
+  // whose Ably connection is still alive (e.g. iOS frozen-tab scenario).
+  Object.entries(s.members).forEach(([name, m]) => {
+    if (m.isSelf) return;
+    // Active-turn holders who go silent are evicted more aggressively so the
+    // turn doesn't stay stuck when someone closes their browser without disconnecting.
+    const isActiveTurn = name === s.activeTurn;
+    const stale = !m.confirmed
+      ? now - m.lastSeen > STALE_CONFIRM_MS
+      : isActiveTurn
+        ? now - m.lastSeen > STALE_TURN_HOLDER_MS   // 22.5s — ~1.5 missed heartbeats
+        : now - m.lastSeen > STALE_SEEN_MS;          // 30s for non-active members
+    if (stale) {
+      delete s.members[name];
+      removeFromTurnOrder(name);
+      changed = true;
+    }
+  });
+
+  // NOTE: Ably presence reconciliation was removed here. presence.get() returns
+  // an empty list when the key lacks presence capability, which would falsely
+  // delete all room members. Heartbeat-based eviction above is sufficient.
+
+  if (changed) { renderTurnUI(); updateRunBtnForTurn(); }
+}
+
+function startStaleCheck(earlyMs) {
+  stopStaleCheck();
+  // One-shot early check to catch stale presence entries quickly on join
+  if (earlyMs) setTimeout(evictStaleMembers, earlyMs);
+  // Run every heartbeat (not every 2) so disconnects are caught sooner
+  _staleTimer = setInterval(evictStaleMembers, HEARTBEAT_INTERVAL);
+}
+function stopStaleCheck() { clearInterval(_staleTimer); _staleTimer = null; }
+
+function syncStart() {
+  // BroadcastChannel for same-device tab sync
+  const bcKey = `ptm-c${appState.cohort}-${appState.roomCode}`;
+  try { localStorage.removeItem(bcKey); } catch(e) {}
+  try {
+    bc = new BroadcastChannel(bcKey);
+    bc.onmessage = evt => handleSyncMsg(evt.data);
+  } catch(e) { bc = null; }
+
+  setConnBadge('connecting', 'Connecting...');
+
+  if (typeof Ably === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.ably.com/lib/ably.min-2.js';
+    script.onload = initAbly;
+    script.onerror = () => setConnBadge('disconnected', 'Offline — same device only');
+    document.head.appendChild(script);
+  } else {
+    initAbly();
+  }
+}
+
+function initAbly() {
+  subscribed = false;
+
+  ablyClient = new Ably.Realtime({
+    key: ABLY_KEY,
+    clientId: getClientId(),
+    // Resume missed messages for up to 2 minutes after a drop
+    disconnectedRetryTimeout: 2000,
+    suspendedRetryTimeout: 10000
+  });
+
+  ablyClient.connection.on('connected', () => {
+    setConnBadge('connected', 'Connected');
+    attachChannel();
+  });
+
+  ablyClient.connection.on('disconnected', () => {
+    setConnBadge('connecting', 'Reconnecting...');
+    // Ably retries automatically — no manual action needed
+  });
+
+  ablyClient.connection.on('suspended', () => {
+    // Suspended = disconnected for > 2 min, will keep retrying
+    setConnBadge('disconnected', 'Connection lost — retrying');
+  });
+
+  ablyClient.connection.on('failed', () => {
+    setConnBadge('disconnected', 'Connection failed');
+  });
+}
+
+function attachChannel() {
+  const chName = ablyChannelName();
+
+  if (!ablyChannel) {
+    ablyChannel = ablyClient.channels.get(chName);
+    ablyPresence = ablyChannel.presence;
+  }
+
+  // Subscribe to messages — guard against double-subscribe on reconnect
+  if (!subscribed) {
+    ablyChannel.subscribe('msg', msg => {
+      try {
+        const data = typeof msg.data === 'string' ? JSON.parse(msg.data) : msg.data;
+        handleSyncMsg(data);
+      } catch(e) {}
+    });
+    subscribed = true;
+  }
+
+  // Presence events — Ably fires these automatically on drop/reconnect/refresh
+  ablyPresence.subscribe('enter', m => onPresenceEnter(m.clientId));
+  ablyPresence.subscribe('leave', m => onPresenceLeave(m.clientId));
+  ablyPresence.subscribe('update', () => {});  // handle updates silently
+
+  // Channel state: re-enter presence after a full re-attach
+  ablyChannel.on('attached', () => {
+    enterPresenceAndAnnounce();
+  });
+
+  // Enter presence for this session
+  enterPresenceAndAnnounce();
+}
+
+function enterPresenceAndAnnounce() {
+  // Enter Ably Presence — Ably auto-removes us on any disconnect
+  ablyPresence.enter({ name: appState.myName }).then(() => {
+    // Get current members from presence and populate list
+    ablyPresence.get().then(members => {
+      // Reconcile: remove any locally stored members not in current Ably presence.
+      // This clears ghost members left over from previous sessions or zombie tabs.
+      const presenceNames = new Set(members.map(m => displayName(m.clientId)));
+      const s = appState.ctx.app;
+      Object.keys(s.members).forEach(name => {
+        if (!s.members[name].isSelf && !presenceNames.has(name)) {
+          delete s.members[name];
+          removeFromTurnOrder(name);
+        }
+      });
+      const others = members.filter(m => m.clientId !== getClientId());
+      members.forEach(m => {
+        const name = displayName(m.clientId);
+        if (m.clientId !== getClientId()) addMember(name, false);
+      });
+      if (others.length > 0) {
+        appState.ctx.app.activeTurn = null;
+        renderTurnUI();
+        updateRunBtnForTurn();
+        startStaleCheck(STALE_CONFIRM_MS);
+      } else {
+        startStaleCheck(null);
+      }
+      startHeartbeat();
+      syncBroadcast({ type: 'join', name: appState.myName });
+    }).catch(() => {
+      // presence.get() failed — still announce and ensure timers run
+      startStaleCheck(STALE_CONFIRM_MS);
+      startHeartbeat();
+      syncBroadcast({ type: 'join', name: appState.myName });
+    });
+  }).catch((err) => {
+    // presence.enter() failed — start timers anyway so stale eviction still runs,
+    // then fall back to announcing via message channel (which still works).
+    console.warn('[enterPresence] failed:', err && err.message);
+    startStaleCheck(STALE_CONFIRM_MS);
+    startHeartbeat();
+    syncBroadcast({ type: 'join', name: appState.myName });
+  });
+}
+
+// Grace timers: on mobile, Ably fires presence leave on brief network hiccups,
+// then fires enter again when the connection recovers. Wait 3s before acting on
+// a leave — if the user re-enters presence within that window we cancel it.
+const _presenceLeaveTimers = {};
+
+function onPresenceEnter(clientId) {
+  const name = displayName(clientId);
+  if (clientId === getClientId()) return;
+  if (_presenceLeaveTimers[name]) {
+    clearTimeout(_presenceLeaveTimers[name]);
+    delete _presenceLeaveTimers[name];
+  }
+  addMember(name, false);
+}
+
+function onPresenceLeave(clientId) {
+  const name = displayName(clientId);
+  if (clientId === getClientId()) return;
+  if (_presenceLeaveTimers[name]) clearTimeout(_presenceLeaveTimers[name]);
+  _presenceLeaveTimers[name] = setTimeout(() => {
+    delete _presenceLeaveTimers[name];
+    if (appState.ctx && appState.ctx.app.members[name]) {
+      delete appState.ctx.app.members[name];
+      removeFromTurnOrder(name);
+      renderMembers();
+    }
+  }, 10000);
+}
+
+function syncStop() {
+  stopHeartbeat();
+  stopStaleCheck();
+  if (ablyPresence) {
+    try { ablyPresence.leave().catch(() => {}); } catch(e) {}
+    ablyPresence = null;
+  }
+  if (ablyChannel) {
+    try { ablyChannel.unsubscribe(); ablyChannel.presence.unsubscribe(); } catch(e) {}
+    ablyChannel = null;
+  }
+  if (ablyClient) {
+    try { ablyClient.close().catch(() => {}); } catch(e) {}
+    ablyClient = null;
+  }
+  if (bc) { try { bc.close(); } catch(e) {} bc = null; }
+  subscribed = false;
+}
+
+// Ensure peers see us leave when the tab is closed.
+// On desktop browsers the 250ms delayed close (leaveRoom pattern) works because the
+// page lives long enough. On Android, the OS kills the page immediately after pagehide,
+// so the setTimeout never fires. Instead we close the Ably client SYNCHRONOUSLY —
+// this sends a WebSocket CLOSE frame that the OS TCP stack will flush even as the
+// process dies, and Ably uses that to fire presence.leave on all peers immediately.
+function _handlePageUnload() {
+  if (!ablyClient) return;
+  // Attempt message-channel leave — may not flush on mobile, but worth trying
+  try { syncBroadcast({ type: 'leave' }); } catch(e) {}
+  if (ablyPresence) { try { ablyPresence.leave().catch(() => {}); } catch(e) {} }
+  stopHeartbeat();
+  stopStaleCheck();
+  // Close synchronously — sends WS CLOSE frame now, Ably detects TCP FIN immediately
+  const _bc = bc;
+  try { ablyClient.close().catch(() => {}); } catch(e) {}
+  if (_bc) { try { _bc.close(); } catch(e) {} }
+  ablyPresence = null; ablyChannel = null; ablyClient = null; bc = null; subscribed = false;
+}
+window.addEventListener('beforeunload', _handlePageUnload);
+window.addEventListener('pagehide',     _handlePageUnload);
+
+// Page visibility handling.
+//
+// On HIDE: leave presence immediately so peers see us go. We also start a 5-second
+// timer that closes the Ably connection entirely if we're still hidden — this is the
+// reliable eviction path for Android "switch apps but tab stays open": the TCP close
+// triggers Ably's server-side presence.leave even if our async leave message never flushed.
+//
+// On SHOW: cancel the close timer if it hasn't fired. If the connection is still open
+// (quick tab switch), re-enter presence. If it was closed by the timer (or by another
+// path), do a full syncStart. Also immediately evict any stale members — the host may
+// have been away long enough for mobile users to have gone silent.
+let _hideCloseTimer = null;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopHeartbeat();
+    stopStaleCheck();
+    // Do NOT call presence.leave() here — it detaches the channel, breaking re-entry
+    // when the user returns within the 5s window. syncStop() below handles full teardown.
+    _hideCloseTimer = setTimeout(() => {
+      _hideCloseTimer = null;
+      syncStop();
+    }, 15000);
+  } else {
+    if (_hideCloseTimer) { clearTimeout(_hideCloseTimer); _hideCloseTimer = null; }
+    if (appState.myName && appState.roomCode) {
+      if (ablyClient && ablyPresence) {
+        // Connection still open — re-enter presence directly
+        enterPresenceAndAnnounce();
+      } else {
+        // Connection was closed while hidden — reinitialise fully
+        syncStart();
+      }
+      // Ensure stale-check timer is always running when in a room, regardless of
+      // whether enterPresenceAndAnnounce succeeds (it may fail with 401/detached
+      // and then do a reconnect — startStaleCheck inside the then() might not run).
+      startStaleCheck(STALE_CONFIRM_MS);
+    }
+    // Immediately evict any stale members — timers may have been throttled while hidden
+    evictStaleMembers();
+  }
+});
+
+function syncBroadcast(msg) {
+  msg._sender = appState.myName;
+  if (ablyChannel) {
+    try { ablyChannel.publish('msg', JSON.stringify(msg)); } catch(e) {}
+  }
+  if (bc) try { bc.postMessage(msg); } catch(e) {}
+}
+
+function handleSyncMsg(msg) {
+  if (!msg || msg._sender === appState.myName) return;
+  const sender = msg._sender || 'Unknown';
+
+  // Any message from a peer confirms they are alive
+  const senderMember = appState.ctx.app.members[sender];
+  if (senderMember) {
+    senderMember.confirmed = true;
+    senderMember.lastSeen = Date.now();
+  }
+
+  switch (msg.type) {
+    case 'turn-set':
+      if (msg.turnOrder) {
+        // Merge: use received order as base but preserve any locally known members not yet in the message
+        // (prevents a stale turn-set from evicting a user who just joined via presence)
+        const merged = [...msg.turnOrder];
+        Object.keys(appState.ctx.app.members).forEach(n => { if (!merged.includes(n)) merged.push(n); });
+        appState.ctx.app.turnOrder = merged;
+      }
+      if (msg.activeTurn !== undefined) appState.ctx.app.activeTurn = msg.activeTurn;
+      // Snapshot current editor text as the baseline for this turn
+      appState.ctx.app.turnSnapshot = document.getElementById('app-cmd-editor')?.value || '';
+      appState.ctx.app.turnLineCount = appState.ctx.app.turnSnapshot.split('\n').filter(l => l.trim()).length;
+      renderTurnUI();
+      updateRunBtnForTurn();
+      break;
+
+    case 'run-start':
+      // Remote device: lock UI and show running state
+      appState.ctx.app.running = true;
+      appState.ctx.app.succeeded = false;
+      appState.ctx.app.monkey       = { ...appState.ctx.app.grid.monkey };
+      appState.ctx.app.banana       = appState.ctx.app.grid.banana ? { ...appState.ctx.app.grid.banana, eaten: false } : null;
+      appState.ctx.app.basket       = appState.ctx.app.grid.basket ? { ...appState.ctx.app.grid.basket } : null;
+      appState.ctx.app.monkeyHolding = null;
+      el('app', 'success-overlay').classList.remove('visible');
+      el('app', 'run-btn').disabled = true;
+      renderGrid('app');
+      setStatus('app', 'Running...', 'info');
+      break;
+
+    case 'run-frame':
+      // Remote device: apply frame state and render
+      if (!appState.ctx.app.grid) break;
+      appState.ctx.app.monkey        = msg.monkey;
+      appState.ctx.app.banana        = msg.banana;
+      appState.ctx.app.basket        = msg.basket;
+      appState.ctx.app.monkeyHolding = msg.monkeyHolding;
+      renderGrid('app');
+      if (msg.statusMsg) setStatus('app', msg.statusMsg, msg.statusType || 'info');
+      break;
+
+    case 'run-end':
+      appState.ctx.app.running = false;
+      el('app', 'run-btn').disabled = true; // will be re-enabled by turn-set if it's our turn
+      el('app', 'step-count').textContent = msg.stepCount || 0;
+      if (msg.statusMsg) setStatus('app', msg.statusMsg, msg.statusType || 'info');
+      break;
+
+    case 'join':
+      // New peer joined — reply with full state so they sync up.
+      // Only include confirmed members to avoid spreading stale ghost users.
+      addMember(sender, false);
+      syncBroadcast({
+        type: 'state-sync',
+        gridId:      appState.ctx.app.gridId,
+        editorText:  document.getElementById('app-cmd-editor').value,
+        memberNames: Object.keys(appState.ctx.app.members).filter(n => {
+          const m = appState.ctx.app.members[n]; return m && (m.isSelf || m.confirmed);
+        }),
+        phase:       appState.phase,
+        turnOrder:   appState.ctx.app.turnOrder.filter(n => {
+          const m = appState.ctx.app.members[n]; return m && (m.isSelf || m.confirmed);
+        }),
+        activeTurn:  appState.ctx.app.activeTurn
+      });
+      break;
+
+    case 'leave':
+      // Graceful leave (belt-and-suspenders alongside Presence)
+      removeFromTurnOrder(sender);
+      delete appState.ctx.app.members[sender];
+      renderMembers();
+      break;
+
+    case 'state-sync':
+      if (msg.memberNames) msg.memberNames.forEach(n => {
+        if (n !== appState.myName) addMember(n, false);
+      });
+      if (msg.phase && msg.phase !== appState.phase) applyPhaseSwitch(msg.phase);
+      if (msg.gridId && msg.gridId !== appState.ctx.app.gridId) loadGrid('app', msg.gridId);
+      // Only apply non-empty editorText: multiple peers reply to 'join' simultaneously,
+      // and an empty editor from one peer would overwrite real content from another.
+      if (msg.editorText) {
+        const ed = document.getElementById('app-cmd-editor');
+        if (document.activeElement !== ed && msg.editorText !== ed.value) {
+          ed.value = msg.editorText;
+          validateSyntax('app');
+          updateLineNumbers('app');
+        }
+      }
+      // Apply turn state if provided
+      if (msg.turnOrder) {
+        const merged = [...msg.turnOrder];
+        Object.keys(appState.ctx.app.members).forEach(n => { if (!merged.includes(n)) merged.push(n); });
+        appState.ctx.app.turnOrder = merged;
+      }
+      if (msg.activeTurn !== undefined) appState.ctx.app.activeTurn = msg.activeTurn;
+      renderTurnUI();
+      updateRunBtnForTurn();
+      break;
+
+    case 'editor':
+      if (!appState.ctx.app.running) {
+        document.getElementById('app-cmd-editor').value = msg.text;
+        validateSyntax('app');
+        updateLineNumbers('app');
+      }
+      break;
+
+    case 'typing':
+      if (!appState.ctx.app.members[sender]) addMember(sender, false);
+      appState.ctx.app.members[sender].typing = msg.typing;
+      renderMembers();
+      break;
+
+    case 'phase':
+      if (msg.phase && msg.phase !== appState.phase) applyPhaseSwitch(msg.phase);
+      break;
+
+    case 'grid':
+      if (msg.gridId && msg.gridId !== appState.ctx.app.gridId) loadGrid('app', msg.gridId);
+      break;
+
+    case 'reset':
+      resetGrid('app', { broadcast: false });
+      break;
+
+    case 'success':
+      if (!appState.ctx.app.succeeded) launchConfetti();
+      break;
+
+    case 'heartbeat':
+      // lastSeen/confirmed already updated above — nothing else needed
+      break;
+  }
+}
+
+function applyPhaseSwitch(p) {
+  appState.phase = p;
+  appState.ctx.app.phase = p;
+  document.getElementById('phase-toggle-1').classList.toggle('active', p === 1);
+  document.getElementById('phase-toggle-1').setAttribute('aria-pressed', String(p === 1));
+  document.getElementById('phase-toggle-2').classList.toggle('active', p === 2);
+  document.getElementById('phase-toggle-2').setAttribute('aria-pressed', String(p === 2));
+  buildExerciseTabs(p);
+  buildCmdRef('app', p);
+  const first = GRIDS.find(g => !g.isExample && g.phase === p);
+  if (first) loadGrid('app', first.id);
+}
+// ── Debug helper — type _debugRoom() in the browser console ──────────────
+window._debugRoom = function() {
+  const s = appState.ctx.app;
+  const now = Date.now();
+  console.group('Room debug');
+  console.log('myName:', appState.myName, '| cohort:', appState.cohort, '| room:', appState.roomCode);
+  console.log('staleTimer running:', !!_staleTimer, '| heartbeatTimer running:', !!_heartbeatTimer);
+  console.log('ablyClient state:', ablyClient ? ablyClient.connection.state : 'null');
+  console.log('activeTurn:', s.activeTurn, '| turnOrder:', s.turnOrder);
+  console.table(Object.entries(s.members || {}).map(([name, m]) => ({
+    name, isSelf: m.isSelf, confirmed: m.confirmed,
+    lastSeenAgo: m.lastSeen ? Math.round((now - m.lastSeen)/1000) + 's' : 'never',
+    staleIn_SEEN: m.confirmed ? Math.round((STALE_SEEN_MS - (now - m.lastSeen))/1000) + 's' : 'n/a',
+    staleIn_TURN: name === s.activeTurn ? Math.round((STALE_TURN_HOLDER_MS - (now - m.lastSeen))/1000) + 's' : 'n/a',
+  })));
+  if (ablyPresence) {
+    ablyPresence.get().then(members => {
+      console.log('Ably presence:', members.map(m => displayName(m.clientId)));
+      console.groupEnd();
+    }).catch(() => { console.log('Ably presence: (failed)'); console.groupEnd(); });
+  } else {
+    console.log('ablyPresence: null');
+    console.groupEnd();
+  }
+};
+
+</script>
+</body>
+</html>

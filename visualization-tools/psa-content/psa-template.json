@@ -1,0 +1,34 @@
+{
+  "_doc": "PSA Set authoring template. Copy this file to your week folder as psa-set.json and fill in the fields below.",
+
+  "id": "week-N",
+  "_id_doc": "Unique string identifier for this set. Used as the localStorage key and in the dropdown. Convention: 'week-N' where N matches the folder name.",
+
+  "title": "Topic Title Here",
+  "_title_doc": "Short display name shown in the set dropdown.",
+
+  "labels": [
+    {
+      "_labels_doc": "Array of label objects. Each label gets a color and shape assigned automatically by its position in this array (index 0, 1, 2, ...). No color or shape keys are needed — the app cycles through a fixed accessible palette.",
+      "id": "label-id",
+      "_id_doc": "Kebab-case string, unique within this set. Used as a stable key for tagging state.",
+      "name": "Display Name",
+      "_name_doc": "Short label name shown on buttons and badges.",
+      "desc": "One sentence: what structural concept does this label identify?"
+    }
+  ],
+  "_labels_count_doc": "Tip: 6–10 labels works best. The palette supports up to 12 before cycling. Fewer labels = less cognitive load per prompt.",
+
+  "prompts": [
+    {
+      "title": "Short problem name (e.g. 'Salary Comparison')",
+      "_title_doc": "Displayed in bold in the prompt list and as a heading above the tokenized statement. Keep it short — 2-4 words.",
+      "statement": "Scenario-based description of the problem. Write in third person, present tense. Describe the situation and what the program needs to do — do NOT prescribe code structure, variable names, or specific syntax. Students should infer the structure by tagging.",
+      "_statement_doc": "This replaces the old string prompt. Avoid imperatives like 'Create a class' or 'Add a method'. Frame it as a real-world scenario instead.",
+      "code": "Clean, idiomatic Java solution. Newlines as \\n, no actual line breaks in the JSON string value. Use proper idioms for the week's topic level.",
+      "_code_doc": "Revealed only after the student adds at least one tag. Should demonstrate the canonical solution — not the only solution, but a good one."
+    }
+  ],
+  "_prompts_doc": "Array of prompt objects. 6–8 prompts per set is the target. Legacy string format is still supported for backward compatibility — the app normalises it automatically.",
+  "_legacy_prompts_doc": "String format (legacy): 'Plain-English problem statement.' — still rendered correctly but shows no title and has no code reveal."
+}

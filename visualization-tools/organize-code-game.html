@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Code Builder</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231A1714'/><rect x='6' y='8' width='20' height='3' rx='1.5' fill='%23D6EEFF'/><rect x='6' y='14' width='14' height='3' rx='1.5' fill='%23FFF0C0'/><rect x='6' y='20' width='17' height='3' rx='1.5' fill='%23F0D9FF'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-page:    #F7F5F0;
+  --bg-surface: #FFFFFF;
+  --bg-inset:   #EDEAE3;
+  --bg-stripe:  #F2EFE8;
+  --text-primary:   #1A1714;
+  --text-secondary: #4A453E;
+  --text-muted:     #857F77;
+  --border-light:  rgba(26,23,20,0.10);
+  --border-medium: rgba(26,23,20,0.20);
+  --border-strong: rgba(26,23,20,0.38);
+  --focus-color: #0057B8;
+
+  --font-body: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --font-mono: 'Source Code Pro', 'Courier New', monospace;
+  --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 40px;
+}
+
+html { font-size: 15px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.7;
+  min-height: 100vh;
+  padding: var(--sp-lg);
+}
+
+.page-wrap { max-width: 1700px; margin: 0 auto; }
+
+/* Header */
+.site-header {
+  margin-bottom: var(--sp-xl);
+  padding-bottom: var(--sp-lg);
+  border-bottom: 2px solid var(--border-light);
+}
+.site-header h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.site-header .tagline { font-size: 0.9rem; color: var(--text-secondary); }
+
+/* Controls bar */
+.controls-bar {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: var(--sp-md) var(--sp-lg);
+  margin-bottom: var(--sp-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  flex-wrap: wrap;
+}
+.controls-bar label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.controls-bar select { flex: 1; min-width: 220px; }
+
+/* Problem statement card */
+.problem-card {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: var(--sp-md) var(--sp-lg);
+  margin-bottom: var(--sp-lg);
+  display: none;
+}
+.problem-card.visible { display: block; }
+.problem-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.problem-statement {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* Section label */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: var(--sp-sm);
+}
+
+/* Two-panel resizable layout */
+#game-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: var(--sp-lg);
+}
+
+.panel-left  { width: calc(50% - 10px); min-width: 200px; flex-shrink: 0; display: flex; flex-direction: column; }
+.panel-right { flex: 1; min-width: 240px; display: flex; flex-direction: column; }
+
+.panel-divider {
+  width: 8px;
+  flex-shrink: 0;
+  align-self: stretch;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+  background: transparent;
+}
+.panel-divider::after {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 40px;
+  background: var(--border-medium);
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+.panel-divider:hover::after,
+.panel-divider.dragging::after { background: var(--focus-color); }
+
+/* Drop zones */
+.drop-zone {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-medium);
+  border-radius: var(--r-lg);
+  padding: var(--sp-sm);
+  min-height: 220px;
+  overflow-x: auto;
+}
+.drop-zone.drag-over {
+  border-color: var(--focus-color);
+  background: #EEF5FF;
+}
+
+/* Code line tiles */
+.code-line {
+  display: block;
+  padding: 6px 12px;
+  margin: 4px 0;
+  background: var(--bg-inset);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--r-md);
+  cursor: grab;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  white-space: pre;
+  color: var(--text-primary);
+  user-select: none;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+.code-line:hover { background: var(--bg-stripe); border-color: var(--border-strong); }
+.code-line:active { cursor: grabbing; }
+.code-line.dragging {
+  opacity: 0.45;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* Result feedback */
+.result-bar {
+  padding: var(--sp-md) var(--sp-lg);
+  border-radius: var(--r-lg);
+  font-size: 1rem;
+  font-weight: 700;
+  display: none;
+  margin-bottom: var(--sp-md);
+}
+.result-bar.visible { display: block; }
+.result-bar.correct { background: #D4F4E0; color: #004D26; border: 1.5px solid #007A3D; }
+.result-bar.incorrect { background: #FFE0E0; color: #880000; border: 1.5px solid #BB0000; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: var(--r-md);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.btn-primary { background: #1A1714; color: #fff; border-color: #1A1714; }
+.btn-primary:hover { background: #333028; border-color: #333028; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border-color: var(--border-medium); }
+.btn-ghost:hover { background: var(--bg-inset); color: var(--text-primary); border-color: var(--border-strong); }
+.btn-row { display: flex; gap: var(--sp-sm); flex-wrap: wrap; align-items: center; }
+.btn:focus-visible { outline: 3px solid var(--focus-color); outline-offset: 3px; }
+
+select {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--bg-inset);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--r-md);
+  padding: 9px 14px;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+  outline: none;
+}
+select:hover { border-color: var(--border-strong); }
+select:focus-visible { border-color: var(--focus-color); outline: 3px solid var(--focus-color); outline-offset: 2px; }
+
+@media (max-width: 780px) {
+  body { padding: var(--sp-md); }
+  #game-area { flex-direction: column; }
+  .panel-left { width: 100% !important; }
+  .panel-divider { display: none; }
+  .panel-right { min-width: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <header class="site-header">
+    <h1>Java Code Builder</h1>
+    <p class="tagline">Drag or click the tiles to assemble each program in the correct order.</p>
+  </header>
+
+  <div class="controls-bar">
+    <label for="problemSelect">Problem</label>
+    <select id="problemSelect">
+      <optgroup label="Week 1 — Programming Basics">
+        <option value="w1_salary">Salary Comparison</option>
+        <option value="w1_grosspay">Gross Pay Calculator</option>
+      </optgroup>
+      <optgroup label="Week 2 — Core Java">
+        <option value="w2_vehicle">Vehicle Blueprint</option>
+        <option value="w2_inventory">Vehicle Inventory</option>
+      </optgroup>
+      <optgroup label="Week 3 — IO and Collections">
+        <option value="w3_employees">Load Employees from File</option>
+        <option value="w3_payroll">Payroll File Processor</option>
+      </optgroup>
+    </select>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="loadProblem()">Load</button>
+      <button class="btn btn-ghost" onclick="resetProblem()">Reset</button>
+    </div>
+  </div>
+
+  <div class="problem-card" id="problemCard">
+    <p class="problem-eyebrow" id="problemEyebrow"></p>
+    <p class="problem-statement" id="problemStatement"></p>
+  </div>
+
+  <div id="resultBar" class="result-bar"></div>
+
+  <div id="game-area">
+    <div class="panel-left">
+      <p class="section-label">Shuffled Lines</p>
+      <div id="shuffled" class="drop-zone" role="list" aria-label="Shuffled code lines"></div>
+    </div>
+
+    <div class="panel-divider" role="separator" aria-label="Resize panels"
+         tabindex="0" title="Drag to resize"></div>
+
+    <div class="panel-right">
+      <p class="section-label">Your Program</p>
+      <div id="assembled" class="drop-zone" role="list" aria-label="Assembled program"></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkAnswer()">Check Answer</button>
+  </div>
+
+</div>
+
+<script>
+const problems = {
+  w1_salary: {
+    week: "Week 1 — Programming Basics",
+    title: "Salary Comparison",
+    statement: "Bob and David need to know whose annual salary is higher.",
+    lines: [
+      "double bobSalary = 55000.00;",
+      "double davidSalary = 62500.00;",
+      "double higherSalary;",
+      "if (bobSalary > davidSalary) {",
+      "    higherSalary = bobSalary;",
+      "} else {",
+      "    higherSalary = davidSalary;",
+      "}",
+      'System.out.println("Higher salary: $" + higherSalary);'
+    ],
+    swapGroups: [[0, 1]]
+  },
+
+  w1_grosspay: {
+    week: "Week 1 — Programming Basics",
+    title: "Gross Pay Calculator",
+    statement: "An employee needs to be shown their total pay for the week after entering their hours worked and pay rate.",
+    lines: [
+      "Scanner scanner = new Scanner(System.in);",
+      'System.out.print("Hours worked: ");',
+      "double hours = scanner.nextDouble();",
+      'System.out.print("Pay rate: ");',
+      "double payRate = scanner.nextDouble();",
+      "double grossPay = hours * payRate;",
+      'System.out.printf("Gross pay: $%.2f%n", grossPay);'
+    ]
+  },
+
+  w2_vehicle: {
+    week: "Week 2 — Core Java",
+    title: "Vehicle Blueprint",
+    statement: "A used car dealership needs a consistent way to represent any vehicle in their system. Fields should not be directly reachable without going through the right channels.",
+    lines: [
+      "public class Vehicle {",
+      "    private String makeModel;",
+      "    private double price;",
+      "    public Vehicle(String makeModel, double price) {",
+      "        this.makeModel = makeModel;",
+      "        this.price = price;",
+      "    }",
+      "    public String getMakeModel() { return makeModel; }",
+      "    public double getPrice() { return price; }",
+      "}"
+    ],
+    swapGroups: [[1, 2], [7, 8]]
+  },
+
+  w2_inventory: {
+    week: "Week 2 — Core Java",
+    title: "Vehicle Inventory",
+    statement: "The dealership lot holds a maximum of 20 cars. Three vehicles are already on the lot when the program starts, and the system must report the current count.",
+    lines: [
+      "Vehicle[] inventory = new Vehicle[20];",
+      'inventory[0] = new Vehicle("Toyota Camry", 18500.0);',
+      'inventory[1] = new Vehicle("Honda Civic", 14200.0);',
+      'inventory[2] = new Vehicle("Ford F-150", 31000.0);',
+      "int count = 3;",
+      'System.out.println("Vehicles on lot: " + count);'
+    ],
+    swapGroups: [[1, 2, 3]]
+  },
+
+  w3_employees: {
+    week: "Week 3 — IO and Collections",
+    title: "Load Employees from File",
+    statement: "A company stores employee records in a text file — one per line, fields separated by a pipe character. Read the file, parse each record, and display each one. If the file cannot be read, report the error rather than crashing.",
+    lines: [
+      'try (BufferedReader reader = new BufferedReader(new FileReader("employees.txt"))) {',
+      "    String line;",
+      "    while ((line = reader.readLine()) != null) {",
+      '        String[] parts = line.split("\\\\|");',
+      '        System.out.println(parts[0] + " - " + parts[1]);',
+      "    }",
+      "} catch (IOException e) {",
+      '    System.out.println("Error reading file: " + e.getMessage());',
+      "}"
+    ]
+  },
+
+  w3_payroll: {
+    week: "Week 3 — IO and Collections",
+    title: "Payroll File Processor",
+    statement: "HR needs a payroll report generated from a raw data file. Ask the user for the input file path. Read each record, compute gross pay, and print the formatted results. If the file can't be opened, show a helpful error.",
+    lines: [
+      "Scanner scanner = new Scanner(System.in);",
+      'System.out.print("Input file: ");',
+      "String inputFile = scanner.nextLine();",
+      "try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {",
+      "    String line;",
+      "    while ((line = reader.readLine()) != null) {",
+      '        String[] parts = line.split("\\\\|");',
+      "        double grossPay = Double.parseDouble(parts[2]) * Double.parseDouble(parts[3]);",
+      '        System.out.printf("%s: $%.2f%n", parts[1], grossPay);',
+      "    }",
+      "} catch (IOException e) {",
+      '    System.out.println("File error: " + e.getMessage());',
+      "}"
+    ]
+  }
+};
+
+let currentKey = null;
+const lastShuffles = {};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Guarantee the shuffle differs from the solution order and from the previous shuffle.
+function freshShuffle(key) {
+  const lines = problems[key].lines;
+  const solutionSig = JSON.stringify(lines);
+  const prevSig = lastShuffles[key] || null;
+  let result;
+  let attempts = 0;
+  do {
+    result = shuffle(lines);
+    attempts++;
+  } while (
+    attempts < 20 &&
+    (JSON.stringify(result) === solutionSig || JSON.stringify(result) === prevSig)
+  );
+  lastShuffles[key] = JSON.stringify(result);
+  return result;
+}
+
+function createLineElement(text) {
+  const div = document.createElement("div");
+  div.className = "code-line";
+  div.setAttribute("role", "listitem");
+  div.textContent = text;
+  div.draggable = true;
+
+  div.addEventListener("dragstart", e => {
+    div.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+  });
+  div.addEventListener("dragend", () => div.classList.remove("dragging"));
+
+  div.addEventListener("click", () => {
+    const parent = div.parentElement.id;
+    if (parent === "shuffled") {
+      document.getElementById("assembled").appendChild(div);
+    } else {
+      document.getElementById("shuffled").appendChild(div);
+    }
+    clearResult();
+  });
+
+  return div;
+}
+
+function enableDrop(container) {
+  container.addEventListener("dragover", e => {
+    e.preventDefault();
+    container.classList.add("drag-over");
+    const dragging = document.querySelector(".dragging");
+    if (!dragging) return;
+    const after = getDragAfterElement(container, e.clientY);
+    if (after == null) {
+      container.appendChild(dragging);
+    } else {
+      container.insertBefore(dragging, after);
+    }
+  });
+  container.addEventListener("dragleave", e => {
+    if (!container.contains(e.relatedTarget)) {
+      container.classList.remove("drag-over");
+    }
+  });
+  container.addEventListener("drop", e => {
+    e.preventDefault();
+    container.classList.remove("drag-over");
+    clearResult();
+  });
+}
+
+function getDragAfterElement(container, y) {
+  const elements = [...container.querySelectorAll(".code-line:not(.dragging)")];
+  return elements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset, element: child };
+    }
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function loadProblem() {
+  currentKey = document.getElementById("problemSelect").value;
+  const problem = problems[currentKey];
+
+  document.getElementById("problemEyebrow").textContent = problem.week + " — " + problem.title;
+  document.getElementById("problemStatement").textContent = problem.statement;
+  document.getElementById("problemCard").classList.add("visible");
+
+  const shuffledDiv = document.getElementById("shuffled");
+  const assembledDiv = document.getElementById("assembled");
+  shuffledDiv.innerHTML = "";
+  assembledDiv.innerHTML = "";
+  clearResult();
+
+  freshShuffle(currentKey).forEach(line => {
+    shuffledDiv.appendChild(createLineElement(line));
+  });
+}
+
+function resetProblem() {
+  if (currentKey) loadProblem();
+}
+
+function checkAnswer() {
+  if (!currentKey) return;
+  const problem = problems[currentKey];
+  const solution = problem.lines.map(l => l.trim());
+
+  const assembled = Array.from(
+    document.getElementById("assembled").children
+  ).map(div => div.textContent.trim());
+
+  // Normalize swap groups: sort both arrays at the swappable indices so
+  // any ordering within a group is accepted as correct.
+  let normSolution = [...solution];
+  let normAssembled = [...assembled];
+  if (problem.swapGroups) {
+    for (const group of problem.swapGroups) {
+      const sortedSolution = group.map(i => normSolution[i]).sort();
+      group.forEach((idx, j) => { normSolution[idx] = sortedSolution[j]; });
+      if (group.every(i => i < normAssembled.length)) {
+        const sortedAssembled = group.map(i => normAssembled[i]).sort();
+        group.forEach((idx, j) => { normAssembled[idx] = sortedAssembled[j]; });
+      }
+    }
+  }
+
+  const correct = JSON.stringify(normAssembled) === JSON.stringify(normSolution);
+
+  const bar = document.getElementById("resultBar");
+  bar.className = "result-bar visible " + (correct ? "correct" : "incorrect");
+  bar.textContent = correct
+    ? "Correct! The program is in the right order."
+    : "Not quite — check the order and try again.";
+}
+
+function clearResult() {
+  const bar = document.getElementById("resultBar");
+  bar.className = "result-bar";
+  bar.textContent = "";
+}
+
+enableDrop(document.getElementById("shuffled"));
+enableDrop(document.getElementById("assembled"));
+
+/* ── Resizable panels ─────────────────────────────────────────── */
+(function () {
+  const divider   = document.querySelector(".panel-divider");
+  const leftPanel = document.querySelector(".panel-left");
+  if (!divider || !leftPanel) return;
+  let dragging = false, startX = 0, startW = 0;
+
+  divider.addEventListener("mousedown", e => {
+    dragging = true;
+    startX = e.clientX;
+    startW = leftPanel.offsetWidth;
+    divider.classList.add("dragging");
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", e => {
+    if (!dragging) return;
+    const w = Math.max(200, Math.min(760, startW + (e.clientX - startX)));
+    leftPanel.style.width = w + "px";
+  });
+  document.addEventListener("mouseup", () => {
+    if (!dragging) return;
+    dragging = false;
+    divider.classList.remove("dragging");
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+  });
+  divider.addEventListener("keydown", e => {
+    const step = e.shiftKey ? 40 : 10;
+    if (e.key === "ArrowLeft") { leftPanel.style.width = Math.max(200, leftPanel.offsetWidth - step) + "px"; e.preventDefault(); }
+    if (e.key === "ArrowRight") { leftPanel.style.width = Math.min(760, leftPanel.offsetWidth + step) + "px"; e.preventDefault(); }
+  });
+}());
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+[
+  {
+    "id": "w1-vars",
+    "week": 1,
+    "title": "Variables and Data Types",
+    "desc": "Declare and print int, double, boolean, and String variables.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        // TODO: declare and print an int, a double, a boolean, and a String\n        int age = 0;\n        double gpa = 0.0;\n        boolean enrolled = false;\n        String name = \"\";\n\n        System.out.println(\"Name: \" + name);\n        System.out.println(\"Age: \" + age);\n        System.out.println(\"GPA: \" + gpa);\n        System.out.println(\"Enrolled: \" + enrolled);\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w1-strings",
+    "week": 1,
+    "title": "String Basics",
+    "desc": "Practice string concatenation and the length() method.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        String firstName = \"Ada\";\n        String lastName  = \"Lovelace\";\n\n        // TODO: concatenate firstName and lastName with a space in between\n        String fullName = \"\";\n\n        // TODO: print fullName and its length\n        System.out.println(fullName);\n        System.out.println(\"Length: \" + fullName.length());\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w1-cond",
+    "week": 1,
+    "title": "Conditionals",
+    "desc": "Write an if/else that compares two numbers and prints which is larger.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        int a = 12;\n        int b = 7;\n\n        // TODO: print \"a is larger\", \"b is larger\", or \"equal\"\n        if (/* condition */ false) {\n            System.out.println(\"a is larger\");\n        } else {\n            System.out.println(\"b is larger\");\n        }\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w2-for",
+    "week": 2,
+    "title": "For Loop",
+    "desc": "Print the numbers 1 through 10, one per line.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        // TODO: use a for loop to print 1 through 10\n        for (int i = 1; i <= 10; i++) {\n            // print i\n        }\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w2-while",
+    "week": 2,
+    "title": "While Loop",
+    "desc": "Count down from 10 to 1 using a while loop, then print \"Blastoff!\".",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        int count = 10;\n\n        // TODO: while count > 0, print count and decrement\n        while (count > 0) {\n            // print count\n            count--;\n        }\n\n        System.out.println(\"Blastoff!\");\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w2-arrays",
+    "week": 2,
+    "title": "Array Basics",
+    "desc": "Declare an int array of 5 elements, assign values, and print each.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        // TODO: declare int[] scores with 5 values\n        int[] scores = {0, 0, 0, 0, 0};\n\n        // TODO: print each element using a for loop\n        for (int i = 0; i < scores.length; i++) {\n            System.out.println(\"scores[\" + i + \"] = \" + scores[i]);\n        }\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w2-strmet",
+    "week": 2,
+    "title": "String Methods",
+    "desc": "Use toUpperCase(), substring(), and indexOf() on a given string.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        String message = \"hello, world!\";\n\n        // TODO: print the message in uppercase\n        System.out.println(/* toUpperCase */message);\n\n        // TODO: print characters 0 through 4 (inclusive) using substring\n        System.out.println(/* substring */message);\n\n        // TODO: print the index of the comma\n        System.out.println(\"Comma at index: \" + /* indexOf */0);\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w3-scanner",
+    "week": 3,
+    "title": "Scanner Input",
+    "desc": "Read a name and age from the user, then print a greeting.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\nimport java.util.Scanner;\n\npublic class Main {\n\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n\n        // TODO: prompt for and read the user's name\n        System.out.print(\"Enter your name: \");\n        String name = \"\";  // scanner.nextLine()\n\n        // TODO: prompt for and read the user's age\n        System.out.print(\"Enter your age: \");\n        int age = 0;  // scanner.nextInt()\n\n        System.out.println(\"Hello, \" + name + \"! You are \" + age + \" years old.\");\n        scanner.close();\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w3-filewrite",
+    "week": 3,
+    "title": "File Write",
+    "desc": "Write three lines of text to a file called output.txt.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\nimport java.io.FileWriter;\nimport java.io.IOException;\n\npublic class Main {\n\n    public static void main(String[] args) {\n        // TODO: open a FileWriter for \"output.txt\" and write three lines\n        try (FileWriter fw = new FileWriter(\"output.txt\")) {\n            fw.write(\"Line one\\n\");\n            // TODO: write two more lines\n        } catch (IOException e) {\n            System.out.println(\"Error: \" + e.getMessage());\n        }\n\n        System.out.println(\"Done writing.\");\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w3-fileread",
+    "week": 3,
+    "title": "File Read",
+    "desc": "Read and print the contents of a file line by line.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\nimport java.io.BufferedReader;\nimport java.io.FileReader;\nimport java.io.IOException;\n\npublic class Main {\n\n    public static void main(String[] args) {\n        // TODO: read \"output.txt\" line by line and print each line\n        try (BufferedReader br = new BufferedReader(new FileReader(\"output.txt\"))) {\n            String line;\n            while ((line = br.readLine()) != null) {\n                System.out.println(line);\n            }\n        } catch (IOException e) {\n            System.out.println(\"Error: \" + e.getMessage());\n        }\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w5-class",
+    "week": 5,
+    "title": "Class Definition",
+    "desc": "Create a Person class with name and age fields and getter methods.",
+    "files": [
+      {
+        "name": "Person.java",
+        "content": "// Person.java\npublic class Person {\n\n    // TODO: declare private String name and private int age fields\n    private String name;\n    private int age;\n\n    // TODO: write a constructor that sets both fields\n    public Person(String name, int age) {\n        // assign fields\n    }\n\n    // TODO: write getName() and getAge() getters\n    public String getName() { return name; }\n    public int getAge()     { return age; }\n\n}"
+      },
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        Person p = new Person(\"Riya\", 21);\n        System.out.println(p.getName() + \" is \" + p.getAge() + \" years old.\");\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w5-ctor",
+    "week": 5,
+    "title": "Constructor Practice",
+    "desc": "Instantiate two Person objects and print both.",
+    "files": [
+      {
+        "name": "Person.java",
+        "content": "// Person.java\npublic class Person {\n    private String name;\n    private int age;\n\n    public Person(String name, int age) {\n        this.name = name;\n        this.age  = age;\n    }\n\n    public String getName() { return name; }\n    public int getAge()     { return age; }\n\n    @Override\n    public String toString() {\n        return name + \" (age \" + age + \")\";\n    }\n}"
+      },
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        // TODO: create two Person objects with different names and ages\n        Person p1 = null; // new Person(...)\n        Person p2 = null; // new Person(...)\n\n        System.out.println(p1);\n        System.out.println(p2);\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w5-this",
+    "week": 5,
+    "title": "this Keyword",
+    "desc": "Use this to distinguish a field from a constructor parameter.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        Rectangle r = new Rectangle(5, 3);\n        System.out.println(\"Area: \" + r.area());\n    }\n\n}\n\nclass Rectangle {\n    private int width;\n    private int height;\n\n    // TODO: fix this constructor so the fields are set correctly using this.width / this.height\n    public Rectangle(int width, int height) {\n        width  = width;   // bug: should be this.width = width\n        height = height;  // bug: should be this.height = height\n    }\n\n    public int area() { return width * height; }\n}"
+      }
+    ]
+  },
+  {
+    "id": "w6-inherit",
+    "week": 6,
+    "title": "Inheritance",
+    "desc": "Create an Animal base class and a Dog subclass that overrides sound().",
+    "files": [
+      {
+        "name": "Animal.java",
+        "content": "// Animal.java\npublic class Animal {\n    private String name;\n\n    public Animal(String name) {\n        this.name = name;\n    }\n\n    public String getName() { return name; }\n\n    public String sound() {\n        return \"...\";\n    }\n}"
+      },
+      {
+        "name": "Dog.java",
+        "content": "// Dog.java\npublic class Dog extends Animal {\n\n    public Dog(String name) {\n        super(name);\n    }\n\n    // TODO: override sound() to return \"Woof!\"\n    @Override\n    public String sound() {\n        return super.sound(); // replace with \"Woof!\"\n    }\n}"
+      },
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        Animal a = new Animal(\"Generic\");\n        Dog d    = new Dog(\"Rex\");\n\n        System.out.println(a.getName() + \" says \" + a.sound());\n        System.out.println(d.getName() + \" says \" + d.sound());\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w6-poly",
+    "week": 6,
+    "title": "Polymorphism",
+    "desc": "Use a parent type reference to hold a child object and call overridden methods.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        // TODO: declare an Animal reference pointing to a Dog object\n        Animal pet = null; // new Dog(\"Buddy\")\n\n        // calling sound() should print \"Woof!\" via polymorphism\n        if (pet != null) {\n            System.out.println(pet.getName() + \": \" + pet.sound());\n        }\n    }\n\n}\n\nclass Animal {\n    private String name;\n    public Animal(String name) { this.name = name; }\n    public String getName() { return name; }\n    public String sound() { return \"...\"; }\n}\n\nclass Dog extends Animal {\n    public Dog(String name) { super(name); }\n    @Override\n    public String sound() { return \"Woof!\"; }\n}"
+      }
+    ]
+  },
+  {
+    "id": "w6-abstract",
+    "week": 6,
+    "title": "Abstract Class",
+    "desc": "Define an abstract Shape class with an abstract area() method, then implement it.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        Shape s = new Circle(5);\n        System.out.println(\"Area: \" + s.area());\n    }\n\n}\n\n// TODO: make Shape abstract and add abstract method area()\nclass Shape {\n    public double area() { return 0; }\n}\n\n// TODO: implement area() as Math.PI * radius * radius\nclass Circle extends Shape {\n    private double radius;\n    public Circle(double r) { this.radius = r; }\n\n    @Override\n    public double area() { return 0; /* Math.PI * radius * radius */ }\n}"
+      }
+    ]
+  },
+  {
+    "id": "w7-iface",
+    "week": 7,
+    "title": "Interface",
+    "desc": "Define a Printable interface with a print() method and implement it in two classes.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    public static void main(String[] args) {\n        Printable doc  = new Document(\"Report\");\n        Printable img  = new Image(\"photo.png\");\n        doc.print();\n        img.print();\n    }\n\n}\n\n// TODO: define interface Printable with void print()\ninterface Printable { }\n\nclass Document implements Printable {\n    private String title;\n    public Document(String t) { this.title = t; }\n    // TODO: implement print() -- print \"Printing document: <title>\"\n    public void print() { }\n}\n\nclass Image implements Printable {\n    private String filename;\n    public Image(String f) { this.filename = f; }\n    // TODO: implement print() -- print \"Rendering image: <filename>\"\n    public void print() { }\n}"
+      }
+    ]
+  },
+  {
+    "id": "w7-generic",
+    "week": 7,
+    "title": "Generic Method",
+    "desc": "Write a generic method that prints any array element.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\npublic class Main {\n\n    // TODO: write a generic static method printFirst(T[] arr)\n    // that prints the first element if the array is non-empty\n    public static void printFirst(Object[] arr) {\n        if (arr.length > 0) System.out.println(arr[0]);\n    }\n\n    public static void main(String[] args) {\n        String[]  words  = {\"hello\", \"world\"};\n        Integer[] nums   = {42, 7, 99};\n\n        printFirst(words);\n        printFirst(nums);\n    }\n\n}"
+      }
+    ]
+  },
+  {
+    "id": "w7-list",
+    "week": 7,
+    "title": "ArrayList vs Array",
+    "desc": "Store five names in both an array and an ArrayList, then print each.",
+    "files": [
+      {
+        "name": "Main.java",
+        "content": "// Main.java\nimport java.util.ArrayList;\n\npublic class Main {\n\n    public static void main(String[] args) {\n        // Fixed-size array\n        String[] namesArray = {\"Alice\", \"Bob\", \"Carlos\", \"Diana\", \"Evan\"};\n\n        // TODO: create an ArrayList<String> and add the same five names\n        ArrayList<String> namesList = new ArrayList<>();\n\n        System.out.println(\"-- Array --\");\n        for (String n : namesArray) System.out.println(n);\n\n        System.out.println(\"-- ArrayList --\");\n        // TODO: iterate and print the ArrayList\n    }\n\n}"
+      }
+    ]
+  }
+]

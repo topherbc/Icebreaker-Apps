@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Your Signature — Generative Art Icebreaker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg transform='translate(16,16)'%3E%3Cpolygon points='0,-11 9.5,5.5 -9.5,5.5' fill='none' stroke='%23e8853a' stroke-width='2' stroke-linejoin='round'/%3E%3Cpolygon points='0,11 9.5,-5.5 -9.5,-5.5' fill='none' stroke='%23e8853a' stroke-width='2' stroke-linejoin='round'/%3E%3Cpolygon points='0,-6 5.2,3 -5.2,3' fill='none' stroke='%23f0a060' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpolygon points='0,6 5.2,-3 -5.2,-3' fill='none' stroke='%23f0a060' stroke-width='1.5' stroke-linejoin='round'/%3E%3Ccircle r='2' fill='%23f0a060'/%3E%3C/g%3E%3C/svg%3E"/>
+<style>
+:root {
+  --bg:#f2ece0;--bg2:#e8e0d0;--ink:#18140e;--mid:#6b5e4e;
+  --acc:#b8521e;--rule:rgba(100,85,65,.15);
+  --fd:'Cormorant Garamond',Georgia,serif;
+  --fb:'Jost',system-ui,sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);
+  font-family:var(--fb);font-size:18px;-webkit-font-smoothing:antialiased}
+.phase{display:none;min-height:100vh;width:100%;opacity:0;transition:opacity .65s var(--ease)}
+.phase.active{display:flex;opacity:1}
+
+/* INTRO */
+#phase-intro{flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem 2rem 8rem;gap:1.8rem;position:relative;overflow:hidden}
+#phase-intro::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 50% -5%,rgba(184,82,30,.10) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 45% at 90% 90%,rgba(30,100,130,.07) 0%,transparent 60%)}
+.deco{position:absolute;border-radius:50%;border:1px solid var(--rule);pointer-events:none}
+.d1{width:580px;height:580px;top:-220px;right:-180px}
+.d2{width:380px;height:380px;bottom:-150px;left:-120px}
+.d3{width:220px;height:220px;top:30%;left:5%;opacity:.45}
+.eyebrow{font-size:.75rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--acc)}
+.hero{font-family:var(--fd);font-size:clamp(3rem,7vw,5.5rem);line-height:1.05;max-width:13ch;font-weight:300}
+.hero em{font-style:italic;color:var(--acc)}
+.sub{font-size:clamp(.95rem,2vw,1.2rem);color:var(--mid);max-width:42ch;line-height:1.7;font-weight:300}
+.rule-line{width:44px;height:1px;background:var(--acc);opacity:.7}
+
+/* QUESTIONS */
+#phase-q{flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem 2rem 8rem;min-height:100vh;gap:0;position:relative}
+.qbar{position:fixed;top:0;left:0;height:3px;background:var(--acc);
+  transition:width .45s var(--ease);border-radius:0 2px 2px 0;z-index:50}
+.qctr{position:fixed;top:1rem;right:1.5rem;z-index:50;
+  font-size:.75rem;font-weight:500;letter-spacing:.12em;color:var(--mid)}
+.qcard{display:none;flex-direction:column;align-items:center;text-align:center;
+  gap:2.2rem;max-width:660px;width:100%;animation:fu .4s var(--ease) both}
+.qcard.cur{display:flex}
+@keyframes fu{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.qn{font-size:.75rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--acc)}
+.qt{font-family:var(--fd);font-size:clamp(1.7rem,3.8vw,2.9rem);line-height:1.18;max-width:22ch;font-weight:300}
+.qh{font-size:.9rem;color:var(--mid);font-weight:300;line-height:1.5}
+.iw{display:flex;flex-direction:column;align-items:center;gap:1.4rem;width:100%}
+input[type=range]{-webkit-appearance:none;width:min(400px,88vw);height:5px;border-radius:3px;
+  background:linear-gradient(to right,var(--acc) var(--pct,50%),var(--rule) var(--pct,50%));
+  outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;
+  background:var(--acc);box-shadow:0 2px 12px rgba(184,82,30,.35);
+  border:3px solid var(--bg);cursor:grab;transition:transform .13s}
+input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.18)}
+input[type=range]::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:var(--acc);border:3px solid var(--bg)}
+.sv{font-family:var(--fd);font-size:clamp(2.8rem,5.5vw,4.2rem);color:var(--ink);min-width:2ch;text-align:center;font-weight:300}
+.rl{display:flex;justify-content:space-between;width:min(400px,88vw);color:var(--mid);font-size:.75rem}
+.sp{display:flex;align-items:center;gap:1rem}
+.sb{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--rule);background:transparent;
+  font-size:1.5rem;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .13s,border-color .13s,transform .1s;user-select:none}
+.sb:hover{background:var(--bg2);border-color:var(--acc)}
+.sb:active{transform:scale(.91)}
+.spv{font-family:var(--fd);font-size:clamp(2.8rem,5.5vw,4.2rem);min-width:2.2ch;text-align:center;color:var(--ink);font-weight:300}
+
+/* FIXED BUTTON */
+#fixed-btn-wrap{position:fixed;bottom:2.2rem;left:50%;transform:translateX(-50%);z-index:100;display:none}
+#fixed-btn-wrap.visible{display:flex}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.95rem 2.8rem;
+  border:1.5px solid var(--ink);border-radius:100px;background:transparent;color:var(--ink);
+  font-family:var(--fb);font-size:1rem;font-weight:500;letter-spacing:.05em;cursor:pointer;
+  white-space:nowrap;transition:background .18s,color .18s,transform .1s,box-shadow .18s}
+.btn:hover{background:var(--ink);color:var(--bg);box-shadow:0 6px 28px rgba(24,20,14,.22)}
+.btn:active{transform:scale(.97)}
+.ba{background:var(--acc);border-color:var(--acc);color:#fff}
+.ba:hover{background:#962f08;border-color:#962f08;color:#fff}
+.bs{padding:.48rem 1.2rem;font-size:.82rem}
+
+/* REVEAL */
+#phase-r{flex-direction:column;align-items:stretch;position:relative;background:#060309}
+#cw{position:fixed;inset:0;z-index:0}
+#cw canvas{position:absolute;inset:0;display:block;width:100%!important;height:100%!important}
+#veil{position:fixed;inset:0;z-index:8;background:#060309;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.4rem;transition:opacity 1.4s var(--ease)}
+#veil.gone{opacity:0;pointer-events:none}
+.vl{font-family:var(--fd);font-size:clamp(1.5rem,3.5vw,2.4rem);
+  color:rgba(255,255,255,.75);font-style:italic;font-weight:300}
+.vs{font-size:.72rem;color:rgba(255,255,255,.3);letter-spacing:.18em;text-transform:uppercase}
+.dots{display:flex;gap:.45rem}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);
+  animation:dp 1.3s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.22s}.dot:nth-child(3){animation-delay:.44s}
+@keyframes dp{0%,80%,100%{transform:scale(.65);opacity:.3}40%{transform:scale(1.1);opacity:1}}
+.rtop{position:fixed;top:1rem;right:1.4rem;z-index:20}
+.rtop .bs{border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.55);background:rgba(0,0,0,.35)}
+.rtop .bs:hover{background:rgba(255,255,255,.1);color:#fff}
+
+/* ── LEGEND / LIVE CONTROLS ─────────────────────────────────
+   Layout per row:
+     [dot]  [question text full width]
+            [role description]          [▼] [editable number] [▲]
+
+   The number input is a plain text-style input, no spinners,
+   just type a value. Up/down arrow buttons sit either side.
+   Clean, readable, no overlap anywhere.                       */
+.rui{
+  position:fixed;bottom:0;left:0;right:0;z-index:10;
+  background:rgba(6,3,9,.91);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-top:1px solid rgba(255,255,255,.08);
+  padding:.65rem 1.4rem .75rem;
+}
+.ll{font-size:.62rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.28);margin-bottom:.5rem}
+
+.lg{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:.3rem .9rem;
+}
+
+/* One parameter row */
+.li{
+  display:grid;
+  /* dot | text-block | stepper */
+  grid-template-columns:12px 1fr auto;
+  align-items:center;
+  gap:0 .6rem;
+  padding:.3rem .35rem;
+  border-radius:7px;
+  transition:background .15s;
+}
+.li:hover{background:rgba(255,255,255,.04)}
+
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:1px}
+
+/* Text block: question on top, role below */
+.li-text{display:flex;flex-direction:column;gap:.12rem;min-width:0}
+.li-q{
+  font-size:.78rem;font-weight:500;
+  color:rgba(255,255,255,.82);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.2;
+}
+.li-role{
+  font-size:.67rem;
+  color:rgba(255,255,255,.38);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.2;
+}
+
+/* Stepper: ▼ [number input] ▲ */
+.stepper{
+  display:flex;align-items:center;gap:.3rem;flex-shrink:0;
+}
+.step-btn{
+  width:24px;height:24px;border-radius:5px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.65);
+  font-size:.75rem;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;user-select:none;
+  transition:background .12s,color .12s,transform .08s;
+  flex-shrink:0;
+}
+.step-btn:hover{background:rgba(255,255,255,.16);color:#fff}
+.step-btn:active{transform:scale(.88)}
+
+.step-input{
+  width:3.4ch;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:5px;
+  color:rgba(255,255,255,.92);
+  font-family:var(--fd);
+  font-size:.95rem;
+  font-weight:400;
+  text-align:center;
+  padding:.18rem .2rem;
+  outline:none;
+  transition:border-color .15s,background .15s;
+  /* hide browser number spinners */
+  -moz-appearance:textfield;
+}
+.step-input::-webkit-outer-spin-button,
+.step-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.step-input:focus{
+  border-color:rgba(255,255,255,.4);
+  background:rgba(255,255,255,.12);
+  color:#fff;
+}
+
+/* Flash indicator */
+.rerender-flash{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:50;pointer-events:none;opacity:0;
+  font-family:var(--fd);font-size:1.1rem;color:rgba(255,255,255,.55);
+  font-style:italic;letter-spacing:.08em;transition:opacity .3s;
+}
+.rerender-flash.show{opacity:1;transition:none}
+
+:focus-visible{outline:2.5px solid var(--acc);outline-offset:3px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<div class="phase active" id="phase-intro">
+  <div class="deco d1" aria-hidden="true"></div>
+  <div class="deco d2" aria-hidden="true"></div>
+  <div class="deco d3" aria-hidden="true"></div>
+  <p class="eyebrow">Generative Art Icebreaker</p>
+  <h1 class="hero">Your answers.<br/><em>Your equation.</em></h1>
+  <div class="rule-line" aria-hidden="true"></div>
+  <p class="sub">Six questions. Six numbers. They become the parameters of a mathematical system that generates art no one else will ever see.</p>
+</div>
+
+<div class="phase" id="phase-q">
+  <div class="qbar" id="qbar" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"></div>
+  <div class="qctr" id="qctr" aria-live="polite"></div>
+  <div id="qa"></div>
+</div>
+
+<div class="phase" id="phase-r">
+  <div id="cw">
+    <canvas id="c-newton" style="z-index:1"></canvas>
+    <canvas id="c-curves" style="z-index:2"></canvas>
+    <canvas id="c-flow"   style="z-index:3"></canvas>
+  </div>
+  <div id="veil">
+    <p class="vl">Solving your equation…</p>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <p class="vs">Three systems converging</p>
+  </div>
+  <div class="rerender-flash" id="rf">recalculating…</div>
+  <div class="rtop"><button class="btn bs" id="btn-restart">&#8635; Restart</button></div>
+  <div class="rui" role="region" aria-label="Live parameter controls">
+    <p class="ll">Your parameters — adjust to explore</p>
+    <div class="lg" id="legend"></div>
+  </div>
+</div>
+
+<div id="fixed-btn-wrap" class="visible">
+  <button class="btn ba" id="fixed-btn">Begin &rarr;</button>
+</div>
+
+<script>
+'use strict';
+
+const QS = [
+  { text:"Browser tabs open right now?",
+    hint:"Every window, every browser. Total honesty.",
+    type:"spinner",min:0,max:99,def:12,
+    role:"Newton roots — degree & layout of fractal basins", dot:"#e8824a" },
+  { text:"How much of a morning person are you?",
+    hint:"1 = not legally conscious before 10am · 10 = you greet the sunrise",
+    type:"slider",min:1,max:10,def:5,
+    role:"Color family — warm golds at 10, deep violet at 1", dot:"#4ab8e8" },
+  { text:"1 = total planner · 10 = total improviser",
+    hint:"How much do you figure it out as you go?",
+    type:"slider",min:1,max:10,def:5,
+    role:"Curve geometry — rose petals vs. wild epitrochoids", dot:"#a8e84a" },
+  { text:"Pets you have — or would want?",
+    hint:"Real, past, or hypothetical. All creatures count.",
+    type:"spinner",min:0,max:20,def:1,
+    role:"Flow turbulence — more pets = more chaotic paths", dot:"#e84aa8" },
+  { text:"Different jobs in your career?",
+    hint:"Internships, part-time, side gigs — all of it.",
+    type:"spinner",min:0,max:30,def:4,
+    role:"Evolution speed — more roles = faster morphing", dot:"#e8d84a" },
+  { text:"Things actively learning right now?",
+    hint:"Books, courses, skills, hobbies in progress.",
+    type:"spinner",min:0,max:20,def:3,
+    role:"Depth & saturation — more learning = richer layers", dot:"#4ae8a8" },
+];
+
+let curQ = 0;
+const ans = QS.map(q => q.def);
+let rafId = null;
+let artRecomputeFn = null;
+
+/* ── Phase control ─────────────────────────────────── */
+function showPhase(id){
+  document.querySelectorAll('.phase').forEach(el=>{
+    el.classList.remove('active');el.style.display='none';el.style.opacity='0';
+  });
+  const el=document.getElementById(id);
+  el.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    el.style.opacity='1';el.classList.add('active');
+  }));
+}
+
+/* ── Fixed button ─────────────────────────────────── */
+const fixedBtn=document.getElementById('fixed-btn');
+const fixedWrap=document.getElementById('fixed-btn-wrap');
+function setBtn(label,fn){fixedBtn.innerHTML=label;fixedBtn.onclick=fn;}
+setBtn('Begin &rarr;',startQuestions);
+function startQuestions(){showPhase('phase-q');buildQs();curQ=0;showQ(0);setBtn('Next &rarr;',advanceQ);}
+function advanceQ(){
+  if(curQ<QS.length-1){curQ++;showQ(curQ);}
+  else{fixedWrap.classList.remove('visible');launchReveal();}
+}
+
+/* ── Build questions ──────────────────────────────── */
+function buildQs(){
+  const area=document.getElementById('qa');area.innerHTML='';
+  QS.forEach((q,i)=>{
+    const card=document.createElement('div');card.className='qcard';card.id=`qc${i}`;
+    let inp='';
+    if(q.type==='slider'){
+      const pct=((q.def-q.min)/(q.max-q.min))*100;
+      inp=`<div class="iw">
+        <div class="sv" id="sv${i}">${q.def}</div>
+        <input type="range" id="inp${i}" min="${q.min}" max="${q.max}" value="${q.def}" step="1"
+          style="--pct:${pct}%" aria-label="${q.text}"
+          aria-valuemin="${q.min}" aria-valuemax="${q.max}" aria-valuenow="${q.def}"/>
+        <div class="rl"><span>${q.min}</span><span>${q.max}</span></div>
+      </div>`;
+    } else {
+      inp=`<div class="iw"><div class="sp">
+        <button class="sb" id="dc${i}" type="button" aria-label="Decrease">−</button>
+        <div class="spv" id="sv${i}">${q.def}</div>
+        <button class="sb" id="ic${i}" type="button" aria-label="Increase">+</button>
+      </div></div>`;
+    }
+    card.innerHTML=`<p class="qn">Question ${i+1} of ${QS.length}</p>
+      <h2 class="qt">${q.text}</h2>
+      ${q.hint?`<p class="qh">${q.hint}</p>`:''}${inp}`;
+    area.appendChild(card);
+    wireQ(q,i,card);
+  });
+}
+
+function wireQ(q,i,card){
+  if(q.type==='slider'){
+    const el=card.querySelector(`#inp${i}`),sv=card.querySelector(`#sv${i}`);
+    el.addEventListener('input',()=>{
+      const v=+el.value,p=((v-q.min)/(q.max-q.min))*100;
+      el.style.setProperty('--pct',p+'%');sv.textContent=v;
+      el.setAttribute('aria-valuenow',v);ans[i]=v;
+    });
+  } else {
+    let val=q.def;
+    const sv=card.querySelector(`#sv${i}`),
+          dc=card.querySelector(`#dc${i}`),
+          ic=card.querySelector(`#ic${i}`);
+    function set(v){val=Math.max(q.min,Math.min(q.max,v));sv.textContent=val;ans[i]=val;}
+    dc.addEventListener('click',()=>set(val-1));
+    ic.addEventListener('click',()=>set(val+1));
+    let hld=null;
+    const sh=d=>{hld=setInterval(()=>set(val+d),85);};
+    const eh=()=>clearInterval(hld);
+    dc.addEventListener('mousedown',()=>sh(-1));ic.addEventListener('mousedown',()=>sh(1));
+    dc.addEventListener('touchstart',()=>sh(-1),{passive:true});
+    ic.addEventListener('touchstart',()=>sh(1),{passive:true});
+    ['mouseup','mouseleave','touchend'].forEach(e=>{
+      dc.addEventListener(e,eh);ic.addEventListener(e,eh);
+    });
+    set(val);
+  }
+}
+
+function showQ(i){
+  document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('cur'));
+  document.getElementById(`qc${i}`).classList.add('cur');
+  const bar=document.getElementById('qbar');
+  bar.style.width=((i/QS.length)*100)+'%';
+  bar.setAttribute('aria-valuenow',i);
+  document.getElementById('qctr').textContent=`${i+1} / ${QS.length}`;
+  fixedBtn.innerHTML=i===QS.length-1?'Reveal &rarr;':'Next &rarr;';
+}
+
+document.getElementById('btn-restart').addEventListener('click',()=>{
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  document.getElementById('veil').classList.remove('gone');
+  fixedWrap.classList.add('visible');
+  showPhase('phase-intro');
+  setBtn('Begin &rarr;',startQuestions);
+  curQ=0;
+});
+
+/* ── Legend with stepper controls ───────────────────
+   Each row:
+     • Colored dot
+     • Question text (short version) + role description below
+     • ▼  [editable number]  ▲
+
+   Typing a number and pressing Enter (or blurring) commits it.
+   Up/down buttons increment/decrement by 1.
+   Any change debounces 220ms then triggers full art recompute. */
+function buildLegend(){
+  const el=document.getElementById('legend');
+  el.innerHTML='';
+  QS.forEach((q,i)=>{
+    const row=document.createElement('div');
+    row.className='li';
+    row.setAttribute('role','group');
+    row.setAttribute('aria-label',q.text);
+
+    row.innerHTML=`
+      <span class="ld" style="background:${q.dot}"></span>
+      <span class="li-text">
+        <span class="li-q">${q.text}</span>
+        <span class="li-role">${q.role}</span>
+      </span>
+      <span class="stepper">
+        <button class="step-btn" data-dir="-1" aria-label="Decrease ${q.text}">▼</button>
+        <input
+          type="number"
+          class="step-input"
+          id="li-inp-${i}"
+          value="${ans[i]}"
+          min="${q.min}" max="${q.max}"
+          aria-label="${q.text} value"
+        />
+        <button class="step-btn" data-dir="1" aria-label="Increase ${q.text}">▲</button>
+      </span>`;
+
+    el.appendChild(row);
+
+    const input=row.querySelector('.step-input');
+    const [decBtn, incBtn]=row.querySelectorAll('.step-btn');
+
+    function commitValue(v){
+      const clamped=Math.max(q.min,Math.min(q.max,Math.round(+v)));
+      if(isNaN(clamped))return;
+      ans[i]=clamped;
+      input.value=clamped;
+      scheduleLiveUpdate();
+    }
+
+    // Up/down buttons
+    decBtn.addEventListener('click',()=>commitValue(ans[i]-1));
+    incBtn.addEventListener('click',()=>commitValue(ans[i]+1));
+
+    // Hold to repeat on buttons
+    let hld=null;
+    const sh=d=>{hld=setInterval(()=>commitValue(ans[i]+d),90);};
+    const eh=()=>clearInterval(hld);
+    decBtn.addEventListener('mousedown',()=>sh(-1));
+    incBtn.addEventListener('mousedown',()=>sh(1));
+    decBtn.addEventListener('touchstart',()=>sh(-1),{passive:true});
+    incBtn.addEventListener('touchstart',()=>sh(1),{passive:true});
+    ['mouseup','mouseleave','touchend'].forEach(e=>{
+      decBtn.addEventListener(e,eh);
+      incBtn.addEventListener(e,eh);
+    });
+
+    // Typing: commit on Enter or blur
+    input.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){commitValue(input.value);input.blur();}
+      if(e.key==='ArrowUp'){e.preventDefault();commitValue(ans[i]+1);}
+      if(e.key==='ArrowDown'){e.preventDefault();commitValue(ans[i]-1);}
+    });
+    input.addEventListener('blur',()=>commitValue(input.value));
+  });
+}
+
+function syncLegend(){
+  QS.forEach((q,i)=>{
+    const inp=document.getElementById(`li-inp-${i}`);
+    if(inp) inp.value=ans[i];
+  });
+}
+
+let debTimer=null;
+function scheduleLiveUpdate(){
+  clearTimeout(debTimer);
+  debTimer=setTimeout(()=>{
+    if(artRecomputeFn)artRecomputeFn();
+    flashRf();
+  },220);
+}
+function flashRf(){
+  const el=document.getElementById('rf');
+  el.classList.remove('show');
+  requestAnimationFrame(()=>{
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),900);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ART ENGINE — identical to previous version
+═══════════════════════════════════════════════════════════════ */
+function launchReveal(){
+  showPhase('phase-r');
+  buildLegend();
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  startArt();
+}
+
+function startArt(){
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  const a=ans.map(Number);
+
+  const newtonDeg    = 3+(a[0]%10);
+  const newtonLayout = Math.floor(a[0]/10)%4;
+  const perturbAmt   = 0.04+(a[0]%7)*0.11;
+  const baseHue      = Math.round(255-((a[1]-1)/9)*217);
+  const hue2         = (baseHue+122)%360;
+  const hue3         = (baseHue+244)%360;
+  const shapeBias    = (a[2]-1)/9;
+  const roseK        = 2+Math.floor(shapeBias*13);
+  const folds        = 4+Math.floor(shapeBias*12);
+  const epiR         = 2+Math.floor(shapeBias*7);
+  const epir         = 1+Math.floor((1-shapeBias)*5);
+  const epiD_norm    = 0.3+shapeBias*0.6;
+  const flowFreq     = 0.3+(a[3]/20)*5.2;
+  const speed        = 0.00015+(a[4]/30)*0.0024;
+  const depth        = 0.3+(a[5]/20)*0.7;
+  const numP         = Math.round(600+(a[5]/20)*1600);
+
+  const cw=document.getElementById('cw');
+  const W=cw.offsetWidth,H=cw.offsetHeight;
+  const cnN=document.getElementById('c-newton');
+  const cnC=document.getElementById('c-curves');
+  const cnF=document.getElementById('c-flow');
+  const NW=Math.floor(W*0.5),NH=Math.floor(H*0.5);
+  cnN.width=NW;cnN.height=NH;
+  cnN.style.width=W+'px';cnN.style.height=H+'px';
+  cnN.style.imageRendering='auto';
+  cnC.width=W;cnC.height=H;
+  cnF.width=W;cnF.height=H;
+  const ctxN=cnN.getContext('2d');
+  const ctxC=cnC.getContext('2d');
+  const ctxF=cnF.getContext('2d');
+
+  function buildRoots(drift){
+    const roots=[],n=newtonDeg;
+    if(newtonLayout===0){
+      for(let k=0;k<n;k++){const a2=(2*Math.PI*k/n)+drift;roots.push([Math.cos(a2),Math.sin(a2)]);}
+    } else if(newtonLayout===1){
+      const phi=2.3999;
+      for(let k=0;k<n;k++){const r=0.45+0.55*(k/n),a2=phi*k+drift;roots.push([r*Math.cos(a2),r*Math.sin(a2)]);}
+    } else if(newtonLayout===2){
+      const half=Math.ceil(n/2);
+      for(let k=0;k<n;k++){
+        const cl=k<half?0:1,cx2=cl===0?-0.72:0.72,cy2=cl===0?0.18:-0.18;
+        const sz=k<half?half:n-half;
+        const a2=(2*Math.PI*(k-(cl===0?0:half))/sz)+drift;
+        const r=0.22+perturbAmt*0.28;
+        roots.push([cx2+r*Math.cos(a2),cy2+r*Math.sin(a2)]);
+      }
+    } else {
+      for(let k=0;k<n;k++){
+        const a2=(2*Math.PI*k/n)+drift;
+        const rx=0.9+perturbAmt*0.5,ry=0.5+perturbAmt*0.4;
+        roots.push([rx*Math.cos(a2)+(k%3-1)*perturbAmt*0.25,
+                    ry*Math.sin(a2)+(k%2-.5)*perturbAmt*0.2]);
+      }
+    }
+    return roots;
+  }
+
+  function newtonIter(cr,ci,roots){
+    let zr=cr,zi=ci;
+    const maxIt=22+Math.floor(depth*30);
+    for(let it=0;it<maxIt;it++){
+      let dsr=0,dsi=0;
+      for(let k=0;k<roots.length;k++){
+        const dr=zr-roots[k][0],di=zi-roots[k][1],m2=dr*dr+di*di;
+        if(m2>1e-18){dsr+=dr/m2;dsi-=di/m2;}
+      }
+      const sm2=dsr*dsr+dsi*dsi;
+      if(sm2<1e-18)break;
+      zr-=dsr/sm2;zi-=dsi/sm2;
+      for(let k=0;k<roots.length;k++){
+        const dr=zr-roots[k][0],di=zi-roots[k][1];
+        if(dr*dr+di*di<8e-7){
+          const smooth=it+1-0.5*Math.log2(Math.max(1e-12,dr*dr+di*di)+1e-12);
+          return[k,smooth,maxIt];
+        }
+      }
+    }
+    let best=0,bestD=1e18;
+    for(let k=0;k<roots.length;k++){
+      const dr=zr-roots[k][0],di=zi-roots[k][1],d=dr*dr+di*di;
+      if(d<bestD){bestD=d;best=k;}
+    }
+    return[best,22+Math.floor(depth*30),22+Math.floor(depth*30)];
+  }
+
+  function h2r(p,q2,t){
+    if(t<0)t+=1;if(t>1)t-=1;
+    if(t<1/6)return p+(q2-p)*6*t;
+    if(t<1/2)return q2;
+    if(t<2/3)return p+(q2-p)*(2/3-t)*6;
+    return p;
+  }
+  function hslPx(h,s,l){
+    h/=360;
+    const q2=l<.5?l*(1+s):l+s-l*s,p2=2*l-q2;
+    return[h2r(p2,q2,h+1/3)*255|0,h2r(p2,q2,h)*255|0,h2r(p2,q2,h-1/3)*255|0];
+  }
+  function newtonColor(ri,smooth,maxIt){
+    if(smooth>=maxIt){
+      const h=(baseHue+ri*(360/newtonDeg))%360;
+      const[r,g,b]=hslPx(h,0.25+depth*0.25,0.05+depth*0.05);
+      return[r,g,b,210];
+    }
+    const t=Math.pow(smooth/maxIt,0.52);
+    const rh=(baseHue+ri*(360/newtonDeg)+smooth*1.1)%360;
+    const s=0.48+depth*0.42-t*0.18,l=0.07+(1-t)*(0.5+depth*0.32);
+    const[r,g,b]=hslPx(rh,s,l);
+    return[r,g,b,215];
+  }
+
+  const ROWS=6;
+  let nRow=0,nDrift=0;
+  let nImgData=ctxN.createImageData(NW,NH);
+  const nScale=4.4/Math.min(NW,NH);
+  let nRoots=buildRoots(nDrift);
+  let nFirstDone=false;
+
+  function renderNewtonChunk(){
+    const data=nImgData.data;
+    const endRow=Math.min(nRow+ROWS,NH);
+    for(let py=nRow;py<endRow;py++){
+      const ci=(py-NH/2)*nScale;
+      for(let px=0;px<NW;px++){
+        const cr=(px-NW/2)*nScale;
+        const[ri,smooth,maxIt]=newtonIter(cr,ci,nRoots);
+        const[r,g,b,al]=newtonColor(ri,smooth,maxIt);
+        const idx=(py*NW+px)*4;
+        data[idx]=r;data[idx+1]=g;data[idx+2]=b;data[idx+3]=al;
+      }
+    }
+    ctxN.putImageData(nImgData,0,0);
+    nRow=endRow;
+    if(nRow>=NH){
+      if(!nFirstDone){nFirstDone=true;document.getElementById('veil').classList.add('gone');}
+      nRow=0;nDrift+=speed*320;
+      nRoots=buildRoots(nDrift);
+      nImgData=ctxN.createImageData(NW,NH);
+    }
+  }
+
+  function drawCurves(t){
+    const CW=cnC.width,CH=cnC.height;
+    ctxC.clearRect(0,0,CW,CH);
+    const cx=CW/2,cy=CH/2,maxR=Math.min(CW,CH)*0.43;
+    function layer(hue,ctype,phase,rotSpd,opacity,lw){
+      ctxC.globalAlpha=(0.42+depth*0.48)*opacity;
+      ctxC.globalCompositeOperation='screen';
+      ctxC.lineWidth=(0.7+depth*1.1)*lw;ctxC.lineCap='round';
+      for(let fold=0;fold<folds;fold++){
+        ctxC.save();
+        ctxC.translate(cx,cy);
+        ctxC.rotate((Math.PI*2/folds)*fold+t*speed*rotSpd);
+        if(fold%2===1)ctxC.scale(1,-1);
+        ctxC.beginPath();
+        const steps=680;
+        for(let s=0;s<=steps;s++){
+          const theta=(Math.PI*2*s/steps)+phase;
+          let x,y;
+          if(ctype==='rose'){
+            const r=maxR*0.44*Math.abs(Math.cos(roseK*theta+t*speed*20));
+            x=r*Math.cos(theta);y=r*Math.sin(theta);
+          } else if(ctype==='epi'){
+            const sumR=epiR+epir,ratio=sumR/epir,d=epiD_norm*maxR*0.55;
+            x=sumR*Math.cos(theta)-d*Math.cos(ratio*theta+t*speed*11);
+            y=sumR*Math.sin(theta)-d*Math.sin(ratio*theta+t*speed*11);
+            const norm=Math.min(1,maxR*0.44/((epiR+epir+epiD_norm*maxR*0.55)*0.9));
+            x*=norm;y*=norm;
+          } else {
+            const kx=2+Math.floor(shapeBias*5),ky=3+Math.floor((1-shapeBias)*4);
+            x=maxR*0.42*Math.sin(kx*theta+t*speed*16);
+            y=maxR*0.42*Math.sin(ky*theta+Math.PI*0.38);
+          }
+          s===0?ctxC.moveTo(x,y):ctxC.lineTo(x,y);
+        }
+        ctxC.strokeStyle=`hsl(${hue},${52+depth*38|0}%,${52+depth*20|0}%)`;
+        ctxC.stroke();ctxC.restore();
+      }
+      ctxC.globalAlpha=1;ctxC.globalCompositeOperation='source-over';
+    }
+    const ct=shapeBias<0.35?'rose':shapeBias>0.65?'epi':'lissajous';
+    layer(hue2,ct,t*speed*5,40,1.0,1.0);
+    layer(hue3,ct,-t*speed*3.5,-28,0.55,0.65);
+    layer((hue2+65)%360,'rose',t*speed*8,18,0.32,0.5);
+  }
+
+  const pX=new Float32Array(numP),pY=new Float32Array(numP);
+  const pAge=new Float32Array(numP),pLife=new Float32Array(numP);
+  const pH=new Float32Array(numP);
+  function resetP(i){
+    pX[i]=Math.random()*W;pY[i]=Math.random()*H;
+    pAge[i]=0;pLife[i]=80+Math.random()*260;
+    pH[i]=hue3+(Math.random()-.5)*(55+depth*95);
+  }
+  for(let i=0;i<numP;i++){resetP(i);pAge[i]=Math.random()*160;}
+
+  function flowAngle(x,y,tt){
+    const nx=x/W*flowFreq,ny=y/H*flowFreq;
+    let a2=Math.sin(nx*2.1+tt*.6)*Math.cos(ny*1.7+tt*.5)*Math.PI*1.65;
+    if(flowFreq>1.8)a2+=Math.cos(nx*3.4-tt*.4)*Math.sin(ny*2.9+tt*.7)*Math.PI*.75;
+    if(flowFreq>3.5)a2+=Math.sin(nx*5.2+tt*.9)*Math.cos(ny*4.3-tt*.6)*Math.PI*.45;
+    return a2;
+  }
+  let fInit=false;
+  function updateFlow(tt){
+    if(!fInit){ctxF.fillStyle='#060309';ctxF.fillRect(0,0,W,H);fInit=true;}
+    ctxF.globalCompositeOperation='source-over';
+    ctxF.fillStyle='rgba(6,3,9,0.022)';ctxF.fillRect(0,0,W,H);
+    ctxF.globalCompositeOperation='screen';
+    const ps=0.75+(a[4]/30)*1.45;
+    for(let i=0;i<numP;i++){
+      const angle=flowAngle(pX[i],pY[i],tt);
+      const nx2=pX[i]+Math.cos(angle)*ps,ny2=pY[i]+Math.sin(angle)*ps;
+      const lf=pAge[i]/pLife[i];
+      const fi=Math.min(1,pAge[i]/22),fo=Math.max(0,1-Math.pow(Math.max(0,lf-.70)/.30,2));
+      const alpha2=fi*fo*(0.26+depth*0.40);
+      ctxF.strokeStyle=`hsla(${pH[i]%360},${52+depth*32|0}%,${50+depth*24|0}%,${alpha2})`;
+      ctxF.lineWidth=0.75+depth*.75;ctxF.lineCap='round';
+      ctxF.beginPath();ctxF.moveTo(pX[i],pY[i]);ctxF.lineTo(nx2,ny2);ctxF.stroke();
+      pX[i]=nx2;pY[i]=ny2;pAge[i]++;
+      if(nx2<0||nx2>W||ny2<0||ny2>H||pAge[i]>pLife[i])resetP(i);
+    }
+    ctxF.globalCompositeOperation='source-over';
+  }
+
+  artRecomputeFn=()=>{startArt();syncLegend();};
+
+  let t=0;
+  function loop(){
+    t+=speed*55;
+    renderNewtonChunk();
+    drawCurves(t);
+    updateFlow(t*0.016);
+    rafId=requestAnimationFrame(loop);
+  }
+  rafId=requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>

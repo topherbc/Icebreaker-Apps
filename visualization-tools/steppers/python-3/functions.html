@@ -1,0 +1,153 @@
+/*
+  Python 3 -- Functions
+  def, parameters, return values
+  No em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Line index comments mark each scenario's 0-based line numbers
+  (blank lines are not counted).
+*/
+STEPPER_REGISTRY.register("python-3/functions", {
+  label: 'Functions',
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: false,
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#68655f', border:'#d4d1cc', label:'Paused, waiting to resume' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+  scenarios: [
+
+    /* ------------------------------------------------------------------ */
+    /*  1. No args, no return                                               */
+    /*                                                                      */
+    /*  0  def greet():                                                     */
+    /*  1      print("Hello!")                                              */
+    /*     (blank -- not counted)                                           */
+    /*  2  greet()                                                          */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'No args, no return',
+      lines: [
+        { code: [['tok-kw','def '],['tok-meth','greet'],['tok-op','():']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"Hello!"'],['tok-op',')']] },
+        { blank: true },
+        { code: [['tok-meth','greet'],['tok-op','()']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Script starts', text:'Python reads the <hi>def</hi> statement and stores <hi>greet</hi> as a function. The body is not executed yet.'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'greet() is called', text:'We see <hi>greet()</hi> -- the parentheses mean "call this function now." No arguments, no return value needed.'} },
+        { line:1, stack:[{name:'greet()',vars:[],active:true},{name:'<module>',vars:[],active:false}],
+          expl:{label:'Jumped into greet()', text:'Python pauses <hi>&lt;module&gt;</hi> and pushes a new frame for <hi>greet()</hi>. We are now inside that function.'} },
+        { line:1, stack:[{name:'greet()',vars:[],active:true},{name:'<module>',vars:[],active:false}],
+          expl:{label:'Executing the body', text:'<hi>print("Hello!")</hi> runs and prints to the console. This is the only thing <hi>greet()</hi> does.'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'greet() finishes and returns', text:'<hi>greet()</hi> reached the end of its body. Its frame is popped off the stack. Script ends.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  2. With arguments                                                   */
+    /*                                                                      */
+    /*  0  def print_score(points):                                         */
+    /*  1      print("Score: " + str(points))                              */
+    /*     (blank -- not counted)                                           */
+    /*  2  print_score(42)                                                  */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'With arguments',
+      lines: [
+        { code: [['tok-kw','def '],['tok-meth','print_score'],['tok-op','(points):']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"Score: "'],['tok-op',' + '],['tok-meth','str'],['tok-op','(points))']] },
+        { blank: true },
+        { code: [['tok-meth','print_score'],['tok-op','('],['tok-num','42'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Script starts', text:'Python reads the <hi>def</hi> statement and stores <hi>print_score</hi> as a function. The body is not executed yet.'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Calling with an argument', text:'We call <hi>print_score(42)</hi>. The value <hi>42</hi> will be passed in as the <hi>points</hi> parameter.'} },
+        { line:1, stack:[{name:'print_score()',vars:[{n:'points',v:'42',fresh:true,cls:false}],active:true},{name:'<module>',vars:[],active:false}],
+          expl:{label:'New frame -- parameter set', text:'Python pushes a frame for <hi>print_score()</hi>. The parameter <hi>points</hi> is automatically set to <hi>42</hi>. It lives inside this frame.'} },
+        { line:1, stack:[{name:'print_score()',vars:[{n:'points',v:'42',fresh:false,cls:false}],active:true},{name:'<module>',vars:[],active:false}],
+          expl:{label:'Using the parameter', text:'<hi>points</hi> holds <hi>42</hi>. The function uses it to print "Score: 42".'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Frame popped', text:'<hi>print_score()</hi> finishes. Its frame (and the local variable <hi>points</hi>) are gone. Script ends.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  3. Return a value                                                   */
+    /*                                                                      */
+    /*  0  def add(a, b):                                                   */
+    /*  1      return a + b                                                 */
+    /*     (blank -- not counted)                                           */
+    /*  2  total = add(3, 5)                                                */
+    /*  3  print(total)                                                     */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Return a value',
+      lines: [
+        { code: [['tok-kw','def '],['tok-meth','add'],['tok-op','(a, b):']] },
+        { code: [['','    '],['tok-kw','return '],['tok-op','a + b']] },
+        { blank: true },
+        { code: [['tok-op','total = '],['tok-meth','add'],['tok-op','('],['tok-num','3'],['tok-op',', '],['tok-num','5'],['tok-op',')']] },
+        { code: [['tok-meth','print'],['tok-op','(total)']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Script starts', text:'Python reads the <hi>def</hi> statement and stores <hi>add</hi> as a function. The body is not executed yet.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'total',v:'?',fresh:false,cls:false}],active:true}],
+          expl:{label:'Declaration + call', text:'Python sees <hi>total = add(3, 5)</hi>. It reserves space for <hi>total</hi>, then must call <hi>add()</hi> first to get a value.'} },
+        { line:1, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:true,cls:false},{n:'b',v:'5',fresh:true,cls:false}],active:true},{name:'<module>',vars:[{n:'total',v:'?',fresh:false,cls:false}],active:false}],
+          expl:{label:'add() frame created', text:'A new frame for <hi>add()</hi> is pushed. Parameters <hi>a = 3</hi> and <hi>b = 5</hi> are set. <hi>&lt;module&gt;</hi> is paused -- <hi>total</hi> is still unknown.'} },
+        { line:1, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:false,cls:false},{n:'b',v:'5',fresh:false,cls:false}],active:true},{name:'<module>',vars:[{n:'total',v:'?',fresh:false,cls:false}],active:false}],
+          expl:{label:'return statement', text:'<hi>return a + b</hi> computes 3 + 5 = 8. This value is packaged up and sent back to the caller.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'total',v:'8',fresh:true,cls:false}],active:true}],
+          expl:{label:'Return value received', text:'<hi>add()</hi> is popped. The value <hi>8</hi> comes back to <hi>&lt;module&gt;</hi>, and <hi>total</hi> is finally assigned.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'total',v:'8',fresh:false,cls:false}],active:true}],
+          expl:{label:'Using the result', text:'<hi>total</hi> is now <hi>8</hi>. We pass it to <hi>print()</hi>, which prints 8 to the console.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'total',v:'8',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'There is nothing more to run.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  4. Fire and forget                                                  */
+    /*                                                                      */
+    /*  0  def add(a, b):                                                   */
+    /*  1      return a + b                                                 */
+    /*     (blank -- not counted)                                           */
+    /*  2  add(3, 5)  # return value ignored                                */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Fire and forget',
+      lines: [
+        { code: [['tok-kw','def '],['tok-meth','add'],['tok-op','(a, b):']] },
+        { code: [['','    '],['tok-kw','return '],['tok-op','a + b']] },
+        { blank: true },
+        { code: [['tok-meth','add'],['tok-op','('],['tok-num','3'],['tok-op',', '],['tok-num','5'],['tok-op',')'],['','  '],['tok-cmt','# return value ignored']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Script starts', text:'Python reads the <hi>def</hi> statement and stores <hi>add</hi> as a function.'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Calling without assigning', text:'We call <hi>add(3, 5)</hi> but there is no <hi>total =</hi> in front. The function will still run and return a value -- we just will not use it.'} },
+        { line:1, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:true,cls:false},{n:'b',v:'5',fresh:true,cls:false}],active:true},{name:'<module>',vars:[],active:false}],
+          expl:{label:'add() runs normally', text:'<hi>add()</hi> has no idea it is being ignored. It executes exactly the same as before.'} },
+        { line:1, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:false,cls:false},{n:'b',v:'5',fresh:false,cls:false}],active:true},{name:'<module>',vars:[],active:false}],
+          expl:{label:'Returns 8 - nobody catches it', text:'<hi>add()</hi> computes and returns <hi>8</hi>. That value floats back to the call site in <hi>&lt;module&gt;</hi>...'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Value is discarded', text:'...and is immediately thrown away. No variable catches it. Valid Python, but only makes sense when the result truly does not matter.'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Script ends', text:'The value 8 was computed and immediately lost.'} },
+      ]
+    },
+
+  ]
+});

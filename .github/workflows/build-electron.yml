@@ -1,0 +1,111 @@
+name: Build & Publish Electron App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # ── 1. Create the GitHub release (once, before builds start) ──────────────
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: ver
+        run: echo "version=v$(node -p "require('./live-code/package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.ver.outputs.version }} \
+            --title "LiveCode ${{ steps.ver.outputs.version }}" \
+            --notes "LiveCode classroom app — native desktop build." \
+            --repo ${{ github.repository }} \
+            || echo "Release may already exist, continuing."
+
+  # ── 2. macOS builds (arm64 + x64 DMGs) ───────────────────────────────────
+  build-mac:
+    needs: create-release
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/electron
+          key: electron-${{ runner.os }}-${{ hashFiles('live-code/package-lock.json') }}
+
+      - name: Install dependencies
+        working-directory: live-code
+        run: npm ci
+
+      - name: Build macOS DMGs
+        working-directory: live-code
+        env:
+          ABLY_API_KEY: ${{ secrets.ABLY_API_KEY }}
+          # Ad-hoc sign with "-" identity: avoids "damaged" Gatekeeper error.
+          # Users will see "unidentified developer" on first launch (right-click → Open).
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_LINK: ''
+        run: |
+          npx electron-builder --mac --publish never \
+            --config.mac.identity=null
+
+      - name: Upload macOS artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.create-release.outputs.version }} \
+            live-code/dist/LiveCode-arm64.dmg \
+            live-code/dist/LiveCode-x64.dmg \
+            --repo ${{ github.repository }} \
+            --clobber
+
+  # ── 3. Windows build (NSIS installer) ────────────────────────────────────
+  build-win:
+    needs: create-release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\electron\Cache
+          key: electron-${{ runner.os }}-${{ hashFiles('live-code/package-lock.json') }}
+
+      - name: Install dependencies
+        working-directory: live-code
+        run: npm ci
+
+      - name: Build Windows installer
+        working-directory: live-code
+        env:
+          ABLY_API_KEY: ${{ secrets.ABLY_API_KEY }}
+        run: npx electron-builder --win --publish never
+
+      - name: Upload Windows artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.create-release.outputs.version }} `
+            live-code\dist\LiveCode-Setup.exe `
+            --repo ${{ github.repository }} `
+            --clobber

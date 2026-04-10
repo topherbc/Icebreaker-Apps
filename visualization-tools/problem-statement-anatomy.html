@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Problem Statement Anatomy</title>
+<meta name="description" content="An annotation exercise connecting programming problem statements to code structure concepts.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231A1714'/><rect x='6' y='8' width='20' height='3' rx='1.5' fill='%23D6EEFF'/><rect x='6' y='14' width='14' height='3' rx='1.5' fill='%23FFF0C0'/><rect x='6' y='20' width='17' height='3' rx='1.5' fill='%23F0D9FF'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-page:    #F7F5F0;
+  --bg-surface: #FFFFFF;
+  --bg-inset:   #EDEAE3;
+  --bg-stripe:  #F2EFE8;
+  --text-primary:   #1A1714;
+  --text-secondary: #4A453E;
+  --text-muted:     #857F77;
+  --border-light:  rgba(26,23,20,0.10);
+  --border-medium: rgba(26,23,20,0.20);
+  --border-strong: rgba(26,23,20,0.38);
+  --focus-color: #0057B8;
+
+  --font-body: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --font-mono: 'Source Code Pro', 'Courier New', monospace;
+  --r-sm:4px; --r-md:8px; --r-lg:14px;
+  --sp-sm:8px; --sp-md:16px; --sp-lg:24px; --sp-xl:40px;
+}
+
+html { font-size: 18px; }
+body { font-family:var(--font-body); background:var(--bg-page); color:var(--text-primary); line-height:1.7; min-height:100vh; padding:var(--sp-lg); }
+
+.skip-link { position:absolute;top:-999px;left:0;background:#0057B8;color:#fff;padding:10px 20px;font-size:1rem;font-weight:700;z-index:9999;border-radius:0 0 var(--r-md) 0;text-decoration:none; }
+.skip-link:focus { top:0; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+.page-wrap { max-width:1400px;margin:0 auto; }
+
+/* Two-panel layout */
+#exercise-area { display:flex;align-items:flex-start;gap:0; }
+.panel-left { width:558px;min-width:180px;flex-shrink:0; }
+.panel-left .card { margin-bottom:0; }
+.panel-divider {
+  width:8px;flex-shrink:0;align-self:stretch;cursor:col-resize;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 6px;border-radius:4px;transition:background 0.15s;
+  background:transparent;
+}
+.panel-divider::after {
+  content:'';display:block;width:3px;height:40px;
+  background:var(--border-medium);border-radius:2px;transition:background 0.15s;
+}
+.panel-divider:hover::after,.panel-divider.dragging::after { background:var(--focus-color); }
+.panel-right { flex:1;min-width:280px;overflow:hidden; }
+.panel-right-placeholder {
+  display:flex;align-items:center;justify-content:center;
+  min-height:300px;color:var(--text-muted);font-size:0.95rem;
+  border:2px dashed var(--border-light);border-radius:var(--r-lg);
+  text-align:center;padding:var(--sp-xl);
+}
+
+/* Header */
+.site-header { margin-bottom:var(--sp-xl);padding-bottom:var(--sp-lg);border-bottom:2px solid var(--border-light); }
+.site-header h1 { font-size:1.9rem;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin-bottom:4px; }
+.site-header .tagline { font-size:0.9rem;color:var(--text-secondary); }
+
+/* Set bar */
+.set-bar { background:var(--bg-surface);border:1.5px solid var(--border-light);border-radius:var(--r-lg);padding:var(--sp-md) var(--sp-lg);margin-bottom:var(--sp-xl);display:flex;align-items:center;gap:var(--sp-md);flex-wrap:wrap; }
+.set-bar label { font-weight:700;font-size:0.9rem;color:var(--text-secondary);white-space:nowrap; }
+.set-bar select { flex:1;min-width:200px; }
+.set-meta { font-size:0.85rem;color:var(--text-muted); }
+
+/* Form elements */
+select, textarea { font-family:var(--font-body);font-size:1rem;color:var(--text-primary);background:var(--bg-inset);border:2px solid var(--border-medium);border-radius:var(--r-md);padding:10px 14px;width:100%;line-height:1.5;transition:border-color 0.15s; }
+select:hover, textarea:hover { border-color:var(--border-strong); }
+select:focus-visible, textarea:focus-visible, button:focus-visible { outline:3px solid var(--focus-color);outline-offset:3px;border-color:var(--focus-color); }
+
+.section-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:var(--sp-sm); }
+.card { background:var(--bg-surface);border:1.5px solid var(--border-light);border-radius:var(--r-lg);padding:var(--sp-lg);margin-bottom:var(--sp-lg); }
+
+/* Prompts */
+.prompt-list { display:flex;flex-direction:column;gap:var(--sp-sm); }
+.prompt-option { display:flex;align-items:flex-start;gap:var(--sp-md);background:var(--bg-surface);border:2px solid var(--border-light);border-radius:var(--r-md);padding:var(--sp-md);cursor:pointer;transition:border-color 0.15s,background 0.15s;text-align:left;font-family:var(--font-body);font-size:1rem;line-height:1.6;color:var(--text-primary);width:100%; }
+.prompt-option:hover { border-color:var(--border-strong);background:var(--bg-stripe); }
+.prompt-option.selected { border-color:var(--focus-color);background:#EEF5FF; }
+.prompt-num { font-size:0.8rem;font-weight:700;color:var(--text-muted);min-width:22px;padding-top:2px; }
+.prompt-text { flex:1; }
+
+/* Instruction display */
+.instruction-display {
+  background:var(--bg-inset);
+  border:2px solid var(--border-medium);
+  border-radius:var(--r-lg);
+  padding:var(--sp-lg) var(--sp-xl);
+  font-size:1.3rem;
+  line-height:2.6;
+  color:var(--text-primary);
+  margin-bottom:var(--sp-sm);
+  min-height:80px;
+  cursor:default;
+}
+
+.instruction-hint {
+  font-size:0.85rem;color:var(--text-secondary);
+  background:var(--bg-surface);border:1.5px solid var(--border-light);
+  border-radius:var(--r-md);padding:10px var(--sp-md);
+  display:flex;align-items:flex-start;gap:var(--sp-sm);
+  margin-bottom:var(--sp-lg);
+}
+
+/* Word tokens */
+.word-token {
+  display:inline;
+  border-radius:3px;
+  padding:3px 2px;
+  cursor:pointer;
+  transition:background 0.1s;
+  position:relative;
+  white-space:pre-wrap;
+}
+.word-token:not(.tagged):hover { background:rgba(0,87,184,0.13); }
+.word-token.pending {
+  background:rgba(0,87,184,0.18);
+  outline:2px solid var(--focus-color);
+  border-radius:3px;
+}
+.word-token:focus-visible { outline:2px solid var(--focus-color);outline-offset:2px; }
+
+/* Tagged token — background tint from first label, striped bottom border from all labels */
+.word-token.tagged {
+  padding:3px 4px 5px;
+  border-radius:4px;
+  font-weight:700;
+  cursor:pointer;
+  /* border-bottom and background set dynamically via JS */
+}
+.word-token.tagged:hover { filter: brightness(0.95); }
+
+/* Tag panel */
+#tag-panel {
+  border:2px solid var(--focus-color);border-radius:var(--r-lg);
+  background:#EEF5FF;padding:var(--sp-md) var(--sp-lg);
+  box-shadow:0 4px 16px rgba(0,0,0,0.10);
+  margin-top:var(--sp-md);
+  display:none;
+}
+#tag-panel.visible { display:block; }
+
+/* Post-check phrase review popup */
+#phrase-review-popup {
+  position:fixed;z-index:1000;
+  border:2px solid var(--focus-color);border-radius:var(--r-lg);
+  background:#fff;padding:var(--sp-md) var(--sp-lg);
+  width:555px;max-width:calc(100vw - 32px);
+  max-height:80vh;overflow-y:auto;
+  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  display:none;
+}
+#phrase-review-popup.visible { display:block; }
+.tag-panel-title { font-weight:700;font-size:0.9rem;color:#003880;margin-bottom:var(--sp-sm); }
+.selected-phrase-display { font-family:var(--font-mono);background:#fff;border:2px solid var(--focus-color);border-radius:var(--r-sm);padding:4px 12px;font-size:1rem;color:#003880;display:inline-block;max-width:100%;word-break:break-word;flex-shrink:0; }
+.phrase-and-labels { display:flex;align-items:flex-start;gap:var(--sp-md);flex-wrap:wrap;margin-bottom:var(--sp-md); }
+
+.panel-instruction { font-size:1rem;font-weight:700;color:#003880;margin-bottom:var(--sp-sm); }
+
+/* Label grid — multi-select toggle buttons */
+.label-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-sm);margin-bottom:var(--sp-md); }
+
+/* Two-column layout inside tag panel: buttons left, code right */
+.tag-panel-columns { display:flex;gap:var(--sp-lg);align-items:flex-start; }
+.tag-panel-col-left { flex:0 0 auto;width:320px; }
+.tag-panel-col-right { flex:1;min-width:0; }
+.label-btn {
+  display:flex;align-items:center;gap:var(--sp-sm);
+  padding:9px 13px;border-radius:var(--r-md);border:2px solid;
+  background:var(--bg-surface);font-family:var(--font-body);
+  font-size:0.9rem;font-weight:700;cursor:pointer;
+  transition:all 0.12s;text-align:left;line-height:1.2;
+  position:relative;
+}
+.label-btn:hover { transform:translateY(-1px); }
+.label-btn[aria-pressed="true"] { transform:none; }
+.label-btn .check {
+  position:absolute;top:4px;right:6px;
+  font-size:0.7rem;font-weight:700;
+  opacity:0;transition:opacity 0.1s;
+}
+.label-btn[aria-pressed="true"] .check { opacity:1; }
+.label-shape { width:13px;height:13px;flex-shrink:0; }
+
+/* Selected labels preview strip */
+.selected-labels-preview {
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-bottom:var(--sp-md);
+  min-height:28px;
+}
+.preview-badge {
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:20px;border:2px solid;
+  font-weight:700;font-size:0.75rem;white-space:nowrap;
+}
+.preview-shape { width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0; }
+
+/* Prompt list titles */
+.prompt-title { font-weight:700;font-size:1rem;line-height:1.4;display:block; }
+.prompt-stmt  { font-size:0.85rem;color:var(--text-secondary);display:block;margin-top:2px;line-height:1.5; }
+/* Collapsed prompt list */
+.prompt-option.prompt-collapsed { display:none; }
+.btn-expand-prompts {
+  display:none;width:100%;margin-top:var(--sp-sm);
+  background:none;border:1.5px dashed var(--border-medium);border-radius:var(--r-md);
+  font-family:var(--font-body);font-size:0.85rem;font-weight:700;color:var(--text-muted);
+  padding:8px var(--sp-md);cursor:pointer;text-align:left;transition:all 0.12s;
+}
+.btn-expand-prompts:hover { border-color:var(--border-strong);color:var(--text-secondary);background:var(--bg-stripe); }
+
+/* Problem title heading above tokenized text (legacy mode) */
+#problem-title-display { display:none; }
+
+/* Code reveal */
+.code-reveal-section { margin-bottom:var(--sp-xl); }
+.code-reveal-card { background:#1A1714;border-radius:var(--r-lg);overflow:hidden; }
+.code-reveal-card pre { margin:0;overflow-x:auto;padding:24px; }
+.code-reveal-card code { font-family:var(--font-mono);font-size:1rem;color:#F7F5F0;line-height:1.7;white-space:pre; }
+
+
+/* Hotspot instruction display — same card style as .instruction-display */
+#hotspot-display {
+  background:var(--bg-inset);border:2px solid var(--border-medium);
+  border-radius:var(--r-lg);padding:var(--sp-lg) var(--sp-xl);
+  font-size:1.3rem;line-height:2.0;color:var(--text-primary);
+  margin-bottom:var(--sp-sm);min-height:80px;
+  overflow-wrap:break-word;word-break:break-word;
+}
+
+/* Hotspot phrase spans — inline, flow naturally with surrounding prose */
+.hotspot {
+  padding:2px 4px;border-radius:3px;background:none;
+  font-family:var(--font-body);font-size:inherit;line-height:inherit;
+  cursor:pointer;transition:background 0.1s;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+/* At-rest cue: dotted underline shows phrases are clickable before hover */
+.hotspot:not(.hs-tagged):not(.hs-correct):not(.hs-partial):not(.hs-wrong):not(.hs-pending) {
+  text-decoration:underline dotted rgba(0,87,184,0.45);
+  text-underline-offset:3px;
+}
+.hotspot:not(.hs-tagged):not(.hs-correct):not(.hs-partial):not(.hs-wrong):hover {
+  background:rgba(0,87,184,0.13);text-decoration:none;
+}
+.hotspot.hs-tagged { border-radius:4px;padding:3px 4px 5px;font-weight:700; }
+.hotspot.hs-correct { background:#D4F4E0;border-bottom:4px solid #007A3D;color:#004D26;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
+.hotspot.hs-partial  { background:#FFF0C0;border-bottom:4px solid #9A6500;color:#6B4500;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
+.hotspot.hs-wrong    { background:#FFE0E0;border-bottom:4px solid #BB0000;color:#880000;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
+.hotspot.hs-pending {
+  background:rgba(0,87,184,0.18);outline:2px solid var(--focus-color);
+  outline-offset:2px;border-radius:3px;
+}
+.hotspot:focus-visible { outline:2px solid var(--focus-color);outline-offset:2px; }
+
+/* Problem header — statement above the instruction display */
+.problem-header { margin-bottom:var(--sp-lg); }
+.problem-header-eyebrow { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:6px; }
+.problem-header-stmt { font-size:1.55rem;font-weight:700;line-height:1.4;color:var(--text-primary); }
+
+/* Section header shown above the problem statement in hotspot mode */
+.problem-section-header { margin-bottom:var(--sp-md); }
+.problem-section-eyebrow { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px; }
+.problem-section-subtitle { font-size:1rem;color:var(--text-secondary);line-height:1.5; }
+
+/* Legend info toggle button */
+.btn-legend-info {
+  background:none;border:1.5px solid var(--border-medium);border-radius:50%;
+  width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:0.9rem;color:var(--text-muted);cursor:pointer;flex-shrink:0;
+  transition:all 0.12s;font-family:var(--font-body);font-weight:700;line-height:1;
+}
+.btn-legend-info:hover { background:var(--bg-inset);color:var(--text-primary);border-color:var(--border-strong); }
+.btn-legend-info[aria-expanded="true"] { background:var(--bg-inset);border-color:var(--border-strong);color:var(--text-primary); }
+.btn-legend-info:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+
+/* Label example preview in tag panel */
+#examples-preview { margin-top:var(--sp-sm); }
+.example-block { margin-bottom:var(--sp-sm); }
+.example-block .example-label-name {
+  font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-muted);margin-bottom:4px;
+}
+.example-block pre {
+  background:#1A1714;border-radius:var(--r-sm);padding:10px 14px;
+  font-family:var(--font-mono);font-size:0.8rem;color:#F7F5F0;
+  white-space:pre;overflow-x:auto;margin:0;line-height:1.55;
+}
+
+/* Feedback section */
+.feedback-section { margin-bottom:var(--sp-xl); }
+.feedback-item {
+  display:flex;gap:var(--sp-md);align-items:flex-start;
+  background:var(--bg-surface);border:1.5px solid var(--border-light);
+  border-radius:var(--r-md);padding:var(--sp-md);margin-bottom:var(--sp-sm);
+  flex-wrap:wrap;
+}
+.feedback-icon { font-size:1.1rem;flex-shrink:0;margin-top:3px; }
+.feedback-body { flex:1;min-width:200px; }
+.feedback-phrase {
+  font-family:var(--font-mono);font-size:0.9rem;color:var(--text-primary);
+  margin-bottom:6px;
+}
+.feedback-row {
+  display:flex;align-items:flex-start;gap:6px;font-size:0.82rem;
+  flex-wrap:wrap;margin-bottom:3px;
+}
+.feedback-row-label { font-weight:700;color:var(--text-secondary);min-width:64px;flex-shrink:0; }
+.feedback-examples { width:100%;margin-top:var(--sp-sm); }
+
+/* Buttons */
+.btn { display:inline-flex;align-items:center;gap:6px;font-family:var(--font-body);font-size:1rem;font-weight:700;padding:11px 22px;border-radius:var(--r-md);border:2px solid transparent;cursor:pointer;transition:all 0.15s;line-height:1; }
+.btn-primary { background:#1A1714;color:#fff;border-color:#1A1714; }
+.btn-primary:hover { background:#333028;border-color:#333028; }
+.btn-primary:disabled { background:#AAAAAA;border-color:#AAAAAA;cursor:not-allowed; }
+.btn-ghost { background:transparent;color:var(--text-secondary);border-color:var(--border-medium); }
+.btn-ghost:hover { background:var(--bg-inset);color:var(--text-primary); }
+.btn-remove { background:transparent;color:#9B1C1C;border:1.5px solid #9B1C1C;border-radius:var(--r-sm);font-family:var(--font-body);font-size:0.8rem;font-weight:700;padding:4px 10px;cursor:pointer;flex-shrink:0; }
+.btn-remove:hover { background:#FEE2E2; }
+.btn-row { display:flex;gap:var(--sp-sm);flex-wrap:wrap;align-items:center; }
+
+/* Tags list */
+#tags-section { display:none;margin-bottom:var(--sp-lg); }
+#tags-section.visible { display:block; }
+.tags-list { list-style:none;display:flex;flex-direction:column;gap:var(--sp-sm); }
+.tag-item { display:flex;align-items:flex-start;gap:var(--sp-sm);background:var(--bg-surface);border:1.5px solid var(--border-light);border-radius:var(--r-md);padding:10px var(--sp-md);font-size:0.9rem; }
+.tag-badges { display:flex;flex-wrap:wrap;gap:4px;flex-shrink:0;max-width:220px; }
+.tag-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;border:2px solid;font-weight:700;font-size:0.72rem;white-space:nowrap; }
+.tag-shape { width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0; }
+.tag-content { flex:1; }
+.tag-phrase { font-family:var(--font-mono);font-size:0.88rem;color:var(--text-primary); }
+
+/* Legend (inside tag panel inline) */
+#inline-legend { background:var(--bg-inset);border-radius:var(--r-md);padding:var(--sp-md); }
+.legend-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--sp-sm);padding:0; }
+.legend-item { display:flex;align-items:flex-start;gap:var(--sp-sm);font-size:0.85rem; }
+.legend-item .desc { color:var(--text-secondary);font-size:0.8rem;line-height:1.4;margin-top:2px; }
+
+/* Submit */
+.submit-section { margin-bottom:var(--sp-lg); margin-top: var(--sp-md);}
+.status-msg { font-size:0.88rem;color:var(--text-muted);margin-left:var(--sp-sm); }
+
+.no-set-msg { text-align:center;color:var(--text-muted);padding:var(--sp-xl);font-size:0.95rem; }
+.site-footer { margin-top:var(--sp-xl);padding-top:var(--sp-lg);border-top:1.5px solid var(--border-light);font-size:0.8rem;color:var(--text-muted); }
+
+/* How to Play button */
+.btn-how-to-play {
+  background:none;border:1.5px solid var(--border-medium);border-radius:var(--r-md);
+  font-family:var(--font-body);font-size:0.82rem;font-weight:700;color:var(--text-secondary);
+  padding:7px 14px;cursor:pointer;transition:all 0.12s;white-space:nowrap;flex-shrink:0;line-height:1;
+}
+.btn-how-to-play:hover { background:var(--bg-inset);border-color:var(--border-strong);color:var(--text-primary); }
+.btn-how-to-play:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+
+/* How to Play modal */
+.modal-overlay {
+  position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.45);
+  display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);
+}
+.modal-box {
+  background:var(--bg-surface);border-radius:var(--r-lg);padding:var(--sp-xl);
+  max-width:560px;width:100%;max-height:82vh;overflow-y:auto;
+  box-shadow:0 8px 40px rgba(0,0,0,0.22);
+}
+.modal-title { font-size:1.3rem;font-weight:700;letter-spacing:-0.01em;margin:0; }
+.modal-close {
+  background:none;border:1.5px solid var(--border-medium);cursor:pointer;
+  font-size:0.9rem;padding:5px 10px;color:var(--text-muted);
+  border-radius:var(--r-sm);font-family:var(--font-body);line-height:1;
+}
+.modal-close:hover { background:var(--bg-inset);color:var(--text-primary);border-color:var(--border-strong); }
+.modal-close:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+.modal-steps { list-style:none;display:flex;flex-direction:column;gap:var(--sp-md);margin-top:var(--sp-lg); }
+.modal-step { display:flex;gap:var(--sp-md);align-items:flex-start;font-size:0.95rem;line-height:1.6; }
+.modal-step-num {
+  background:var(--text-primary);color:#fff;border-radius:50%;
+  width:24px;height:24px;min-width:24px;display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:700;margin-top:2px;
+}
+
+/* Hotspot tags summary */
+#hotspot-tags-summary { margin-top:var(--sp-md);margin-bottom:var(--sp-lg);display:none; }
+#hotspot-tags-summary.visible { display:block; }
+.hs-summary-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:var(--sp-sm); }
+.hs-summary-list { display:flex;flex-direction:column;gap:6px; }
+.hs-summary-item {
+  display:flex;align-items:center;gap:var(--sp-sm);
+  background:var(--bg-surface);border:1.5px solid var(--border-light);
+  border-radius:var(--r-md);padding:8px var(--sp-md);
+  cursor:pointer;transition:border-color 0.12s,background 0.12s;
+  font-family:var(--font-body);width:100%;text-align:left;
+}
+.hs-summary-item:hover:not(:disabled) { border-color:var(--focus-color);background:#EEF5FF; }
+.hs-summary-item:hover:not(:disabled) .hs-summary-phrase::after {
+  content:'Edit';margin-left:20px;
+  font-size:0.72rem;font-weight:700;color:var(--focus-color);
+}
+.hs-summary-item:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+.hs-summary-item:disabled { cursor:default;opacity:0.7; }
+.hs-summary-phrase { font-family:var(--font-mono);font-size:0.85rem;flex:1;color:var(--text-primary); }
+.hs-summary-badges { display:flex;flex-wrap:wrap;gap:4px; }
+
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none!important;animation:none!important; } }
+@media (max-width:700px) {
+  html { font-size:16px; }
+  body { padding:var(--sp-md); }
+  #exercise-area { flex-direction:column; }
+  .panel-left { width:100% !important; }
+  .panel-divider { display:none; }
+  .panel-right { min-width:0;width:100%; }
+  .instruction-display,#hotspot-display { font-size:1.1rem;padding:var(--sp-md); }
+  .label-grid { grid-template-columns:1fr 1fr; }
+  .tag-panel-columns { flex-direction:column; }
+  .tag-panel-col-left { width:100%; }
+  .btn-row { flex-direction:column;align-items:stretch; }
+}
+@media print { .submit-section,#feedback-section,#tag-panel,.btn { display:none!important; } }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div aria-live="polite" aria-atomic="true" class="sr-only" id="live-polite"></div>
+<div aria-live="assertive" aria-atomic="true" class="sr-only" id="live-urgent"></div>
+
+<div class="page-wrap">
+  <header class="site-header" role="banner">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);">
+      <div>
+        <h1>Problem Statement Anatomy</h1>
+        <p class="tagline">Tag different parts of a problem statement and connect each phrase to the code structure it implies.</p>
+      </div>
+      <button id="how-to-play-btn" class="btn-how-to-play" type="button">How to Play</button>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="set-bar" role="region" aria-label="Set selection">
+      <label for="set-select">Set</label>
+      <select id="set-select" aria-describedby="set-desc">
+        <option value="">— Choose a set —</option>
+      </select>
+      <span class="set-meta" id="set-desc" aria-live="polite"></span>
+    </div>
+
+    <div id="no-set-msg" class="card no-set-msg">
+      <div>Select a set above to begin.</div>
+      <div style="margin-top:var(--sp-sm);font-size:0.85rem;">
+        New here? <button type="button" id="htp-inline-btn" style="background:none;border:none;font-family:var(--font-body);font-size:0.85rem;font-weight:700;color:var(--focus-color);cursor:pointer;padding:0;text-decoration:underline;">How to Play</button> walks you through the exercise.
+      </div>
+    </div>
+
+    <div id="exercise-area" style="display:none;align-items:flex-start;">
+
+      <!-- Left panel: problem list -->
+      <div class="panel-left">
+        <section class="card" aria-labelledby="prompt-heading">
+          <h2 id="prompt-heading" class="section-label">Choose a problem</h2>
+          <div class="prompt-list" id="prompt-list" role="list"></div>
+          <button id="prompt-expand-btn" class="btn-expand-prompts" type="button" aria-expanded="false">
+            ▸ Choose a different problem
+          </button>
+        </section>
+      </div>
+
+      <!-- Drag handle -->
+      <div class="panel-divider" role="separator" aria-label="Resize panels" tabindex="0"
+           title="Drag to resize"></div>
+
+      <!-- Right panel: annotation -->
+      <div class="panel-right">
+        <div id="right-placeholder" class="panel-right-placeholder">
+          Select a problem from the list to begin.
+        </div>
+
+      <section id="annotation-section" style="display:none;" aria-label="Annotation exercise">
+
+        <!-- Problem header: statement shown above the instruction -->
+        <div id="problem-header" style="display:none;" class="problem-header">
+          <div class="problem-header-eyebrow">Problem Statement</div>
+          <div class="problem-header-stmt" id="problem-header-stmt"></div>
+        </div>
+
+        <div id="problem-section-header" style="display:none;" class="problem-section-header">
+          <div class="problem-section-eyebrow">Problem Statement</div>
+          <div class="problem-section-subtitle">Read through the problem - Indentify code needed - Select phrases to tag</div>
+        </div>
+
+        <div
+          id="hotspot-display"
+          style="display:none;"
+          aria-label="Instruction text. Click phrases to tag them."
+        ></div>
+
+        <!-- Hotspot mode: live summary of tagged phrases -->
+        <div id="hotspot-tags-summary" aria-label="Tags so far" aria-live="polite"></div>
+
+        <div id="problem-title-display" aria-hidden="true" style="display:none;"></div>
+
+        <div
+          class="instruction-display"
+          id="instruction-display"
+          role="group"
+          aria-label="Problem statement. Click words to select a phrase for tagging."
+        ></div>
+
+        <div class="instruction-hint">
+          <span aria-hidden="true" style="font-size:1rem;flex-shrink:0;margin-top:1px;">&#128161;</span>
+          <span id="hint-text">Click any word to start selecting. Click more words to extend. Then click <strong>Tag this phrase</strong> to tag it.</span>
+        </div>
+
+        <div id="label-phrase-wrap" style="margin-bottom:var(--sp-lg);">
+          <button id="label-phrase-btn" class="btn btn-primary" type="button" style="display:none;">Tag this phrase</button>
+        </div>
+
+        <!-- Tag panel -->
+        <section id="tag-panel" aria-labelledby="tag-panel-title" aria-live="polite">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-sm);">
+            <p class="tag-panel-title" id="tag-panel-title" style="margin:0;">What does this phrase imply?</p>
+            <button id="legend-info-btn" class="btn-legend-info" type="button"
+                    aria-label="Show tag reference" aria-expanded="false" title="Tag reference">ⓘ</button>
+          </div>
+          <div id="inline-legend" style="display:none;margin-bottom:var(--sp-md);">
+            <div class="legend-grid" id="legend-grid" role="list"></div>
+          </div>
+          <div class="phrase-and-labels">
+            <div class="selected-phrase-display" id="phrase-display"></div>
+            <div class="selected-labels-preview" id="labels-preview" aria-live="polite" aria-label="Selected tags"></div>
+          </div>
+          <p class="panel-instruction">Select one or more tags — pick everything that applies to this phrase.</p>
+
+          <div class="tag-panel-columns">
+            <div class="tag-panel-col-left">
+              <fieldset style="border:none;padding:0;margin-bottom:var(--sp-sm);">
+                <legend class="sr-only">Choose tags for this phrase</legend>
+                <div class="label-grid" id="label-grid" role="group" aria-label="Tag options"></div>
+              </fieldset>
+              <div class="btn-row">
+                <button class="btn btn-primary" id="confirm-tag-btn" type="button">Add tag</button>
+                <button class="btn btn-ghost" id="cancel-tag-btn" type="button">Cancel</button>
+              </div>
+            </div>
+            <div class="tag-panel-col-right">
+              <div id="examples-preview" aria-live="polite" aria-label="Code examples for selected tags"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tags list -->
+        <section id="tags-section" aria-labelledby="tags-heading">
+          <h2 id="tags-heading" class="section-label">Your tags so far</h2>
+          <ul class="tags-list" id="tags-list" aria-label="Tags you have added"></ul>
+        </section>
+
+        <!-- Submit / Reveal -->
+        <div class="submit-section">
+          <div class="btn-row">
+            <button class="btn btn-primary" id="check-btn" type="button" disabled style="display:none;">Check my work</button>
+            <button class="btn btn-primary" id="reveal-btn" type="button" disabled>Reveal code</button>
+            <button class="btn btn-ghost" id="results-btn" type="button" style="display:none;">See results</button>
+            <button class="btn btn-ghost" id="export-btn" type="button" style="display:none;">Export for AI feedback</button>
+            <button class="btn btn-ghost" id="reset-btn" type="button">Start over</button>
+            <span class="status-msg" id="status-msg" aria-live="polite">Add at least one tag to continue</span>
+          </div>
+        </div>
+
+        <!-- Code reveal (appears right after the button) -->
+        <section id="code-reveal-section" class="code-reveal-section" style="display:none;" aria-labelledby="code-reveal-heading">
+          <h2 id="code-reveal-heading" class="section-label">Java solution</h2>
+          <div class="code-reveal-card">
+            <pre><code id="code-reveal-content"></code></pre>
+          </div>
+        </section>
+
+        <!-- Feedback (hotspot mode) -->
+        <section id="feedback-section" class="feedback-section" style="display:none;" aria-labelledby="feedback-heading">
+          <h2 id="feedback-heading" class="section-label">How did you do?</h2>
+          <div id="feedback-items"></div>
+        </section>
+
+      </section>
+      </div><!-- /.panel-right -->
+    </div><!-- /#exercise-area -->
+  </main>
+
+  <!-- How to Play modal -->
+  <div id="htp-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="htp-title" style="display:none;">
+    <div class="modal-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-sm);">
+        <h2 class="modal-title" id="htp-title">How to Play</h2>
+        <button id="htp-close" class="modal-close" type="button" aria-label="Close how to play">✕ Close</button>
+      </div>
+      <ol class="modal-steps">
+        <li class="modal-step"><span class="modal-step-num" aria-hidden="true">1</span><span>Select a <strong>problem</strong> from the list on the left to load it into the exercise area.</span></li>
+        <li class="modal-step"><span class="modal-step-num" aria-hidden="true">2</span><span>Read the problem statement. <strong>Click any highlighted phrase</strong> to open the tagging panel.</span></li>
+        <li class="modal-step"><span class="modal-step-num" aria-hidden="true">3</span><span><strong>Select one or more tags</strong> that describe what the phrase implies about the code — pick everything that applies.</span></li>
+        <li class="modal-step"><span class="modal-step-num" aria-hidden="true">4</span><span>Click <strong>Add tag</strong> to save. Tag as many phrases as you like — your tags appear below the statement as you go.</span></li>
+        <li class="modal-step"><span class="modal-step-num" aria-hidden="true">5</span><span>When you're ready, click <strong>Check my work</strong> to compare your annotations against the expected answers.</span></li>
+        <li class="modal-step"><span class="modal-step-num" aria-hidden="true">6</span><span>Use <strong>Reveal code</strong> to see the full Java solution for the problem.</span></li>
+        <li class="modal-step"><span class="modal-step-num" aria-hidden="true">7</span><span>Use the <strong>Export for AI feedback</strong> to see have a deeper analysis of the problem statement - and what can be improved</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>Problem Statement Anatomy — a practice exercise for software engineering students.</p>
+  </footer>
+</div>
+
+<script>
+'use strict';
+
+/* ── Palette & shapes (deterministic by label index within the set) ── */
+const PALETTE = [
+  { bg:'#D6EEFF', bdr:'#0057B8', txt:'#003880' },
+  { bg:'#D4F4E0', bdr:'#007A3D', txt:'#004D26' },
+  { bg:'#FFF0C0', bdr:'#9A6500', txt:'#6B4500' },
+  { bg:'#FFE0CC', bdr:'#C04F00', txt:'#8C3700' },
+  { bg:'#F0D9FF', bdr:'#6B00CC', txt:'#4A0099' },
+  { bg:'#FFE8F0', bdr:'#B8005A', txt:'#800040' },
+  { bg:'#D8F0F8', bdr:'#007799', txt:'#004D66' },
+  { bg:'#F8F0D8', bdr:'#887700', txt:'#554C00' },
+  { bg:'#E8E0FF', bdr:'#4040CC', txt:'#282880' },
+  { bg:'#FFEEDD', bdr:'#CC6600', txt:'#8C4400' },
+  { bg:'#E0F0E0', bdr:'#3A7A3A', txt:'#245024' },
+  { bg:'#FFE0E0', bdr:'#BB0000', txt:'#880000' },
+];
+const SHAPE_LIST = ['50%','3px','0','50% 50% 0 50%','2px','50%','3px','0','50% 50% 0 50%','2px','50%','3px'];
+
+/* ── State ───────────────────────────────────────────────────────── */
+let currentSet      = null;
+let labelIdxMap     = new Map(); // label.id → index in current set
+let selectedPromptIdx = null;
+let tags            = [];       // [{phrase, labels:[{id,name}], note, tokenEls}]
+let pendingTokens   = [];       // tokens currently highlighted for selection
+let firstToken      = null;
+let activeLabels    = [];       // labels selected in the open panel
+let hotspotTags       = {};   // { idx: [{id, name}] }  — per-hotspot student labels
+let activeHotspot     = null; // index of hotspot being tagged in panel
+let checkDone         = false;
+let lastCorrectCount  = 0;
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* Normalise a prompt entry — supports legacy string format and new object format */
+function getPrompt(p) {
+  return typeof p === 'string' ? { title: null, statement: p, code: null } : p;
+}
+
+function isHotspotMode(p) {
+  return (Array.isArray(p.expectedTags) && p.expectedTags.length > 0) ||
+         (Array.isArray(p.hotspots) && p.hotspots.length > 0);
+}
+
+function labelProps(id) {
+  const idx = labelIdxMap.has(id) ? labelIdxMap.get(id) : 0;
+  const c = PALETTE[idx % PALETTE.length];
+  const shape = SHAPE_LIST[idx % SHAPE_LIST.length];
+  return { bg: c.bg, bdr: c.bdr, txt: c.txt, shape };
+}
+
+function announce(msg, urgent) {
+  const el = urgent ? $('live-urgent') : $('live-polite');
+  el.textContent = '';
+  requestAnimationFrame(() => { el.textContent = msg; });
+}
+
+function getPhraseText(tokens) {
+  return tokens.map(t => t.textContent).join(' ').replace(/\s+/g,' ').trim();
+}
+
+/* ── Striped bottom border from multiple label colors ────────────── */
+function buildStripedBorder(labelIds) {
+  if (!labelIds.length) return '';
+  if (labelIds.length === 1) return labelProps(labelIds[0]).bdr;
+  const w = Math.round(100 / labelIds.length);
+  const stops = labelIds.map((id, i) => {
+    const c = labelProps(id).bdr;
+    const from = i * w;
+    const to   = i === labelIds.length - 1 ? 100 : (i + 1) * w;
+    return `${c} ${from}% ${to}%`;
+  });
+  return `linear-gradient(to right, ${stops.join(', ')})`;
+}
+
+function applyTagStyles(tokenEl, tagList) {
+  const firstP = labelProps(tagList[0].id);
+  tokenEl.style.background = firstP.bg;
+  tokenEl.style.color = firstP.txt;
+  tokenEl.style.fontWeight = '700';
+
+  const ids = tagList.map(l => l.id);
+  if (ids.length === 1) {
+    tokenEl.style.borderBottom = `4px solid ${firstP.bdr}`;
+    tokenEl.style.borderImage = '';
+  } else {
+    tokenEl.style.borderBottom = '4px solid transparent';
+    tokenEl.style.borderImage = `${buildStripedBorder(ids)} 1`;
+  }
+  tokenEl.style.borderRadius = '4px';
+  tokenEl.style.paddingBottom = '2px';
+}
+
+/* ── Set dropdown (populated via fetch) ──────────────────────────── */
+const LS_KEY    = 'psa_set';
+const setSelect = $('set-select');
+
+async function initDropdown() {
+  try {
+    const res  = await fetch('psa-content/psa-set-tree.json');
+    const tree = await res.json();
+
+    // Probe all paths in parallel — entries whose file is missing (404 or
+    // gitignored) are silently dropped from the dropdown.
+    const probes = await Promise.allSettled(
+      tree.map(entry =>
+        fetch(entry.path, { method: 'HEAD' }).then(r => r.ok ? entry : null).catch(() => null)
+      )
+    );
+
+    probes.forEach(({ value }) => {
+      if (!value) return;
+      const o = document.createElement('option');
+      o.value = value.id;
+      o.dataset.path = value.path;
+      o.textContent = value.title;
+      setSelect.appendChild(o);
+    });
+
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      const opt = setSelect.querySelector(`option[value="${CSS.escape(saved)}"]`);
+      if (opt) { setSelect.value = saved; await loadSetFromOption(opt); }
+    }
+  } catch (e) {
+    console.error('Failed to load set tree:', e);
+  }
+}
+
+async function loadSetFromOption(opt) {
+  if (!opt || !opt.dataset.path) return;
+  try {
+    const res  = await fetch(opt.dataset.path);
+    const data = await res.json();
+    loadSet(data);
+  } catch (e) {
+    console.error('Failed to load set:', e);
+  }
+}
+
+setSelect.addEventListener('change', async () => {
+  const v = setSelect.value;
+  if (!v) {
+    $('no-set-msg').style.display = 'block';
+    $('exercise-area').style.display = 'none';
+    $('set-desc').textContent = '';
+    return;
+  }
+  localStorage.setItem(LS_KEY, v);
+  const opt = setSelect.querySelector(`option[value="${CSS.escape(v)}"]`);
+  await loadSetFromOption(opt);
+});
+
+initDropdown();
+
+/* ── Load set ────────────────────────────────────────────────────── */
+function loadSet(sd) {
+  currentSet = sd;
+  labelIdxMap = new Map(sd.labels.map((l, i) => [l.id, i]));
+  selectedPromptIdx = null;
+  tags = []; pendingTokens = []; firstToken = null; activeLabels = [];
+
+  hotspotTags = {}; activeHotspot = null; checkDone = false;
+
+  $('no-set-msg').style.display = 'none';
+  $('exercise-area').style.display = 'flex';
+  $('annotation-section').style.display = 'none';
+  $('tag-panel').classList.remove('visible');
+  $('tags-section').classList.remove('visible');
+  $('tags-section').style.display = 'none';
+  $('tags-list').innerHTML = '';
+  $('problem-header').style.display = 'none';
+  $('problem-section-header').style.display = 'none';
+  $('code-reveal-section').style.display = 'none';
+  $('feedback-section').style.display  = 'none';
+  $('results-btn').style.display       = 'none';
+  $('results-btn').textContent         = 'See results';
+  $('annotation-section').style.display = 'none';
+  $('right-placeholder').style.display = '';
+  $('feedback-items').innerHTML = '';
+  $('set-desc').textContent = `${sd.prompts.length} prompts · ${sd.labels.length} tags`;
+
+  buildPrompts(sd);
+  buildLabelGrid(sd.labels);
+  buildLegend(sd.labels);
+  updateSubmit();
+  announce(`${sd.title} loaded.`);
+}
+
+/* ── Prompts ─────────────────────────────────────────────────────── */
+function buildPrompts(sd) {
+  const list = $('prompt-list');
+  list.innerHTML = '';
+  sd.prompts.forEach((p, i) => {
+    const prompt = getPrompt(p);
+    const btn = document.createElement('button');
+    btn.className = 'prompt-option';
+    btn.setAttribute('role', 'listitem');
+    btn.setAttribute('aria-pressed', 'false');
+    if (prompt.title) {
+      btn.innerHTML = `<span class="prompt-num" aria-hidden="true">${i+1}.</span><span class="prompt-text"><span class="prompt-title">${esc(prompt.title)}</span><span class="prompt-stmt">${esc(prompt.statement)}</span></span>`;
+    } else {
+      btn.innerHTML = `<span class="prompt-num" aria-hidden="true">${i+1}.</span><span class="prompt-text">${esc(prompt.statement)}</span>`;
+    }
+    btn.addEventListener('click', () => selectPrompt(i));
+    list.appendChild(btn);
+  });
+}
+
+function selectPrompt(idx) {
+  selectedPromptIdx = idx;
+  tags = []; pendingTokens = []; firstToken = null; activeLabels = [];
+
+  $('prompt-list').querySelectorAll('.prompt-option').forEach((b, i) => {
+    b.classList.toggle('selected', i === idx);
+    b.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
+  });
+
+  closeTagPanel();
+  $('phrase-review-popup').classList.remove('visible');
+
+  const prompt = getPrompt(currentSet.prompts[idx]);
+  const isHS = isHotspotMode(prompt);
+
+  // Problem header — show only when a separate statement exists alongside an instruction
+  const hdr = $('problem-header');
+  if (prompt.statement && prompt.instruction) {
+    $('problem-header-stmt').textContent = prompt.statement;
+    hdr.style.display = 'block';
+  } else {
+    hdr.style.display = 'none';
+  }
+
+  // Show/hide instruction vs hotspot displays
+  $('instruction-display').style.display    = isHS ? 'none' : '';
+  $('hotspot-display').style.display        = isHS ? '' : 'none';
+  $('problem-section-header').style.display = isHS ? '' : 'none';
+  $('hint-text').closest('.instruction-hint').style.display = isHS ? 'none' : '';
+  $('label-phrase-wrap').style.display   = isHS ? 'none' : '';
+
+  if (!isHS) renderInstruction(prompt.statement);
+  renderTags();
+  updateSubmit();
+
+  // Hide code reveal when a new prompt is chosen
+  $('code-reveal-section').style.display = 'none';
+
+  $('right-placeholder').style.display = 'none';
+  $('annotation-section').style.display = 'block';
+
+  // Show/hide check vs reveal buttons
+  $('check-btn').style.display   = isHS ? 'inline-flex' : 'none';
+  $('check-btn').textContent     = 'Check my work';
+  $('reveal-btn').style.display  = 'inline-flex';
+  $('export-btn').style.display  = isHS ? 'inline-flex' : 'none';
+
+  // Hide feedback and code reveal
+  $('feedback-section').style.display     = 'none';
+  $('feedback-items').innerHTML           = '';
+  $('code-reveal-section').style.display  = 'none';
+  $('results-btn').style.display          = 'none';
+  $('results-btn').textContent            = 'See results';
+
+  // Reset hotspot state
+  hotspotTags = {}; activeHotspot = null; checkDone = false;
+  const summaryEl = $('hotspot-tags-summary');
+  if (summaryEl) { summaryEl.classList.remove('visible'); summaryEl.innerHTML = ''; }
+
+  if (isHS) {
+    const annotationText = prompt.instruction || prompt.statement;
+    const tagItems = prompt.expectedTags || prompt.hotspots;
+    renderHotspotInstruction(annotationText, tagItems);
+  }
+
+  // Collapse prompt list to just selected item
+  collapsePromptList(idx);
+
+  announce(`Prompt ${idx+1} selected. ${isHS ? 'Click a highlighted phrase to tag it.' : 'Click any word in the statement to begin tagging.'}`);
+}
+
+/* ── Render instruction as word tokens ───────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEGACY — Word-token free-selection mode
+   ═══════════════════════════════════════════════════════════════════════════
+   The functions below power the original word-by-word tagging mode, where
+   students click individual words to build a phrase and then label it.
+
+   This mode activates automatically for any prompt that does NOT have a
+   `hotspots` array defined in its psa-set.json. All current weeks use
+   hotspot mode, so this code is dormant but preserved.
+
+   To re-enable for a week/prompt: remove the `instruction` and `hotspots`
+   keys from the relevant prompts in psa-set.json. The app will fall back
+   to this mode and render word tokens via renderInstruction().
+
+   Related HTML elements (all inside #annotation-section):
+     #instruction-display   — the tokenized word display container
+     .instruction-hint      — the "click words to select" hint bar
+     #label-phrase-wrap     — wrapper for the "Label this phrase" button
+     #label-phrase-btn      — the button that opens the tag panel
+
+   Related CSS: .word-token, .word-token.tagged, .word-token.pending
+   ═══════════════════════════════════════════════════════════════════════════ */
+function renderInstruction(text) {
+  const display = $('instruction-display');
+  display.innerHTML = '';
+  const parts = text.match(/\S+|\s+/g) || [];
+  parts.forEach(part => {
+    if (/^\s+$/.test(part)) { display.appendChild(document.createTextNode(part)); return; }
+    const span = document.createElement('span');
+    span.className = 'word-token';
+    span.textContent = part;
+    span.tabIndex = 0;
+    span.setAttribute('role', 'button');
+    span.setAttribute('aria-label', `Select: ${part}`);
+    span.addEventListener('click', () => handleToken(span));
+    span.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleToken(span); }
+    });
+    display.appendChild(span);
+  });
+}
+
+/* ── Hotspot instruction rendering ───────────────────────────────── */
+function renderHotspotInstruction(instruction, hotspots) {
+  const display = $('hotspot-display');
+  display.innerHTML = '';
+
+  const spans = [];
+  hotspots.forEach((hs, idx) => {
+    const pos = instruction.indexOf(hs.phrase);
+    if (pos !== -1) spans.push({ start: pos, end: pos + hs.phrase.length, idx });
+  });
+  spans.sort((a, b) => a.start - b.start);
+
+  let cursor = 0;
+  spans.forEach(sp => {
+    if (sp.start > cursor) {
+      display.appendChild(document.createTextNode(instruction.slice(cursor, sp.start)));
+    }
+    const btn = document.createElement('span');
+    btn.className = 'hotspot';
+    btn.role = 'button';
+    btn.tabIndex = 0;
+    btn.textContent = hotspots[sp.idx].phrase;
+    btn.dataset.idx  = sp.idx;
+    btn.setAttribute('aria-label', `Tag phrase: ${hotspots[sp.idx].phrase}`);
+    btn.addEventListener('click', () => handleHotspotClick(sp.idx));
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleHotspotClick(sp.idx); }
+    });
+    cursor = sp.end;
+    display.appendChild(btn);
+  });
+  if (cursor < instruction.length) {
+    display.appendChild(document.createTextNode(instruction.slice(cursor)));
+  }
+}
+
+function handleHotspotClick(idx) {
+  if (checkDone) { showPhraseReview(idx); return; }
+  // Clear any previous pending highlight
+  $('hotspot-display').querySelectorAll('.hotspot.hs-pending').forEach(b => b.classList.remove('hs-pending'));
+  activeHotspot = idx;
+  const prompt = getPrompt(currentSet.prompts[selectedPromptIdx]);
+  const tagItems = prompt.expectedTags || prompt.hotspots;
+  const hs     = tagItems[idx];
+
+  // Highlight selected phrase while panel is open
+  const hsBtn = $('hotspot-display').querySelector(`.hotspot[data-idx="${idx}"]`);
+  if (hsBtn && !hsBtn.classList.contains('hs-tagged')) hsBtn.classList.add('hs-pending');
+
+  $('phrase-display').textContent = `"${hs.phrase}"`;
+
+  activeLabels = [];
+  const existing = hotspotTags[idx] || [];
+  $('label-grid').querySelectorAll('.label-btn').forEach(btn => {
+    const match = existing.find(l => l.id === btn.dataset.id);
+    if (match) {
+      btn.setAttribute('aria-pressed', 'true');
+      const p = labelProps(btn.dataset.id);
+      btn.style.background = p.bg;
+      activeLabels.push(match);
+    } else {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.style.background = '';
+    }
+  });
+
+  updateLabelsPreview();
+  updateExamplesPreview();
+  $('tag-panel').classList.add('visible');
+  requestAnimationFrame(() => {
+    const first = $('label-grid').querySelector('.label-btn');
+    if (first) first.focus();
+  });
+  announce(`Tagging phrase: "${hs.phrase}". Choose one or more labels.`);
+}
+
+function updateExamplesPreview() {
+  const el = $('examples-preview');
+  if (!el) return;
+  el.innerHTML = '';
+  if (!activeLabels.length) return;
+
+  // In hotspot mode, prefer per-hotspot code snippets over the generic label examples
+  const prompt = selectedPromptIdx !== null ? getPrompt(currentSet.prompts[selectedPromptIdx]) : null;
+  const hotspot = (prompt && isHotspotMode(prompt) && activeHotspot !== null)
+    ? (prompt.expectedTags || prompt.hotspots)[activeHotspot]
+    : null;
+
+  activeLabels.forEach(label => {
+    const snippetText = (hotspot && hotspot.codeSnippets && hotspot.codeSnippets[label.id])
+      ? hotspot.codeSnippets[label.id]
+      : label.example;
+    if (!snippetText) return;
+    const block = document.createElement('div');
+    block.className = 'example-block';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'example-label-name';
+    nameEl.textContent = label.name;
+    const pre = document.createElement('pre');
+    pre.textContent = snippetText;
+    block.appendChild(nameEl);
+    block.appendChild(pre);
+    el.appendChild(block);
+  });
+}
+
+function applyHotspotTagStyle(idx) {
+  const btn = $('hotspot-display').querySelector(`.hotspot[data-idx="${idx}"]`);
+  if (!btn) return;
+  const labels = hotspotTags[idx] || [];
+  btn.classList.remove('hs-tagged', 'hs-correct', 'hs-partial', 'hs-wrong', 'hs-pending');
+  btn.style.background = ''; btn.style.color = '';
+  btn.style.borderBottom = ''; btn.style.borderImage = '';
+  if (!labels.length) return;
+  btn.classList.add('hs-tagged');
+  const fp = labelProps(labels[0].id);
+  btn.style.background = fp.bg;
+  btn.style.color      = fp.txt;
+  const ids = labels.map(l => l.id);
+  if (ids.length === 1) {
+    btn.style.borderBottom = `4px solid ${fp.bdr}`;
+    btn.style.borderImage  = '';
+  } else {
+    btn.style.borderBottom = '4px solid transparent';
+    btn.style.borderImage  = `${buildStripedBorder(ids)} 1`;
+  }
+}
+
+function renderLabelBadgeHtml(id, name) {
+  const p = labelProps(id);
+  const shape = SHAPE_LIST[labelIdxMap.has(id) ? labelIdxMap.get(id) : 0];
+  return `<span class="tag-badge" style="background:${p.bg};border-color:${p.bdr};color:${p.txt};">`
+    + `<span class="tag-shape" style="background:${p.bdr};border-radius:${shape};"></span>${esc(name)}</span>`;
+}
+
+function checkWork() {
+  checkDone = true;
+  const prompt = getPrompt(currentSet.prompts[selectedPromptIdx]);
+  const itemsEl = $('feedback-items');
+  itemsEl.innerHTML = '';
+
+  let allCorrect = true;
+  let correctCount = 0;
+
+  const tagItems = prompt.expectedTags || prompt.hotspots;
+  tagItems.forEach((hs, idx) => {
+    const student    = hotspotTags[idx] || [];
+    const studentIds = new Set(student.map(l => l.id));
+    const expected   = hs.labels;
+    const correct    = expected.every(id => studentIds.has(id));
+    const partial    = !correct && expected.some(id => studentIds.has(id));
+    const notTagged  = student.length === 0;
+
+    if (correct) correctCount++;
+    else allCorrect = false;
+
+    const hsBtn = $('hotspot-display').querySelector(`.hotspot[data-idx="${idx}"]`);
+    if (hsBtn) {
+      hsBtn.classList.remove('hs-tagged', 'hs-correct', 'hs-partial', 'hs-wrong');
+      hsBtn.style.background = ''; hsBtn.style.borderColor = ''; hsBtn.style.color = '';
+      hsBtn.classList.add(notTagged || (!correct && !partial) ? 'hs-wrong' : correct ? 'hs-correct' : 'hs-partial');
+    }
+
+    const item = document.createElement('div');
+    item.className = 'feedback-item';
+
+    const icon = correct ? '✅' : (partial ? '🟡' : '❌');
+
+    const studentBadgesHtml = notTagged
+      ? '<em style="color:var(--text-muted);font-size:0.82rem">not tagged</em>'
+      : student.map(l => renderLabelBadgeHtml(l.id, l.name)).join(' ');
+
+    const expectedBadgesHtml = expected.map(id => {
+      const lbl = currentSet.labels.find(l => l.id === id);
+      return lbl ? renderLabelBadgeHtml(lbl.id, lbl.name) : '';
+    }).join(' ');
+
+    let detailHtml = '';
+    if (hs.explanation) {
+      detailHtml = `<div class="feedback-row" style="margin-top:8px;"><span style="font-size:0.82rem;color:var(--text-secondary);font-style:italic;">${esc(hs.explanation)}</span></div>`;
+    } else {
+      const missed = expected.filter(id => !studentIds.has(id));
+      if (missed.length > 0 || notTagged) {
+        const targets = missed.length > 0 ? missed : expected;
+        detailHtml = `<div class="feedback-examples">` +
+          targets.map(id => {
+            const lbl = currentSet.labels.find(l => l.id === id);
+            if (!lbl || !lbl.example) return '';
+            return `<div class="example-block"><div class="example-label-name">${esc(lbl.name)}</div><pre>${esc(lbl.example)}</pre></div>`;
+          }).join('') +
+          `</div>`;
+      }
+    }
+
+    item.innerHTML = `
+      <span class="feedback-icon" aria-hidden="true">${icon}</span>
+      <div class="feedback-body">
+        <div class="feedback-phrase">"${esc(hs.phrase)}"</div>
+        <div class="feedback-row"><span class="feedback-row-label">You:</span><span>${studentBadgesHtml}</span></div>
+        <div class="feedback-row"><span class="feedback-row-label">Expected:</span><span>${expectedBadgesHtml}</span></div>
+        ${detailHtml}
+      </div>`;
+    itemsEl.appendChild(item);
+  });
+
+  lastCorrectCount = correctCount;
+
+  $('check-btn').disabled = true;
+  $('check-btn').textContent = allCorrect ? '✓ All correct!' : 'Checked';
+  $('reveal-btn').disabled = false;
+  $('results-btn').style.display = 'inline-flex';
+  renderHotspotTagsSummary();
+  updateSubmit();
+  announce(allCorrect ? 'All correct!' : 'Checked — click phrases to review, or see results below.');
+}
+
+/* ── Token click logic ───────────────────────────────────────────── */
+function panelIsOpen() { return $('tag-panel').classList.contains('visible'); }
+
+function handleToken(el) {
+  if (panelIsOpen()) return;
+
+  if (el.classList.contains('pending')) {
+    el.classList.remove('pending');
+    pendingTokens = pendingTokens.filter(t => t !== el);
+    if (pendingTokens.length === 0) {
+      firstToken = null;
+      updateSelectionHint(false);
+      updateLabelBtn(false);
+    } else {
+      updateLabelBtn(true);
+    }
+  } else {
+    el.classList.add('pending');
+    pendingTokens.push(el);
+    if (!firstToken) firstToken = el;
+    updateSelectionHint(true);
+    updateLabelBtn(true);
+  }
+}
+
+function updateLabelBtn(show) {
+  let btn = document.getElementById('label-phrase-btn');
+  if (!btn) return;
+  btn.style.display = show ? 'inline-flex' : 'none';
+  if (show) btn.textContent = `Label this phrase (${pendingTokens.length} word${pendingTokens.length !== 1 ? 's' : ''})`;
+}
+
+function updateSelectionHint(selecting) {
+  const hint = document.getElementById('hint-text');
+  if (!hint) return;
+  if (selecting) {
+    hint.innerHTML = 'Words highlighted — click more words to extend the selection, then click <strong>Label this phrase</strong> below. Click a highlighted word to deselect back to it.';
+    hint.style.color = 'var(--focus-color)';
+  } else {
+    hint.innerHTML = 'Click any word to start selecting. Click more words to extend. Then click <strong>Label this phrase</strong> to tag it.';
+    hint.style.color = '';
+  }
+}
+
+function clearPendingStyles() { pendingTokens.forEach(t => t.classList.remove('pending')); }
+// clearPending is also called by closeTagPanel — keep active even in hotspot-only mode
+function clearPending() { clearPendingStyles(); pendingTokens = []; firstToken = null; updateSelectionHint(false); updateLabelBtn(false); }
+
+/* ── End of legacy word-token selection helpers ─────────────────── */
+
+/* ── Phrase review popup (post-check) ────────────────────────────── */
+function positionPopup(popupEl, anchorEl) {
+  const margin = 12;
+  if (!anchorEl) {
+    popupEl.style.top = '50%';
+    popupEl.style.left = '50%';
+    popupEl.style.transform = 'translate(-50%,-50%)';
+    return;
+  }
+  popupEl.style.visibility = 'hidden';
+  popupEl.style.display = 'block';
+  const pW = popupEl.offsetWidth;
+  const pH = popupEl.offsetHeight;
+  popupEl.style.display = '';
+  popupEl.style.visibility = '';
+
+  const rect = anchorEl.getBoundingClientRect();
+  const vW = window.innerWidth;
+  const vH = window.innerHeight;
+
+  let left = rect.left + rect.width / 2 - pW / 2;
+  left = Math.max(margin, Math.min(left, vW - pW - margin));
+
+  let top;
+  if (rect.top - pH - margin >= margin) {
+    top = rect.top - pH - margin;
+  } else {
+    top = Math.min(rect.bottom + margin, vH - pH - margin);
+  }
+  popupEl.style.top = `${top}px`;
+  popupEl.style.left = `${left}px`;
+  popupEl.style.transform = '';
+}
+
+function showPhraseReview(idx, anchorEl) {
+  const prompt    = getPrompt(currentSet.prompts[selectedPromptIdx]);
+  const reviewItems = prompt.expectedTags || prompt.hotspots;
+  const hs        = reviewItems[idx];
+  const student   = hotspotTags[idx] || [];
+  const studentIds = new Set(student.map(l => l.id));
+  const expected  = hs.labels;
+  const correct   = expected.every(id => studentIds.has(id));
+  const partial   = !correct && expected.some(id => studentIds.has(id));
+  const notTagged = student.length === 0;
+  const icon      = correct ? '✅' : (partial ? '🟡' : '❌');
+
+  const studentBadgesHtml = notTagged
+    ? '<em style="color:var(--text-muted);font-size:0.82rem">not tagged</em>'
+    : student.map(l => renderLabelBadgeHtml(l.id, l.name)).join(' ');
+
+  const expectedBadgesHtml = expected.map(id => {
+    const lbl = currentSet.labels.find(l => l.id === id);
+    return lbl ? renderLabelBadgeHtml(lbl.id, lbl.name) : '';
+  }).join(' ');
+
+  let detailHtml = '';
+  if (hs.explanation) {
+    detailHtml = `<div class="feedback-row" style="margin-top:8px;"><span style="font-size:0.82rem;color:var(--text-secondary);font-style:italic;">${esc(hs.explanation)}</span></div>`;
+  } else {
+    const missed = expected.filter(id => !studentIds.has(id));
+    if (missed.length > 0 || notTagged) {
+      const targets = missed.length > 0 ? missed : expected;
+      detailHtml = `<div class="feedback-examples">` +
+        targets.map(id => {
+          const lbl = currentSet.labels.find(l => l.id === id);
+          if (!lbl || !lbl.example) return '';
+          return `<div class="example-block"><div class="example-label-name">${esc(lbl.name)}</div><pre>${esc(lbl.example)}</pre></div>`;
+        }).join('') + `</div>`;
+    }
+  }
+
+  $('phrase-review-content').innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:var(--sp-sm);margin-bottom:var(--sp-sm);">
+      <span aria-hidden="true" style="font-size:1.1rem;flex-shrink:0;">${icon}</span>
+      <div class="feedback-phrase" style="flex:1;">"${esc(hs.phrase)}"</div>
+      <button id="phrase-review-close" type="button" aria-label="Close"
+        style="background:none;border:none;cursor:pointer;font-size:1rem;line-height:1;padding:2px 6px;color:var(--text-muted);flex-shrink:0;">✕</button>
+    </div>
+    <div class="feedback-row"><span class="feedback-row-label">You:</span><span>${studentBadgesHtml}</span></div>
+    <div class="feedback-row"><span class="feedback-row-label">Expected:</span><span>${expectedBadgesHtml}</span></div>
+    ${detailHtml}
+  `;
+
+  const popup  = $('phrase-review-popup');
+  const hsBtn  = anchorEl || $('hotspot-display').querySelector(`.hotspot[data-idx="${idx}"]`);
+  positionPopup(popup, hsBtn);
+  popup.classList.add('visible');
+
+  document.getElementById('phrase-review-close').addEventListener('click', () => {
+    popup.classList.remove('visible');
+  });
+}
+
+/* Close review popup when clicking outside it */
+document.addEventListener('mousedown', function(e) {
+  const popup = $('phrase-review-popup');
+  if (!popup || !popup.classList.contains('visible')) return;
+  if (popup.contains(e.target)) return;
+  popup.classList.remove('visible');
+});
+
+/* ── Tag panel ───────────────────────────────────────────────────── */
+// LEGACY: openTagPanel() is only reached via #label-phrase-btn (word-token mode)
+function openTagPanel() {
+  $('phrase-display').textContent = `"${getPhraseText(pendingTokens)}"`;
+  activeLabels = [];
+  $('label-grid').querySelectorAll('.label-btn').forEach(b => {
+    b.setAttribute('aria-pressed', 'false');
+    b.style.background = '';
+  });
+  updateLabelsPreview();
+  $('tag-panel').classList.add('visible');
+  requestAnimationFrame(() => {
+    const first = $('label-grid').querySelector('.label-btn');
+    if (first) first.focus();
+  });
+}
+
+function closeTagPanel() {
+  $('tag-panel').classList.remove('visible');
+  clearPending();
+  firstToken = null;
+  activeLabels = [];
+}
+
+/* ── Label grid — multi-select ───────────────────────────────────── */
+function buildLabelGrid(labels) {
+  const grid = $('label-grid');
+  grid.innerHTML = '';
+  labels.forEach(label => {
+    const p = labelProps(label.id);
+    const btn = document.createElement('button');
+    btn.className = 'label-btn';
+    btn.dataset.id = label.id;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('type', 'button');
+    btn.setAttribute('title', label.desc);
+    btn.style.borderColor = p.bdr; btn.style.color = p.txt;
+
+    const shapeEl = document.createElement('span');
+    shapeEl.className = 'label-shape'; shapeEl.setAttribute('aria-hidden', 'true');
+    shapeEl.style.background = p.bdr; shapeEl.style.borderRadius = p.shape;
+
+    const check = document.createElement('span');
+    check.className = 'check'; check.setAttribute('aria-hidden', 'true'); check.textContent = '✓';
+
+    btn.appendChild(shapeEl);
+    btn.appendChild(document.createTextNode(label.name));
+    btn.appendChild(check);
+
+    btn.addEventListener('click', () => {
+      const isOn = btn.getAttribute('aria-pressed') === 'true';
+      if (isOn) {
+        btn.setAttribute('aria-pressed', 'false');
+        btn.style.background = '';
+        activeLabels = activeLabels.filter(l => l.id !== label.id);
+      } else {
+        btn.setAttribute('aria-pressed', 'true');
+        btn.style.background = p.bg;
+        activeLabels.push(currentSet.labels.find(l => l.id === label.id) || label);
+      }
+      updateLabelsPreview();
+      updateExamplesPreview();
+      announce(`${label.name} ${isOn ? 'removed' : 'added'}.`);
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function updateLabelsPreview() {
+  $('confirm-tag-btn').disabled = activeLabels.length === 0;
+  const preview = $('labels-preview');
+  preview.innerHTML = '';
+  if (!activeLabels.length) {
+    preview.innerHTML = '<span style="font-size:0.82rem;color:var(--text-muted);font-style:italic;">No tags selected yet</span>';
+    return;
+  }
+  activeLabels.forEach(label => {
+    const p = labelProps(label.id);
+    const badge = document.createElement('span');
+    badge.className = 'preview-badge';
+    badge.style.background = p.bg; badge.style.borderColor = p.bdr; badge.style.color = p.txt;
+    const sh = document.createElement('span');
+    sh.className = 'preview-shape'; sh.setAttribute('aria-hidden', 'true');
+    sh.style.background = p.bdr; sh.style.borderRadius = p.shape;
+    badge.appendChild(sh); badge.appendChild(document.createTextNode(label.name));
+    preview.appendChild(badge);
+  });
+}
+
+/* ── Legend ──────────────────────────────────────────────────────── */
+function buildLegend(labels) {
+  const grid = $('legend-grid');
+  grid.innerHTML = '';
+  labels.forEach(label => {
+    const p = labelProps(label.id);
+    const div = document.createElement('div');
+    div.className = 'legend-item'; div.setAttribute('role', 'listitem');
+    const badge = document.createElement('span');
+    badge.className = 'tag-badge';
+    badge.style.background = p.bg; badge.style.borderColor = p.bdr; badge.style.color = p.txt;
+    const sh = document.createElement('span');
+    sh.className = 'tag-shape'; sh.setAttribute('aria-hidden', 'true');
+    sh.style.background = p.bdr; sh.style.borderRadius = p.shape;
+    badge.appendChild(sh); badge.appendChild(document.createTextNode(label.name));
+    const desc = document.createElement('span');
+    desc.className = 'desc'; desc.textContent = label.desc;
+    div.appendChild(badge); div.appendChild(desc);
+    grid.appendChild(div);
+  });
+}
+
+/* ── Confirm tag ─────────────────────────────────────────────────── */
+$('confirm-tag-btn').addEventListener('click', () => {
+  // --- Hotspot mode path ---
+  const curPrompt = selectedPromptIdx !== null ? getPrompt(currentSet.prompts[selectedPromptIdx]) : null;
+  if (curPrompt && isHotspotMode(curPrompt)) {
+    if (!activeLabels.length) { announce('Please choose at least one label.', true); return; }
+    hotspotTags[activeHotspot] = [...activeLabels];
+    applyHotspotTagStyle(activeHotspot);
+    activeHotspot = null; activeLabels = [];
+    $('tag-panel').classList.remove('visible');
+    updateExamplesPreview();
+    renderHotspotTagsSummary();
+    updateSubmit();
+    announce('Tag saved.');
+    return;
+  }
+  // --- Legacy path ---
+  if (!pendingTokens.length) { announce('No words selected.', true); return; }
+  if (!activeLabels.length)  { announce('Please choose at least one label.', true); return; }
+
+  const phrase     = getPhraseText(pendingTokens);
+  const labelsCopy = [...activeLabels];
+  const captured   = [...pendingTokens];
+
+  captured.forEach(t => {
+    t.classList.remove('pending');
+    t.classList.add('tagged');
+
+    const existing = t._labels || [];
+    const merged = [...existing];
+    labelsCopy.forEach(l => { if (!merged.find(m => m.id === l.id)) merged.push(l); });
+    t._labels = merged;
+
+    applyTagStyles(t, merged);
+    t.setAttribute('aria-label', `${t.textContent} — tagged: ${merged.map(l => l.name).join(', ')}`);
+    t.setAttribute('tabindex', '0');
+    t.setAttribute('role', 'button');
+  });
+
+  tags.push({ phrase, labels: labelsCopy, tokenEls: captured });
+
+  firstToken = null;
+  pendingTokens = [];
+  activeLabels = [];
+  updateLabelBtn(false);
+
+  $('tag-panel').classList.remove('visible');
+  updateSelectionHint(false);
+
+  renderTags();
+  updateSubmit();
+  announce(`Tag added: "${phrase}" as ${labelsCopy.map(l => l.name).join(', ')}. Click a new word to start another tag.`);
+});
+
+$('cancel-tag-btn').addEventListener('click', () => {
+  $('hotspot-display').querySelectorAll('.hotspot.hs-pending').forEach(b => b.classList.remove('hs-pending'));
+  closeTagPanel();
+  activeHotspot = null;
+  updateExamplesPreview();
+});
+
+// LEGACY: triggers openTagPanel() from the word-token "Label this phrase" button
+document.getElementById('label-phrase-btn').addEventListener('click', () => {
+  if (pendingTokens.length > 0) openTagPanel();
+});
+
+/* ── Legend info toggle ──────────────────────────────────────────── */
+$('legend-info-btn').addEventListener('click', () => {
+  const expanded = $('legend-info-btn').getAttribute('aria-expanded') === 'true';
+  const next = !expanded;
+  $('inline-legend').style.display = next ? '' : 'none';
+  $('legend-info-btn').setAttribute('aria-expanded', String(next));
+  $('legend-info-btn').setAttribute('aria-label', next ? 'Hide tag reference' : 'Show tag reference');
+});
+
+/* ── Prompt list collapse ────────────────────────────────────────── */
+let promptListExpanded = false;
+
+function collapsePromptList(selectedIdx) {
+  promptListExpanded = false;
+  $('prompt-list').querySelectorAll('.prompt-option').forEach((b, i) => {
+    b.classList.toggle('prompt-collapsed', i !== selectedIdx);
+  });
+  const btn = $('prompt-expand-btn');
+  btn.style.display = 'block';
+  btn.textContent = '▸ Choose a different problem';
+  btn.setAttribute('aria-expanded', 'false');
+}
+
+$('prompt-expand-btn').addEventListener('click', () => {
+  promptListExpanded = !promptListExpanded;
+  $('prompt-list').querySelectorAll('.prompt-option').forEach(b => {
+    b.classList.toggle('prompt-collapsed', !promptListExpanded);
+    // Re-show selected even when collapsing
+    if (!promptListExpanded && b.classList.contains('selected')) {
+      b.classList.remove('prompt-collapsed');
+    }
+  });
+  const btn = $('prompt-expand-btn');
+  btn.textContent = promptListExpanded ? '▴ Collapse problem list' : '▸ Choose a different problem';
+  btn.setAttribute('aria-expanded', String(promptListExpanded));
+});
+
+/* ── Render tags list ────────────────────────────────────────────── */
+function renderTags() {
+  const section = $('tags-section');
+  const list    = $('tags-list');
+  if (!tags.length) { section.classList.remove('visible'); section.style.display = 'none'; return; }
+
+  section.style.display = 'block'; section.classList.add('visible');
+  list.innerHTML = '';
+
+  tags.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.className = 'tag-item';
+
+    const badgesEl = document.createElement('div');
+    badgesEl.className = 'tag-badges';
+    t.labels.forEach(label => {
+      const p = labelProps(label.id);
+      const badge = document.createElement('span');
+      badge.className = 'tag-badge';
+      badge.style.background = p.bg; badge.style.borderColor = p.bdr; badge.style.color = p.txt;
+      const sh = document.createElement('span');
+      sh.className = 'tag-shape'; sh.setAttribute('aria-hidden', 'true');
+      sh.style.background = p.bdr; sh.style.borderRadius = p.shape;
+      badge.appendChild(sh); badge.appendChild(document.createTextNode(label.name));
+      badgesEl.appendChild(badge);
+    });
+
+    const content = document.createElement('div'); content.className = 'tag-content';
+    const phrase  = document.createElement('div'); phrase.className = 'tag-phrase';
+    phrase.textContent = `"${t.phrase}"`;
+    content.appendChild(phrase);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-remove'; removeBtn.type = 'button';
+    removeBtn.setAttribute('aria-label', `Remove tag for "${t.phrase}"`);
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', () => {
+      const removed = tags.splice(i, 1)[0];
+      removed.tokenEls.forEach(el => {
+        const remaining = tags.filter(tg => tg.tokenEls.includes(el));
+        if (!remaining.length) {
+          el.classList.remove('tagged');
+          el.style.background = ''; el.style.borderBottom = ''; el.style.borderImage = '';
+          el.style.color = ''; el.style.paddingBottom = ''; el.style.borderRadius = '';
+          el.style.fontWeight = ''; el.style.cursor = 'pointer';
+          el._labels = [];
+          el.setAttribute('tabindex', '0'); el.setAttribute('role', 'button');
+          el.setAttribute('aria-label', `Select: ${el.textContent}`);
+        } else {
+          const allLabels = [];
+          remaining.forEach(tg => tg.labels.forEach(l => { if (!allLabels.find(m => m.id === l.id)) allLabels.push(l); }));
+          el._labels = allLabels;
+          applyTagStyles(el, allLabels);
+          el.setAttribute('aria-label', `${el.textContent} — tagged: ${allLabels.map(l => l.name).join(', ')}`);
+        }
+      });
+      renderTags(); updateSubmit();
+      announce(`Tag removed: "${removed.phrase}".`);
+    });
+
+    li.appendChild(badgesEl); li.appendChild(content); li.appendChild(removeBtn);
+    list.appendChild(li);
+  });
+}
+
+/* ── Hotspot tags summary (live list below the instruction) ──────── */
+function renderHotspotTagsSummary() {
+  const container = $('hotspot-tags-summary');
+  if (!container) return;
+  const prompt = selectedPromptIdx !== null ? getPrompt(currentSet.prompts[selectedPromptIdx]) : null;
+  if (!prompt || !isHotspotMode(prompt)) { container.classList.remove('visible'); return; }
+
+  const tagItems = prompt.expectedTags || prompt.hotspots;
+  const anyTagged = tagItems.some((_, idx) => hotspotTags[idx] && hotspotTags[idx].length > 0);
+  if (!anyTagged) { container.classList.remove('visible'); container.innerHTML = ''; return; }
+
+  container.classList.add('visible');
+  container.innerHTML = '<div class="hs-summary-label">Your tags so far</div><div class="hs-summary-list"></div>';
+  const list = container.querySelector('.hs-summary-list');
+
+  tagItems.forEach((hs, idx) => {
+    const labels = hotspotTags[idx];
+    if (!labels || !labels.length) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hs-summary-item';
+    btn.setAttribute('aria-label', checkDone ? `Review tag for "${hs.phrase}"` : `Edit tag for "${hs.phrase}"`);
+
+    // Border and background: correct/partial/wrong post-check, or label color pre-check
+    if (checkDone) {
+      const expected = hs.labels;
+      const studentIds = new Set(labels.map(l => l.id));
+      const correct = expected.every(id => studentIds.has(id));
+      const partial = !correct && expected.some(id => studentIds.has(id));
+      if (correct) {
+        btn.style.borderColor = '#007A3D'; btn.style.background = '#D4F4E0';
+      } else if (partial) {
+        btn.style.borderColor = '#9A6500'; btn.style.background = '#FFF0C0';
+      } else {
+        btn.style.borderColor = '#BB0000'; btn.style.background = '#FFE0E0';
+      }
+    } else {
+      const fp = labelProps(labels[0].id);
+      btn.style.background = fp.bg;
+      const ids = labels.map(l => l.id);
+      if (ids.length === 1) {
+        btn.style.borderColor = fp.bdr;
+        btn.style.borderImage = '';
+      } else {
+        btn.style.borderColor = 'transparent';
+        btn.style.borderImage = `${buildStripedBorder(ids)} 1`;
+      }
+    }
+
+    const phraseEl = document.createElement('span');
+    phraseEl.className = 'hs-summary-phrase';
+    phraseEl.textContent = `"${hs.phrase}"`;
+
+    const badgesEl = document.createElement('span');
+    badgesEl.className = 'hs-summary-badges';
+    labels.forEach(label => { badgesEl.innerHTML += renderLabelBadgeHtml(label.id, label.name); });
+
+    btn.appendChild(phraseEl);
+    btn.appendChild(badgesEl);
+    if (checkDone) {
+      btn.addEventListener('click', () => showPhraseReview(idx, btn));
+    } else {
+      btn.addEventListener('click', () => handleHotspotClick(idx));
+    }
+    list.appendChild(btn);
+  });
+}
+
+/* ── Submit state ────────────────────────────────────────────────── */
+function updateSubmit() {
+  const prompt = selectedPromptIdx !== null ? getPrompt(currentSet.prompts[selectedPromptIdx]) : null;
+
+  if (prompt && isHotspotMode(prompt)) {
+    const submitTagItems = prompt.expectedTags || prompt.hotspots;
+    const taggedCount = Object.values(hotspotTags).filter(v => v && v.length > 0).length;
+    const total = submitTagItems.length;
+    $('check-btn').disabled = taggedCount === 0 || checkDone;
+    $('reveal-btn').disabled = !checkDone;
+    $('status-msg').textContent = checkDone
+      ? `${lastCorrectCount} of ${total} tagged correctly`
+      : taggedCount === 0
+        ? 'Tag at least one phrase to continue'
+        : `${taggedCount} of ${total} phrase${total !== 1 ? 's' : ''} tagged`;
+  } else {
+    if (!tags.length) {
+      $('reveal-btn').disabled = true;
+      $('status-msg').textContent = 'Add at least one tag to continue';
+    } else {
+      $('reveal-btn').disabled = false;
+      $('status-msg').textContent = `${tags.length} tag${tags.length !== 1 ? 's' : ''} added`;
+    }
+  }
+}
+
+/* ── Reset ───────────────────────────────────────────────────────── */
+$('reset-btn').addEventListener('click', () => {
+  if (currentSet && selectedPromptIdx !== null) {
+    hotspotTags = {}; activeHotspot = null; checkDone = false;
+    $('feedback-section').style.display  = 'none';
+    $('feedback-items').innerHTML = '';
+    $('check-btn').disabled = true;
+    $('check-btn').textContent = 'Check my work';
+    selectPrompt(selectedPromptIdx);
+  }
+  announce('Reset. Start tagging again.');
+});
+
+/* ── Check work ──────────────────────────────────────────────────── */
+$('check-btn').addEventListener('click', () => {
+  if (checkDone || selectedPromptIdx === null) return;
+  checkWork();
+});
+
+$('results-btn').addEventListener('click', () => {
+  const fs = $('feedback-section');
+  const showing = fs.style.display === 'block';
+  fs.style.display = showing ? 'none' : 'block';
+  $('results-btn').textContent = showing ? 'See results' : 'Hide results';
+  if (!showing) fs.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+/* ── Reveal code ─────────────────────────────────────────────────── */
+$('reveal-btn').addEventListener('click', () => {
+  if (selectedPromptIdx === null || !currentSet) return;
+  const prompt = getPrompt(currentSet.prompts[selectedPromptIdx]);
+  if (!prompt.code) return;
+  const codeEl  = $('code-reveal-content');
+  const section = $('code-reveal-section');
+  codeEl.textContent = prompt.code;
+  section.style.display = 'block';
+  section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  announce('Java solution revealed.');
+});
+
+/* ── Export for AI feedback ──────────────────────────────────────── */
+$('export-btn').addEventListener('click', () => {
+  if (selectedPromptIdx === null || !currentSet) return;
+  const prompt = getPrompt(currentSet.prompts[selectedPromptIdx]);
+  if (!isHotspotMode(prompt)) return;
+  const date = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  let md = `# Problem Statement Anatomy — Feedback Request\n\n`;
+  md += `**Set:** ${currentSet.title}  \n**Prompt:** ${prompt.title}  \n${date}\n\n---\n\n`;
+
+  // Problem statement
+  const annotationText = prompt.instruction || prompt.statement;
+  md += `## Problem Statement\n\n> ${annotationText}\n\n---\n\n`;
+
+  // Full solution code
+  if (prompt.code) {
+    md += `## Java Solution\n\n\`\`\`java\n${prompt.code}\n\`\`\`\n\n---\n\n`;
+  }
+
+  // Tag vocabulary used in this set
+  md += `## Tag Definitions\n\n`;
+  currentSet.labels.forEach(l => {
+    md += `- **${l.name}** — ${l.desc}\n`;
+  });
+  md += `\n---\n\n`;
+
+  // Annotations with missed detail
+  md += `## My Annotations\n\n`;
+  const exportTagItems = prompt.expectedTags || prompt.hotspots;
+  let correctCount = 0;
+  let anyGaps = false;
+  exportTagItems.forEach((hs, idx) => {
+    const student = hotspotTags[idx] || [];
+    const studentIds = new Set(student.map(l => l.id));
+    const correct = hs.labels.every(id => studentIds.has(id));
+    const notTagged = student.length === 0;
+    if (correct) correctCount++;
+    else anyGaps = true;
+    const status = notTagged ? '❌ not tagged' : correct ? '✅ correct' : '🟡 partial';
+    md += `### "${hs.phrase}" — ${status}\n`;
+    md += `- **I tagged:** ${student.length ? student.map(l => l.name).join(', ') : 'nothing'}\n`;
+    md += `- **Expected:** ${hs.labels.map(id => { const l = currentSet.labels.find(x => x.id === id); return l ? l.name : id; }).join(', ')}\n`;
+    if (!correct) {
+      const missed = hs.labels.filter(id => !studentIds.has(id));
+      const extra  = student.filter(l => !hs.labels.includes(l.id));
+      if (missed.length) {
+        md += `- **Missed:** ${missed.map(id => { const l = currentSet.labels.find(x => x.id === id); return l ? l.name : id; }).join(', ')}\n`;
+      }
+      if (extra.length) {
+        md += `- **Incorrect:** ${extra.map(l => l.name).join(', ')}\n`;
+      }
+    }
+    if (hs.explanation) {
+      md += `- **Explanation:** ${hs.explanation}\n`;
+    }
+    md += `\n`;
+  });
+
+  // Feedback prompt
+  md += `---\n\n## Instructions for Feedback\n\n`;
+  md += `I am a Java bootcamp student practising how to read problem statements and identify the code structures they imply. `;
+  md += `The tag definitions above describe the vocabulary I am learning.\n\n`;
+  md += `I tagged ${correctCount} out of ${exportTagItems.length} phrases correctly.\n\n`;
+  if (anyGaps) {
+    md += `For each phrase I missed or got partially right, please:\n`;
+    md += `1. Point to the **specific line(s) in the Java solution** that correspond to the missed tag, and ask me what I notice about that line\n`;
+    md += `2. Ask a **probing question** that connects the language of the problem statement to the code concept — do not state the answer directly\n`;
+    md += `3. If I tagged something **incorrectly**, explain briefly why that tag does not apply here\n`;
+    md += `4. For phrases I got **fully correct**, affirm what I understood and why it matters\n\n`;
+    md += `Keep your tone encouraging. Prioritise questions over explanations — I learn better when I work it out myself.\n`;
+  } else {
+    md += `I got everything correct. Please affirm what I understood well for each phrase, and offer one follow-up question per phrase that deepens my understanding beyond just identifying the tag.\n`;
+  }
+
+  const blob = new Blob([md], { type:'text/markdown' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `psa-${currentSet.id}-${Date.now()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  announce('Markdown exported. Upload it to your AI assistant for feedback.');
+});
+
+/* ── Resizable panels ────────────────────────────────────────────── */
+(function() {
+  const divider  = document.querySelector('.panel-divider');
+  const leftPanel = document.querySelector('.panel-left');
+  if (!divider || !leftPanel) return;
+  let dragging = false, startX = 0, startW = 0;
+
+  divider.addEventListener('mousedown', e => {
+    dragging = true; startX = e.clientX; startW = leftPanel.offsetWidth;
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const w = Math.max(160, Math.min(640, startW + (e.clientX - startX)));
+    leftPanel.style.width = w + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    divider.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+
+  // Keyboard: left/right arrows on the divider
+  divider.addEventListener('keydown', e => {
+    const step = e.shiftKey ? 40 : 10;
+    if (e.key === 'ArrowLeft') { leftPanel.style.width = Math.max(160, leftPanel.offsetWidth - step) + 'px'; e.preventDefault(); }
+    if (e.key === 'ArrowRight') { leftPanel.style.width = Math.min(640, leftPanel.offsetWidth + step) + 'px'; e.preventDefault(); }
+  });
+}());
+
+/* ── How to Play modal ───────────────────────────────────────────── */
+(function() {
+  const overlay = $('htp-overlay');
+  const openBtn = $('how-to-play-btn');
+  const closeBtn = $('htp-close');
+  if (!overlay || !openBtn || !closeBtn) return;
+
+  function openHTP() { overlay.style.display = 'flex'; closeBtn.focus(); }
+  openBtn.addEventListener('click', openHTP);
+  const inlineBtn = $('htp-inline-btn');
+  if (inlineBtn) inlineBtn.addEventListener('click', openHTP);
+  closeBtn.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    openBtn.focus();
+  });
+  overlay.addEventListener('mousedown', e => {
+    if (e.target === overlay) { overlay.style.display = 'none'; }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.style.display === 'flex') {
+      overlay.style.display = 'none';
+      openBtn.focus();
+    }
+  });
+}());
+</script>
+
+<!-- Phrase review popup (post-check only) -->
+<div id="phrase-review-popup" role="dialog" aria-modal="false" aria-label="Phrase result" style="display:none;">
+  <div id="phrase-review-content"></div>
+</div>
+
+</body>
+</html>

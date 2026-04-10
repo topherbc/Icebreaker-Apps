@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bits, Bytes & Bases</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #0f1117;
+    --muted: #5a6272;
+    --blue: #1a5fb8;
+    --blue-bg: rgba(26,95,184,0.07);
+    --blue-border: rgba(26,95,184,0.3);
+    --green: #1a7a34;
+    --green-bg: rgba(26,122,52,0.07);
+    --green-border: rgba(26,122,52,0.3);
+    --amber: #8a5c00;
+    --amber-bg: rgba(138,92,0,0.07);
+    --amber-border: rgba(138,92,0,0.3);
+    --bit-on-bg: rgba(26,95,184,0.1);
+    --bit-on-border: #1a5fb8;
+    --bit-on-text: #1a5fb8;
+    --bit-off-bg: #f8f9fb;
+    --bit-off-border: rgba(0,0,0,0.14);
+    --bit-off-text: #8a92a0;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'DM Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px 48px;
+    line-height: 1.6;
+  }
+
+  header { text-align: center; margin-bottom: 36px; }
+  header h1 {
+    font-family: var(--font-mono);
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  header h1 span { color: var(--blue); }
+  header p { color: var(--muted); font-size: 1rem; margin-top: 8px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 860px;
+    margin-bottom: 20px;
+  }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tab {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .tab:hover { background: var(--surface2); color: var(--text); }
+  .tab.active { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+
+  .example-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .arrow-btn {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+  .arrow-btn:hover { background: var(--surface); border-color: var(--blue-border); color: var(--blue); }
+  .example-title { font-family: var(--font-mono); font-size: 1rem; color: var(--text); flex: 1; }
+  .example-dots { display: flex; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); transition: background .15s; }
+  .dot.active { background: var(--blue); }
+
+  .bits-section-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 14px;
+  }
+  .bits-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .bit-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+  /* positional value shown above every bit, highlights when on */
+  .bit-pos-val {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--bit-off-text);
+    transition: color .12s;
+    min-width: 40px;
+    text-align: center;
+  }
+  .bit-pos-val.on { color: var(--blue); }
+
+  .bit-btn {
+    width: 72px; height: 72px;
+    border-radius: 12px;
+    border: 2px solid var(--bit-off-border);
+    background: var(--bit-off-bg);
+    color: var(--bit-off-text);
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .12s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bit-btn:hover { border-color: var(--blue-border); color: var(--blue); background: var(--blue-bg); }
+  .bit-btn.on { background: var(--bit-on-bg); border-color: var(--bit-on-border); color: var(--bit-on-text); }
+  .bit-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+  .sum-row {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-align: center;
+    margin: 16px 0 4px;
+    min-height: 24px;
+    line-height: 1.7;
+  }
+  .sum-row .addend { color: var(--blue); }
+
+  .keyboard-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+  }
+  kbd {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--text);
+  }
+
+  .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+  .val-card {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+  }
+  .val-label {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .badge {
+    font-size: 0.65rem; padding: 2px 7px; border-radius: 5px;
+    font-family: var(--font-sans); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .badge-blue  { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border); }
+  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .val-number { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; line-height: 1.1; color: var(--text); }
+  .val-number.blue  { color: var(--blue); }
+  .val-number.green { color: var(--green); }
+  .val-number.amber { color: var(--amber); }
+  .val-sub { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); margin-top: 5px; }
+
+  .hex-input-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .hex-prefix { font-family: var(--font-mono); font-size: 1.4rem; color: var(--muted); font-weight: 700; flex-shrink: 0; }
+  .hex-input {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--amber);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--amber-border);
+    width: 58px;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    padding: 2px 4px;
+    caret-color: var(--amber);
+    transition: border-color .15s;
+  }
+  .hex-input:focus { border-color: var(--amber); }
+  .hex-input::placeholder { color: rgba(138,92,0,0.2); }
+  .hex-edit-hint { font-size: 0.72rem; color: var(--muted); font-family: var(--font-sans); margin-top: 6px; }
+
+  .nibble-breakdown { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .nibble-card {
+    background: var(--surface);
+    border: 1px solid var(--amber-border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+  .nibble-card .n-bits { color: var(--blue); font-size: 0.8rem; }
+  .nibble-card .n-eq  { color: var(--muted); margin: 0 4px; }
+  .nibble-card .n-dec { color: var(--text); }
+  .nibble-card .n-hex { color: var(--amber); font-weight: 700; }
+
+  .hint-box {
+    margin-top: 22px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--blue-border);
+    background: var(--blue-bg);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .hint-icon { color: var(--blue); margin-right: 6px; }
+
+  .freeplay-hint { font-size: 0.9rem; color: var(--muted); margin-bottom: 20px; }
+  .reset-btn {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    padding: 7px 16px;
+    border-radius: 7px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .12s;
+    margin-top: 8px;
+    display: block;
+  }
+  .reset-btn:hover { background: var(--surface2); color: var(--text); }
+
+  @media (max-width: 640px) {
+    .bit-btn { width: 54px; height: 54px; font-size: 1.5rem; }
+    .bits-grid { gap: 6px; }
+    .values-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bits, Bytes, Bases, <span>&amp;</span> Nibbles</h1>
+</header>
+
+<div class="card">
+  <div class="tabs">
+    <button class="tab active" onclick="setMode('examples')" id="tab-examples">Examples</button>
+    <button class="tab" onclick="setMode('free')" id="tab-free">Demo</button>
+  </div>
+
+  <div class="example-nav" id="example-nav">
+    <button class="arrow-btn" onclick="prevEx()" aria-label="Previous example">&larr;</button>
+    <span class="example-title" id="ex-title"></span>
+    <div class="example-dots" id="ex-dots"></div>
+    <button class="arrow-btn" onclick="nextEx()" aria-label="Next example">&rarr;</button>
+  </div>
+
+  <div class="freeplay-hint" id="freeplay-hint" style="display:none">
+    <button class="reset-btn" onclick="resetBits()">Clear all bits</button>
+  </div>
+
+  <div class="bits-section-label">8 bits &mdash; 1 byte</div>
+  <div class="bits-grid" id="bits-grid"></div>
+  <div class="sum-row" id="sum-row"></div>
+
+  <div class="values-grid">
+    <div class="val-card">
+      <div class="val-label"><span class="badge badge-blue">Base 2</span> Binary</div>
+      <div class="val-number blue" id="val-bin" style="font-size:1.2rem;letter-spacing:.05em">00000000</div>
+      <div class="val-sub">8 bits = 0&ndash;255</div>
+    </div>
+    <div class="val-card">
+      <div class="val-label"><span class="badge badge-green">Base 10</span> Decimal</div>
+      <div class="val-number green" id="val-dec">0</div>
+      <div class="val-sub" id="val-dec-sub">no bits on</div>
+    </div>
+    <div class="val-card">
+      <div class="val-label"><span class="badge badge-amber">Base 16</span> Hex </div>
+      <div class="hex-input-row">
+        <span class="hex-prefix">0x</span>
+        <input class="hex-input" id="hex-input" maxlength="2" placeholder="00" aria-label="Hexadecimal value" spellcheck="false">
+      </div>
+      <div class="nibble-breakdown" id="nibble-breakdown"></div>
+    </div>
+  </div>
+
+  <div class="hint-box" id="hint-box" style="display:none">
+    <span class="hint-icon">&#9432;</span><span id="hint-text"></span>
+  </div>
+</div>
+
+<script>
+const EXAMPLES = [
+  {
+    label: 'Example 1 &mdash; number 42',
+    bits: [0,0,1,0,1,0,1,0],
+    hint: '42 = 32 + 8 + 2. The highlighted values above each ON bit add up to the total. Each position doubles as you move left.'
+  },
+  {
+    label: 'Example 2 &mdash; letter A (ASCII 65)',
+    bits: [0,1,0,0,0,0,0,1],
+    hint: 'Computers store characters as numbers. ASCII 65 = uppercase A. One byte can represent 256 different characters (0&ndash;255).'
+  },
+  {
+    label: 'Hex 1 &mdash; 0xFF = 255',
+    bits: [1,1,1,1,1,1,1,1],
+    hint: 'All 8 bits ON = 255. In hex, each group of 4 bits (a nibble) becomes one digit. 1111 = 15 = F, so both nibbles are F &rarr; 0xFF.'
+  },
+  {
+    label: 'Hex 2 &mdash; 0xA0 = 160',
+    bits: [1,0,1,0,0,0,0,0],
+    hint: '0xA0: left nibble 1010 = 10 = 0xA, right nibble 0000 = 0 = 0x0. Hex compresses 8 bits into just two characters &mdash; that\'s why programmers love it.'
+  },
+];
+
+const POS_VALS = [128, 64, 32, 16, 8, 4, 2, 1];
+
+let mode = 'examples';
+let exIdx = 0;
+let bits = [...EXAMPLES[0].bits];
+let hexInputActive = false;
+
+function decVal(b) { return b.reduce((acc,v,i) => acc + v * POS_VALS[i], 0); }
+function nibbleHex(b4) { return b4.reduce((a,v,i) => a + v * Math.pow(2,3-i), 0).toString(16).toUpperCase(); }
+
+function buildDots() {
+  document.getElementById('ex-dots').innerHTML =
+    EXAMPLES.map((_,i) => `<div class="dot${i===exIdx?' active':''}"></div>`).join('');
+}
+
+function buildBits() {
+  document.getElementById('bits-grid').innerHTML = bits.map((b, i) => {
+    const pval = POS_VALS[i];
+    return `<div class="bit-col">
+      <span class="bit-pos-val${b?' on':''}">${pval}</span>
+      <button class="bit-btn${b?' on':''}"
+        onclick="toggleBit(${i})"
+        aria-label="Bit with value ${pval}, currently ${b ? 'on' : 'off'}, click to toggle"
+        tabindex="0">${b}</button>
+    </div>`;
+  }).join('');
+}
+
+function buildSumRow() {
+  const row = document.getElementById('sum-row');
+  const ons = bits.map((b,i) => b ? POS_VALS[i] : null).filter(v => v !== null);
+  if (!ons.length) { row.textContent = ''; return; }
+  row.innerHTML = ons.map(v => `<span class="addend">${v}</span>`).join(' + ') +
+    ' = <span class="addend">' + decVal(bits) + '</span>';
+}
+
+function buildValues() {
+  const dec = decVal(bits);
+  const hex = dec.toString(16).toUpperCase().padStart(2,'0');
+
+  document.getElementById('val-bin').textContent = bits.join('');
+  document.getElementById('val-dec').textContent = dec;
+  document.getElementById('val-dec-sub').textContent =
+    dec === 0 ? 'no bits on' : dec === 255 ? 'max byte value' : `${dec} out of 255`;
+
+  if (!hexInputActive) document.getElementById('hex-input').value = hex;
+
+  const ln = nibbleHex(bits.slice(0,4));
+  const rn = nibbleHex(bits.slice(4,8));
+  document.getElementById('nibble-breakdown').innerHTML = `
+    <div class="nibble-card">
+      <span class="n-bits">${bits.slice(0,4).join('')}</span>
+      <span class="n-eq">=</span>
+      <span class="n-dec">${parseInt(ln,16)}</span>
+      <span class="n-eq">=</span>
+      <span class="n-hex">0x${ln}</span>
+    </div>
+    <div class="nibble-card">
+      <span class="n-bits">${bits.slice(4,8).join('')}</span>
+      <span class="n-eq">=</span>
+      <span class="n-dec">${parseInt(rn,16)}</span>
+      <span class="n-eq">=</span>
+      <span class="n-hex">0x${rn}</span>
+    </div>`;
+}
+
+function buildHint() {
+  const box = document.getElementById('hint-box');
+  if (mode === 'examples') {
+    box.style.display = 'block';
+    document.getElementById('hint-text').innerHTML = EXAMPLES[exIdx].hint;
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function render() {
+  buildDots(); buildBits(); buildSumRow(); buildValues(); buildHint();
+  document.getElementById('example-nav').style.display   = mode === 'examples' ? 'flex'  : 'none';
+  document.getElementById('freeplay-hint').style.display = mode === 'free'     ? 'block' : 'none';
+  document.getElementById('ex-title').innerHTML = mode === 'examples' ? EXAMPLES[exIdx].label : '';
+  document.getElementById('tab-examples').className = 'tab' + (mode === 'examples' ? ' active' : '');
+  document.getElementById('tab-free').className    = 'tab' + (mode === 'free'     ? ' active' : '');
+}
+
+function toggleBit(i) { bits[i] = bits[i] ? 0 : 1; render(); }
+
+function setMode(m) {
+  mode = m;
+  bits = m === 'free' ? [0,0,0,0,0,0,0,0] : [...EXAMPLES[exIdx].bits];
+  render();
+}
+
+function prevEx() { exIdx = (exIdx - 1 + EXAMPLES.length) % EXAMPLES.length; bits = [...EXAMPLES[exIdx].bits]; render(); }
+function nextEx() { exIdx = (exIdx + 1) % EXAMPLES.length; bits = [...EXAMPLES[exIdx].bits]; render(); }
+function resetBits() { bits = [0,0,0,0,0,0,0,0]; render(); }
+
+const hexIn = document.getElementById('hex-input');
+hexIn.addEventListener('focus', () => { hexInputActive = true; });
+hexIn.addEventListener('blur', () => {
+  hexInputActive = false;
+  let dec = Math.max(0, Math.min(255, parseInt(
+    hexIn.value.toUpperCase().replace(/[^0-9A-F]/g,'').padStart(2,'0').slice(-2) || '00', 16) || 0));
+  bits = dec.toString(2).padStart(8,'0').split('').map(Number);
+  render();
+  hexIn.value = dec.toString(16).toUpperCase().padStart(2,'0');
+});
+hexIn.addEventListener('input', () => {
+  const v = hexIn.value.toUpperCase().replace(/[^0-9A-F]/g,'');
+  if (v.length === 2) {
+    const dec = parseInt(v, 16);
+    if (!isNaN(dec)) { bits = dec.toString(2).padStart(8,'0').split('').map(Number); buildBits(); buildSumRow(); buildValues(); buildHint(); }
+  }
+});
+hexIn.addEventListener('keydown', e => { if (e.key === 'Enter') hexIn.blur(); });
+document.addEventListener('keydown', e => {
+  if (document.activeElement === hexIn) return;
+  if (e.key === 'ArrowRight' && mode === 'examples') nextEx();
+  if (e.key === 'ArrowLeft'  && mode === 'examples') prevEx();
+});
+
+render();
+</script>
+</body>
+</html>

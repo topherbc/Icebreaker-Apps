@@ -296,19 +296,20 @@
   }
 
   .note-text {
-    font-family: var(--font-hand);
-    font-size: 20px;
-    line-height: 1.45;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.65;
     color: #2c2418;
     word-break: break-word;
   }
 
-  /* note color cycling */
-  .note:nth-child(5n+1) { background: var(--note-1); }
-  .note:nth-child(5n+2) { background: var(--note-2); }
-  .note:nth-child(5n+3) { background: var(--note-3); }
-  .note:nth-child(5n+4) { background: var(--note-4); }
-  .note:nth-child(5n+5) { background: var(--note-5); }
+  /* stable per-note colors — assigned by ID hash, not position, so they don't shift on refresh */
+  .note-color-1 { background: var(--note-1); }
+  .note-color-2 { background: var(--note-2); }
+  .note-color-3 { background: var(--note-3); }
+  .note-color-4 { background: var(--note-4); }
+  .note-color-5 { background: var(--note-5); }
 
   /* empty state */
   .empty-state {
@@ -324,8 +325,8 @@
   }
 
   .empty-text {
-    font-family: var(--font-hand);
-    font-size: 22px;
+    font-family: var(--font-body);
+    font-size: 18px;
     color: var(--ink-faint);
   }
 
@@ -597,15 +598,14 @@
   const MAX_CHARS = 280;
 
   // ── SESSION ──────────────────────────────────────────────────────
-  // Derived from query param: amnesty-box.html?s=5 → session 5
-  // Query params (unlike hash) trigger a real page reload on navigation
   const SESSION      = (new URLSearchParams(location.search).get('s') || '').replace(/[^1-9]/g, '');
   const CHANNEL_NAME = `amnesty-wall-${SESSION || '0'}`;
   const CLEAR_PASS   = SESSION ? `111${SESSION}` : 'bootcamp';
+  const STORAGE_KEY  = `amnesty-notes-${SESSION || '0'}`;
+  const CLIENT_ID    = Math.random().toString(36).slice(2);  // identifies this tab for sync
 
   // ── STATE ────────────────────────────────────────────────────────
-  let notes     = [];
-  let hasPosted = false;
+  let notes = [];
 
   // ── DOM REFS ──────────────────────────────────────────────────────
   const textarea      = document.getElementById('noteInput');
@@ -628,7 +628,6 @@
 
   // ── SESSION PICKER ────────────────────────────────────────────────
   if (!SESSION) {
-    // Build 1-9 session buttons
     for (let i = 1; i <= 9; i++) {
       const btn = document.createElement('button');
       btn.className = 'session-btn';
@@ -639,39 +638,50 @@
       sessionGrid.appendChild(btn);
     }
   } else {
-    // Hide picker, show session badge
     sessionPicker.style.display = 'none';
     document.getElementById('sessionBadge').style.display = 'block';
     document.getElementById('sessionNum').textContent = SESSION;
   }
 
-  // ── TEXTAREA CHAR COUNT ───────────────────────────────────────────
-  textarea.addEventListener('input', () => {
-    const len = textarea.value.length;
-    charCountEl.textContent = `${len} / ${MAX_CHARS}`;
-    charCountEl.classList.toggle('near-limit', len > MAX_CHARS - 30);
-  });
+  // ── LOCAL STORAGE ────────────────────────────────────────────────
+  // Notes survive refresh for the same browser. Sync-request fills gaps for others.
+  function loadStored() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveStored() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); }
+    catch { /* quota full — silently skip */ }
+  }
+
+  // ── NOTE COLOR ───────────────────────────────────────────────────
+  // Hash the note ID to a stable 1-5 index. Same ID → same color on every browser.
+  function noteColorIndex(id) {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff;
+    return (h % 5) + 1;
+  }
 
   // ── RENDER ────────────────────────────────────────────────────────
   function renderNotes() {
     noteCountEl.textContent = notes.length;
-    if (notes.length === 0) {
-      emptyState.style.display = 'block';
-      [...notesGrid.querySelectorAll('.note')].forEach(n => n.remove());
-      return;
-    }
-    emptyState.style.display = 'none';
+    emptyState.style.display = notes.length === 0 ? 'block' : 'none';
   }
 
-  function addNoteToDOM(note, animate = true) {
+  // Returns true if the note was new (added), false if duplicate
+  function addNote(note, animate) {
+    if (notes.find(n => n.id === note.id)) return false;
+    notes.push(note);
     emptyState.style.display = 'none';
     const el = document.createElement('div');
-    el.className = 'note';
+    el.className = `note note-color-${noteColorIndex(note.id)}`;
     el.dataset.id = note.id;
     if (!animate) el.style.animation = 'none';
     el.innerHTML = `<div class="note-text">${escapeHtml(note.text)}</div>`;
     notesGrid.appendChild(el);
     noteCountEl.textContent = notes.length;
+    return true;
   }
 
   function escapeHtml(str) {
@@ -684,44 +694,68 @@
 
   function clearAllNotes() {
     notes = [];
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
     [...notesGrid.querySelectorAll('.note')].forEach(n => n.remove());
     renderNotes();
   }
+
+  // ── TEXTAREA CHAR COUNT ───────────────────────────────────────────
+  textarea.addEventListener('input', () => {
+    const len = textarea.value.length;
+    charCountEl.textContent = `${len} / ${MAX_CHARS}`;
+    charCountEl.classList.toggle('near-limit', len > MAX_CHARS - 30);
+  });
 
   // ── ABLY ──────────────────────────────────────────────────────────
   let channel;
 
   function setStatus(state) {
     statusDot.className = 'status-dot ' + state;
-    statusText.textContent = {
-      connected:    'Live',
-      connecting:   'Connecting...',
-      disconnected: 'Disconnected'
-    }[state] || state;
+    statusText.textContent = { connected: 'Live', connecting: 'Connecting…', disconnected: 'Disconnected' }[state] || state;
   }
 
   function initAbly() {
     const ably = new Ably.Realtime({ key: ABLY_KEY });
 
-    ably.connection.on('connected',    () => setStatus('connected'));
     ably.connection.on('connecting',   () => setStatus('connecting'));
     ably.connection.on('disconnected', () => setStatus('disconnected'));
     ably.connection.on('failed',       () => setStatus('disconnected'));
 
-    channel = ably.channels.get(CHANNEL_NAME);
-
-    // Live events only — history not enabled on this key
-    channel.subscribe('note', (msg) => {
-      const note = msg.data;
-      if (!notes.find(n => n.id === note.id)) {
-        notes.push(note);
-        addNoteToDOM(note, true);
-        noteCountEl.textContent = notes.length;
-      }
+    ably.connection.on('connected', () => {
+      setStatus('connected');
+      // 1. Restore this browser's own notes from localStorage immediately
+      for (const note of loadStored()) addNote(note, false);
+      renderNotes();
+      // 2. Ask any currently-connected peers to share their notes (handles other students' posts)
+      setTimeout(() => channel.publish('sync-request', { from: CLIENT_ID }), 500);
     });
 
-    channel.subscribe('clear', () => {
-      clearAllNotes();
+    channel = ably.channels.get(CHANNEL_NAME);
+
+    // New note from any browser → add to board and save locally
+    channel.subscribe('note', (msg) => {
+      if (addNote(msg.data, true)) saveStored();
+    });
+
+    // Board cleared → wipe everything including localStorage
+    channel.subscribe('clear', () => clearAllNotes());
+
+    // A peer just joined and wants existing notes — share ours after a random delay
+    // (random delay prevents everyone responding at once; first responder is enough)
+    channel.subscribe('sync-request', (msg) => {
+      if (msg.data.from === CLIENT_ID || notes.length === 0) return;
+      setTimeout(() => {
+        if (notes.length > 0) channel.publish('sync-response', { notes });
+      }, Math.random() * 600 + 100);
+    });
+
+    // Receive notes from a peer who answered our sync-request
+    channel.subscribe('sync-response', (msg) => {
+      let changed = false;
+      for (const note of (msg.data.notes || [])) {
+        if (addNote(note, false)) changed = true;
+      }
+      if (changed) saveStored();
     });
   }
 
@@ -733,8 +767,9 @@
 
   function postNote() {
     const text = textarea.value.trim();
-    if (!text || hasPosted) return;
+    if (!text || submitBtn.disabled) return;
 
+    submitBtn.disabled = true;
     const note = {
       id:   Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       text: text.slice(0, MAX_CHARS),
@@ -743,12 +778,15 @@
 
     channel.publish('note', note);
 
-    hasPosted = true;
     textarea.value = '';
-    textarea.disabled = true;
-    submitBtn.disabled = true;
-    charCountEl.textContent = '0 / 280';
+    charCountEl.textContent = `0 / ${MAX_CHARS}`;
     submittedMsg.classList.add('visible');
+    // Re-enable after brief confirmation so they can post again
+    setTimeout(() => {
+      submittedMsg.classList.remove('visible');
+      submitBtn.disabled = false;
+      textarea.focus();
+    }, 1800);
   }
 
   // ── CLEAR MODAL ───────────────────────────────────────────────────
@@ -759,9 +797,7 @@
     clearPassword.focus();
   });
 
-  modalCancel.addEventListener('click', () => {
-    clearModal.classList.remove('open');
-  });
+  modalCancel.addEventListener('click', () => clearModal.classList.remove('open'));
 
   clearModal.addEventListener('click', (e) => {
     if (e.target === clearModal) clearModal.classList.remove('open');
@@ -784,7 +820,6 @@
   });
 
   // ── INIT ──────────────────────────────────────────────────────────
-  // Only connect to Ably once a session is selected
   if (SESSION) initAbly();
 </script>
 </body>

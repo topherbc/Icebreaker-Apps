@@ -189,7 +189,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 .panel-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 4px;
   padding: 4px 8px;
   background: var(--surface2);
@@ -2813,13 +2813,15 @@ function pascalCase(filename) {
 }
 
 function javaBoilerplate(filename) {
-  const cls = pascalCase(filename) || 'Main';
-  return `// ${filename}\npublic class ${cls} {\n\n  public static void main(String[] args) {\n    // your code here\n  }\n\n}`;
+  const base = filename.includes('/') ? filename.split('/').pop() : filename;
+  const cls = pascalCase(base) || 'Main';
+  return `// ${base}\npublic class ${cls} {\n\n  public static void main(String[] args) {\n    // your code here\n  }\n\n}`;
 }
 
 function javaClassBoilerplate(filename) {
-  const cls = pascalCase(filename) || 'MyClass';
-  return `// ${filename}\npublic class ${cls} {\n\n}`;
+  const base = filename.includes('/') ? filename.split('/').pop() : filename;
+  const cls = pascalCase(base) || 'MyClass';
+  return `// ${base}\npublic class ${cls} {\n\n}`;
 }
 
 function ensureJavaExt(name) {

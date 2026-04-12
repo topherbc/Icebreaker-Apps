@@ -944,6 +944,45 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 }
 #exp-unready-btn:hover { background: rgba(185,28,28,0.22); }
 #exp-unready-btn.visible { display: flex; }
+/* Card remove button (shown only when inactive/offline) */
+.stu-remove-btn {
+  display: none;
+  align-items: center;
+  gap: 3px;
+  padding: 0 7px;
+  height: 22px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(180,83,9,0.15);
+  color: var(--warn, #b45309);
+  border: 1px solid currentColor;
+  cursor: pointer;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.stu-remove-btn:hover { background: rgba(180,83,9,0.28); }
+.stu-card.disconnected .stu-remove-btn,
+.stu-card.inactive .stu-remove-btn { display: flex; }
+/* Expanded view remove button */
+#exp-remove-btn {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  height: 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(180,83,9,0.12);
+  color: var(--warn, #b45309);
+  border: 1px solid currentColor;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+#exp-remove-btn:hover { background: rgba(180,83,9,0.24); }
+#exp-remove-btn.visible { display: flex; }
 .stu-offline-badge {
   display: none;
   align-items: center;
@@ -2061,6 +2100,7 @@ sc.close();</code></div>
       <span class="expanded-stu-name" id="exp-stu-name">--</span>
       <span class="stu-ready-badge" id="exp-ready-badge" style="font-size:14px;" aria-label="Student is ready">&#10003; READY</span>
       <button id="exp-unready-btn" aria-label="Mark student as not ready">&#10005; Unready</button>
+      <button id="exp-remove-btn" aria-label="Remove student from room">&#10008; Remove from Room</button>
     </div>
     <div class="expanded-cm-wrap" id="exp-cm-wrap"></div>
     <div class="expanded-nav">
@@ -2987,17 +3027,23 @@ function onPresenceEnter(member) {
   }
 
   if (S.myRole === 'instructor' && data.role === 'student') {
-    const wasKnown = !!S.students[id];
+    const wasKnown       = !!S.students[id];
+    const wasInactive    = wasKnown && S.students[id].inactive;
+    const wasDisconnected = wasKnown && S.students[id].disconnected;
     addStudent(id, data.name || id);
     subscribeToStudent(id);
+    // Restore ready state from presence data (handles instructor reconnect mid-session)
+    if (data.ready) {
+      S.students[id].ready = true;
+      updateDashCard(id);
+      updateReadyCount();
+    }
     // Push current editor state to the joining student immediately
     publishInstCode();
     if (!wasKnown) {
       showToast(`${data.name || id} joined`, '&#129312;', 3000);
-    } else if (S.students[id] && S.students[id].inactive) {
-      // Student came back from inactive
-      S.students[id].inactive = false;
-      updateDashCard(id);
+    } else if (wasInactive || wasDisconnected) {
+      showToast(`${data.name || id} is back`, '&#129311;', 3000);
     }
   }
 }
@@ -3090,6 +3136,30 @@ function handleControlMsg(data) {
             S.chControl.presence.update({ name: S.myName, role: S.myRole, clientId: S.myClientId, ready: S.isReady });
           } catch(err) {}
         }
+      }
+      break;
+    case 'removed':
+      if (S.myRole === 'student' && data.clientId === S.myClientId) {
+        showToast('You were removed from the room by the instructor.', '&#128683;', 5000);
+        setTimeout(() => {
+          cleanupAbly();
+          S.students = {}; S.myTabs = [{ name: 'Main.java', content: '' }];
+          S.myActiveTab = 0; S.instTabs = []; S.instActive = 0;
+          S.instConnected = false; S.isReady = false; S.expandedId = null;
+          S.stuChannels = {}; S.chControl = null; S.chInstructor = null; S.chMyStudent = null;
+          _appStarted = false; cmInst = null; cmMy = null;
+          document.getElementById('app').hidden = true;
+          document.getElementById('join-overlay').hidden = false;
+          document.getElementById('native-app-bar').hidden = false;
+          document.getElementById('join-modal').hidden = false;
+          document.getElementById('waiting-view').hidden = true;
+          document.getElementById('student-layout').hidden = true;
+          document.getElementById('instructor-layout').hidden = true;
+          document.getElementById('join-btn').disabled = false;
+          document.getElementById('join-btn').textContent = 'Join Room';
+          document.getElementById('join-err').textContent = 'You were removed from the room by your instructor.';
+          validateJoinForm();
+        }, 2000);
       }
       break;
   }
@@ -3945,6 +4015,7 @@ function buildStudentCard(clientId, view) {
     </span>
     <span class="stu-inactive-badge" aria-label="Inactive">&#9632; INACTIVE</span>
     <span class="stu-offline-badge" aria-label="Offline">&#9866; OFFLINE</span>
+    <button class="stu-remove-btn" title="Remove from room" aria-label="Remove ${escHtml(stu.name)} from room">&#10008; Remove</button>
   `;
   const unreadyBtn = header.querySelector('.stu-unready-btn');
   if (unreadyBtn) {
@@ -3953,6 +4024,13 @@ function buildStudentCard(clientId, view) {
       if (S.chControl) {
         try { S.chControl.publish('control', { type: 'set-ready', clientId, ready: false }); } catch(err) {}
       }
+    });
+  }
+  const removeBtn = header.querySelector('.stu-remove-btn');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      removeStudent(clientId);
     });
   }
   card.appendChild(header);
@@ -3996,6 +4074,27 @@ function updateReadyCount() {
 }
 
 // ================================================================
+// REMOVE STUDENT
+// ================================================================
+function removeStudent(clientId) {
+  if (!S.students[clientId]) return;
+  // Notify student if they might still be connected
+  if (S.chControl) {
+    try { S.chControl.publish('control', { type: 'removed', clientId }); } catch(e) {}
+  }
+  // Cancel pending leave timer
+  if (_leaveTimers[clientId]) { clearTimeout(_leaveTimers[clientId]); delete _leaveTimers[clientId]; }
+  // Unsubscribe from their code channel
+  if (S.stuChannels[clientId]) {
+    try { S.stuChannels[clientId].unsubscribe(); } catch(e) {}
+    delete S.stuChannels[clientId];
+  }
+  delete S.students[clientId];
+  renderDashboard();
+  updateReadyCount();
+}
+
+// ================================================================
 // EXPANDED STUDENT VIEW
 // ================================================================
 function openExpanded(clientId) {
@@ -4022,6 +4121,9 @@ function updateExpandedEditor() {
   const expUnreadyBtn = document.getElementById('exp-unready-btn');
   expUnreadyBtn.classList.toggle('visible', stu.ready);
   expUnreadyBtn.dataset.clientId = S.expandedId;
+  const expRemoveBtn = document.getElementById('exp-remove-btn');
+  expRemoveBtn.classList.toggle('visible', !!(stu.disconnected || stu.inactive));
+  expRemoveBtn.dataset.clientId = S.expandedId;
 
   const tab = stu.tabs[S.expTabIdx] || stu.tabs[0];
   if (tab) cmExpanded.setValue(tab.content);
@@ -4044,6 +4146,10 @@ function updateExpandedEditor() {
 }
 
 document.getElementById('expanded-close').addEventListener('click', closeExpanded);
+document.getElementById('exp-remove-btn').addEventListener('click', () => {
+  const clientId = document.getElementById('exp-remove-btn').dataset.clientId;
+  if (clientId) { closeExpanded(); removeStudent(clientId); }
+});
 document.getElementById('exp-unready-btn').addEventListener('click', () => {
   const clientId = document.getElementById('exp-unready-btn').dataset.clientId;
   if (clientId && S.chControl) {

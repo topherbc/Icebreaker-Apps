@@ -3074,6 +3074,7 @@ function handleControlMsg(data) {
         S.students[data.clientId].ready = data.ready;
         updateDashCard(data.clientId);
         updateReadyCount();
+        if (S.expandedId === data.clientId) updateExpandedEditor();
       }
       break;
     case 'set-ready':
@@ -4044,6 +4045,12 @@ document.getElementById('exp-unready-btn').addEventListener('click', () => {
   const clientId = document.getElementById('exp-unready-btn').dataset.clientId;
   if (clientId && S.chControl) {
     try { S.chControl.publish('control', { type: 'set-ready', clientId, ready: false }); } catch(e) {}
+    if (S.students[clientId]) {
+      S.students[clientId].ready = false;
+      updateDashCard(clientId);
+      updateReadyCount();
+      updateExpandedEditor();
+    }
   }
 });
 document.getElementById('exp-prev').addEventListener('click', () => {

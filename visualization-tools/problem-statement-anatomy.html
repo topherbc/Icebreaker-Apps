@@ -252,9 +252,9 @@ select:focus-visible, textarea:focus-visible, button:focus-visible { outline:3px
   background:rgba(0,87,184,0.13);text-decoration:none;
 }
 .hotspot.hs-tagged { border-radius:4px;padding:3px 4px 5px;font-weight:700; }
-.hotspot.hs-correct { background:#D4F4E0;border-bottom:4px solid #007A3D;color:#004D26;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
-.hotspot.hs-partial  { background:#FFF0C0;border-bottom:4px solid #9A6500;color:#6B4500;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
-.hotspot.hs-wrong    { background:#FFE0E0;border-bottom:4px solid #BB0000;color:#880000;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
+.hotspot.hs-correct { background:#8DE8AB;border-bottom:4px solid #005C2E;color:#003A1C;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
+.hotspot.hs-partial  { background:#FFD14A;border-bottom:4px solid #7A5000;color:#4D3200;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
+.hotspot.hs-wrong    { background:#FFB0B0;border-bottom:4px solid #990000;color:#660000;border-radius:4px;padding:3px 4px 5px;font-weight:700; }
 .hotspot.hs-pending {
   background:rgba(0,87,184,0.18);outline:2px solid var(--focus-color);
   outline-offset:2px;border-radius:3px;
@@ -289,6 +289,13 @@ select:focus-visible, textarea:focus-visible, button:focus-visible { outline:3px
   font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
   color:var(--text-muted);margin-bottom:4px;
 }
+.example-block.example-collapsed .example-label-name {
+  margin-bottom:0;cursor:pointer;display:flex;align-items:center;gap:5px;
+  padding:5px 0;border-top:1px solid var(--border-light);
+}
+.example-block.example-collapsed .example-label-name:hover { color:var(--text-secondary); }
+.example-block.example-collapsed pre { display:none; }
+.example-collapse-arrow { font-size:0.6rem;flex-shrink:0; }
 .example-block pre {
   background:#1A1714;border-radius:var(--r-sm);padding:10px 14px;
   font-family:var(--font-mono);font-size:0.8rem;color:#F7F5F0;
@@ -643,6 +650,7 @@ let tags            = [];       // [{phrase, labels:[{id,name}], note, tokenEls}
 let pendingTokens   = [];       // tokens currently highlighted for selection
 let firstToken      = null;
 let activeLabels    = [];       // labels selected in the open panel
+let focusedLabelId  = null;    // which label's example is shown expanded
 let hotspotTags       = {};   // { idx: [{id, name}] }  — per-hotspot student labels
 let activeHotspot     = null; // index of hotspot being tagged in panel
 let checkDone         = false;
@@ -993,6 +1001,7 @@ function handleHotspotClick(idx) {
   $('phrase-display').textContent = `"${hs.phrase}"`;
 
   activeLabels = [];
+  focusedLabelId = null;
   const existing = hotspotTags[idx] || [];
   $('label-grid').querySelectorAll('.label-btn').forEach(btn => {
     const match = existing.find(l => l.id === btn.dataset.id);
@@ -1006,6 +1015,7 @@ function handleHotspotClick(idx) {
       btn.style.background = '';
     }
   });
+  if (activeLabels.length) focusedLabelId = activeLabels[activeLabels.length - 1].id;
 
   updateLabelsPreview();
   updateExamplesPreview();
@@ -1029,16 +1039,42 @@ function updateExamplesPreview() {
     ? (prompt.expectedTags || prompt.hotspots)[activeHotspot]
     : null;
 
-  activeLabels.forEach(label => {
+  // Focused label (most recently selected) goes first and shows expanded;
+  // all other selected labels appear collapsed below.
+  const focused = focusedLabelId || activeLabels[activeLabels.length - 1].id;
+  const ordered = [
+    ...activeLabels.filter(l => l.id === focused),
+    ...activeLabels.filter(l => l.id !== focused),
+  ];
+
+  ordered.forEach(label => {
     const snippetText = (hotspot && hotspot.codeSnippets && hotspot.codeSnippets[label.id])
       ? hotspot.codeSnippets[label.id]
       : label.example;
     if (!snippetText) return;
+
+    const isFocused = label.id === focused;
     const block = document.createElement('div');
-    block.className = 'example-block';
+    block.className = 'example-block' + (isFocused ? '' : ' example-collapsed');
+
     const nameEl = document.createElement('div');
     nameEl.className = 'example-label-name';
-    nameEl.textContent = label.name;
+
+    if (!isFocused) {
+      const arrow = document.createElement('span');
+      arrow.className = 'example-collapse-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '▸';
+      nameEl.appendChild(arrow);
+      nameEl.appendChild(document.createTextNode(label.name));
+      nameEl.addEventListener('click', () => {
+        const nowCollapsed = block.classList.toggle('example-collapsed');
+        arrow.textContent = nowCollapsed ? '▸' : '▾';
+      });
+    } else {
+      nameEl.textContent = label.name;
+    }
+
     const pre = document.createElement('pre');
     pre.textContent = snippetText;
     block.appendChild(nameEl);
@@ -1363,10 +1399,14 @@ function buildLabelGrid(labels) {
         btn.setAttribute('aria-pressed', 'false');
         btn.style.background = '';
         activeLabels = activeLabels.filter(l => l.id !== label.id);
+        if (focusedLabelId === label.id) {
+          focusedLabelId = activeLabels.length ? activeLabels[activeLabels.length - 1].id : null;
+        }
       } else {
         btn.setAttribute('aria-pressed', 'true');
         btn.style.background = p.bg;
         activeLabels.push(currentSet.labels.find(l => l.id === label.id) || label);
+        focusedLabelId = label.id;
       }
       updateLabelsPreview();
       updateExamplesPreview();

@@ -98,6 +98,10 @@ body {
 body.dyslexia-font {
   font-family: 'OpenDyslexic', 'DM Sans', sans-serif;
 }
+body.dyslexia-font code,
+body.dyslexia-font pre,
+body.dyslexia-font .mono { font-family: 'OpenDyslexic Mono', 'OpenDyslexic', monospace; }
+body.dyslexia-font .CodeMirror { font-family: 'OpenDyslexic Mono', 'OpenDyslexic', monospace !important; }
 code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
 /* ---- FOCUS ---- */
@@ -178,34 +182,36 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  min-height: 36px;
+  min-height: 48px;
 }
 .panel-run-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 0 12px;
-  height: 28px;
+  gap: 6px;
+  padding: 0 14px;
+  height: 40px;
+  min-height: 40px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   background: var(--accent);
   color: #ffffff;
-  border: none;
+  border: 1px solid var(--accent);
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.12s;
 }
-.panel-run-btn:hover { background: var(--accent-hover); }
+.panel-run-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 .panel-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .panel-dl-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 0 10px;
-  height: 28px;
+  gap: 6px;
+  padding: 0 14px;
+  height: 40px;
+  min-height: 40px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
@@ -1330,7 +1336,18 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 .cm-s-livecode .CodeMirror-cursor { border-left: 2px solid var(--text); }
 .cm-s-livecode .CodeMirror-selected { background: rgba(26,79,122,0.18); }
 [data-theme="dark"] .cm-s-livecode .CodeMirror-selected { background: rgba(90,159,212,0.22); }
-.cm-s-livecode .CodeMirror-matchingbracket { color: var(--accent) !important; font-weight: 700; background: rgba(42,122,75,0.12); }
+.cm-s-livecode .CodeMirror-matchingbracket {
+  color: inherit !important;
+  font-weight: 700;
+  background: rgba(234, 137, 12, 0.30);
+  outline: 2px solid rgba(234, 137, 12, 0.75);
+  border-radius: 2px;
+}
+[data-theme="dark"] .cm-s-livecode .CodeMirror-matchingbracket {
+  background: rgba(251, 191, 36, 0.22);
+  outline-color: rgba(251, 191, 36, 0.70);
+}
+.cm-s-livecode .CodeMirror-nonmatchingbracket { color: var(--error) !important; background: var(--error-bg); }
 
 /* Instructor selection/cursor overlay (visible on student read-only panel) */
 .cm-inst-selection {
@@ -1602,11 +1619,9 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
     <div class="tb-badge role-instructor hidden" id="tb-instructor-badge">INSTRUCTOR</div>
     <div class="tb-sep"></div>
 
-    <!-- Student controls -->
-    <button class="tb-btn stu-only" id="btn-ready" aria-pressed="false" title="Toggle ready status">
-      <span id="ready-icon" aria-hidden="true">&#9633;</span>
-      <span id="ready-label">Ready</span>
-    </button>
+    <!-- Leave Room (leftmost action, visible to all) -->
+    <button class="tb-btn" id="btn-leave" aria-label="Leave room" title="Leave room" style="color:var(--error);border-color:var(--error);">&#8592; Leave Room</button>
+    <div class="tb-sep"></div>
 
     <!-- Instructor controls -->
     <button class="tb-btn inst-only hidden" id="btn-load-problem" aria-label="Load a problem from library">
@@ -1623,16 +1638,21 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
       <button class="tb-btn" id="btn-grid" title="Grid view" aria-pressed="false" style="gap:5px;">&#9635; Grid</button>
     </div>
 
-    <!-- Student-only: reference sheet toggle -->
+    <!-- Spacer pushes remaining controls to the right -->
+    <div class="tb-spacer"></div>
+
+    <!-- Student-only: ready + reference -->
+    <button class="tb-btn stu-only" id="btn-ready" aria-pressed="false" title="Toggle ready status">
+      <span id="ready-icon" aria-hidden="true">&#9633;</span>
+      <span id="ready-label">Ready</span>
+    </button>
     <button class="tb-btn stu-only hidden" id="btn-ref-sheet" aria-label="Toggle Java reference sheet" aria-pressed="false">
       <span aria-hidden="true">&#128218;</span> Reference
     </button>
 
     <div class="tb-sep"></div>
-
     <button class="tb-btn icon-only" id="btn-theme" aria-label="Toggle dark/light mode" title="Toggle theme">&#9790;</button>
-    <button class="tb-btn icon-only" id="btn-a11y" aria-label="Accessibility options" title="Accessibility">&#9854;</button>
-    <button class="tb-btn" id="btn-leave" aria-label="Leave room" title="Leave room" style="color:var(--error);border-color:var(--error);">&#8592; Leave</button>
+    <button class="tb-btn icon-only" id="btn-a11y" aria-label="Accessibility options" title="Settings">&#9881;</button>
   </header>
 
   <!-- MAIN CONTENT -->
@@ -1934,7 +1954,7 @@ sc.close();</code></div>
       <div class="a11y-row">
         <div class="a11y-label">
           <div>Dyslexia-Friendly Font</div>
-          <div class="a11y-desc">Switches body text to OpenDyslexic. Code editor remains JetBrains Mono.</div>
+          <div class="a11y-desc">Switches all text to OpenDyslexic, including code editors (uses OpenDyslexic Mono).</div>
         </div>
         <label class="toggle-switch">
           <input type="checkbox" id="toggle-dyslexia" aria-label="Enable dyslexia-friendly font">
@@ -4007,15 +4027,25 @@ document.getElementById('toggle-dyslexia').addEventListener('change', e => {
   } else {
     document.body.classList.remove('dyslexia-font');
   }
+  // Refresh all editors so CodeMirror picks up the font change
+  [cmInst, cmMy, cmExpanded].forEach(cm => { if (cm) cm.refresh(); });
 });
 
 function loadDyslexicFont() {
-  if (document.getElementById('dyslexic-font-link')) return;
-  const link = document.createElement('link');
-  link.id   = 'dyslexic-font-link';
-  link.rel  = 'stylesheet';
-  link.href = 'https://fonts.cdnfonts.com/css/opendyslexic';
-  document.head.appendChild(link);
+  if (!document.getElementById('dyslexic-font-link')) {
+    const link = document.createElement('link');
+    link.id   = 'dyslexic-font-link';
+    link.rel  = 'stylesheet';
+    link.href = 'https://fonts.cdnfonts.com/css/opendyslexic';
+    document.head.appendChild(link);
+  }
+  if (!document.getElementById('dyslexic-mono-font-link')) {
+    const link2 = document.createElement('link');
+    link2.id   = 'dyslexic-mono-font-link';
+    link2.rel  = 'stylesheet';
+    link2.href = 'https://fonts.cdnfonts.com/css/opendyslexic-mono';
+    document.head.appendChild(link2);
+  }
 }
 
 // ================================================================

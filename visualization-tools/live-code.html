@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<!-- xterm.js — used in Electron (IS_ELECTRON gate); harmless to load in browser -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
 <style>
 /* =========================================================
    WCAG AA contrast spot-check (light mode):
@@ -550,6 +553,18 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 }
 .output-stdout { color: var(--text); white-space: pre-wrap; }
 .output-stderr { color: var(--error); white-space: pre-wrap; }
+/* ---- xterm inside output-body (Electron only) ---- */
+.output-body.xterm-mode {
+  padding: 0;
+  overflow: hidden;
+}
+.output-body.xterm-mode .xterm-container {
+  width: 100%;
+  height: 210px; /* fits inside 260px max-height panel after 36px header + 2px border */
+}
+.output-body.xterm-mode .xterm,
+.output-body.xterm-mode .xterm-viewport,
+.output-body.xterm-mode .xterm-screen { height: 100% !important; }
 .output-exit {
   display: inline-flex;
   align-items: center;
@@ -2958,6 +2973,47 @@ function setupChannels() {
     S.chInstructor.subscribe('typing', () => onInstructorTyping());
     S.chInstructor.subscribe('output', msg => onInstructorOutput(msg.data));
 
+    // Electron streaming: receive instructor run chunks in real time
+    if (window.IS_ELECTRON) {
+      S.chInstructor.subscribe('run-start', () => {
+        _instRunQueue = [];
+        const p = document.getElementById('inst-run-output');
+        if (p) p.style.maxHeight = '260px';
+        // Init terminal after the panel has dimensions
+        requestAnimationFrame(() => {
+          if (!_instRunTerm) {
+            const wrap = _xtermBody('inst-run-body', 'inst-run-stdout', 'inst-run-stderr');
+            if (wrap) _instRunTerm = _makeXterm(wrap);
+          }
+          if (_instRunTerm) {
+            _instRunTerm.reset();
+            _instRunQueue.forEach(({ t, chunk }) =>
+              _instRunTerm.write(t === 'err' ? '\x1b[31m' + chunk + '\x1b[0m' : chunk));
+            _instRunQueue = [];
+          }
+        });
+      });
+      S.chInstructor.subscribe('stdout-chunk', msg => {
+        const chunk = msg.data.chunk || '';
+        if (_instRunTerm) _instRunTerm.write(chunk);
+        else _instRunQueue.push({ t: 'out', chunk });
+      });
+      S.chInstructor.subscribe('stderr-chunk', msg => {
+        const chunk = msg.data.chunk || '';
+        if (_instRunTerm) _instRunTerm.write('\x1b[31m' + chunk + '\x1b[0m');
+        else _instRunQueue.push({ t: 'err', chunk });
+      });
+      S.chInstructor.subscribe('run-done', msg => {
+        const d = msg.data || {};
+        const exitEl = document.getElementById('inst-run-exit-badge');
+        if (!exitEl) return;
+        exitEl.style.display = 'inline-flex';
+        const ok = d.exitCode === 0 && !d.compileError;
+        exitEl.className = ok ? 'output-exit success' : 'output-exit error';
+        exitEl.innerHTML = ok ? '&#10003; Exit 0' : `&#10007; ${d.statusDesc || 'Error'}`;
+      });
+    }
+
     // Set up student publishing channel
     S.chMyStudent = S.ablyClient.channels.get(channelName(`student:${S.myClientId}`));
 
@@ -3215,16 +3271,25 @@ function onInstructorTyping() {
 function onInstructorOutput(data) {
   if (!data) return;
   const outPanel = document.getElementById('inst-run-output');
-  const stdoutEl = document.getElementById('inst-run-stdout');
-  const stderrEl = document.getElementById('inst-run-stderr');
   const exitEl   = document.getElementById('inst-run-exit-badge');
   const timeEl   = document.getElementById('inst-run-time');
-  if (!outPanel || !stdoutEl || !stderrEl) return;
+  if (!outPanel) return;
 
   outPanel.style.maxHeight = '260px';
-  stdoutEl.textContent = data.stdout || (data.stderr ? '' : '(no output)');
-  const noteText = data.note ? `\n[Note] ${data.note}` : '';
-  stderrEl.textContent = (data.stderr || '') + noteText;
+
+  if (window.IS_ELECTRON && _instRunTerm) {
+    // Xterm path: write full batch result (browser instructor → Electron student, rare)
+    _instRunTerm.reset();
+    if (data.stdout) _instRunTerm.write(data.stdout);
+    if (data.stderr) _instRunTerm.write('\x1b[31m' + data.stderr + '\x1b[0m');
+  } else {
+    const stdoutEl = document.getElementById('inst-run-stdout');
+    const stderrEl = document.getElementById('inst-run-stderr');
+    if (!stdoutEl || !stderrEl) return;
+    stdoutEl.textContent = data.stdout || (data.stderr ? '' : '(no output)');
+    const noteText = data.note ? `\n[Note] ${data.note}` : '';
+    stderrEl.textContent = (data.stderr || '') + noteText;
+  }
 
   if (exitEl) {
     exitEl.style.display = 'inline-flex';
@@ -4206,6 +4271,8 @@ const Runner = {
 
   // Main entry point. Returns { stdout, stderr, exitCode, time, statusId, statusDesc, note }
   async execute(tabs, activeTab) {
+    // §20 -- Electron build uses local javac via IPC (streaming)
+    if (window.IS_ELECTRON) return this._electronStream(tabs, activeTab);
     if (tabs.length === 1) {
       return this._single(tabs[0].content);
     }
@@ -4307,7 +4374,135 @@ const Runner = {
       note: null,
     };
   },
+
+  // Electron streaming path.
+  // Calls electronAPI.startRun(), collects chunks into xterm via module-level
+  // _activeRunTerm, and resolves with the same shape as _parse() so runCode()
+  // needs no structural changes.
+  _electronStream(tabs, activeTab) {
+    const realTabs  = tabs.filter(t => !t.name.endsWith('/.keep') && t.name !== '.keep');
+    const mainTab   = realTabs.find(t => {
+      const base = t.name.includes('/') ? t.name.split('/').pop() : t.name;
+      return base.toLowerCase() === 'main.java';
+    }) || realTabs[activeTab] || realTabs[0];
+    const mainClass = (mainTab.name.includes('/') ? mainTab.name.split('/').pop() : mainTab.name)
+                      .replace(/\.java$/i, '');
+
+    return new Promise(resolve => {
+      let stdout = '', stderr = '';
+
+      window.electronAPI.offAll();
+
+      window.electronAPI.onStdout(chunk => {
+        stdout += chunk;
+        if (_activeRunTerm) _activeRunTerm.write(chunk);
+        // Instructor: broadcast each chunk to students in real time
+        if (_isInstRun && S.chInstructor) {
+          try { S.chInstructor.publish('stdout-chunk', { chunk }); } catch (_) {}
+        }
+      });
+
+      window.electronAPI.onStderr(chunk => {
+        stderr += chunk;
+        if (_activeRunTerm) _activeRunTerm.write('\x1b[31m' + chunk + '\x1b[0m');
+        if (_isInstRun && S.chInstructor) {
+          try { S.chInstructor.publish('stderr-chunk', { chunk }); } catch (_) {}
+        }
+      });
+
+      window.electronAPI.onDone(result => {
+        const isSuccess = result.exitCode === 0 && !result.compileError && !stderr.trim();
+        resolve({
+          stdout,
+          stderr,
+          exitCode:   result.exitCode,
+          time:       result.elapsed ? `${result.elapsed}s` : null,
+          statusId:   isSuccess ? 3 : (result.compileError ? 6 : 11),
+          statusDesc: result.compileError ? 'Compilation Error' : (isSuccess ? 'Accepted' : 'Runtime Error'),
+          note:       null,
+        });
+      });
+
+      window.electronAPI.startRun({
+        files:     realTabs.map(t => ({ name: t.name.includes('/') ? t.name.split('/').pop() : t.name, content: t.content })),
+        mainClass,
+      });
+    });
+  },
 };
+
+// ================================================================
+// XTERM TERMINAL INTEGRATION (Electron only)
+// All identifiers are prefixed _ to avoid clashing with the app.
+// ================================================================
+let _stuTerm      = null;  // student's own output terminal
+let _instMyTerm   = null;  // instructor's own output terminal
+let _instRunTerm  = null;  // instructor output shown to students
+let _instRunQueue = [];    // buffer for student side before _instRunTerm opens
+let _activeRunTerm = null; // terminal for the current in-flight run
+let _isInstRun    = false; // whether the current run is the instructor's
+
+function _xtermTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return dark
+    ? { background: '#111820', foreground: '#e8eef4', cursor: '#4a9a6a',  selectionBackground: '#253040' }
+    : { background: '#f5f8f5', foreground: '#0d1f2d', cursor: '#2a7a4b',  selectionBackground: '#c8d8e4' };
+}
+
+function _makeXterm(container, opts) {
+  if (typeof Terminal === 'undefined') return null;
+  const term = new Terminal(Object.assign({
+    fontFamily:   "'JetBrains Mono', monospace",
+    fontSize:     14,
+    lineHeight:   1.4,
+    theme:        _xtermTheme(),
+    convertEol:   true,
+    scrollback:   2000,
+    disableStdin: true,
+  }, opts || {}));
+  term.open(container);
+  return term;
+}
+
+// Replace an output-body's children with an xterm container.
+// Ghost divs (id=stdoutId/stderrId, display:none) are kept so that
+// document.getElementById() calls in runCode() never throw.
+function _xtermBody(bodyId, stdoutId, stderrId) {
+  const bodyEl = document.getElementById(bodyId);
+  if (!bodyEl) return null;
+  bodyEl.innerHTML =
+    `<div id="${stdoutId}" style="display:none;"></div>` +
+    `<div id="${stderrId}" style="display:none;"></div>`;
+  bodyEl.classList.add('xterm-mode');
+  const wrap = document.createElement('div');
+  wrap.className = 'xterm-container';
+  bodyEl.appendChild(wrap);
+  return wrap;
+}
+
+function _runTermFor(stdoutId) {
+  if (stdoutId === 'inst-out-stdout') return _instMyTerm;
+  if (stdoutId === 'out-stdout')      return _stuTerm;
+  return null;
+}
+
+// Lazily create the student output terminal (called on first Run click).
+function _ensureStuTerm() {
+  if (_stuTerm) return;
+  const wrap = _xtermBody('out-body', 'out-stdout', 'out-stderr');
+  if (!wrap) return;
+  _stuTerm = _makeXterm(wrap, { disableStdin: false });
+  if (_stuTerm) {
+    _stuTerm.onData(data => { if (window.electronAPI) window.electronAPI.sendStdin(data); });
+  }
+}
+
+// Lazily create the instructor's own output terminal.
+function _ensureInstMyTerm() {
+  if (_instMyTerm) return;
+  const wrap = _xtermBody('inst-out-body', 'inst-out-stdout', 'inst-out-stderr');
+  if (wrap) _instMyTerm = _makeXterm(wrap);
+}
 
 async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId, stderrId, exitBadgeId, timeId) {
   if (S.isRunning) return;
@@ -4326,7 +4521,23 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
   if (spinner)  spinner.style.display = 'block';
   if (runLabel) runLabel.style.display = 'none';
   outPanel.classList.add('open');
-  stdoutEl.textContent = 'Compiling...';
+
+  // §20-xterm: lazily create terminal, reset it, and announce run-start to students
+  if (window.IS_ELECTRON) {
+    if (stdoutId === 'out-stdout')      _ensureStuTerm();
+    if (stdoutId === 'inst-out-stdout') _ensureInstMyTerm();
+    _activeRunTerm = _runTermFor(stdoutId);
+    _isInstRun     = (stdoutId === 'inst-out-stdout');
+    if (_activeRunTerm) {
+      _activeRunTerm.reset();
+      _activeRunTerm.writeln('\x1b[33mCompiling...\x1b[0m');
+    }
+    if (_isInstRun && S.chInstructor) {
+      try { S.chInstructor.publish('run-start', {}); } catch (_) {}
+    }
+  }
+
+  stdoutEl.textContent = 'Compiling...'; // visible in browser; ghost-div in Electron
   stderrEl.textContent = '';
   if (exitEl) exitEl.style.display = 'none';
   if (timeEl) timeEl.style.display = 'none';
@@ -4341,10 +4552,12 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
     const isTimeout = statusId === 5;
     const isSuccess = statusId === 3 && !stderr;
 
-    stdoutEl.textContent = stdout || (stderr ? '' : '(no output)');
-
-    const noteText = note ? `\n[Note] ${note}` : '';
-    stderrEl.textContent = (stderr || '') + noteText;
+    // Browser only: xterm already received output via streaming chunks
+    if (!window.IS_ELECTRON) {
+      stdoutEl.textContent = stdout || (stderr ? '' : '(no output)');
+      const noteText = note ? `\n[Note] ${note}` : '';
+      stderrEl.textContent = (stderr || '') + noteText;
+    }
 
     if (exitEl) {
       exitEl.style.display = 'inline-flex';
@@ -4367,12 +4580,21 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
     // Broadcast output to students when instructor runs
     if (S.myRole === 'instructor') {
       if (!S.chInstructor) S.chInstructor = S.ablyClient.channels.get(channelName('instructor'));
-      try { S.chInstructor.publish('output', { stdout, stderr, statusId, statusDesc, exitCode, time, note }); } catch(e) {}
+      if (window.IS_ELECTRON) {
+        // Streaming: chunks already published; send completion so students update exit badge
+        try { S.chInstructor.publish('run-done', { exitCode, compileError: statusId === 6, statusId, statusDesc, stderr, time }); } catch(e) {}
+      } else {
+        try { S.chInstructor.publish('output', { stdout, stderr, statusId, statusDesc, exitCode, time, note }); } catch(e) {}
+      }
     }
 
   } catch(e) {
-    stdoutEl.textContent = '';
-    stderrEl.textContent = `Could not reach execution server.\n${e.message}`;
+    if (window.IS_ELECTRON && _activeRunTerm) {
+      _activeRunTerm.writeln('\x1b[31mError: ' + e.message + '\x1b[0m');
+    } else {
+      stdoutEl.textContent = '';
+      stderrEl.textContent = `Could not reach execution server.\n${e.message}`;
+    }
     if (exitEl) { exitEl.style.display = 'inline-flex'; exitEl.className = 'output-exit error'; exitEl.innerHTML = '&#10007; Error'; }
     showToast('Execution server unreachable', '&#10060;');
   } finally {
@@ -4393,14 +4615,22 @@ document.getElementById('btn-run-stu').addEventListener('click', () => {
 });
 
 document.getElementById('btn-clear-output').addEventListener('click', () => {
-  document.getElementById('out-stdout').textContent = '';
-  document.getElementById('out-stderr').textContent = '';
+  if (window.IS_ELECTRON && _stuTerm) {
+    _stuTerm.clear();
+  } else {
+    document.getElementById('out-stdout').textContent = '';
+    document.getElementById('out-stderr').textContent = '';
+  }
   document.getElementById('out-exit-badge').style.display = 'none';
   document.getElementById('out-time').style.display = 'none';
 });
 document.getElementById('btn-clear-inst-output').addEventListener('click', () => {
-  document.getElementById('inst-out-stdout').textContent = '';
-  document.getElementById('inst-out-stderr').textContent = '';
+  if (window.IS_ELECTRON && _instMyTerm) {
+    _instMyTerm.clear();
+  } else {
+    document.getElementById('inst-out-stdout').textContent = '';
+    document.getElementById('inst-out-stderr').textContent = '';
+  }
   document.getElementById('inst-out-exit-badge').style.display = 'none';
   document.getElementById('inst-out-time').style.display = 'none';
 });

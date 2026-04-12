@@ -153,7 +153,9 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   position: relative;
 }
 .panel:last-child { border-right: none; }
-#inst-panel { flex: 0 0 50%; }
+#inst-panel { flex: 0 0 50%; transition: box-shadow 0.15s, border-color 0.15s; }
+#inst-panel.typing { box-shadow: inset 0 0 0 3px var(--accent); }
+#inst-panel.typing #inst-panel-badge { background: var(--accent); color: #fff; }
 #student-panel { flex: 1; }
 #instructor-work { flex: 0 0 45%; }
 #dashboard-panel { flex: 1; }
@@ -875,7 +877,20 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   border-bottom-color: var(--ready-color);
 }
 .stu-card.ready .stu-name { font-weight: 700; color: #ffffff; }
-.stu-card.ready .stu-ready-badge { display: flex; color: rgba(255,255,255,0.85); }
+.stu-card.ready .stu-ready-badge { display: flex; color: rgba(255,255,255,0.85); align-items: center; gap: 4px; }
+.stu-unready-btn {
+  background: rgba(255,255,255,0.20);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #ffffff;
+  font-size: 10px;
+  line-height: 1;
+  padding: 1px 4px;
+  cursor: pointer;
+  border-radius: 2px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+}
+.stu-unready-btn:hover { background: rgba(255,255,255,0.35); }
 .stu-offline-badge {
   display: none;
   align-items: center;
@@ -1663,7 +1678,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
       <!-- Left: instructor read-only panel -->
       <div class="panel" id="inst-panel" style="flex:0 0 50%">
-        <div class="panel-badge">INSTRUCTOR</div>
+        <div class="panel-badge" id="inst-panel-badge">INSTRUCTOR</div>
         <div id="inst-waiting" class="inst-placeholder">-- waiting for instructor --</div>
         <div id="inst-editor-area" class="editor-area hidden" style="flex-direction:column;">
           <div class="tab-bar" id="inst-view-tab-bar" role="tablist" aria-label="Instructor files (read only)"></div>
@@ -2060,6 +2075,7 @@ const S = {
   myClientId: '',
   myRole: 'student',
   roomCode: '',
+  instName: '',          // instructor's display name (students track this)
 
   // Ably
   ablyClient:    null,
@@ -2101,6 +2117,8 @@ let _editorTimer    = null;
 let _rainbowTimers  = {};  // keyed by cm instance id
 let _instPubTimer   = null;
 let _selPubTimer    = null;
+let _typingPubTimer = null;
+let _instTypingTimer = null;  // student-side: clears typing class after inactivity
 
 // Instructor selection marks on student read-only panel
 let _instSelMarks   = [];
@@ -2762,6 +2780,7 @@ function setupChannels() {
     S.chInstructor = S.ablyClient.channels.get(channelName('instructor'));
     S.chInstructor.subscribe('code', msg => onInstructorCode(msg.data));
     S.chInstructor.subscribe('selection', msg => onInstructorSelection(msg.data));
+    S.chInstructor.subscribe('typing', () => onInstructorTyping());
 
     // Set up student publishing channel
     S.chMyStudent = S.ablyClient.channels.get(channelName(`student:${S.myClientId}`));
@@ -2787,12 +2806,23 @@ function attachResumeListeners() {
 // ================================================================
 const _leaveTimers = {};
 
+function setInstName(name) {
+  S.instName = name || 'Instructor';
+  const badge = document.getElementById('inst-panel-badge');
+  if (badge) badge.textContent = S.instName;
+}
+
 function onPresenceEnter(member) {
   const id   = member.clientId;
   const data = member.data || {};
   if (id === S.myClientId) return;
 
   if (_leaveTimers[id]) { clearTimeout(_leaveTimers[id]); delete _leaveTimers[id]; }
+
+  // Student tracks instructor name
+  if (S.myRole === 'student' && data.role === 'instructor') {
+    setInstName(data.name);
+  }
 
   if (S.myRole === 'instructor' && data.role === 'student') {
     const wasKnown = !!S.students[id];
@@ -2835,6 +2865,10 @@ function onPresenceLeave(member) {
 function onPresenceUpdate(member) {
   const id   = member.clientId;
   const data = member.data || {};
+  // Student: update instructor name if it changed
+  if (S.myRole === 'student' && data.role === 'instructor') {
+    setInstName(data.name);
+  }
   if (S.myRole === 'instructor' && S.students[id]) {
     if (data.ready !== undefined) {
       S.students[id].ready = data.ready;
@@ -2883,6 +2917,18 @@ function handleControlMsg(data) {
         updateReadyCount();
       }
       break;
+    case 'set-ready':
+      if (S.myRole === 'student' && data.clientId === S.myClientId) {
+        S.isReady = data.ready;
+        updateReadyBtn();
+        if (S.chControl) {
+          try {
+            S.chControl.publish('control', { type: 'ready', clientId: S.myClientId, ready: S.isReady });
+            S.chControl.presence.update({ name: S.myName, role: S.myRole, clientId: S.myClientId, ready: S.isReady });
+          } catch(err) {}
+        }
+      }
+      break;
   }
 }
 
@@ -2922,6 +2968,16 @@ function onInstructorSelection(data) {
       }));
     }
   });
+}
+
+function onInstructorTyping() {
+  const panel = document.getElementById('inst-panel');
+  if (!panel) return;
+  panel.classList.add('typing');
+  clearTimeout(_instTypingTimer);
+  _instTypingTimer = setTimeout(() => {
+    panel.classList.remove('typing');
+  }, 2000);
 }
 
 function onStudentCode(clientId, data) {
@@ -3292,6 +3348,10 @@ function initInstructorView() {
     clearTimeout(_selPubTimer);
     _selPubTimer = setTimeout(publishInstSelection, 50);
   });
+  cmMy.on('change', () => {
+    clearTimeout(_typingPubTimer);
+    _typingPubTimer = setTimeout(publishInstTyping, 150);
+  });
   scheduleRainbow(cmMy);
 
   renderTabBar(document.getElementById('inst-tab-bar'), S.myTabs, S.myActiveTab, 'inst');
@@ -3367,6 +3427,11 @@ function publishInstSelection() {
     head:   { line: r.head.line,   ch: r.head.ch   },
   }));
   try { S.chInstructor.publish('selection', { ranges }); } catch(e) {}
+}
+
+function publishInstTyping() {
+  if (!S.chInstructor) return;
+  try { S.chInstructor.publish('typing', {}); } catch(e) {}
 }
 
 // ================================================================
@@ -3451,10 +3516,22 @@ function buildStudentCard(clientId, view) {
   header.className = 'stu-card-header';
   header.innerHTML = `
     <span class="stu-name">${escHtml(stu.name)}</span>
-    <span class="stu-ready-badge" aria-label="Ready">&#10003; READY</span>
+    <span class="stu-ready-badge" aria-label="Ready">
+      &#10003; READY
+      <button class="stu-unready-btn" title="Mark as not ready" aria-label="Unmark ${escHtml(stu.name)} as ready">&#10005;</button>
+    </span>
     <span class="stu-inactive-badge" aria-label="Inactive">&#9632; INACTIVE</span>
     <span class="stu-offline-badge" aria-label="Offline">&#9866; OFFLINE</span>
   `;
+  const unreadyBtn = header.querySelector('.stu-unready-btn');
+  if (unreadyBtn) {
+    unreadyBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (S.chControl) {
+        try { S.chControl.publish('control', { type: 'set-ready', clientId, ready: false }); } catch(err) {}
+      }
+    });
+  }
   card.appendChild(header);
 
   const mini = document.createElement('div');

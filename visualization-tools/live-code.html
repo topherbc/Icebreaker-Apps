@@ -11,9 +11,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<!-- xterm.js — used in Electron (IS_ELECTRON gate); harmless to load in browser -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
-<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+<!-- xterm.js — Electron only; preload sets IS_ELECTRON before this runs -->
+<script>
+if (window.IS_ELECTRON) {
+  var _xl = document.createElement('link');
+  _xl.rel = 'stylesheet';
+  _xl.href = 'https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css';
+  document.head.appendChild(_xl);
+  var _xs = document.createElement('script');
+  _xs.src = 'https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js';
+  document.head.appendChild(_xs);
+}
+</script>
 <style>
 /* =========================================================
    WCAG AA contrast spot-check (light mode):

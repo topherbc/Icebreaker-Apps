@@ -168,6 +168,8 @@ select:focus-visible, textarea:focus-visible, button:focus-visible { outline:3px
 
 /* Label grid — multi-select toggle buttons */
 .label-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-sm);margin-bottom:var(--sp-md); }
+/* Center the last tag button when there's an odd total */
+.label-grid > :last-child:nth-child(odd) { grid-column:1/-1;justify-self:center;width:calc(50% - var(--sp-sm)/2); }
 
 /* Two-column layout inside tag panel: buttons left, code right */
 .tag-panel-columns { display:flex;gap:var(--sp-lg);align-items:flex-start; }

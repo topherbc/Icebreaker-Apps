@@ -1421,24 +1421,21 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 [data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.18) !important; }
 [data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.90) !important; }
 
-/* Gutter separator glow — orange line between line numbers and editor content */
-.cm-inst-gutter-active .CodeMirror-gutters {
-  border-right-color: rgba(234,137,12,0.95) !important;
-}
-.cm-inst-gutter-active .CodeMirror-gutters::after {
-  content: '';
+/* Gutter separator overlay — positioned by JS, sits inside #inst-cm-wrap */
+#_inst_gsep {
   position: absolute;
-  right: -3px; top: 0; bottom: 0;
+  top: 0; bottom: 0;
   width: 3px;
-  background: rgba(234,137,12,0.85);
   pointer-events: none;
-  z-index: 4;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.08s;
+  background: rgba(234,137,12,0.90);
+  box-shadow: 0 0 8px rgba(234,137,12,0.35);
 }
-[data-theme="dark"] .cm-inst-gutter-active .CodeMirror-gutters {
-  border-right-color: rgba(251,191,36,0.85) !important;
-}
-[data-theme="dark"] .cm-inst-gutter-active .CodeMirror-gutters::after {
-  background: rgba(251,191,36,0.75);
+[data-theme="dark"] #_inst_gsep {
+  background: rgba(251,191,36,0.80);
+  box-shadow: 0 0 8px rgba(251,191,36,0.30);
 }
 
 /* Instructor selection/cursor overlay (visible on student read-only panel) */
@@ -2999,7 +2996,7 @@ function onPresenceEnter(member) {
     // Push current editor state to the joining student immediately
     publishInstCode();
     if (!wasKnown) {
-      showToast(`${data.name || id} joined`, '&#128104;', 3000);
+      showToast(`${data.name || id} joined`, '&#129312;', 3000);
     } else if (S.students[id] && S.students[id].inactive) {
       // Student came back from inactive
       S.students[id].inactive = false;
@@ -3118,8 +3115,29 @@ function clearInstActiveLine() {
     } catch(e) {}
     _instActiveLine = -1;
   }
+  setInstGutterSep(false);
+}
+
+function setInstGutterSep(active) {
   const wrap = document.getElementById('inst-cm-wrap');
-  if (wrap) wrap.classList.remove('cm-inst-gutter-active');
+  if (!wrap) return;
+  let sep = document.getElementById('_inst_gsep');
+  if (!sep) {
+    if (!active) return;
+    sep = document.createElement('div');
+    sep.id = '_inst_gsep';
+    sep.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(sep);
+  }
+  if (!active) { sep.style.opacity = '0'; return; }
+  // Position the separator at the exact right edge of CodeMirror's gutter
+  const gutters = wrap.querySelector('.CodeMirror-gutters');
+  if (gutters) {
+    const wrapRect = wrap.getBoundingClientRect();
+    const gutRect  = gutters.getBoundingClientRect();
+    sep.style.left = (gutRect.right - wrapRect.left - 1) + 'px';
+  }
+  sep.style.opacity = '1';
 }
 
 function onInstructorSelection(data) {
@@ -3157,10 +3175,7 @@ function onInstructorSelection(data) {
   });
 
   // Gutter separator glow whenever instructor has any active cursor/selection
-  if (data.ranges && data.ranges.length > 0) {
-    const wrap = document.getElementById('inst-cm-wrap');
-    if (wrap) wrap.classList.add('cm-inst-gutter-active');
-  }
+  if (data.ranges && data.ranges.length > 0) setInstGutterSep(true);
 }
 
 function onInstructorTyping() {

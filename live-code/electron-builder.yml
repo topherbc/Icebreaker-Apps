@@ -1,0 +1,50 @@
+appId: com.topherbc.livecode
+productName: LiveCode
+
+files:
+  - "**/*"
+  - "!node_modules/**"
+  - "!.git/**"
+  - "!*.md"
+  # Pull live-code.html from the web-app folder so the relative path
+  # path.join(__dirname, '..', 'visualization-tools', 'live-code.html')
+  # resolves correctly inside the packaged asar.
+  - from: "../visualization-tools"
+    to: "visualization-tools"
+    filter:
+      - "live-code.html"
+
+# Inject Ably key at build time via CI environment variable.
+# GitHub Actions sets ABLY_API_KEY; electron-builder substitutes it here
+# via extraMetadata so the renderer can read it from app.getVersion() context.
+# See main.js — key is injected into the renderer via preload.
+extraMetadata:
+  ablyKey: ${env.ABLY_API_KEY}
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: "LiveCode-Setup.exe"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+  category: public.app-category.education
+  artifactName: "LiveCode-${arch}.dmg"
+
+dmg:
+  title: "LiveCode Installer"
+
+publish:
+  provider: github
+  owner: topherbc
+  repo: Icebreaker-Apps

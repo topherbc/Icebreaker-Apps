@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - 'index.html'
+      - 'live-code/**'
       - 'java-academy/week-1/1-mon-monkey-bot.html'
       - 'java-academy/shared/trace-liveshare.js'
 
@@ -66,6 +67,7 @@ jobs:
           # Collect all html files except index.html, visualization-tools/steppers/ (internal modules), and java-academy/shared/ (authoring templates)
           all_files = sorted(f.replace('\\', '/') for f in glob.glob('**/*.html', recursive=True)
                              if f not in ('index.html',)
+                             and not f.replace('\\', '/').startswith('live-code/')
                              and not f.replace('\\', '/').startswith('visualization-tools/steppers/')
                              and not f.replace('\\', '/').startswith('java-academy/shared/'))
 

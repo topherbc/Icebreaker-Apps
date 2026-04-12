@@ -71,8 +71,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ needs.create-release.outputs.version }} \
-            live-code/dist/LiveCode-arm64.dmg \
-            live-code/dist/LiveCode-x64.dmg \
+            live-code/dist/LiveCode.dmg \
             --repo ${{ github.repository }} \
             --clobber
 

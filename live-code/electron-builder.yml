@@ -37,10 +37,9 @@ mac:
   target:
     - target: dmg
       arch:
-        - arm64
-        - x64
+        - universal
   category: public.app-category.education
-  artifactName: "LiveCode-${arch}.dmg"
+  artifactName: "LiveCode.dmg"
 
 dmg:
   title: "LiveCode Installer"

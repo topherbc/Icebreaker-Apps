@@ -1421,19 +1421,16 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 [data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.18) !important; }
 [data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.90) !important; }
 
-/* Gutter separator — border on the absolutely-positioned gutter-elt, no layout impact */
+/* Gutter separator — drop-shadow on the gutters element paints from its real
+   right edge (the separator) at z-index 3, into the code area. No layout impact,
+   no box-shadow clipping issues. */
 #inst-panel.inst-cursor-active .CodeMirror-gutters {
   border-right-color: rgba(234,137,12,0.95) !important;
-}
-#inst-panel.inst-cursor-active .CodeMirror-gutter-elt {
-  border-right: 2px solid rgba(234,137,12,0.85) !important;
-  box-sizing: border-box;
+  filter: drop-shadow(2px 0 4px rgba(234,137,12,0.60)) !important;
 }
 [data-theme="dark"] #inst-panel.inst-cursor-active .CodeMirror-gutters {
   border-right-color: rgba(251,191,36,0.85) !important;
-}
-[data-theme="dark"] #inst-panel.inst-cursor-active .CodeMirror-gutter-elt {
-  border-right: 2px solid rgba(251,191,36,0.75) !important;
+  filter: drop-shadow(2px 0 4px rgba(251,191,36,0.50)) !important;
 }
 
 /* Instructor selection/cursor overlay (visible on student read-only panel) */

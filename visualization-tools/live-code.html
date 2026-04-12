@@ -2255,6 +2255,7 @@ let _instTypingTimer = null;  // student-side: clears typing class after inactiv
 // Instructor selection marks on student read-only panel
 let _instSelMarks   = [];
 let _instActiveLine = -1; // line number of last instructor cursor line class
+let _lastInstSelData = null; // last selection data — re-applied after setValue clears marks
 let _instHeartbeat  = null; // instructor presence keepalive
 let _appStarted     = false; // guard: proceedToApp runs exactly once per session
 
@@ -3102,10 +3103,18 @@ function clearInstActiveLine() {
 
 function onInstructorSelection(data) {
   if (!cmInst || !data || !data.ranges) return;
-  // Clear previous marks and active line
+  _lastInstSelData = data;
+  // Clear previous marks
   _instSelMarks.forEach(m => m.clear());
   _instSelMarks = [];
-  clearInstActiveLine();
+  // Determine the incoming cursor line before clearing the old gutter class,
+  // so we can skip the clear/re-add if the line hasn't changed (prevents flicker)
+  let incomingActiveLine = -1;
+  data.ranges.forEach(r => {
+    const a = r.anchor, h = r.head;
+    if (a.line === h.line && a.ch === h.ch) incomingActiveLine = a.line;
+  });
+  if (incomingActiveLine !== _instActiveLine) clearInstActiveLine();
 
   data.ranges.forEach(r => {
     let from = r.anchor, to = r.head;
@@ -3668,6 +3677,9 @@ function updateInstPanel() {
   const cur = cmInst.getValue();
   if (cur !== tab.content) {
     cmInst.setValue(tab.content);
+    // setValue clears all bookmarks and line classes — re-apply last known selection
+    // so the cursor widget and gutter highlight survive code updates
+    if (_lastInstSelData) onInstructorSelection(_lastInstSelData);
   }
   // Render instructor's tab bar (read-only) on student side
   const instViewBar = document.getElementById('inst-view-tab-bar');
@@ -4776,7 +4788,17 @@ joinBtn.addEventListener('click', () => {
               '<br><button id="btn-force-join" style="margin-top:8px;padding:4px 14px;' +
               'font-size:13px;cursor:pointer;background:var(--error);color:#fff;' +
               'border:none;border-radius:4px;font-family:inherit;">Force Join (Take Over)</button>';
-            document.getElementById('btn-force-join').addEventListener('click', () => {
+            document.getElementById('btn-force-join').addEventListener('click', function onForceJoin() {
+              const entered = (window.prompt('Enter override password to take over this room:') || '').trim();
+              if (entered !== room + '!') {
+                joinErr.innerHTML =
+                  '<span style="color:var(--error)">Incorrect password.</span>' +
+                  '<br><button id="btn-force-join" style="margin-top:8px;padding:4px 14px;' +
+                  'font-size:13px;cursor:pointer;background:var(--error);color:#fff;' +
+                  'border:none;border-radius:4px;font-family:inherit;">Force Join (Take Over)</button>';
+                document.getElementById('btn-force-join').addEventListener('click', onForceJoin);
+                return;
+              }
               joinErr.textContent = '';
               proceedToApp(); // Ably connection is already open — reuse it
             });

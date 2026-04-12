@@ -1423,6 +1423,16 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 [data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.15) !important; }
 [data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.85) !important; }
 
+/* Gutter separator glow — orange border between line numbers and editor */
+.cm-inst-gutter-active .CodeMirror-gutters {
+  border-right: 2px solid rgba(234,137,12,0.80) !important;
+  box-shadow: 2px 0 10px rgba(234,137,12,0.22);
+}
+[data-theme="dark"] .cm-inst-gutter-active .CodeMirror-gutters {
+  border-right: 2px solid rgba(251,191,36,0.70) !important;
+  box-shadow: 2px 0 10px rgba(251,191,36,0.18);
+}
+
 /* Instructor selection/cursor overlay (visible on student read-only panel) */
 .cm-inst-selection {
   background: rgba(234, 137, 12, 0.28);
@@ -1748,6 +1758,19 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         <div id="inst-editor-area" class="editor-area hidden" style="flex-direction:column;">
           <div class="tab-bar" id="inst-view-tab-bar" role="tablist" aria-label="Instructor files (read only)"></div>
           <div class="cm-wrap" id="inst-cm-wrap" aria-label="Instructor's code (read only)" style="flex:1;"></div>
+        </div>
+        <!-- Instructor run output (visible to students when instructor runs code) -->
+        <div id="inst-run-output" role="region" aria-label="Instructor program output" style="flex-shrink:0;border-top:2px solid var(--border);background:var(--surface);display:flex;flex-direction:column;max-height:0;overflow:hidden;transition:max-height 0.2s ease;">
+          <div class="output-header">
+            <span class="output-header-title">INSTRUCTOR OUTPUT</span>
+            <span class="tb-sep" style="margin:0 4px;"></span>
+            <span id="inst-run-exit-badge" class="output-exit" style="display:none"></span>
+            <span id="inst-run-time" class="output-meta" style="display:none"></span>
+          </div>
+          <div class="output-body" id="inst-run-body">
+            <div class="output-stdout" id="inst-run-stdout"></div>
+            <div class="output-stderr" id="inst-run-stderr"></div>
+          </div>
         </div>
       </div>
 
@@ -2915,6 +2938,7 @@ function setupChannels() {
     S.chInstructor.subscribe('code', msg => onInstructorCode(msg.data));
     S.chInstructor.subscribe('selection', msg => onInstructorSelection(msg.data));
     S.chInstructor.subscribe('typing', () => onInstructorTyping());
+    S.chInstructor.subscribe('output', msg => onInstructorOutput(msg.data));
 
     // Set up student publishing channel
     S.chMyStudent = S.ablyClient.channels.get(channelName(`student:${S.myClientId}`));
@@ -3085,6 +3109,8 @@ function clearInstActiveLine() {
     } catch(e) {}
     _instActiveLine = -1;
   }
+  const wrap = document.getElementById('inst-cm-wrap');
+  if (wrap) wrap.classList.remove('cm-inst-gutter-active');
 }
 
 function onInstructorSelection(data) {
@@ -3140,6 +3166,12 @@ function onInstructorSelection(data) {
       }));
     }
   });
+
+  // Gutter separator glow whenever instructor has any active cursor/selection
+  if (data.ranges && data.ranges.length > 0) {
+    const wrap = document.getElementById('inst-cm-wrap');
+    if (wrap) wrap.classList.add('cm-inst-gutter-active');
+  }
 }
 
 function onInstructorTyping() {
@@ -3150,6 +3182,36 @@ function onInstructorTyping() {
   _instTypingTimer = setTimeout(() => {
     panel.classList.remove('typing');
   }, 2000);
+}
+
+function onInstructorOutput(data) {
+  if (!data) return;
+  const outPanel = document.getElementById('inst-run-output');
+  const stdoutEl = document.getElementById('inst-run-stdout');
+  const stderrEl = document.getElementById('inst-run-stderr');
+  const exitEl   = document.getElementById('inst-run-exit-badge');
+  const timeEl   = document.getElementById('inst-run-time');
+  if (!outPanel || !stdoutEl || !stderrEl) return;
+
+  outPanel.style.maxHeight = '260px';
+  stdoutEl.textContent = data.stdout || (data.stderr ? '' : '(no output)');
+  const noteText = data.note ? `\n[Note] ${data.note}` : '';
+  stderrEl.textContent = (data.stderr || '') + noteText;
+
+  if (exitEl) {
+    exitEl.style.display = 'inline-flex';
+    if (data.statusId === 5) {
+      exitEl.className = 'output-exit error';
+      exitEl.textContent = 'Timeout';
+    } else if (data.statusId === 3 && !data.stderr) {
+      exitEl.className = 'output-exit success';
+      exitEl.innerHTML = '&#10003; Exit 0';
+    } else {
+      exitEl.className = 'output-exit error';
+      exitEl.innerHTML = `&#10007; ${data.statusDesc || 'Error'}`;
+    }
+  }
+  if (timeEl && data.time) { timeEl.style.display = 'block'; timeEl.textContent = data.time; }
 }
 
 function onStudentCode(clientId, data) {
@@ -3180,6 +3242,24 @@ function makeCM(container, opts) {
     lineWrapping: false,
     extraKeys: {
       Tab: cm => cm.replaceSelection('  '),
+      Enter: cm => {
+        const doc    = cm.getDoc();
+        const cur    = doc.getCursor();
+        const line   = cm.getLine(cur.line);
+        const before = line.substring(0, cur.ch);
+        const after  = line.substring(cur.ch);
+        const indent = before.match(/^(\s*)/)[1];
+        if (before.trimEnd().endsWith('{') && after.trimStart().startsWith('}')) {
+          // Cursor between { and } — insert inner + closing lines
+          const inner = indent + '  ';
+          doc.replaceRange('\n' + inner + '\n' + indent, cur);
+          doc.setCursor({ line: cur.line + 1, ch: inner.length });
+        } else if (before.trimEnd().endsWith('{')) {
+          doc.replaceRange('\n' + indent + '  ', cur);
+        } else {
+          doc.replaceRange('\n' + indent, cur);
+        }
+      },
     },
     readOnly: opts.readOnly || false,
     ...opts,
@@ -4116,6 +4196,12 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
       }
     }
     if (timeEl && time) { timeEl.style.display = 'block'; timeEl.textContent = time; }
+
+    // Broadcast output to students when instructor runs
+    if (S.myRole === 'instructor') {
+      if (!S.chInstructor) S.chInstructor = S.ablyClient.channels.get(channelName('instructor'));
+      try { S.chInstructor.publish('output', { stdout, stderr, statusId, statusDesc, exitCode, time, note }); } catch(e) {}
+    }
 
   } catch(e) {
     stdoutEl.textContent = '';

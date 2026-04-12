@@ -6,13 +6,14 @@ files:
   - "!node_modules/**"
   - "!.git/**"
   - "!*.md"
-  # Pull live-code.html from the web-app folder so the relative path
-  # path.join(__dirname, '..', 'visualization-tools', 'live-code.html')
-  # resolves correctly inside the packaged asar.
-  - from: "../visualization-tools"
-    to: "visualization-tools"
-    filter:
-      - "live-code.html"
+
+# Bundle live-code.html from the sibling web-app folder.
+# extraResources places it at Resources/visualization-tools/live-code.html
+# (a real filesystem path, not inside the asar), which main.js reads via
+# process.resourcesPath when app.isPackaged is true.
+extraResources:
+  - from: "../visualization-tools/live-code.html"
+    to: "visualization-tools/live-code.html"
 
 # Inject Ably key at build time via CI environment variable.
 # GitHub Actions sets ABLY_API_KEY; electron-builder substitutes it here

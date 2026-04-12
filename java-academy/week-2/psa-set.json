@@ -12,7 +12,7 @@
     { "id": "object",        "name": "Object",        "desc": "An instance of a class with its own data",                                               "example": "Car myCar = new Car();\nmyCar.setMake(\"Toyota\");" },
     { "id": "array",         "name": "Array",         "desc": "A fixed-size collection of items",                                                       "example": "int[] scores = new int[5];\nscores[0] = 92;" },
     { "id": "computation",   "name": "Computation",   "desc": "A calculation that produces a result",                                                   "example": "double avg = total / count;\ndouble root = Math.sqrt(value);" },
-    { "id": "encapsulation", "name": "Encapsulation", "desc": "Keeping internal details protected and only reachable through controlled access",         "example": "private double price;\npublic double getPrice() { return price; }\npublic void setPrice(double price) { this.price = price; }" }
+    { "id": "encapsulation", "name": "Encapsulation", "desc": "Keeping internal details protected and only reachable through controlled access",         "example": "private double price;\npublic double getPrice() {\n    return price;\n}\npublic void setPrice(double price) {\n    this.price = price;\n}" }
   ],
   "prompts": [
     {
@@ -42,7 +42,7 @@
           "explanation": "The vehicle's details are kept protected from the outside. The only way to read or update them is through a controlled path — a defined channel the rest of the program must use.",
           "codeSnippets": {
             "encapsulation": "private int id;\nprivate double price;",
-            "method": "public int getId() { return id; }\npublic void setId(int id) { this.id = id; }\npublic double getPrice() { return price; }\npublic void setPrice(double price) { this.price = price; }"
+            "method": "public int getId() {\n    return id;\n}\npublic void setId(int id) {\n    this.id = id;\n}\npublic double getPrice() {\n    return price;\n}\npublic void setPrice(double price) {\n    this.price = price;\n}"
           }
         }
       ],
@@ -141,7 +141,7 @@
           "labels": ["condition", "output"],
           "explanation": "Each vehicle is evaluated against what the customer entered — only the ones that match get surfaced and shown.",
           "codeSnippets": {
-            "condition": "if (inventory[i].getMakeModel().toLowerCase().contains(search)) {",
+            "condition": "if (inventory[i].getMakeModel()\n        .toLowerCase().contains(search)) {\n    System.out.println(inventory[i].getMakeModel());\n}",
             "output": "System.out.println(inventory[i].getId() + \" - \" + inventory[i].getMakeModel()\n    + \" - $\" + inventory[i].getPrice());"
           }
         }
@@ -157,7 +157,7 @@
           "labels": ["condition", "computation"],
           "explanation": "Before anything else happens, the current count must be compared against the maximum — a decision that determines which path follows.",
           "codeSnippets": {
-            "condition": "if (count >= inventory.length) {",
+            "condition": "if (count >= inventory.length) {\n    System.out.println(\"Inventory is full.\");\n}",
             "computation": "count >= inventory.length"
           }
         },
@@ -225,7 +225,7 @@
           "labels": ["encapsulation"],
           "explanation": "The book's information is kept protected so that nothing outside can access or change it directly — any interaction must come through a controlled path.",
           "codeSnippets": {
-            "encapsulation": "private int id;\nprivate String isbn;\nprivate String title;\npublic int getId() { return id; }\npublic String getTitle() { return title; }"
+            "encapsulation": "private int id;\nprivate String isbn;\nprivate String title;\npublic int getId() {\n    return id;\n}\npublic String getTitle() {\n    return title;\n}"
           }
         },
         {
@@ -311,7 +311,7 @@
           "explanation": "When the number fails the check, the user must be shown a message explaining it — a response that only happens on the branch where the value was unacceptable.",
           "codeSnippets": {
             "output": "System.out.println(\"That's not positive. Try again.\");",
-            "condition": "if (number <= 0) System.out.println(\"That's not positive. Try again.\");"
+            "condition": "if (number <= 0) {\n    System.out.println(\"That's not positive. Try again.\");\n}"
           }
         },
         {

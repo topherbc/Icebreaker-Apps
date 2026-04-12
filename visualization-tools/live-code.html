@@ -676,12 +676,15 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   inset: 0;
   background: rgba(13,31,45,0.65);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
   z-index: 1000;
   padding: 16px;
 }
 #join-modal {
+#join-modal {
+  margin: auto;
   background: var(--surface);
   border: 2px solid var(--border);
   box-shadow: var(--shadow-lg);

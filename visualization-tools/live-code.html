@@ -4510,6 +4510,29 @@ function _runTermFor(stdoutId) {
   return null;
 }
 
+// Local echo: show typed characters in the terminal immediately.
+// Java Scanner reads line-buffered, so we echo chars and send on Enter.
+let _stdinLine = '';
+function _stdinHandler(term, data) {
+  if (!window.electronAPI) return;
+  for (const ch of data) {
+    if (ch === '\r' || ch === '\n') {
+      term.write('\r\n');
+      window.electronAPI.sendStdin(_stdinLine + '\n');
+      _stdinLine = '';
+    } else if (ch === '\x7f' || ch === '\b') {
+      // Backspace
+      if (_stdinLine.length > 0) {
+        _stdinLine = _stdinLine.slice(0, -1);
+        term.write('\b \b');
+      }
+    } else if (ch >= ' ') {
+      _stdinLine += ch;
+      term.write(ch);
+    }
+  }
+}
+
 // Lazily create the student output terminal (called on first Run click).
 function _ensureStuTerm() {
   if (_stuTerm) return;
@@ -4517,7 +4540,7 @@ function _ensureStuTerm() {
   if (!wrap) return;
   _stuTerm = _makeXterm(wrap, { disableStdin: false });
   if (_stuTerm) {
-    _stuTerm.onData(data => { if (window.electronAPI) window.electronAPI.sendStdin(data); });
+    _stuTerm.onData(data => _stdinHandler(_stuTerm, data));
   }
 }
 
@@ -4528,8 +4551,16 @@ function _ensureInstMyTerm() {
   if (!wrap) return;
   _instMyTerm = _makeXterm(wrap, { disableStdin: false });
   if (_instMyTerm) {
-    _instMyTerm.onData(data => { if (window.electronAPI) window.electronAPI.sendStdin(data); });
+    _instMyTerm.onData(data => _stdinHandler(_instMyTerm, data));
   }
+}
+
+// Update all live xterm terminals when the app theme changes.
+function _syncXtermTheme() {
+  const t = _xtermTheme();
+  if (_stuTerm)     _stuTerm.options.theme = t;
+  if (_instMyTerm)  _instMyTerm.options.theme = t;
+  if (_instRunTerm) _instRunTerm.options.theme = t;
 }
 
 async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId, stderrId, exitBadgeId, timeId) {
@@ -4556,6 +4587,7 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
     if (stdoutId === 'inst-out-stdout') _ensureInstMyTerm();
     _activeRunTerm = _runTermFor(stdoutId);
     _isInstRun     = (stdoutId === 'inst-out-stdout');
+    _stdinLine = '';
     if (_activeRunTerm) {
       _activeRunTerm.reset();
       _activeRunTerm.writeln('\x1b[33mCompiling...\x1b[0m');
@@ -4884,6 +4916,7 @@ function toggleTheme() {
   localStorage.setItem('livecode-theme', next);
   document.getElementById('btn-theme').innerHTML = next === 'dark' ? '&#9728;' : '&#9790;';
   document.getElementById('toggle-dark').checked = next === 'dark';
+  if (window.IS_ELECTRON) _syncXtermTheme();
 }
 
 document.getElementById('btn-a11y').addEventListener('click', () => {

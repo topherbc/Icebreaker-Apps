@@ -436,6 +436,19 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   background: var(--code-bg);
 }
 
+/* ---- Instructor offline (student view) ---- */
+#inst-panel.inst-offline { opacity: 0.4; }
+#inst-offline-badge {
+  display: none;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--disconnect-color);
+  font-family: 'Share Tech Mono', monospace;
+  margin-left: 8px;
+}
+#inst-panel.inst-offline #inst-offline-badge { display: inline-flex; }
+
 /* ---- Collapsible sections ---- */
 .collapsible {
   flex-shrink: 0;
@@ -1806,7 +1819,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
       <!-- Left: instructor read-only panel -->
       <div class="panel" id="inst-panel" style="flex:0 0 50%">
-        <div class="panel-badge" id="inst-panel-badge">INSTRUCTOR</div>
+        <div class="panel-badge" id="inst-panel-badge">INSTRUCTOR</div><span id="inst-offline-badge">&#9866; OFFLINE</span>
         <div id="inst-waiting" class="inst-placeholder">-- waiting for instructor --</div>
         <div id="inst-editor-area" class="editor-area hidden" style="flex-direction:column;">
           <div class="tab-bar" id="inst-view-tab-bar" role="tablist" aria-label="Instructor files (read only)"></div>
@@ -2327,6 +2340,10 @@ let _instActiveLine = -1; // line number of last instructor cursor line class
 let _lastInstSelData = null; // last selection data — re-applied after setValue clears marks
 let _instHeartbeat  = null; // instructor presence keepalive
 let _appStarted     = false; // guard: proceedToApp runs exactly once per session
+let _instLeaveTimer1 = null; // 50s  → offline badge on instructor panel
+let _instLeaveTimer2 = null; // 5min → offer to leave
+let _instLeaveTimer3 = null; // 15min → force close
+let _instOffline     = false;
 
 // Stale session: if an instructor's presence timestamp is older than this,
 // their browser is gone and we take over without blocking.
@@ -2346,6 +2363,46 @@ function startInstructorHeartbeat() {
 
 function stopInstructorHeartbeat() {
   if (_instHeartbeat) { clearInterval(_instHeartbeat); _instHeartbeat = null; }
+}
+
+function clearInstLeaveTimers() {
+  if (_instLeaveTimer1) { clearTimeout(_instLeaveTimer1); _instLeaveTimer1 = null; }
+  if (_instLeaveTimer2) { clearTimeout(_instLeaveTimer2); _instLeaveTimer2 = null; }
+  if (_instLeaveTimer3) { clearTimeout(_instLeaveTimer3); _instLeaveTimer3 = null; }
+}
+
+// Student-side: instructor left presence
+function onInstructorLeave() {
+  // 50 seconds — show offline badge
+  _instLeaveTimer1 = setTimeout(() => {
+    _instOffline = true;
+    const panel = document.getElementById('inst-panel');
+    if (panel) panel.classList.add('inst-offline');
+    showToast('Instructor disconnected', '&#9888;', 5000);
+  }, 50_000);
+
+  // 5 minutes — prompt student to leave
+  _instLeaveTimer2 = setTimeout(() => {
+    showConfirm(
+      'Instructor has been offline for 5 minutes. Would you like to leave the room?',
+      () => leaveRoom()
+    );
+  }, 300_000);
+
+  // 15 minutes — force close
+  _instLeaveTimer3 = setTimeout(() => {
+    showToast('Room closed \u2014 instructor offline for 15 minutes', '&#128274;', 6000);
+    setTimeout(() => leaveRoom(), 800);
+  }, 900_000);
+}
+
+// Student-side: instructor rejoined
+function onInstructorRejoin() {
+  clearInstLeaveTimers();
+  _instOffline = false;
+  const panel = document.getElementById('inst-panel');
+  if (panel) panel.classList.remove('inst-offline');
+  showToast('Instructor reconnected', '&#9989;', 3000);
 }
 
 // Token validation for session auth handshake
@@ -3082,9 +3139,11 @@ function onPresenceEnter(member) {
 
   if (_leaveTimers[id]) { clearTimeout(_leaveTimers[id]); delete _leaveTimers[id]; }
 
-  // Student tracks instructor name
+  // Student tracks instructor name / reconnect
   if (S.myRole === 'student' && data.role === 'instructor') {
     setInstName(data.name);
+    if (_instOffline) onInstructorRejoin();
+    else clearInstLeaveTimers(); // returned before offline badge appeared
   }
 
   if (S.myRole === 'instructor' && data.role === 'student') {
@@ -3113,6 +3172,11 @@ function onPresenceLeave(member) {
   const id   = member.clientId;
   const data = member.data || {};
   if (id === S.myClientId) return;
+
+  // Student detects instructor departure
+  if (S.myRole === 'student' && data.role === 'instructor') {
+    onInstructorLeave();
+  }
 
   if (S.myRole === 'instructor' && S.students[id]) {
     // Mark inactive immediately on leave
@@ -5253,6 +5317,7 @@ joinBtn.addEventListener('click', () => {
 function cleanupAbly() {
   if (!S.ablyClient) return;
   stopInstructorHeartbeat();
+  clearInstLeaveTimers();
   try { if (S.chControl) S.chControl.presence.leave().catch(()=>{}); } catch(e) {}
   try { S.ablyClient.close().catch(()=>{}); } catch(e) {}
   S.ablyClient = null;
@@ -5263,42 +5328,48 @@ window.addEventListener('pagehide',     cleanupAbly);
 // ================================================================
 // LEAVE ROOM
 // ================================================================
+function leaveRoom() {
+  cleanupAbly();
+  clearInstLeaveTimers();
+  _instOffline = false;
+  // Reset state
+  S.students    = {};
+  S.myTabs      = [{ name: 'Main.java', content: '' }];
+  S.myActiveTab = 0;
+  S.instTabs    = [];
+  S.instActive  = 0;
+  S.instConnected = false;
+  S.isReady     = false;
+  S.expandedId  = null;
+  S.stuChannels = {};
+  S.chControl   = null;
+  S.chInstructor = null;
+  S.chMyStudent  = null;
+  _appStarted   = false;
+  cmInst = null;
+  cmMy   = null;
+  // Hide app, show join screen
+  document.getElementById('app').hidden = true;
+  document.getElementById('join-overlay').hidden = false;
+  document.getElementById('native-app-bar').hidden = false;
+  document.getElementById('join-modal').hidden   = false;
+  document.getElementById('waiting-view').hidden = true;
+  document.getElementById('student-layout').hidden    = true;
+  document.getElementById('instructor-layout').hidden = true;
+  const instPanel = document.getElementById('inst-panel');
+  if (instPanel) instPanel.classList.remove('inst-offline');
+  // Reset join form
+  document.getElementById('join-btn').disabled    = false;
+  document.getElementById('join-btn').textContent = 'Join Room';
+  document.getElementById('join-err').textContent = '';
+  validateJoinForm();
+}
+
 document.getElementById('btn-leave').addEventListener('click', () => {
   const msg = S.myRole === 'instructor'
     ? 'Leave this room? Students will see you as disconnected.'
     : 'Leave this room?';
-  showConfirm(msg, () => {
-    cleanupAbly();
-    // Reset state
-    S.students    = {};
-    S.myTabs      = [{ name: 'Main.java', content: '' }];
-    S.myActiveTab = 0;
-    S.instTabs    = [];
-    S.instActive  = 0;
-    S.instConnected = false;
-    S.isReady     = false;
-    S.expandedId  = null;
-    S.stuChannels = {};
-    S.chControl   = null;
-    S.chInstructor = null;
-    S.chMyStudent  = null;
-    _appStarted   = false;
-    cmInst = null;
-    cmMy   = null;
-    // Hide app, show join screen
-    document.getElementById('app').hidden = true;
-    document.getElementById('join-overlay').hidden = false;
-    document.getElementById('native-app-bar').hidden = false;
-    document.getElementById('join-modal').hidden   = false;
-    document.getElementById('waiting-view').hidden = true;
-    document.getElementById('student-layout').hidden    = true;
-    document.getElementById('instructor-layout').hidden = true;
-    // Reset join form
-    document.getElementById('join-btn').disabled    = false;
-    document.getElementById('join-btn').textContent = 'Join Room';
-    document.getElementById('join-err').textContent = '';
-    validateJoinForm();
-  });
+  showConfirm(msg, () => leaveRoom());
 });
 
 // ================================================================

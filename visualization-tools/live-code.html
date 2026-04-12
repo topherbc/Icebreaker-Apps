@@ -2977,13 +2977,13 @@ function setupChannels() {
     S.chInstructor.subscribe('typing', () => onInstructorTyping());
     S.chInstructor.subscribe('output', msg => onInstructorOutput(msg.data));
 
-    // Electron streaming: receive instructor run chunks in real time
-    if (window.IS_ELECTRON) {
-      S.chInstructor.subscribe('run-start', () => {
-        _instRunQueue = [];
-        const p = document.getElementById('inst-run-output');
-        if (p) p.style.maxHeight = '260px';
-        // Init terminal after the panel has dimensions
+    // Streaming: receive instructor run chunks in real time.
+    // Works for both Electron students (xterm) and browser students (div append).
+    S.chInstructor.subscribe('run-start', () => {
+      _instRunQueue = [];
+      const p = document.getElementById('inst-run-output');
+      if (p) p.style.maxHeight = '260px';
+      if (window.IS_ELECTRON) {
         requestAnimationFrame(() => {
           if (!_instRunTerm) {
             const wrap = _xtermBody('inst-run-body', 'inst-run-stdout', 'inst-run-stderr');
@@ -2996,27 +2996,47 @@ function setupChannels() {
             _instRunQueue = [];
           }
         });
-      });
-      S.chInstructor.subscribe('stdout-chunk', msg => {
-        const chunk = msg.data.chunk || '';
+      } else {
+        const stdoutEl = document.getElementById('inst-run-stdout');
+        const stderrEl = document.getElementById('inst-run-stderr');
+        if (stdoutEl) stdoutEl.textContent = '';
+        if (stderrEl) stderrEl.textContent = '';
+      }
+    });
+    S.chInstructor.subscribe('stdout-chunk', msg => {
+      const chunk = msg.data.chunk || '';
+      if (window.IS_ELECTRON) {
         if (_instRunTerm) _instRunTerm.write(chunk);
         else _instRunQueue.push({ t: 'out', chunk });
-      });
-      S.chInstructor.subscribe('stderr-chunk', msg => {
-        const chunk = msg.data.chunk || '';
+      } else {
+        const el = document.getElementById('inst-run-stdout');
+        if (el) el.textContent += chunk;
+      }
+    });
+    S.chInstructor.subscribe('stderr-chunk', msg => {
+      const chunk = msg.data.chunk || '';
+      if (window.IS_ELECTRON) {
         if (_instRunTerm) _instRunTerm.write('\x1b[31m' + chunk + '\x1b[0m');
         else _instRunQueue.push({ t: 'err', chunk });
-      });
-      S.chInstructor.subscribe('run-done', msg => {
-        const d = msg.data || {};
-        const exitEl = document.getElementById('inst-run-exit-badge');
-        if (!exitEl) return;
-        exitEl.style.display = 'inline-flex';
-        const ok = d.exitCode === 0 && !d.compileError;
-        exitEl.className = ok ? 'output-exit success' : 'output-exit error';
-        exitEl.innerHTML = ok ? '&#10003; Exit 0' : `&#10007; ${d.statusDesc || 'Error'}`;
-      });
-    }
+      } else {
+        const el = document.getElementById('inst-run-stderr');
+        if (el) el.textContent += chunk;
+      }
+    });
+    S.chInstructor.subscribe('run-done', msg => {
+      const d = msg.data || {};
+      // Browser students: if no streaming chunks arrived, fall back to full output
+      if (!window.IS_ELECTRON && d.stdout != null) {
+        onInstructorOutput(d);
+        return;
+      }
+      const exitEl = document.getElementById('inst-run-exit-badge');
+      if (!exitEl) return;
+      exitEl.style.display = 'inline-flex';
+      const ok = d.exitCode === 0 && !d.compileError;
+      exitEl.className = ok ? 'output-exit success' : 'output-exit error';
+      exitEl.innerHTML = ok ? '&#10003; Exit 0' : `&#10007; ${d.statusDesc || 'Error'}`;
+    });
 
     // Set up student publishing channel
     S.chMyStudent = S.ablyClient.channels.get(channelName(`student:${S.myClientId}`));
@@ -4505,7 +4525,11 @@ function _ensureStuTerm() {
 function _ensureInstMyTerm() {
   if (_instMyTerm) return;
   const wrap = _xtermBody('inst-out-body', 'inst-out-stdout', 'inst-out-stderr');
-  if (wrap) _instMyTerm = _makeXterm(wrap);
+  if (!wrap) return;
+  _instMyTerm = _makeXterm(wrap, { disableStdin: false });
+  if (_instMyTerm) {
+    _instMyTerm.onData(data => { if (window.electronAPI) window.electronAPI.sendStdin(data); });
+  }
 }
 
 async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId, stderrId, exitBadgeId, timeId) {
@@ -4585,8 +4609,8 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
     if (S.myRole === 'instructor') {
       if (!S.chInstructor) S.chInstructor = S.ablyClient.channels.get(channelName('instructor'));
       if (window.IS_ELECTRON) {
-        // Streaming: chunks already published; send completion so students update exit badge
-        try { S.chInstructor.publish('run-done', { exitCode, compileError: statusId === 6, statusId, statusDesc, stderr, time }); } catch(e) {}
+        // Streaming: chunks already published; send completion with full output as fallback for browser students
+        try { S.chInstructor.publish('run-done', { stdout, stderr, exitCode, compileError: statusId === 6, statusId, statusDesc, time, note }); } catch(e) {}
       } else {
         try { S.chInstructor.publish('output', { stdout, stderr, statusId, statusDesc, exitCode, time, note }); } catch(e) {}
       }

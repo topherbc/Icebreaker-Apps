@@ -1415,22 +1415,30 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 }
 .cm-s-livecode .CodeMirror-nonmatchingbracket { color: var(--error) !important; background: var(--error-bg); }
 
-/* Instructor active-line glow on student panel */
-.cm-inst-active-line { background: rgba(234,137,12,0.10) !important; }
-.cm-inst-active-gutter { background: rgba(234,137,12,0.18) !important; }
-.cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(234,137,12,0.90) !important; font-weight: 700; }
-[data-theme="dark"] .cm-inst-active-line { background: rgba(251,191,36,0.08) !important; }
-[data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.15) !important; }
-[data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.85) !important; }
+/* Instructor active-line glow on student panel — gutter number only, no line background */
+.cm-inst-active-gutter { background: rgba(234,137,12,0.22) !important; }
+.cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(234,137,12,0.95) !important; font-weight: 700; }
+[data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.18) !important; }
+[data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.90) !important; }
 
-/* Gutter separator glow — orange border between line numbers and editor */
+/* Gutter separator glow — orange line between line numbers and editor content */
 .cm-inst-gutter-active .CodeMirror-gutters {
-  border-right: 2px solid rgba(234,137,12,0.80) !important;
-  box-shadow: 2px 0 10px rgba(234,137,12,0.22);
+  border-right-color: rgba(234,137,12,0.95) !important;
+}
+.cm-inst-gutter-active .CodeMirror-gutters::after {
+  content: '';
+  position: absolute;
+  right: -3px; top: 0; bottom: 0;
+  width: 3px;
+  background: rgba(234,137,12,0.85);
+  pointer-events: none;
+  z-index: 4;
 }
 [data-theme="dark"] .cm-inst-gutter-active .CodeMirror-gutters {
-  border-right: 2px solid rgba(251,191,36,0.70) !important;
-  box-shadow: 2px 0 10px rgba(251,191,36,0.18);
+  border-right-color: rgba(251,191,36,0.85) !important;
+}
+[data-theme="dark"] .cm-inst-gutter-active .CodeMirror-gutters::after {
+  background: rgba(251,191,36,0.75);
 }
 
 /* Instructor selection/cursor overlay (visible on student read-only panel) */
@@ -1445,14 +1453,15 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 }
 .cm-inst-cursor-widget {
   display: inline-block;
-  width: 0;
-  height: 1em;
-  border-left: 2px solid #ea890c;
+  width: 2px;
+  height: 1.35em;
+  background: #ea890c;
   margin-left: -1px;
   vertical-align: text-bottom;
-  animation: inst-cursor-blink 1s step-end infinite;
+  border-radius: 1px;
+  animation: inst-cursor-blink 1.1s step-end infinite;
 }
-[data-theme="dark"] .cm-inst-cursor-widget { border-left-color: #fbbf24; }
+[data-theme="dark"] .cm-inst-cursor-widget { background: #fbbf24; }
 @keyframes inst-cursor-blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
@@ -2136,13 +2145,14 @@ sc.close();</code></div>
 <!-- TAB CONTEXT MENU -->
 <div id="ctx-menu" role="menu" aria-label="Tab options">
   <button class="ctx-item" id="ctx-rename" role="menuitem">Rename file</button>
-  <button class="ctx-item danger" id="ctx-close" role="menuitem">Close tab</button>
+  <button class="ctx-item danger" id="ctx-delete" role="menuitem">Delete file</button>
 </div>
 
 <!-- SIDEBAR CONTEXT MENU -->
 <div id="sidebar-ctx-menu" role="menu" aria-label="New item options" style="position:fixed;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:900;min-width:160px;display:none;">
   <button class="ctx-item" id="sidebar-ctx-new-file" role="menuitem">&#128196; New File</button>
   <button class="ctx-item" id="sidebar-ctx-new-folder" role="menuitem">&#128193; New Folder</button>
+  <button class="ctx-item danger" id="sidebar-ctx-delete" role="menuitem" style="display:none">Delete file</button>
 </div>
 
 <!-- NEW ITEM MODAL -->
@@ -3104,8 +3114,7 @@ function onInstructorCode(data) {
 function clearInstActiveLine() {
   if (_instActiveLine >= 0 && cmInst) {
     try {
-      cmInst.removeLineClass(_instActiveLine, 'background', 'cm-inst-active-line');
-      cmInst.removeLineClass(_instActiveLine, 'gutter',     'cm-inst-active-gutter');
+      cmInst.removeLineClass(_instActiveLine, 'gutter', 'cm-inst-active-gutter');
     } catch(e) {}
     _instActiveLine = -1;
   }
@@ -3133,30 +3142,10 @@ function onInstructorSelection(data) {
       widget.title = 'Instructor cursor';
       _instSelMarks.push(cmInst.setBookmark(from, { widget, insertLeft: true }));
 
-      // Active line glow
+      // Active line gutter glow (number highlight only, no line background)
       _instActiveLine = from.line;
       try {
-        cmInst.addLineClass(from.line, 'background', 'cm-inst-active-line');
-        cmInst.addLineClass(from.line, 'gutter',     'cm-inst-active-gutter');
-      } catch(e) {}
-
-      // Bracket matching — use findMatchingBracket and account for `at`
-      try {
-        const result = cmInst.findMatchingBracket(from, { strict: false });
-        if (result && result.match && result.to) {
-          // `result.at` tells us if the bracket is to the right ("start") or left ("end") of cursor
-          const nearFrom = result.at === 'end'
-            ? { line: from.line, ch: from.ch - 1 }
-            : from;
-          const nearTo = result.at === 'end'
-            ? from
-            : { line: from.line, ch: from.ch + 1 };
-          _instSelMarks.push(cmInst.markText(nearFrom, nearTo,
-            { className: 'CodeMirror-matchingbracket' }));
-          _instSelMarks.push(cmInst.markText(
-            result.to, { line: result.to.line, ch: result.to.ch + 1 },
-            { className: 'CodeMirror-matchingbracket' }));
-        }
+        cmInst.addLineClass(from.line, 'gutter', 'cm-inst-active-gutter');
       } catch(e) {}
     } else {
       // Range selection — highlight it
@@ -3307,35 +3296,40 @@ function scheduleRainbow(cm) {
 // ================================================================
 function renderTabBar(barEl, tabs, activeIdx, owner) {
   // owner: 'stu' | 'inst'
-  const sideBtn = barEl.querySelector('.sidebar-toggle-btn');
-  // Clear existing tabs (keep sidebar btn)
+  // Clear existing tabs (keep sidebar btn and add btn)
   Array.from(barEl.children).forEach(c => {
     if (!c.classList.contains('sidebar-toggle-btn') && !c.classList.contains('tab-add-btn')) c.remove();
     if (c.classList.contains('tab-add-btn')) c.remove();
   });
 
+  const visibleCount = tabs.filter(t => !t.hidden).length;
+
   tabs.forEach((tab, idx) => {
+    if (tab.hidden) return; // only show open tabs in the tab bar
+
+    const label = tab.name.includes('/') ? tab.name.split('/').pop() : tab.name;
     const el = document.createElement('button');
     el.className = 'tab' + (idx === activeIdx ? ' active' : '');
     el.setAttribute('role', 'tab');
     el.setAttribute('aria-selected', idx === activeIdx ? 'true' : 'false');
-    el.setAttribute('aria-label', `File: ${tab.name}`);
+    el.setAttribute('aria-label', `File: ${label}`);
     el.title = tab.name;
 
     const nameSpan = document.createElement('span');
-    nameSpan.textContent = tab.name;
+    nameSpan.textContent = label;
     nameSpan.style.overflow = 'hidden';
     nameSpan.style.textOverflow = 'ellipsis';
     el.appendChild(nameSpan);
 
-    if (tabs.length > 1) {
+    // X closes (hides) the tab — only show when more than one visible tab
+    if (visibleCount > 1) {
       const closeBtn = document.createElement('button');
       closeBtn.className = 'tab-close';
       closeBtn.innerHTML = '&#10005;';
-      closeBtn.setAttribute('aria-label', `Close ${tab.name}`);
+      closeBtn.setAttribute('aria-label', `Close ${label}`);
       closeBtn.addEventListener('click', e => {
         e.stopPropagation();
-        closeTab(owner, idx);
+        hideTab(owner, idx);
       });
       el.appendChild(closeBtn);
     }
@@ -3403,11 +3397,44 @@ function addTabWithName(owner, name) {
   switchTab(owner, newIdx);
 }
 
-function closeTab(owner, idx) {
-  if (S.myTabs.length <= 1) return; // can't close last tab
+// openTab: make a tab visible (un-hide) and switch to it
+function openTab(owner, idx) {
+  S.myTabs[idx].hidden = false;
+  switchTab(owner, idx);
+}
+
+// hideTab: close the tab view but keep the file — x button behavior
+function hideTab(owner, idx) {
+  const visibleTabs = S.myTabs.map((t, i) => ({ t, i })).filter(({ t }) => !t.hidden);
+  if (visibleTabs.length <= 1) return; // can't hide the last visible tab
+  saveCmToTab(owner);
+  S.myTabs[idx].hidden = true;
+  // Switch to nearest still-visible tab
+  if (S.myActiveTab === idx) {
+    const next = visibleTabs.find(({ i }) => i !== idx);
+    S.myActiveTab = next ? next.i : S.myTabs.findIndex(t => !t.hidden);
+    cmMy.setValue(S.myTabs[S.myActiveTab].content);
+    cmMy.clearHistory();
+    scheduleRainbow(cmMy);
+  }
+  const barId = owner === 'stu' ? 'stu-tab-bar' : 'inst-tab-bar';
+  renderTabBar(document.getElementById(barId), S.myTabs, S.myActiveTab, owner);
+  if (owner === 'stu') publishMyCode();
+  else scheduleInstPublish();
+}
+
+// deleteTab: permanently remove a file
+function deleteTab(owner, idx) {
+  if (S.myTabs.length <= 1) return; // can't delete last file
   saveCmToTab(owner);
   S.myTabs.splice(idx, 1);
   if (S.myActiveTab >= S.myTabs.length) S.myActiveTab = S.myTabs.length - 1;
+  // If new active tab is hidden, find a visible one
+  if (S.myTabs[S.myActiveTab].hidden) {
+    const vis = S.myTabs.findIndex(t => !t.hidden);
+    S.myActiveTab = vis >= 0 ? vis : 0;
+    S.myTabs[S.myActiveTab].hidden = false;
+  }
   cmMy.setValue(S.myTabs[S.myActiveTab].content);
   cmMy.clearHistory();
   scheduleRainbow(cmMy);
@@ -3446,16 +3473,25 @@ function renderSidebar(owner) {
   });
 
   function makeFileBtn(tab, idx) {
+    // Don't show .keep placeholder files in the sidebar
+    if (tab.name.endsWith('/.keep') || tab.name === '.keep') return null;
     const btn = document.createElement('button');
     btn.className = 'proj-file' + (idx === S.myActiveTab ? ' active' : '');
     btn.setAttribute('aria-label', `Switch to ${tab.name}`);
     const label = tab.name.includes('/') ? tab.name.split('/').pop() : tab.name;
     btn.innerHTML = `<span aria-hidden="true">&#128196;</span> ${escHtml(label)}`;
-    btn.addEventListener('click', () => switchTab(owner, idx));
+    btn.addEventListener('click', () => openTab(owner, idx));
+    btn.addEventListener('contextmenu', e => {
+      e.preventDefault(); e.stopPropagation();
+      showSidebarCtxMenu(e, owner, null, idx);
+    });
     return btn;
   }
 
-  root.forEach(({ tab, idx }) => sb.appendChild(makeFileBtn(tab, idx)));
+  root.forEach(({ tab, idx }) => {
+    const btn = makeFileBtn(tab, idx);
+    if (btn) sb.appendChild(btn);
+  });
 
   Object.keys(groups).sort().forEach(folder => {
     const folderEl = document.createElement('div');
@@ -3463,11 +3499,12 @@ function renderSidebar(owner) {
     folderEl.innerHTML = `<span aria-hidden="true">&#128193;</span> ${escHtml(folder)}`;
     folderEl.addEventListener('contextmenu', e => {
       e.preventDefault(); e.stopPropagation();
-      showSidebarCtxMenu(e, owner, folder);
+      showSidebarCtxMenu(e, owner, folder, null);
     });
     sb.appendChild(folderEl);
     groups[folder].forEach(({ tab, idx }) => {
       const btn = makeFileBtn(tab, idx);
+      if (!btn) return;
       btn.style.paddingLeft = '24px';
       sb.appendChild(btn);
     });
@@ -3477,7 +3514,7 @@ function renderSidebar(owner) {
   sb.addEventListener('contextmenu', e => {
     if (e.target.closest('.proj-file') || e.target.closest('.proj-folder')) return;
     e.preventDefault();
-    showSidebarCtxMenu(e, owner, null);
+    showSidebarCtxMenu(e, owner, null, null);
   });
 }
 
@@ -3489,9 +3526,9 @@ document.getElementById('ctx-rename').addEventListener('click', () => {
   ctxMenu.style.display = 'none';
   if (S.ctxTabOwner !== null) renameTab(S.ctxTabOwner, S.ctxTabIdx);
 });
-document.getElementById('ctx-close').addEventListener('click', () => {
+document.getElementById('ctx-delete').addEventListener('click', () => {
   ctxMenu.style.display = 'none';
-  if (S.ctxTabOwner !== null) closeTab(S.ctxTabOwner, S.ctxTabIdx);
+  if (S.ctxTabOwner !== null) deleteTab(S.ctxTabOwner, S.ctxTabIdx);
 });
 document.addEventListener('click', () => { ctxMenu.style.display = 'none'; });
 
@@ -3501,25 +3538,29 @@ function showCtxMenu(e, owner, idx) {
   ctxMenu.style.left = `${e.clientX}px`;
   ctxMenu.style.top  = `${e.clientY}px`;
   ctxMenu.style.display = 'block';
-  // Disable close if only one tab
-  document.getElementById('ctx-close').disabled = S.myTabs.length <= 1;
+  document.getElementById('ctx-delete').disabled = S.myTabs.length <= 1;
 }
 
 // ================================================================
 // SIDEBAR CONTEXT MENU
 // ================================================================
 const sidebarCtxMenu = document.getElementById('sidebar-ctx-menu');
-let _sidebarCtxOwner = null;
+let _sidebarCtxOwner  = null;
 let _sidebarCtxFolder = null; // null = root, string = folder name
+let _sidebarCtxFileIdx = null; // null = no file targeted
 
-function showSidebarCtxMenu(e, owner, folder) {
-  _sidebarCtxOwner  = owner;
-  _sidebarCtxFolder = folder;
+function showSidebarCtxMenu(e, owner, folder, fileIdx) {
+  _sidebarCtxOwner   = owner;
+  _sidebarCtxFolder  = folder;
+  _sidebarCtxFileIdx = fileIdx ?? null;
   sidebarCtxMenu.style.left = `${e.clientX}px`;
   sidebarCtxMenu.style.top  = `${e.clientY}px`;
   sidebarCtxMenu.style.display = 'block';
   document.getElementById('sidebar-ctx-new-file').textContent =
     folder ? `\u{1F4C4} New File in ${folder}/` : '\u{1F4C4} New File';
+  // Show delete only when right-clicking a specific file
+  document.getElementById('sidebar-ctx-delete').style.display =
+    fileIdx !== null && fileIdx !== undefined ? 'block' : 'none';
 }
 
 document.getElementById('sidebar-ctx-new-file').addEventListener('click', () => {
@@ -3529,6 +3570,10 @@ document.getElementById('sidebar-ctx-new-file').addEventListener('click', () => 
 document.getElementById('sidebar-ctx-new-folder').addEventListener('click', () => {
   sidebarCtxMenu.style.display = 'none';
   showNewItemModal('folder', _sidebarCtxOwner, null);
+});
+document.getElementById('sidebar-ctx-delete').addEventListener('click', () => {
+  sidebarCtxMenu.style.display = 'none';
+  if (_sidebarCtxFileIdx !== null) deleteTab(_sidebarCtxOwner, _sidebarCtxFileIdx);
 });
 document.addEventListener('click', e => {
   if (!e.target.closest('#sidebar-ctx-menu')) sidebarCtxMenu.style.display = 'none';
@@ -3561,10 +3606,10 @@ function submitNewItem() {
   document.getElementById('new-item-overlay').classList.add('hidden');
 
   if (_newItemType === 'folder') {
-    // Create a placeholder file inside the folder so it renders
+    // Create a hidden placeholder file so the folder appears in the sidebar
     const folderName = raw.replace(/[/\\]/g, '').trim();
     const fileName   = `${folderName}/.keep`;
-    S.myTabs.push({ name: fileName, content: `// ${folderName}/`, initialized: true });
+    S.myTabs.push({ name: fileName, content: '', initialized: true, hidden: true });
     const barId = _newItemOwner === 'stu' ? 'stu-tab-bar' : 'inst-tab-bar';
     renderTabBar(document.getElementById(barId), S.myTabs, S.myActiveTab, _newItemOwner);
   } else {
@@ -4094,18 +4139,48 @@ const Runner = {
   },
 
   async _multi(tabs, activeTab) {
-    const mainTab = tabs.find(t => t.name.toLowerCase() === 'main.java') || tabs[activeTab];
-    const others  = tabs.filter(t => t !== mainTab);
+    // Filter out placeholder files
+    const realTabs = tabs.filter(t => !t.name.endsWith('/.keep') && t.name !== '.keep');
+    const mainTab  = realTabs.find(t => t.name.toLowerCase() === 'main.java' ||
+                                        t.name.toLowerCase().endsWith('/main.java'))
+                     || realTabs[activeTab] || realTabs[0];
+    const others   = realTabs.filter(t => t !== mainTab);
     if (!others.length) return this._single(mainTab.content);
 
+    // Build Test-prefix map for all non-Main public classes (hidden from students)
+    const classMap = {};
+    others.forEach(t => {
+      const m = t.content.match(/\bpublic\s+class\s+(\w+)/);
+      if (m && m[1] !== 'Main' && !m[1].startsWith('Test')) {
+        classMap[m[1]] = 'Test' + m[1];
+      }
+    });
+
+    // Apply prefix substitutions across all file content
+    function applyMap(src) {
+      let out = src;
+      Object.entries(classMap).forEach(([orig, prefixed]) => {
+        out = out.replace(new RegExp(`\\b${orig}\\b`, 'g'), prefixed);
+      });
+      return out;
+    }
+
     const zip = new JSZip();
-    others.forEach(t => zip.file(t.name, t.content));
+    others.forEach(t => {
+      const content  = applyMap(t.content);
+      // Use flat filename (strip folder prefix) so javac finds it in working dir
+      const baseName = t.name.includes('/') ? t.name.split('/').pop() : t.name;
+      // Rename file if its class was prefixed
+      const cls      = baseName.replace(/\.java$/i, '');
+      const zipName  = classMap[cls] ? classMap[cls] + '.java' : baseName;
+      zip.file(zipName, content);
+    });
     const zipB64 = await zip.generateAsync({ type: 'base64' });
 
     return this._submit({
       language_id:      this.LANG,
-      source_code:      this.enc(mainTab.content),
-      additional_files: zipB64, // extracted to working dir before javac runs
+      source_code:      this.enc(applyMap(mainTab.content)),
+      additional_files: zipB64,
       stdin:            '',
     });
   },

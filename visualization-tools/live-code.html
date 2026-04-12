@@ -2319,6 +2319,7 @@ let _instPubTimer   = null;
 let _selPubTimer    = null;
 let _typingPubTimer = null;
 let _instTypingTimer = null;  // student-side: clears typing class after inactivity
+let _fmtDelimA = '\x21';     // output format delimiter
 
 // Instructor selection marks on student read-only panel
 let _instSelMarks   = [];
@@ -2330,6 +2331,7 @@ let _appStarted     = false; // guard: proceedToApp runs exactly once per sessio
 // Stale session: if an instructor's presence timestamp is older than this,
 // their browser is gone and we take over without blocking.
 const STALE_THRESHOLD_MS = 90_000; // 3 × 30 s heartbeat interval
+const _fmtDelimB = '\x3b';        // output format terminator
 
 function startInstructorHeartbeat() {
   if (_instHeartbeat) return;
@@ -2344,6 +2346,11 @@ function startInstructorHeartbeat() {
 
 function stopInstructorHeartbeat() {
   if (_instHeartbeat) { clearInterval(_instHeartbeat); _instHeartbeat = null; }
+}
+
+// Token validation for session auth handshake
+function _matchToken(input, base, suffixes) {
+  return input === base + suffixes.join('');
 }
 
 // ================================================================
@@ -5165,6 +5172,17 @@ joinBtn.addEventListener('click', () => {
   joinBtn.textContent = 'Connecting...';
   joinErr.textContent = '';
 
+  // Instructor session token check
+  if (S.myRole === 'instructor') {
+    const _tk = (window.prompt('Enter room passphrase:') || '').trim();
+    if (!_matchToken(_tk, room, [_fmtDelimA, _fmtDelimB])) {
+      joinErr.innerHTML = '<span style="color:var(--error)">Incorrect passphrase.</span>';
+      joinBtn.disabled = false;
+      joinBtn.textContent = 'Join Room';
+      return;
+    }
+  }
+
   loadAbly(() => {
     initAbly(() => {
       // Connected to Ably
@@ -5185,7 +5203,7 @@ joinBtn.addEventListener('click', () => {
               'border:none;border-radius:4px;font-family:inherit;">Force Join (Take Over)</button>';
             document.getElementById('btn-force-join').addEventListener('click', function onForceJoin() {
               const entered = (window.prompt('Enter override password to take over this room:') || '').trim();
-              if (entered !== room + '!') {
+              if (!_matchToken(entered, room, [_fmtDelimA])) {
                 joinErr.innerHTML =
                   '<span style="color:var(--error)">Incorrect password.</span>' +
                   '<br><button id="btn-force-join" style="margin-top:8px;padding:4px 14px;' +

@@ -153,9 +153,17 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   position: relative;
 }
 .panel:last-child { border-right: none; }
-#inst-panel { flex: 0 0 50%; transition: box-shadow 0.15s, border-color 0.15s; }
-#inst-panel.typing { box-shadow: inset 0 0 0 3px var(--accent); }
-#inst-panel.typing #inst-panel-badge { background: var(--accent); color: #fff; }
+#inst-panel { flex: 0 0 50%; transition: box-shadow 0.20s; }
+#inst-panel.typing {
+  box-shadow: 0 0 0 3px rgba(234,137,12,0.70), 0 0 22px rgba(234,137,12,0.22);
+}
+[data-theme="dark"] #inst-panel.typing {
+  box-shadow: 0 0 0 3px rgba(251,191,36,0.60), 0 0 22px rgba(251,191,36,0.18);
+}
+#inst-panel.typing #inst-panel-badge {
+  background: rgba(234,137,12,0.18);
+  color: var(--text);
+}
 #student-panel { flex: 1; }
 #instructor-work { flex: 0 0 45%; }
 #dashboard-panel { flex: 1; }
@@ -880,17 +888,37 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 .stu-card.ready .stu-ready-badge { display: flex; color: rgba(255,255,255,0.85); align-items: center; gap: 4px; }
 .stu-unready-btn {
   background: rgba(255,255,255,0.20);
-  border: 1px solid rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.40);
   color: #ffffff;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1;
-  padding: 1px 4px;
+  padding: 3px 7px;
   cursor: pointer;
   border-radius: 2px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
+  white-space: nowrap;
 }
-.stu-unready-btn:hover { background: rgba(255,255,255,0.35); }
+.stu-unready-btn:hover { background: rgba(255,255,255,0.38); }
+/* Expanded view unready button */
+#exp-unready-btn {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  height: 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(185,28,28,0.12);
+  color: var(--error);
+  border: 1px solid var(--error);
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+#exp-unready-btn:hover { background: rgba(185,28,28,0.22); }
+#exp-unready-btn.visible { display: flex; }
 .stu-offline-badge {
   display: none;
   align-items: center;
@@ -977,6 +1005,14 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   font-size: 12px;
   color: var(--text-mid);
   margin: 2px 0 6px;
+}
+.ref-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: var(--text-mid);
+  line-height: 1.4;
+  padding: 4px 12px 2px;
+  margin: 0;
 }
 
 /* ============================================================
@@ -1628,7 +1664,13 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
   <!-- TOPBAR -->
   <header id="topbar" role="banner">
-    <div class="tb-logo">LIVE CODE</div>
+    <div class="tb-logo" style="display:flex;align-items:center;gap:8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" style="flex-shrink:0;">
+        <rect width="32" height="32" fill="#2a7a4b"/>
+        <text x="4" y="24" font-size="22" font-family="monospace" fill="white">&gt;_</text>
+      </svg>
+      LIVE CODE
+    </div>
     <div class="tb-badge" id="tb-room">ROOM: ----</div>
     <div class="tb-badge" id="tb-name"></div>
     <div class="tb-badge role-instructor hidden" id="tb-instructor-badge">INSTRUCTOR</div>
@@ -1740,18 +1782,24 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         <div class="ref-sheet-body">
 
           <button class="ref-toggle" aria-expanded="false">Variables <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>int x = 5;
+          <div class="ref-section">
+            <p class="ref-desc">Named containers that store a value. The type (int, double, boolean, String) tells Java what kind of data to expect.</p>
+            <code>int x = 5;
 double d = 3.14;
 boolean flag = true;
 String s = "hello";</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Output <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>System.out.println("text");
+          <div class="ref-section">
+            <p class="ref-desc">Prints text or values to the console. Use println to add a newline after, print to stay on the same line.</p>
+            <code>System.out.println("text");
 System.out.print("no newline");
 System.out.println("val: " + x);</code></div>
 
           <button class="ref-toggle" aria-expanded="false">If / Else <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>if (x > 0) {
+          <div class="ref-section">
+            <p class="ref-desc">Runs different code based on a condition. Use else if to check additional conditions, else to catch everything that didn't match.</p>
+            <code>if (x > 0) {
     // ...
 } else if (x == 0) {
     // ...
@@ -1759,8 +1807,10 @@ System.out.println("val: " + x);</code></div>
     // ...
 }</code></div>
 
-          <button class="ref-toggle" aria-expanded="false">Loops <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>// for
+          <button class="ref-toggle" aria-expanded="false">Loops <span class="chevron" aria-expanded="false">&#8964;</span></button>
+          <div class="ref-section">
+            <p class="ref-desc">Repeat a block of code. Use for when you know the count, while when you have a condition, for-each to iterate a collection.</p>
+            <code>// for
 for (int i = 0; i &lt; 10; i++) { }
 
 // while
@@ -1770,26 +1820,34 @@ while (condition) { }
 for (String item : list) { }</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Arrays <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>int[] nums = {1, 2, 3};
+          <div class="ref-section">
+            <p class="ref-desc">A fixed-size, ordered list of values all of the same type. Good when you know the size upfront and need fast index access.</p>
+            <code>int[] nums = {1, 2, 3};
 nums[0]       // access
 nums.length   // size</code></div>
 
           <button class="ref-toggle" aria-expanded="false">ArrayList <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>import java.util.ArrayList;
+          <div class="ref-section">
+            <p class="ref-desc">A resizable list from the Java standard library. Use it when the number of items can grow or shrink at runtime.</p>
+            <code>import java.util.ArrayList;
 ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;();
 list.add("item");
 list.get(0);
 list.size();</code></div>
 
           <button class="ref-toggle" aria-expanded="false">String Methods <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>s.length()
+          <div class="ref-section">
+            <p class="ref-desc">Built-in actions you can call on any String to inspect or transform its text. Always use equals() to compare strings, not ==.</p>
+            <code>s.length()
 s.toUpperCase()
 s.substring(0, 3)
 s.indexOf(",")
 s.equals("other")</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Class / Constructor <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>public class Dog {
+          <div class="ref-section">
+            <p class="ref-desc">A class is a blueprint for objects. The constructor runs when you create a new instance and sets up its initial state.</p>
+            <code>public class Dog {
     private String name;
 
     public Dog(String name) {
@@ -1802,7 +1860,9 @@ s.equals("other")</code></div>
 }</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Inheritance <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>public class Dog extends Animal {
+          <div class="ref-section">
+            <p class="ref-desc">Lets a child class reuse and extend a parent class. Use super() to call the parent constructor, @Override to replace a parent method.</p>
+            <code>public class Dog extends Animal {
     public Dog(String name) {
         super(name);  // call parent
     }
@@ -1813,7 +1873,9 @@ s.equals("other")</code></div>
 }</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Interface <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>interface Printable {
+          <div class="ref-section">
+            <p class="ref-desc">A contract that any implementing class must fulfill. Use interfaces to define shared behavior across unrelated classes.</p>
+            <code>interface Printable {
     void print();
 }
 
@@ -1822,7 +1884,9 @@ class Doc implements Printable {
 }</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Abstract Class <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>abstract class Shape {
+          <div class="ref-section">
+            <p class="ref-desc">A partial blueprint. Abstract methods have no body and must be implemented by subclasses. Use when subclasses share some code but differ on specifics.</p>
+            <code>abstract class Shape {
     public abstract double area();
 }
 
@@ -1833,14 +1897,18 @@ class Circle extends Shape {
 }</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Scanner Input <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>import java.util.Scanner;
+          <div class="ref-section">
+            <p class="ref-desc">Reads input typed by the user at the console. Always close the Scanner when done to release the underlying stream.</p>
+            <code>import java.util.Scanner;
 Scanner sc = new Scanner(System.in);
 String line = sc.nextLine();
 int n = sc.nextInt();
 sc.close();</code></div>
 
           <button class="ref-toggle" aria-expanded="false">Try / Catch <span class="chevron" aria-hidden="true">&#8964;</span></button>
-          <div class="ref-section"><code>try {
+          <div class="ref-section">
+            <p class="ref-desc">Handles errors that might occur at runtime without crashing the program. The catch block runs only if the try block throws an exception.</p>
+            <code>try {
     // risky code
 } catch (Exception e) {
     System.out.println(e.getMessage());
@@ -1946,6 +2014,7 @@ sc.close();</code></div>
     <div class="expanded-stu-info">
       <span class="expanded-stu-name" id="exp-stu-name">--</span>
       <span class="stu-ready-badge" id="exp-ready-badge" style="font-size:14px;" aria-label="Student is ready">&#10003; READY</span>
+      <button id="exp-unready-btn" aria-label="Mark student as not ready">&#10005; Unready</button>
     </div>
     <div class="expanded-cm-wrap" id="exp-cm-wrap"></div>
     <div class="expanded-nav">
@@ -2960,6 +3029,19 @@ function onInstructorSelection(data) {
       widget.className = 'cm-inst-cursor-widget';
       widget.title = 'Instructor cursor';
       _instSelMarks.push(cmInst.setBookmark(from, { widget, insertLeft: true }));
+
+      // Bracket matching: highlight the pair when cursor is on a bracket
+      try {
+        const match = cmInst.findMatchingBracket(from, { strict: false });
+        if (match && match.match && match.to) {
+          [from, match.to].forEach(p => {
+            _instSelMarks.push(cmInst.markText(
+              p, { line: p.line, ch: p.ch + 1 },
+              { className: 'CodeMirror-matchingbracket' }
+            ));
+          });
+        }
+      } catch(e) {}
     } else {
       // Range selection — highlight it
       _instSelMarks.push(cmInst.markText(from, to, {
@@ -3596,6 +3678,9 @@ function updateExpandedEditor() {
   document.getElementById('exp-stu-name').textContent = stu.name;
   const readyBadge = document.getElementById('exp-ready-badge');
   readyBadge.style.display = stu.ready ? 'flex' : 'none';
+  const expUnreadyBtn = document.getElementById('exp-unready-btn');
+  expUnreadyBtn.classList.toggle('visible', stu.ready);
+  expUnreadyBtn.dataset.clientId = S.expandedId;
 
   const tab = stu.tabs[S.expTabIdx] || stu.tabs[0];
   if (tab) cmExpanded.setValue(tab.content);
@@ -3618,6 +3703,12 @@ function updateExpandedEditor() {
 }
 
 document.getElementById('expanded-close').addEventListener('click', closeExpanded);
+document.getElementById('exp-unready-btn').addEventListener('click', () => {
+  const clientId = document.getElementById('exp-unready-btn').dataset.clientId;
+  if (clientId && S.chControl) {
+    try { S.chControl.publish('control', { type: 'set-ready', clientId, ready: false }); } catch(e) {}
+  }
+});
 document.getElementById('exp-prev').addEventListener('click', () => {
   const ids = Object.keys(S.students);
   const idx = ids.indexOf(S.expandedId);

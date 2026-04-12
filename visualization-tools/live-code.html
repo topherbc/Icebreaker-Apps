@@ -374,6 +374,21 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 }
 .proj-file:hover { background: var(--bg); color: var(--text); }
 .proj-file.active { color: var(--accent); font-weight: 600; }
+.proj-folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: default;
+  user-select: none;
+  margin-top: 4px;
+}
 
 /* ---- CodeMirror wrapper ---- */
 .cm-wrap {
@@ -1400,6 +1415,14 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 }
 .cm-s-livecode .CodeMirror-nonmatchingbracket { color: var(--error) !important; background: var(--error-bg); }
 
+/* Instructor active-line glow on student panel */
+.cm-inst-active-line { background: rgba(234,137,12,0.10) !important; }
+.cm-inst-active-gutter { background: rgba(234,137,12,0.18) !important; }
+.cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(234,137,12,0.90) !important; font-weight: 700; }
+[data-theme="dark"] .cm-inst-active-line { background: rgba(251,191,36,0.08) !important; }
+[data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.15) !important; }
+[data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.85) !important; }
+
 /* Instructor selection/cursor overlay (visible on student read-only panel) */
 .cm-inst-selection {
   background: rgba(234, 137, 12, 0.28);
@@ -2093,6 +2116,32 @@ sc.close();</code></div>
   <button class="ctx-item danger" id="ctx-close" role="menuitem">Close tab</button>
 </div>
 
+<!-- SIDEBAR CONTEXT MENU -->
+<div id="sidebar-ctx-menu" role="menu" aria-label="New item options" style="position:fixed;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:900;min-width:160px;display:none;">
+  <button class="ctx-item" id="sidebar-ctx-new-file" role="menuitem">&#128196; New File</button>
+  <button class="ctx-item" id="sidebar-ctx-new-folder" role="menuitem">&#128193; New Folder</button>
+</div>
+
+<!-- NEW ITEM MODAL -->
+<div id="new-item-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="new-item-title">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title" id="new-item-title">New File</span>
+      <button class="modal-close" id="new-item-close" aria-label="Cancel">&#10005;</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
+      <div class="form-group">
+        <label class="form-label" id="new-item-label" for="new-item-input">File name</label>
+        <input class="form-input" id="new-item-input" type="text" placeholder="e.g. Animal.java" maxlength="60" autocomplete="off" style="font-size:16px;">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn-cancel" id="new-item-cancel">Cancel</button>
+        <button class="tb-btn primary" id="new-item-ok" style="height:40px;">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- DOWNLOAD DROPDOWN -->
 <div id="dl-menu" style="position:fixed;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:900;min-width:200px;display:none;">
   <button class="ctx-item" id="dl-active">Download active file</button>
@@ -2191,6 +2240,7 @@ let _instTypingTimer = null;  // student-side: clears typing class after inactiv
 
 // Instructor selection marks on student read-only panel
 let _instSelMarks   = [];
+let _instActiveLine = -1; // line number of last instructor cursor line class
 let _instHeartbeat  = null; // instructor presence keepalive
 let _appStarted     = false; // guard: proceedToApp runs exactly once per session
 
@@ -2742,7 +2792,12 @@ function pascalCase(filename) {
 
 function javaBoilerplate(filename) {
   const cls = pascalCase(filename) || 'Main';
-  return `// ${filename}\npublic class ${cls} {\n\n    public static void main(String[] args) {\n        // your code here\n    }\n\n}`;
+  return `// ${filename}\npublic class ${cls} {\n\n  public static void main(String[] args) {\n    // your code here\n  }\n\n}`;
+}
+
+function javaClassBoilerplate(filename) {
+  const cls = pascalCase(filename) || 'MyClass';
+  return `// ${filename}\npublic class ${cls} {\n\n}`;
 }
 
 function ensureJavaExt(name) {
@@ -2805,12 +2860,22 @@ function initAbly(onReady) {
     suspendedRetryTimeout: 5000,
   });
 
+  let _disconnectToastTimer = null;
   S.ablyClient.connection.once('connected', () => onReady());
   S.ablyClient.connection.on('failed', () => {
     showToast('Connection failed -- check API key', '&#10060;');
   });
   S.ablyClient.connection.on('disconnected', () => {
-    showToast('Disconnected -- reconnecting...', '&#128275;');
+    // Debounce: only show toast if still disconnected after 5 s.
+    // Suppresses brief blips and Ably error-80023 (resume-from-another-site)
+    // that self-resolve within a second or two.
+    clearTimeout(_disconnectToastTimer);
+    _disconnectToastTimer = setTimeout(() => {
+      showToast('Disconnected -- reconnecting...', '&#128275;');
+    }, 5000);
+  });
+  S.ablyClient.connection.on('connected', () => {
+    clearTimeout(_disconnectToastTimer);
   });
 }
 
@@ -3006,16 +3071,28 @@ function onInstructorCode(data) {
   S.instTabs   = data.tabs;
   S.instActive = data.activeTab || 0;
   updateInstPanel();
-  // Clear stale selection marks when code content changes
+  // Clear stale selection marks and active line when code content changes
   _instSelMarks.forEach(m => m.clear());
   _instSelMarks = [];
+  clearInstActiveLine();
+}
+
+function clearInstActiveLine() {
+  if (_instActiveLine >= 0 && cmInst) {
+    try {
+      cmInst.removeLineClass(_instActiveLine, 'background', 'cm-inst-active-line');
+      cmInst.removeLineClass(_instActiveLine, 'gutter',     'cm-inst-active-gutter');
+    } catch(e) {}
+    _instActiveLine = -1;
+  }
 }
 
 function onInstructorSelection(data) {
   if (!cmInst || !data || !data.ranges) return;
-  // Clear previous marks
+  // Clear previous marks and active line
   _instSelMarks.forEach(m => m.clear());
   _instSelMarks = [];
+  clearInstActiveLine();
 
   data.ranges.forEach(r => {
     let from = r.anchor, to = r.head;
@@ -3030,16 +3107,29 @@ function onInstructorSelection(data) {
       widget.title = 'Instructor cursor';
       _instSelMarks.push(cmInst.setBookmark(from, { widget, insertLeft: true }));
 
-      // Bracket matching: highlight the pair when cursor is on a bracket
+      // Active line glow
+      _instActiveLine = from.line;
       try {
-        const match = cmInst.findMatchingBracket(from, { strict: false });
-        if (match && match.match && match.to) {
-          [from, match.to].forEach(p => {
-            _instSelMarks.push(cmInst.markText(
-              p, { line: p.line, ch: p.ch + 1 },
-              { className: 'CodeMirror-matchingbracket' }
-            ));
-          });
+        cmInst.addLineClass(from.line, 'background', 'cm-inst-active-line');
+        cmInst.addLineClass(from.line, 'gutter',     'cm-inst-active-gutter');
+      } catch(e) {}
+
+      // Bracket matching — use findMatchingBracket and account for `at`
+      try {
+        const result = cmInst.findMatchingBracket(from, { strict: false });
+        if (result && result.match && result.to) {
+          // `result.at` tells us if the bracket is to the right ("start") or left ("end") of cursor
+          const nearFrom = result.at === 'end'
+            ? { line: from.line, ch: from.ch - 1 }
+            : from;
+          const nearTo = result.at === 'end'
+            ? from
+            : { line: from.line, ch: from.ch + 1 };
+          _instSelMarks.push(cmInst.markText(nearFrom, nearTo,
+            { className: 'CodeMirror-matchingbracket' }));
+          _instSelMarks.push(cmInst.markText(
+            result.to, { line: result.to.line, ch: result.to.ch + 1 },
+            { className: 'CodeMirror-matchingbracket' }));
         }
       } catch(e) {}
     } else {
@@ -3222,10 +3312,12 @@ function saveCmToTab(owner) {
 }
 
 function addTab(owner) {
-  const name = prompt('File name (e.g. Animal.java):');
-  if (!name || !name.trim()) return;
+  showNewItemModal('file', owner);
+}
+
+function addTabWithName(owner, name) {
   const finalName = ensureJavaExt(name.trim());
-  const content = javaBoilerplate(finalName);
+  const content = javaClassBoilerplate(finalName);
   S.myTabs.push({ name: finalName, content, initialized: true });
   const newIdx = S.myTabs.length - 1;
   switchTab(owner, newIdx);
@@ -3258,13 +3350,54 @@ function renderSidebar(owner) {
   const sidebarId = owner === 'stu' ? 'stu-sidebar' : 'inst-sidebar';
   const sb = document.getElementById(sidebarId);
   sb.innerHTML = `<div class="proj-sidebar-title">FILES</div>`;
+
+  // Group by folder prefix (e.g. "utils/Dog.java" → folder "utils")
+  const groups = {};  // folderName -> [{tab, idx}]
+  const root = [];
   S.myTabs.forEach((tab, idx) => {
+    const slash = tab.name.indexOf('/');
+    if (slash > 0) {
+      const folder = tab.name.slice(0, slash);
+      if (!groups[folder]) groups[folder] = [];
+      groups[folder].push({ tab, idx });
+    } else {
+      root.push({ tab, idx });
+    }
+  });
+
+  function makeFileBtn(tab, idx) {
     const btn = document.createElement('button');
     btn.className = 'proj-file' + (idx === S.myActiveTab ? ' active' : '');
     btn.setAttribute('aria-label', `Switch to ${tab.name}`);
-    btn.innerHTML = `<span aria-hidden="true">&#128196;</span> ${tab.name}`;
+    const label = tab.name.includes('/') ? tab.name.split('/').pop() : tab.name;
+    btn.innerHTML = `<span aria-hidden="true">&#128196;</span> ${escHtml(label)}`;
     btn.addEventListener('click', () => switchTab(owner, idx));
-    sb.appendChild(btn);
+    return btn;
+  }
+
+  root.forEach(({ tab, idx }) => sb.appendChild(makeFileBtn(tab, idx)));
+
+  Object.keys(groups).sort().forEach(folder => {
+    const folderEl = document.createElement('div');
+    folderEl.className = 'proj-folder';
+    folderEl.innerHTML = `<span aria-hidden="true">&#128193;</span> ${escHtml(folder)}`;
+    folderEl.addEventListener('contextmenu', e => {
+      e.preventDefault(); e.stopPropagation();
+      showSidebarCtxMenu(e, owner, folder);
+    });
+    sb.appendChild(folderEl);
+    groups[folder].forEach(({ tab, idx }) => {
+      const btn = makeFileBtn(tab, idx);
+      btn.style.paddingLeft = '24px';
+      sb.appendChild(btn);
+    });
+  });
+
+  // Right-click on blank sidebar area
+  sb.addEventListener('contextmenu', e => {
+    if (e.target.closest('.proj-file') || e.target.closest('.proj-folder')) return;
+    e.preventDefault();
+    showSidebarCtxMenu(e, owner, null);
   });
 }
 
@@ -3291,6 +3424,88 @@ function showCtxMenu(e, owner, idx) {
   // Disable close if only one tab
   document.getElementById('ctx-close').disabled = S.myTabs.length <= 1;
 }
+
+// ================================================================
+// SIDEBAR CONTEXT MENU
+// ================================================================
+const sidebarCtxMenu = document.getElementById('sidebar-ctx-menu');
+let _sidebarCtxOwner = null;
+let _sidebarCtxFolder = null; // null = root, string = folder name
+
+function showSidebarCtxMenu(e, owner, folder) {
+  _sidebarCtxOwner  = owner;
+  _sidebarCtxFolder = folder;
+  sidebarCtxMenu.style.left = `${e.clientX}px`;
+  sidebarCtxMenu.style.top  = `${e.clientY}px`;
+  sidebarCtxMenu.style.display = 'block';
+  document.getElementById('sidebar-ctx-new-file').textContent =
+    folder ? `\u{1F4C4} New File in ${folder}/` : '\u{1F4C4} New File';
+}
+
+document.getElementById('sidebar-ctx-new-file').addEventListener('click', () => {
+  sidebarCtxMenu.style.display = 'none';
+  showNewItemModal('file', _sidebarCtxOwner, _sidebarCtxFolder);
+});
+document.getElementById('sidebar-ctx-new-folder').addEventListener('click', () => {
+  sidebarCtxMenu.style.display = 'none';
+  showNewItemModal('folder', _sidebarCtxOwner, null);
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#sidebar-ctx-menu')) sidebarCtxMenu.style.display = 'none';
+});
+
+// ================================================================
+// NEW ITEM MODAL
+// ================================================================
+let _newItemType   = 'file';
+let _newItemOwner  = null;
+let _newItemFolder = null;
+
+function showNewItemModal(type, owner, folder) {
+  _newItemType   = type;
+  _newItemOwner  = owner;
+  _newItemFolder = folder || null;
+  const isFolder = type === 'folder';
+  document.getElementById('new-item-title').textContent = isFolder ? 'New Folder' : 'New File';
+  document.getElementById('new-item-label').textContent = isFolder ? 'Folder name' : 'File name';
+  const input = document.getElementById('new-item-input');
+  input.placeholder = isFolder ? 'e.g. utils' : 'e.g. Animal.java';
+  input.value = '';
+  document.getElementById('new-item-overlay').classList.remove('hidden');
+  setTimeout(() => input.focus(), 50);
+}
+
+function submitNewItem() {
+  const raw = document.getElementById('new-item-input').value.trim();
+  if (!raw) return;
+  document.getElementById('new-item-overlay').classList.add('hidden');
+
+  if (_newItemType === 'folder') {
+    // Create a placeholder file inside the folder so it renders
+    const folderName = raw.replace(/[/\\]/g, '').trim();
+    const fileName   = `${folderName}/.keep`;
+    S.myTabs.push({ name: fileName, content: `// ${folderName}/`, initialized: true });
+    const barId = _newItemOwner === 'stu' ? 'stu-tab-bar' : 'inst-tab-bar';
+    renderTabBar(document.getElementById(barId), S.myTabs, S.myActiveTab, _newItemOwner);
+  } else {
+    // New file — prepend folder prefix if we were inside one
+    let name = raw;
+    if (_newItemFolder) name = `${_newItemFolder}/${raw}`;
+    addTabWithName(_newItemOwner, name);
+  }
+}
+
+document.getElementById('new-item-ok').addEventListener('click', submitNewItem);
+document.getElementById('new-item-cancel').addEventListener('click', () => {
+  document.getElementById('new-item-overlay').classList.add('hidden');
+});
+document.getElementById('new-item-close').addEventListener('click', () => {
+  document.getElementById('new-item-overlay').classList.add('hidden');
+});
+document.getElementById('new-item-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); submitNewItem(); }
+  if (e.key === 'Escape') document.getElementById('new-item-overlay').classList.add('hidden');
+});
 
 // ================================================================
 // STUDENT VIEW

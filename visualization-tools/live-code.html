@@ -521,7 +521,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   overflow: hidden;
   transition: max-height 0.2s ease;
 }
-#output-panel.open, #inst-output-panel.open { max-height: 310px; }
+#output-panel.open, #inst-output-panel.open { max-height: 260px; }
 .output-header {
   display: flex;
   align-items: center;
@@ -578,56 +578,6 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   padding: 4px 12px 4px;
   flex-shrink: 0;
 }
-
-/* ---- Stdin collector ---- */
-.stdin-collector {
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.stdin-collector.visible { display: flex; }
-.stdin-collector-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--text-mid);
-}
-.stdin-collector-label strong { color: var(--accent); }
-.stdin-textarea {
-  background: #0d1117;
-  color: #e6edf3;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  line-height: 1.55;
-  padding: 8px 10px;
-  resize: vertical;
-  min-height: 58px;
-  max-height: 110px;
-  outline: none;
-  caret-color: #7dd3fc;
-}
-.stdin-textarea:focus { border-color: var(--accent); }
-.stdin-textarea::placeholder { color: #4d5566; }
-.stdin-run-btn {
-  align-self: flex-start;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
-  padding: 5px 14px;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-}
-.stdin-run-btn:hover { opacity: 0.88; }
-.stdin-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-/* Echoed stdin values rendered in output */
-.output-stdin-echo { color: #7dd3fc; }
 
 .run-spinner {
   display: none;
@@ -1899,11 +1849,6 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
             <span id="out-time" class="output-meta" style="display:none"></span>
             <button class="tb-btn" style="margin-left:auto;height:28px;padding:0 10px;font-size:13px;" id="btn-clear-output" aria-label="Clear output">Clear</button>
           </div>
-          <div class="stdin-collector" id="stdin-collector-stu" aria-label="Program input">
-            <span class="stdin-collector-label">This program reads <strong>keyboard input</strong>. Type each value on its own line:</span>
-            <textarea class="stdin-textarea" id="stdin-input-stu" placeholder="e.g.&#10;Alex&#10;25" rows="3" spellcheck="false" autocorrect="off" autocapitalize="off" aria-label="Standard input values"></textarea>
-            <button class="stdin-run-btn" id="btn-stdin-run-stu">Run Program &#9654;</button>
-          </div>
           <div class="output-body" id="out-body">
             <div class="output-stdout" id="out-stdout"></div>
             <div class="output-stderr" id="out-stderr"></div>
@@ -2104,11 +2049,6 @@ sc.close();</code></div>
             <span id="inst-out-exit-badge" class="output-exit" style="display:none"></span>
             <span id="inst-out-time" class="output-meta" style="display:none"></span>
             <button class="tb-btn" style="margin-left:auto;height:28px;padding:0 10px;font-size:13px;" id="btn-clear-inst-output" aria-label="Clear output">Clear</button>
-          </div>
-          <div class="stdin-collector" id="stdin-collector-inst" aria-label="Program input">
-            <span class="stdin-collector-label">This program reads <strong>keyboard input</strong>. Type each value on its own line:</span>
-            <textarea class="stdin-textarea" id="stdin-input-inst" placeholder="e.g.&#10;Alex&#10;25" rows="3" spellcheck="false" autocorrect="off" autocapitalize="off" aria-label="Standard input values"></textarea>
-            <button class="stdin-run-btn" id="btn-stdin-run-inst">Run Program &#9654;</button>
           </div>
           <div class="output-body" id="inst-out-body">
             <div class="output-stdout" id="inst-out-stdout"></div>
@@ -2537,31 +2477,6 @@ public class Main {
 }`}]},
 
   // Week 3
-  { id:'w3-scanner', week:3, title:'Scanner Input',
-    desc:'Read a name and age from the user, then print a greeting.',
-    files:[{name:'Main.java', content:
-`// Main.java
-import java.util.Scanner;
-
-public class Main {
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        // TODO: prompt for and read the user's name
-        System.out.print("Enter your name: ");
-        String name = "";  // scanner.nextLine()
-
-        // TODO: prompt for and read the user's age
-        System.out.print("Enter your age: ");
-        int age = 0;  // scanner.nextInt()
-
-        System.out.println("Hello, " + name + "! You are " + age + " years old.");
-        scanner.close();
-    }
-
-}`}]},
-
   { id:'w3-filewrite', week:3, title:'File Write',
     desc:'Write three lines of text to a file called output.txt.',
     files:[{name:'Main.java', content:
@@ -4290,34 +4205,34 @@ const Runner = {
   },
 
   // Main entry point. Returns { stdout, stderr, exitCode, time, statusId, statusDesc, note }
-  async execute(tabs, activeTab, stdin = '') {
+  async execute(tabs, activeTab) {
     if (tabs.length === 1) {
-      return this._single(tabs[0].content, stdin);
+      return this._single(tabs[0].content);
     }
     // Multi-file: submit Main.java as source_code, other files as additional_files zip.
     // javac follows cross-file dependencies, so this compiles the full program.
     // Falls back to active tab only if zip creation fails.
     try {
-      return await this._multi(tabs, activeTab, stdin);
+      return await this._multi(tabs, activeTab);
     } catch(zipErr) {
-      const result = await this._single(tabs[activeTab].content, stdin);
+      const result = await this._single(tabs[activeTab].content);
       result.note = `Multi-file submission failed (${zipErr.message}); active tab compiled only.`;
       return result;
     }
   },
 
-  async _single(source, stdin = '') {
-    return this._submit({ language_id: this.LANG, source_code: this.enc(source), stdin: stdin ? this.enc(stdin) : '' });
+  async _single(source) {
+    return this._submit({ language_id: this.LANG, source_code: this.enc(source), stdin: '' });
   },
 
-  async _multi(tabs, activeTab, stdin = '') {
+  async _multi(tabs, activeTab) {
     // Filter out placeholder files
     const realTabs = tabs.filter(t => !t.name.endsWith('/.keep') && t.name !== '.keep');
     const mainTab  = realTabs.find(t => t.name.toLowerCase() === 'main.java' ||
                                         t.name.toLowerCase().endsWith('/main.java'))
                      || realTabs[activeTab] || realTabs[0];
     const others   = realTabs.filter(t => t !== mainTab);
-    if (!others.length) return this._single(mainTab.content, stdin);
+    if (!others.length) return this._single(mainTab.content);
 
     // Build folder-prefix map for non-Main public classes.
     // Folders are display-only (for teaching structure); the folder name is
@@ -4358,7 +4273,7 @@ const Runner = {
       language_id:      this.LANG,
       source_code:      this.enc(applyMap(mainTab.content)),
       additional_files: zipB64,
-      stdin:            stdin ? this.enc(stdin) : '',
+      stdin:            '',
     });
   },
 
@@ -4394,82 +4309,14 @@ const Runner = {
   },
 };
 
-// Returns true if any source file in the current tab set uses Scanner on System.in
-function detectsScanner() {
-  const source = S.myTabs.map(t => t.content).join('\n');
-  return /new\s+Scanner\s*\(\s*System\.in\s*\)/.test(source);
-}
-
-// Render stdout into el, weaving echoed stdin values after prompt lines.
-// Inputs (blue) are injected after lines ending with : or ? to simulate
-// what a real terminal session would look like.
-function renderTerminalOutput(el, stdout, stdinStr) {
-  el.textContent = '';
-  if (!stdinStr || !stdinStr.trim()) {
-    el.textContent = stdout || '(no output)';
-    return;
-  }
-
-  const inputs = stdinStr.split('\n');
-  let idx = 0;
-  const lines = (stdout || '').split('\n');
-  const frag  = document.createDocumentFragment();
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    frag.appendChild(document.createTextNode(line));
-
-    // Inject next input echo after a prompt line (ends with : or ?)
-    if (idx < inputs.length && /[:?]\s*$/.test(line.trimEnd())) {
-      const echo = document.createElement('span');
-      echo.className = 'output-stdin-echo';
-      echo.textContent = inputs[idx++];
-      frag.appendChild(echo);
-    }
-
-    if (i < lines.length - 1) frag.appendChild(document.createTextNode('\n'));
-  }
-
-  // Any remaining inputs not placed after a prompt go at the end
-  while (idx < inputs.length) {
-    const echo = document.createElement('span');
-    echo.className = 'output-stdin-echo';
-    echo.textContent = (idx > 0 ? '\n' : '') + inputs[idx++];
-    frag.appendChild(echo);
-  }
-
-  el.appendChild(frag);
-}
-
-// stdinCollectorId: the .stdin-collector div; stdinInputId: the textarea inside it
-async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId, stderrId, exitBadgeId, timeId,
-                       stdinCollectorId, stdinInputId, stdin = null) {
+async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId, stderrId, exitBadgeId, timeId) {
   if (S.isRunning) return;
-
-  if (cmMy) S.myTabs[S.myActiveTab].content = cmMy.getValue();
-
-  const outPanel    = document.getElementById(outputPanelId);
-  const collectorEl = document.getElementById(stdinCollectorId);
-
-  // If Scanner is in code and stdin hasn't been provided yet, show the collector
-  if (stdin === null && detectsScanner()) {
-    outPanel.classList.add('open');
-    if (collectorEl) {
-      collectorEl.classList.add('visible');
-      const ta = document.getElementById(stdinInputId);
-      if (ta) setTimeout(() => ta.focus(), 50);
-    }
-    return;
-  }
-
-  // Hide collector and proceed with execution
-  if (collectorEl) collectorEl.classList.remove('visible');
-
   S.isRunning = true;
 
   const runBtn   = document.getElementById(runBtnId);
   const spinner  = document.getElementById(spinnerId);
   const runLabel = document.getElementById(runLabelId);
+  const outPanel = document.getElementById(outputPanelId);
   const stdoutEl = document.getElementById(stdoutId);
   const stderrEl = document.getElementById(stderrId);
   const exitEl   = document.getElementById(exitBadgeId);
@@ -4484,21 +4331,17 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
   if (exitEl) exitEl.style.display = 'none';
   if (timeEl) timeEl.style.display = 'none';
 
-  const stdinStr = stdin || '';
+  if (cmMy) S.myTabs[S.myActiveTab].content = cmMy.getValue();
 
   try {
     const { stdout, stderr, exitCode, time, statusId, statusDesc, note } =
-      await Runner.execute(S.myTabs, S.myActiveTab, stdinStr);
+      await Runner.execute(S.myTabs, S.myActiveTab);
 
     // statusId 3 = Accepted, 5 = Time Limit Exceeded, 6 = Compilation Error
     const isTimeout = statusId === 5;
     const isSuccess = statusId === 3 && !stderr;
 
-    if (stdinStr) {
-      renderTerminalOutput(stdoutEl, stdout, stdinStr);
-    } else {
-      stdoutEl.textContent = stdout || (stderr ? '' : '(no output)');
-    }
+    stdoutEl.textContent = stdout || (stderr ? '' : '(no output)');
 
     const noteText = note ? `\n[Note] ${note}` : '';
     stderrEl.textContent = (stderr || '') + noteText;
@@ -4542,37 +4385,11 @@ async function runCode(runBtnId, spinnerId, runLabelId, outputPanelId, stdoutId,
 
 document.getElementById('btn-run-inst').addEventListener('click', () => {
   runCode('btn-run-inst', 'run-spinner-inst', 'run-label-inst',
-          'inst-output-panel', 'inst-out-stdout', 'inst-out-stderr', 'inst-out-exit-badge', 'inst-out-time',
-          'stdin-collector-inst', 'stdin-input-inst');
+          'inst-output-panel', 'inst-out-stdout', 'inst-out-stderr', 'inst-out-exit-badge', 'inst-out-time');
 });
 document.getElementById('btn-run-stu').addEventListener('click', () => {
   runCode('btn-run-stu', 'run-spinner-stu', 'run-label-stu',
-          'output-panel', 'out-stdout', 'out-stderr', 'out-exit-badge', 'out-time',
-          'stdin-collector-stu', 'stdin-input-stu');
-});
-
-// "Run Program" buttons inside stdin collectors
-document.getElementById('btn-stdin-run-stu').addEventListener('click', () => {
-  const stdin = document.getElementById('stdin-input-stu').value;
-  runCode('btn-run-stu', 'run-spinner-stu', 'run-label-stu',
-          'output-panel', 'out-stdout', 'out-stderr', 'out-exit-badge', 'out-time',
-          'stdin-collector-stu', 'stdin-input-stu', stdin);
-});
-document.getElementById('btn-stdin-run-inst').addEventListener('click', () => {
-  const stdin = document.getElementById('stdin-input-inst').value;
-  runCode('btn-run-inst', 'run-spinner-inst', 'run-label-inst',
-          'inst-output-panel', 'inst-out-stdout', 'inst-out-stderr', 'inst-out-exit-badge', 'inst-out-time',
-          'stdin-collector-inst', 'stdin-input-inst', stdin);
-});
-
-// Allow Ctrl+Enter / Cmd+Enter in the stdin textarea to submit
-['stdin-input-stu', 'stdin-input-inst'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      document.getElementById(id === 'stdin-input-stu' ? 'btn-stdin-run-stu' : 'btn-stdin-run-inst').click();
-    }
-  });
+          'output-panel', 'out-stdout', 'out-stderr', 'out-exit-badge', 'out-time');
 });
 
 document.getElementById('btn-clear-output').addEventListener('click', () => {
@@ -4580,16 +4397,12 @@ document.getElementById('btn-clear-output').addEventListener('click', () => {
   document.getElementById('out-stderr').textContent = '';
   document.getElementById('out-exit-badge').style.display = 'none';
   document.getElementById('out-time').style.display = 'none';
-  document.getElementById('stdin-collector-stu').classList.remove('visible');
-  document.getElementById('stdin-input-stu').value = '';
 });
 document.getElementById('btn-clear-inst-output').addEventListener('click', () => {
   document.getElementById('inst-out-stdout').textContent = '';
   document.getElementById('inst-out-stderr').textContent = '';
   document.getElementById('inst-out-exit-badge').style.display = 'none';
   document.getElementById('inst-out-time').style.display = 'none';
-  document.getElementById('stdin-collector-inst').classList.remove('visible');
-  document.getElementById('stdin-input-inst').value = '';
 });
 
 // ================================================================

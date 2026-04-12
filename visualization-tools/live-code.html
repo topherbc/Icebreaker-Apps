@@ -1781,16 +1781,16 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         </div>
         <!-- Student panel actions -->
         <div class="panel-actions">
-          <button class="panel-run-btn" id="btn-run-stu" aria-label="Run Java code">
+          <button class="tb-btn" id="btn-ready" aria-pressed="false" title="Toggle ready status">
+            <span id="ready-icon" aria-hidden="true">&#9633;</span>
+            <span id="ready-label">Ready</span>
+          </button>
+          <button class="panel-run-btn" id="btn-run-stu" aria-label="Run Java code" style="margin-left:auto;">
             <span class="run-spinner" id="run-spinner-stu" aria-hidden="true"></span>
             <span id="run-label-stu" aria-hidden="true">&#9654;</span>
             Run
           </button>
           <button class="panel-dl-btn" id="btn-download-stu" aria-label="Download code">&#8615; Download</button>
-          <button class="tb-btn" id="btn-ready" aria-pressed="false" title="Toggle ready status" style="margin-left:auto;">
-            <span id="ready-icon" aria-hidden="true">&#9633;</span>
-            <span id="ready-label">Ready</span>
-          </button>
         </div>
         <div class="tab-bar" id="stu-tab-bar" role="tablist" aria-label="Student files">
           <button class="sidebar-toggle-btn" id="stu-sidebar-btn" aria-label="Toggle file list" title="File list">&#128193;</button>

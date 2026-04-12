@@ -1421,17 +1421,6 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 [data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.18) !important; }
 [data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.90) !important; }
 
-/* Gutter separator — drop-shadow on the gutters element paints from its real
-   right edge (the separator) at z-index 3, into the code area. No layout impact,
-   no box-shadow clipping issues. */
-#inst-panel.inst-cursor-active .CodeMirror-gutters {
-  border-right-color: rgba(234,137,12,0.95) !important;
-  filter: drop-shadow(2px 0 4px rgba(234,137,12,0.60)) !important;
-}
-[data-theme="dark"] #inst-panel.inst-cursor-active .CodeMirror-gutters {
-  border-right-color: rgba(251,191,36,0.85) !important;
-  filter: drop-shadow(2px 0 4px rgba(251,191,36,0.50)) !important;
-}
 
 /* Instructor selection/cursor overlay (visible on student read-only panel) */
 .cm-inst-selection {
@@ -3097,10 +3086,9 @@ function onInstructorCode(data) {
   S.instTabs   = data.tabs;
   S.instActive = data.activeTab || 0;
   updateInstPanel();
-  // Clear stale selection marks and active line when code content changes
-  _instSelMarks.forEach(m => m.clear());
-  _instSelMarks = [];
-  clearInstActiveLine();
+  // Don't clear cursor/selection marks here — they get re-applied when the
+  // next selection event arrives (50ms after each keystroke), clearing them
+  // now causes the cursor widget to flicker off mid-typing.
 }
 
 function clearInstActiveLine() {
@@ -3110,8 +3098,6 @@ function clearInstActiveLine() {
     } catch(e) {}
     _instActiveLine = -1;
   }
-  const panel = document.getElementById('inst-panel');
-  if (panel) panel.classList.remove('inst-cursor-active');
 }
 
 function onInstructorSelection(data) {
@@ -3148,11 +3134,6 @@ function onInstructorSelection(data) {
     }
   });
 
-  // Gutter separator glow whenever instructor has any active cursor/selection
-  if (data.ranges && data.ranges.length > 0) {
-    const panel = document.getElementById('inst-panel');
-    if (panel) panel.classList.add('inst-cursor-active');
-  }
 }
 
 function onInstructorTyping() {

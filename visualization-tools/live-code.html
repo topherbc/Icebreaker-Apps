@@ -1331,6 +1331,32 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 .cm-s-livecode .CodeMirror-selected { background: rgba(26,79,122,0.18); }
 [data-theme="dark"] .cm-s-livecode .CodeMirror-selected { background: rgba(90,159,212,0.22); }
 .cm-s-livecode .CodeMirror-matchingbracket { color: var(--accent) !important; font-weight: 700; background: rgba(42,122,75,0.12); }
+
+/* Instructor selection/cursor overlay (visible on student read-only panel) */
+.cm-inst-selection {
+  background: rgba(234, 137, 12, 0.28);
+  border-radius: 2px;
+  outline: 1px solid rgba(234, 137, 12, 0.55);
+}
+[data-theme="dark"] .cm-inst-selection {
+  background: rgba(251, 191, 36, 0.22);
+  outline-color: rgba(251, 191, 36, 0.50);
+}
+.cm-inst-cursor-widget {
+  display: inline-block;
+  width: 0;
+  height: 1em;
+  border-left: 2px solid #ea890c;
+  margin-left: -1px;
+  vertical-align: text-bottom;
+  animation: inst-cursor-blink 1s step-end infinite;
+}
+[data-theme="dark"] .cm-inst-cursor-widget { border-left-color: #fbbf24; }
+@keyframes inst-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 /* Java syntax token colors */
 .cm-s-livecode .cm-keyword   { color: #005fa3; font-weight: 600; }
 .cm-s-livecode .cm-atom      { color: #b45309; }
@@ -2054,6 +2080,10 @@ let cmExpanded= null; // expanded student overlay
 let _editorTimer    = null;
 let _rainbowTimers  = {};  // keyed by cm instance id
 let _instPubTimer   = null;
+let _selPubTimer    = null;
+
+// Instructor selection marks on student read-only panel
+let _instSelMarks   = [];
 let _instHeartbeat  = null; // instructor presence keepalive
 let _appStarted     = false; // guard: proceedToApp runs exactly once per session
 
@@ -2711,6 +2741,7 @@ function setupChannels() {
     // Subscribe to instructor channel for left panel
     S.chInstructor = S.ablyClient.channels.get(channelName('instructor'));
     S.chInstructor.subscribe('code', msg => onInstructorCode(msg.data));
+    S.chInstructor.subscribe('selection', msg => onInstructorSelection(msg.data));
 
     // Set up student publishing channel
     S.chMyStudent = S.ablyClient.channels.get(channelName(`student:${S.myClientId}`));
@@ -2840,6 +2871,37 @@ function onInstructorCode(data) {
   S.instTabs   = data.tabs;
   S.instActive = data.activeTab || 0;
   updateInstPanel();
+  // Clear stale selection marks when code content changes
+  _instSelMarks.forEach(m => m.clear());
+  _instSelMarks = [];
+}
+
+function onInstructorSelection(data) {
+  if (!cmInst || !data || !data.ranges) return;
+  // Clear previous marks
+  _instSelMarks.forEach(m => m.clear());
+  _instSelMarks = [];
+
+  data.ranges.forEach(r => {
+    let from = r.anchor, to = r.head;
+    // Normalize so from <= to
+    if (from.line > to.line || (from.line === to.line && from.ch > to.ch)) {
+      [from, to] = [to, from];
+    }
+    if (from.line === to.line && from.ch === to.ch) {
+      // Cursor only — show a blinking cursor widget
+      const widget = document.createElement('span');
+      widget.className = 'cm-inst-cursor-widget';
+      widget.title = 'Instructor cursor';
+      _instSelMarks.push(cmInst.setBookmark(from, { widget, insertLeft: true }));
+    } else {
+      // Range selection — highlight it
+      _instSelMarks.push(cmInst.markText(from, to, {
+        className: 'cm-inst-selection',
+        title: 'Instructor selection',
+      }));
+    }
+  });
 }
 
 function onStudentCode(clientId, data) {
@@ -3206,6 +3268,10 @@ function initInstructorView() {
     scheduleRainbow(cmMy);
     scheduleInstPublish();
   });
+  cmMy.on('cursorActivity', () => {
+    clearTimeout(_selPubTimer);
+    _selPubTimer = setTimeout(publishInstSelection, 50);
+  });
   scheduleRainbow(cmMy);
 
   renderTabBar(document.getElementById('inst-tab-bar'), S.myTabs, S.myActiveTab, 'inst');
@@ -3272,6 +3338,15 @@ function publishInstCode() {
     S.chInstructor = S.ablyClient.channels.get(channelName('instructor'));
   }
   try { S.chInstructor.publish('code', payload); } catch(e) {}
+}
+
+function publishInstSelection() {
+  if (!S.chInstructor) return;
+  const ranges = cmMy.getDoc().listSelections().map(r => ({
+    anchor: { line: r.anchor.line, ch: r.anchor.ch },
+    head:   { line: r.head.line,   ch: r.head.ch   },
+  }));
+  try { S.chInstructor.publish('selection', { ranges }); } catch(e) {}
 }
 
 // ================================================================

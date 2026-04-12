@@ -8,13 +8,15 @@
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:mac:local": "electron-builder --mac --publish never",
+    "build:icon": "node -e \"require('sharp')('build/icon.svg').resize(1024,1024).png().toFile('build/icon.png')\"",
     "build": "electron-builder --win --mac"
   },
   "author": "Topher C",
   "license": "UNLICENSED",
   "devDependencies": {
     "electron": "^30.0.0",
-    "electron-builder": "^24.0.0"
+    "electron-builder": "^24.0.0",
+    "sharp": "^0.33.0"
   },
   "dependencies": {
     "electron-updater": "^6.0.0"

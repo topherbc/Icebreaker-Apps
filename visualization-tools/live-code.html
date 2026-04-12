@@ -95,13 +95,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 /* Dyslexia font override -- toggled by JS adding class to body */
-body.dyslexia-font {
-  font-family: 'OpenDyslexic', 'DM Sans', sans-serif;
+body.dyslexia-font,
+body.dyslexia-font * {
+  font-family: 'OpenDyslexic', 'DM Sans', sans-serif !important;
 }
 body.dyslexia-font code,
 body.dyslexia-font pre,
-body.dyslexia-font .mono { font-family: 'OpenDyslexic Mono', 'OpenDyslexic', monospace; }
-body.dyslexia-font .CodeMirror { font-family: 'OpenDyslexic Mono', 'OpenDyslexic', monospace !important; }
+body.dyslexia-font .mono,
+body.dyslexia-font .CodeMirror,
+body.dyslexia-font .output-stdout,
+body.dyslexia-font .output-stderr { font-family: 'OpenDyslexic Mono', 'OpenDyslexic', monospace !important; }
 code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
 /* ---- FOCUS ---- */
@@ -612,6 +615,10 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   background: var(--accent2);
   color: #ffffff;
   border-color: var(--accent2);
+}
+#tb-room, #tb-name {
+  font-weight: 700;
+  color: var(--text);
 }
 .tb-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; margin: 0 4px; }
 .tb-spacer { flex: 1; }
@@ -1721,11 +1728,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
     <!-- Spacer pushes remaining controls to the right -->
     <div class="tb-spacer"></div>
 
-    <!-- Student-only: ready + reference -->
-    <button class="tb-btn stu-only" id="btn-ready" aria-pressed="false" title="Toggle ready status">
-      <span id="ready-icon" aria-hidden="true">&#9633;</span>
-      <span id="ready-label">Ready</span>
-    </button>
+    <!-- Student-only: reference -->
     <button class="tb-btn stu-only hidden" id="btn-ref-sheet" aria-label="Toggle Java reference sheet" aria-pressed="false">
       <span aria-hidden="true">&#128218;</span> Reference
     </button>
@@ -1784,6 +1787,10 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
             Run
           </button>
           <button class="panel-dl-btn" id="btn-download-stu" aria-label="Download code">&#8615; Download</button>
+          <button class="tb-btn" id="btn-ready" aria-pressed="false" title="Toggle ready status" style="margin-left:auto;">
+            <span id="ready-icon" aria-hidden="true">&#9633;</span>
+            <span id="ready-label">Ready</span>
+          </button>
         </div>
         <div class="tab-bar" id="stu-tab-bar" role="tablist" aria-label="Student files">
           <button class="sidebar-toggle-btn" id="stu-sidebar-btn" aria-label="Toggle file list" title="File list">&#128193;</button>
@@ -4135,12 +4142,17 @@ const Runner = {
     const others   = realTabs.filter(t => t !== mainTab);
     if (!others.length) return this._single(mainTab.content);
 
-    // Build Test-prefix map for all non-Main public classes (hidden from students)
+    // Build folder-prefix map for non-Main public classes.
+    // Folders are display-only (for teaching structure); the folder name is
+    // injected as a class-name prefix at submission time so students never
+    // have to type the prefix themselves.
     const classMap = {};
     others.forEach(t => {
+      const slash  = t.name.indexOf('/');
+      const prefix = slash > 0 ? t.name.slice(0, slash) : null;
       const m = t.content.match(/\bpublic\s+class\s+(\w+)/);
-      if (m && m[1] !== 'Main' && !m[1].startsWith('Test')) {
-        classMap[m[1]] = 'Test' + m[1];
+      if (m && m[1] !== 'Main' && prefix && !m[1].startsWith(prefix)) {
+        classMap[m[1]] = prefix + m[1];
       }
     });
 

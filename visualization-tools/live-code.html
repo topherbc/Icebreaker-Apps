@@ -3661,6 +3661,9 @@ function updateInstPanel() {
     S.instConnected = true;
     document.getElementById('inst-waiting').classList.add('hidden');
     document.getElementById('inst-editor-area').classList.remove('hidden');
+    // Re-measure now that the container is visible — fixes margin-left:0 from
+    // CodeMirror initializing inside a hidden element
+    requestAnimationFrame(() => cmInst.refresh());
   }
   const cur = cmInst.getValue();
   if (cur !== tab.content) {

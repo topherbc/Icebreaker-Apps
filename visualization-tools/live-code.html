@@ -1421,14 +1421,19 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 [data-theme="dark"] .cm-inst-active-gutter { background: rgba(251,191,36,0.18) !important; }
 [data-theme="dark"] .cm-inst-active-gutter .CodeMirror-linenumber { color: rgba(251,191,36,0.90) !important; }
 
-/* Gutter separator glow — inset shadow stays inside the gutter, no clipping */
+/* Gutter separator — border on the absolutely-positioned gutter-elt, no layout impact */
 #inst-panel.inst-cursor-active .CodeMirror-gutters {
   border-right-color: rgba(234,137,12,0.95) !important;
-  box-shadow: inset -4px 0 8px rgba(234,137,12,0.40) !important;
+}
+#inst-panel.inst-cursor-active .CodeMirror-gutter-elt {
+  border-right: 2px solid rgba(234,137,12,0.85) !important;
+  box-sizing: border-box;
 }
 [data-theme="dark"] #inst-panel.inst-cursor-active .CodeMirror-gutters {
   border-right-color: rgba(251,191,36,0.85) !important;
-  box-shadow: inset -4px 0 8px rgba(251,191,36,0.32) !important;
+}
+[data-theme="dark"] #inst-panel.inst-cursor-active .CodeMirror-gutter-elt {
+  border-right: 2px solid rgba(251,191,36,0.75) !important;
 }
 
 /* Instructor selection/cursor overlay (visible on student read-only panel) */

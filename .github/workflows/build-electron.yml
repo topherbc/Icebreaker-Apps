@@ -50,6 +50,10 @@ jobs:
         working-directory: live-code
         run: npm ci
 
+      - name: Generate app icon PNG
+        working-directory: live-code
+        run: magick build/icon.svg -resize 1024x1024 build/icon.png
+
       - name: Build macOS DMGs
         working-directory: live-code
         env:
@@ -94,6 +98,10 @@ jobs:
       - name: Install dependencies
         working-directory: live-code
         run: npm ci
+
+      - name: Generate app icon PNG
+        working-directory: live-code
+        run: magick build\icon.svg -resize 1024x1024 build\icon.png
 
       - name: Build Windows installer
         working-directory: live-code

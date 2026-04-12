@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark terminal background -->
+  <rect width="512" height="512" rx="88" ry="88" fill="#1e1e2e"/>
+  <!-- > chevron (no text elements — path-only for renderer compatibility) -->
+  <polyline
+    points="126,156 298,256 126,356"
+    fill="none"
+    stroke="#4ade80"
+    stroke-width="52"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- _ cursor/underscore -->
+  <rect x="308" y="328" width="152" height="40" rx="20" ry="20" fill="#4ade80"/>
+</svg>

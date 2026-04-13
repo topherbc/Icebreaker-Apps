@@ -38,14 +38,14 @@
       "line": 7,
       "fix": "    if (username.length() < 3 || username.length() > 15) {",
       "altFixes": [],
-      "clue": "Arrays expose their size as a field, but Strings do it differently."
+      "clue": "The program won't compile. The error says 'length' cannot be resolved or is not a field."
     },
     {
       "id": "b2",
       "line": 12,
       "fix": "    if (!Character.isLetter(username.charAt(0))) {",
       "altFixes": [],
-      "clue": "The check is meant to inspect the very first character of the username."
+      "clue": "The username '9Player' passes the starts-with-a-letter check even though it begins with a digit."
     },
     {
       "id": "b3",
@@ -54,7 +54,7 @@
       "altFixes": [
         "    if (username.equalsIgnoreCase(banned)) {"
       ],
-      "clue": "Two Strings can hold identical text yet still be different objects in memory. Java has a method for comparing content."
+      "clue": "Typing 'admin' as the username does not trigger the banned-name message."
     }
   ]
 }

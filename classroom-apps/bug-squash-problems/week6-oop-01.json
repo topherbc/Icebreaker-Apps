@@ -44,21 +44,21 @@
       "altFixes": [
         "    this.balance = startBalance;"
       ],
-      "clue": "After construction, the balance is always 0.0 regardless of what was passed in. Look at which side of the assignment gets written to."
+      "clue": "Creating new BankAccount(100.0) results in a balance of 0.0 immediately after construction."
     },
     {
       "id": "b2",
       "line": 13,
       "fix": "    if (amount <= balance) {",
       "altFixes": [],
-      "clue": "A customer with exactly $30 tries to withdraw $30 and gets denied. The guard condition is slightly too strict."
+      "clue": "Withdrawing exactly the full balance prints 'Insufficient funds' even though there is enough money."
     },
     {
       "id": "b3",
       "line": 28,
       "fix": "    System.out.println(\"Balance: $\" + acct.getBalance());",
       "altFixes": [],
-      "clue": "The balance field is marked private. Code outside the class needs another way to read it."
+      "clue": "The program won't compile. The error says 'balance has private access in BankAccount'."
     }
   ]
 }

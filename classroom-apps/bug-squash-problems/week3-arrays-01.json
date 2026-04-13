@@ -33,21 +33,21 @@
       "line": 7,
       "fix": "    for (int i = 0; i < grades.length; i++) {",
       "altFixes": [],
-      "clue": "With 7 elements, the valid indices run from 0 through 6. This loop tries to visit one position too many."
+      "clue": "The program crashes with an ArrayIndexOutOfBoundsException."
     },
     {
       "id": "b2",
       "line": 12,
       "fix": "      if (grades[i] < min) {",
       "altFixes": [],
-      "clue": "This block is responsible for tracking the smallest value seen so far."
+      "clue": "The 'Lowest' output shows 95, which is actually the highest score in the array."
     },
     {
       "id": "b3",
       "line": 16,
       "fix": "    int average = sum / grades.length;",
       "altFixes": [],
-      "clue": "An average is the total divided by the count. Nothing extra should be added to that result."
+      "clue": "The average is reporting 81 instead of 80."
     }
   ]
 }

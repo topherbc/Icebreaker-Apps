@@ -26,7 +26,7 @@
       "line": 5,
       "fix": "    for (int i = 1; i <= 10; i++) {",
       "altFixes": [],
-      "clue": "Multiplication tables start from 1, not 0."
+      "clue": "The table prints an extra row '7 x 0 = 0' at the top that should not be there."
     },
     {
       "id": "b2",
@@ -35,14 +35,14 @@
       "altFixes": [
         "    int sum = 7 * 55;"
       ],
-      "clue": "The sum of all products (7x1 + 7x2 + ... + 7x10) equals 7 times the sum of 1 through 10. The current formula only computes the last product."
+      "clue": "The reported sum of all products is 70, but adding up 7+14+21+...+70 by hand gives 385."
     },
     {
       "id": "b3",
       "line": 11,
       "fix": "    System.out.println(\"Done! \");",
       "altFixes": [],
-      "clue": "The 'Done' message and the row count should appear on separate lines, but they are running together on one line."
+      "clue": "The output reads 'Done! Printed 10 rows.' all jammed on one line instead of two."
     }
   ]
 }

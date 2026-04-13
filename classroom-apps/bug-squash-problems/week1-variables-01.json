@@ -33,7 +33,7 @@
       "altFixes": [
         "    double popcornBuckets = friends / 2.0;"
       ],
-      "clue": "Four friends sharing popcorn two-to-a-bucket should need exactly 2 buckets, but with different group sizes integer division could lose half a bucket."
+      "clue": "When the group size is odd (say 5 friends), the popcorn count comes out wrong -- 5 friends somehow only need 2 buckets instead of 2.5."
     },
     {
       "id": "b2",
@@ -42,14 +42,14 @@
       "altFixes": [
         "    double drinkTotal = drinkPrice * friends;"
       ],
-      "clue": "Everyone in the group is buying a drink, not just one person."
+      "clue": "The drink total comes out to $4.50, but 4 people are each getting a drink."
     },
     {
       "id": "b3",
       "line": 17,
       "fix": "    System.out.println(\"Each: $\" + eachPays);",
       "altFixes": [],
-      "clue": "The per-person cost was already calculated and stored. Check which variable this line is printing."
+      "clue": "The 'Each' line prints the exact same dollar amount as the 'Total' line."
     }
   ]
 }

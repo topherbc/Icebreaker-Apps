@@ -35,7 +35,7 @@
       "line": 12,
       "fix": "    while (reader.hasNextLine()) {",
       "altFixes": [],
-      "clue": "The loop body reads a full line, but the condition checks for something else. They should agree on what unit of input to expect."
+      "clue": "The program sometimes skips the last line of the file or throws a NoSuchElementException."
     },
     {
       "id": "b2",
@@ -44,7 +44,7 @@
       "altFixes": [
         "      String[] words = line.split(\" +\");"
       ],
-      "clue": "Text files often have tabs or multiple spaces between words. A single-space split misses those cases."
+      "clue": "Lines with extra spaces between words report a higher word count than expected."
     },
     {
       "id": "b3",
@@ -53,7 +53,7 @@
       "altFixes": [
         "      wordCount += words.length;"
       ],
-      "clue": "After reading several lines, the total should reflect all of them. This line replaces the running total each time instead of building on it."
+      "clue": "The word count only reflects the last line of the file, not the total across all lines."
     }
   ]
 }

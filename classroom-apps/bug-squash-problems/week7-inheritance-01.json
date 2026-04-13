@@ -53,21 +53,21 @@
       "line": 15,
       "fix": "    super(name);",
       "altFixes": [],
-      "clue": "Subclass constructors should initialize through the parent. Bypassing it can skip important setup logic."
+      "clue": "The program won't compile. The error says there is no default constructor available in Pet."
     },
     {
       "id": "b2",
       "line": 28,
       "fix": "  public String speak() {",
       "altFixes": [],
-      "clue": "For a method to override its parent version, the signatures must be identical. Compare them carefully."
+      "clue": "Calling myCat.speak() prints 'Whiskers says hello' (the Pet default) instead of 'Whiskers says meow!'"
     },
     {
       "id": "b3",
       "line": 39,
       "fix": "    System.out.println(myDog.name + \" and \" + myCat.name);",
       "altFixes": [],
-      "clue": "This line should print both pets' names together, but both names shown belong to the same animal."
+      "clue": "The output reads 'Rex and Rex' instead of showing both pets' names."
     }
   ]
 }

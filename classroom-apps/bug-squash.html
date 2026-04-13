@@ -551,6 +551,82 @@
   .cmt { color: var(--code-cmt); font-style: italic; }
   .typ { color: var(--code-type); }
 
+  /* ── DYSLEXIA FONT ── */
+  body.dyslexia-font, body.dyslexia-font * {
+    font-family: 'OpenDyslexic', 'DM Sans', sans-serif !important;
+  }
+  body.dyslexia-font code, body.dyslexia-font pre,
+  body.dyslexia-font .line-text, body.dyslexia-font .bug-line-input {
+    font-family: 'OpenDyslexic Mono', 'OpenDyslexic', monospace !important;
+  }
+
+  /* ── SETTINGS MODAL ── */
+  .settings-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 900; padding: 16px;
+  }
+  .settings-overlay.hidden { display: none; }
+  .settings-box {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow-md);
+    border-radius: 12px;
+    width: 100%; max-width: 440px;
+    overflow: hidden;
+  }
+  .settings-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-title { font-size: 1.05rem; font-weight: 700; }
+  .settings-close {
+    background: none; border: none; font-size: 1.2rem;
+    color: var(--ink-faint); cursor: pointer; padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .settings-close:hover { background: var(--bg-panel); color: var(--ink); }
+  .settings-body { padding: 8px 20px 20px; }
+  .settings-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label { flex: 1; }
+  .settings-label div:first-child { font-size: 0.95rem; font-weight: 600; }
+  .settings-desc { font-size: 0.82rem; color: var(--ink-faint); margin-top: 2px; }
+
+  /* Toggle switch */
+  .toggle-switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--border); transition: background 0.2s; border-radius: 13px;
+  }
+  .toggle-track::before {
+    content: ''; position: absolute; left: 3px; top: 3px;
+    width: 20px; height: 20px; background: white;
+    border-radius: 50%; transition: transform 0.2s;
+  }
+  .toggle-switch input:checked + .toggle-track { background: var(--accent); }
+  .toggle-switch input:checked + .toggle-track::before { transform: translateX(18px); }
+
+  /* ── RAINBOW BRACKETS ── */
+  .rb-d0 { color: #005fa3 !important; font-weight: 700; }
+  .rb-d1 { color: #6a0dad !important; font-weight: 700; }
+  .rb-d2 { color: #b45309 !important; font-weight: 700; }
+  .rb-d3 { color: #0d7c3d !important; font-weight: 700; }
+  .rb-d4 { color: #7c4dff !important; font-weight: 700; }
+  [data-theme="dark"] .rb-d0 { color: #66aaff !important; }
+  [data-theme="dark"] .rb-d1 { color: #cc88ff !important; }
+  [data-theme="dark"] .rb-d2 { color: #ffaa44 !important; }
+  [data-theme="dark"] .rb-d3 { color: #00dd77 !important; }
+  [data-theme="dark"] .rb-d4 { color: #c4a0ff !important; }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     .clinic-panels { flex-direction: column; }
@@ -617,9 +693,7 @@
       <span class="progress-icon">&#10003;</span>
       <span id="progress-count">0 / 0</span>
     </div>
-    <button class="nav-theme-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-      <span id="theme-icon">&#9789;</span>
-    </button>
+    <button class="nav-theme-btn" id="btn-settings" aria-label="Settings" title="Settings">&#9881;</button>
   </div>
 </nav>
 
@@ -692,6 +766,8 @@
   let editedLines = {};
   let fixedBugs = new Set();
   let currentWeek = null;
+  let rainbowOn = localStorage.getItem('bug-squash-rainbow') !== 'false';
+  let _rbStack = [];
 
   function saveCompleted() {
     localStorage.setItem(LS_KEY, JSON.stringify([...completedSet]));
@@ -721,25 +797,83 @@
   const btnNext       = $('btn-next');
   const checkFeedback = $('check-feedback');
 
-  // ── Theme toggle ──
-  const themeToggle = $('theme-toggle');
-  const themeIcon   = $('theme-icon');
-  function updateThemeIcon() {
-    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    themeIcon.innerHTML = dark ? '&#9788;' : '&#9789;';
-  }
-  updateThemeIcon();
-  themeToggle.addEventListener('click', () => {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    if (isDark) {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('bug-squash-theme', 'light');
-    } else {
+  // ── Settings modal ──
+  function toggleTheme(toDark) {
+    if (toDark) {
       document.documentElement.setAttribute('data-theme', 'dark');
       localStorage.setItem('bug-squash-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('bug-squash-theme', 'light');
     }
-    updateThemeIcon();
+  }
+
+  $('btn-settings').addEventListener('click', () => {
+    const overlay = $('settings-overlay');
+    overlay.classList.remove('hidden');
+    $('toggle-dark').checked = document.documentElement.getAttribute('data-theme') === 'dark';
+    $('toggle-dyslexia').checked = document.body.classList.contains('dyslexia-font');
+    $('toggle-rainbow').checked = rainbowOn;
+    $('settings-close').focus();
   });
+
+  $('settings-close').addEventListener('click', () => {
+    $('settings-overlay').classList.add('hidden');
+  });
+
+  $('settings-overlay').addEventListener('click', e => {
+    if (e.target === $('settings-overlay')) $('settings-overlay').classList.add('hidden');
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !$('settings-overlay').classList.contains('hidden')) {
+      $('settings-overlay').classList.add('hidden');
+    }
+  });
+
+  $('toggle-dark').addEventListener('change', e => {
+    toggleTheme(e.target.checked);
+  });
+
+  $('toggle-dyslexia').addEventListener('change', e => {
+    if (e.target.checked) {
+      loadDyslexicFont();
+      document.body.classList.add('dyslexia-font');
+      localStorage.setItem('bug-squash-dyslexia', 'true');
+    } else {
+      document.body.classList.remove('dyslexia-font');
+      localStorage.setItem('bug-squash-dyslexia', 'false');
+    }
+  });
+
+  $('toggle-rainbow').addEventListener('change', e => {
+    rainbowOn = e.target.checked;
+    localStorage.setItem('bug-squash-rainbow', rainbowOn ? 'true' : 'false');
+    if (currentProblem) renderCode();
+  });
+
+  function loadDyslexicFont() {
+    if (!document.getElementById('dyslexic-font-link')) {
+      const link = document.createElement('link');
+      link.id = 'dyslexic-font-link';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.cdnfonts.com/css/opendyslexic';
+      document.head.appendChild(link);
+    }
+    if (!document.getElementById('dyslexic-mono-font-link')) {
+      const link2 = document.createElement('link');
+      link2.id = 'dyslexic-mono-font-link';
+      link2.rel = 'stylesheet';
+      link2.href = 'https://fonts.cdnfonts.com/css/opendyslexic-mono';
+      document.head.appendChild(link2);
+    }
+  }
+
+  // Restore dyslexia setting
+  if (localStorage.getItem('bug-squash-dyslexia') === 'true') {
+    loadDyslexicFont();
+    document.body.classList.add('dyslexia-font');
+  }
 
   // ── Norm for fix validation ──
   function norm(s) {
@@ -813,7 +947,16 @@
         i = end;
         continue;
       }
-      result += esc(text[i]);
+      if (rainbowOn && '({['.includes(text[i])) {
+        const depth = _rbStack.length;
+        _rbStack.push(text[i]);
+        result += '<span class="rb-d' + (depth % 5) + '">' + esc(text[i]) + '</span>';
+      } else if (rainbowOn && ')]}' .includes(text[i]) && _rbStack.length > 0) {
+        _rbStack.pop();
+        result += '<span class="rb-d' + (_rbStack.length % 5) + '">' + esc(text[i]) + '</span>';
+      } else {
+        result += esc(text[i]);
+      }
       i++;
     }
     return result;
@@ -961,6 +1104,7 @@
 
   function renderCode() {
     codePanel.innerHTML = '';
+    _rbStack = [];
     currentProblem.code.forEach((line, idx) => {
       const div = document.createElement('div');
       div.className = 'code-line';
@@ -1195,5 +1339,48 @@
   init().then(applyHash);
 })();
 </script>
+
+<!-- Settings Modal -->
+<div id="settings-overlay" class="settings-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="settings-box">
+    <div class="settings-header">
+      <span class="settings-title" id="settings-title">Settings</span>
+      <button class="settings-close" id="settings-close" aria-label="Close settings">&#10005;</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Dark Mode</div>
+          <div class="settings-desc">Reduces screen brightness.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-dark" aria-label="Enable dark mode">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Dyslexia-Friendly Font</div>
+          <div class="settings-desc">Switches to OpenDyslexic for all text.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-dyslexia" aria-label="Enable dyslexia-friendly font">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Rainbow Brackets</div>
+          <div class="settings-desc">Colors matched brackets by nesting depth.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-rainbow" checked aria-label="Enable rainbow brackets">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

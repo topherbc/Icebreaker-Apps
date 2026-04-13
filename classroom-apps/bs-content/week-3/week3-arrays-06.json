@@ -1,0 +1,52 @@
+{
+  "id": "week3-arrays-06",
+  "title": "Contact Book",
+  "week": 3,
+  "topic": "HashMap",
+  "description": "This program stores phone contacts in a HashMap and looks up numbers by name.",
+  "code": [
+    { "line": 1, "text": "import java.util.HashMap;" },
+    { "line": 2, "text": "" },
+    { "line": 3, "text": "public class ContactBook {" },
+    { "line": 4, "text": "  public static void main(String[] args) {" },
+    { "line": 5, "text": "    HashMap<String, String> contacts = new HashMap<String, String>();" },
+    { "line": 6, "text": "    contacts.put(\"Alice\", \"555-1234\");" },
+    { "line": 7, "text": "    contacts.put(\"Bob\", \"555-5678\");" },
+    { "line": 8, "text": "    contacts.put(\"Alice\", \"555-9999\");", "bugId": "b1" },
+    { "line": 9, "text": "" },
+    { "line": 10, "text": "    System.out.println(\"Contacts: \" + contacts.size());" },
+    { "line": 11, "text": "" },
+    { "line": 12, "text": "    String number = contacts.get(\"bob\");", "bugId": "b2" },
+    { "line": 13, "text": "    System.out.println(\"Bob's number: \" + number);" },
+    { "line": 14, "text": "" },
+    { "line": 15, "text": "    boolean hasAlice = contacts.containsValue(\"Alice\");", "bugId": "b3" },
+    { "line": 16, "text": "    System.out.println(\"Has Alice: \" + hasAlice);" },
+    { "line": 17, "text": "  }" },
+    { "line": 18, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 8,
+      "fix": "    contacts.putIfAbsent(\"Alice\", \"555-9999\");",
+      "altFixes": [
+        "    contacts.put(\"Charlie\", \"555-9999\");"
+      ],
+      "clue": "Alice's phone number shows 555-9999 instead of her original number 555-1234."
+    },
+    {
+      "id": "b2",
+      "line": 12,
+      "fix": "    String number = contacts.get(\"Bob\");",
+      "altFixes": [],
+      "clue": "Bob's number prints 'null' even though Bob was added to the contacts."
+    },
+    {
+      "id": "b3",
+      "line": 15,
+      "fix": "    boolean hasAlice = contacts.containsKey(\"Alice\");",
+      "altFixes": [],
+      "clue": "The check for Alice returns false even though Alice is in the contacts."
+    }
+  ]
+}

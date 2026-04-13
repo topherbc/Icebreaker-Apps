@@ -1,0 +1,69 @@
+{
+  "id": "week5-strings-05",
+  "title": "Score Keeper",
+  "week": 5,
+  "topic": "OOP",
+  "description": "This ScoreKeeper class tracks a player's score with add and reset methods, and a static method compares two players.",
+  "code": [
+    { "line": 1, "text": "public class ScoreKeeper {" },
+    { "line": 2, "text": "  private int score;" },
+    { "line": 3, "text": "  String name;" },
+    { "line": 4, "text": "" },
+    { "line": 5, "text": "  public ScoreKeeper(String name) {" },
+    { "line": 6, "text": "    this.name = name;" },
+    { "line": 7, "text": "    score = 0;" },
+    { "line": 8, "text": "  }" },
+    { "line": 9, "text": "" },
+    { "line": 10, "text": "  public void addPoints(int points) {" },
+    { "line": 11, "text": "    score = points;", "bugId": "b1" },
+    { "line": 12, "text": "  }" },
+    { "line": 13, "text": "" },
+    { "line": 14, "text": "  public int getScore() {" },
+    { "line": 15, "text": "    return score;" },
+    { "line": 16, "text": "  }" },
+    { "line": 17, "text": "" },
+    { "line": 18, "text": "  public static String leader(ScoreKeeper a, ScoreKeeper b) {" },
+    { "line": 19, "text": "    if (a.score > b.score) {" },
+    { "line": 20, "text": "      return a.name;" },
+    { "line": 21, "text": "    }" },
+    { "line": 22, "text": "    return a.name;", "bugId": "b2" },
+    { "line": 23, "text": "  }" },
+    { "line": 24, "text": "" },
+    { "line": 25, "text": "  public static void main(String[] args) {" },
+    { "line": 26, "text": "    ScoreKeeper p1 = new ScoreKeeper(\"Alice\");" },
+    { "line": 27, "text": "    ScoreKeeper p2 = new ScoreKeeper(\"Bob\");" },
+    { "line": 28, "text": "    p1.addPoints(10);" },
+    { "line": 29, "text": "    p1.addPoints(5);" },
+    { "line": 30, "text": "    p2.addPoints(20);" },
+    { "line": 31, "text": "    System.out.println(p1.name + \": \" + p1.getScore());" },
+    { "line": 32, "text": "    System.out.println(p2.name + \": \" + p2.getScore());" },
+    { "line": 33, "text": "    System.out.println(\"Leader: \" + ScoreKeeper.leader(p1, p1));", "bugId": "b3" },
+    { "line": 34, "text": "  }" },
+    { "line": 35, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 11,
+      "fix": "    score += points;",
+      "altFixes": [
+        "    score = score + points;"
+      ],
+      "clue": "After adding 10 then 5 points, Alice's score shows 5 instead of 15."
+    },
+    {
+      "id": "b2",
+      "line": 22,
+      "fix": "    return b.name;",
+      "altFixes": [],
+      "clue": "The leader method always returns the first player's name even when the second has more points."
+    },
+    {
+      "id": "b3",
+      "line": 33,
+      "fix": "    System.out.println(\"Leader: \" + ScoreKeeper.leader(p1, p2));",
+      "altFixes": [],
+      "clue": "The leader comparison passes the same player twice instead of comparing Alice and Bob."
+    }
+  ]
+}

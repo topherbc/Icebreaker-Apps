@@ -229,5 +229,173 @@
         "clue": "The final sum just shows 19 instead of a large accumulated total."
       }
     ]
+  },
+  {
+    "id": "week2-loops-04",
+    "title": "Dog Tag",
+    "week": 2,
+    "topic": "classes",
+    "description": "This DogTag class stores a pet's name, breed, and age, and determines if the dog is a puppy.",
+    "code": [
+      { "line": 1, "text": "public class DogTag {" },
+      { "line": 2, "text": "  String name;" },
+      { "line": 3, "text": "  String breed;" },
+      { "line": 4, "text": "  int age;" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "  public DogTag(String name, String breed, int age) {" },
+      { "line": 7, "text": "    name = name;", "bugId": "b1" },
+      { "line": 8, "text": "    this.breed = breed;" },
+      { "line": 9, "text": "    this.age = age;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public boolean isPuppy() {" },
+      { "line": 13, "text": "    return age > 2;", "bugId": "b2" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "  public static void main(String[] args) {" },
+      { "line": 17, "text": "    DogTag tag = new DogTag(\"Buddy\", \"Labrador\", 5);" },
+      { "line": 18, "text": "    System.out.println(tag.name + \" the \" + tag.name);", "bugId": "b3" },
+      { "line": 19, "text": "    System.out.println(\"Age: \" + tag.age);" },
+      { "line": 20, "text": "    System.out.println(\"Puppy: \" + tag.isPuppy());" },
+      { "line": 21, "text": "  }" },
+      { "line": 22, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    this.name = name;",
+        "altFixes": [],
+        "clue": "Printing the tag shows 'null the Labrador' instead of 'Buddy the Labrador'."
+      },
+      {
+        "id": "b2",
+        "line": 13,
+        "fix": "    return age < 2;",
+        "altFixes": [],
+        "clue": "A 5-year-old dog is reported as a puppy, but only dogs under 2 should count."
+      },
+      {
+        "id": "b3",
+        "line": 18,
+        "fix": "    System.out.println(tag.name + \" the \" + tag.breed);",
+        "altFixes": [],
+        "clue": "The output reads 'Buddy the Buddy' instead of 'Buddy the Labrador'."
+      }
+    ]
+  },
+  {
+    "id": "week2-loops-05",
+    "title": "Light Switch",
+    "week": 2,
+    "topic": "classes",
+    "description": "This LightSwitch class tracks whether a light is on or off, supports toggling, and reports the current state.",
+    "code": [
+      { "line": 1, "text": "public class LightSwitch {" },
+      { "line": 2, "text": "  boolean isOn;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public LightSwitch() {" },
+      { "line": 5, "text": "    isOn = true;", "bugId": "b1" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "  public void toggle() {" },
+      { "line": 9, "text": "    isOn = true;", "bugId": "b2" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public String getStatus() {" },
+      { "line": 13, "text": "    if (isOn) {" },
+      { "line": 14, "text": "      return \"ON\";" },
+      { "line": 15, "text": "    }" },
+      { "line": 16, "text": "    return \"ON\";", "bugId": "b3" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "" },
+      { "line": 19, "text": "  public static void main(String[] args) {" },
+      { "line": 20, "text": "    LightSwitch light = new LightSwitch();" },
+      { "line": 21, "text": "    System.out.println(\"Start: \" + light.getStatus());" },
+      { "line": 22, "text": "    light.toggle();" },
+      { "line": 23, "text": "    System.out.println(\"After toggle: \" + light.getStatus());" },
+      { "line": 24, "text": "  }" },
+      { "line": 25, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    isOn = false;",
+        "altFixes": [],
+        "clue": "A brand-new light switch starts as ON, but it should start OFF."
+      },
+      {
+        "id": "b2",
+        "line": 9,
+        "fix": "    isOn = !isOn;",
+        "altFixes": [],
+        "clue": "Calling toggle() always leaves the light ON; it never switches to OFF."
+      },
+      {
+        "id": "b3",
+        "line": 16,
+        "fix": "    return \"OFF\";",
+        "altFixes": [],
+        "clue": "The getStatus method returns 'ON' even when the light should be off."
+      }
+    ]
+  },
+  {
+    "id": "week2-loops-06",
+    "title": "Rectangle",
+    "week": 2,
+    "topic": "classes",
+    "description": "This Rectangle class stores width and height, and computes the area and perimeter.",
+    "code": [
+      { "line": 1, "text": "public class Rectangle {" },
+      { "line": 2, "text": "  double width;" },
+      { "line": 3, "text": "  double height;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "  public Rectangle(double width, double height) {" },
+      { "line": 6, "text": "    this.width = width;" },
+      { "line": 7, "text": "    this.height = width;", "bugId": "b1" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "  public double getArea() {" },
+      { "line": 11, "text": "    return width + height;", "bugId": "b2" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "  public double getPerimeter() {" },
+      { "line": 15, "text": "    return 2 * width + height;", "bugId": "b3" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "" },
+      { "line": 18, "text": "  public static void main(String[] args) {" },
+      { "line": 19, "text": "    Rectangle r = new Rectangle(4.0, 6.0);" },
+      { "line": 20, "text": "    System.out.println(\"Area: \" + r.getArea());" },
+      { "line": 21, "text": "    System.out.println(\"Perimeter: \" + r.getPerimeter());" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    this.height = height;",
+        "altFixes": [],
+        "clue": "Creating a Rectangle(4.0, 6.0) stores height as 4.0 instead of 6.0."
+      },
+      {
+        "id": "b2",
+        "line": 11,
+        "fix": "    return width * height;",
+        "altFixes": [],
+        "clue": "The area of a 4x6 rectangle shows 10.0 instead of 24.0."
+      },
+      {
+        "id": "b3",
+        "line": 15,
+        "fix": "    return 2 * (width + height);",
+        "altFixes": [
+          "    return 2 * width + 2 * height;"
+        ],
+        "clue": "The perimeter of a 4x6 rectangle shows 14.0 instead of 20.0."
+      }
+    ]
   }
 ]

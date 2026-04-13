@@ -663,5 +663,223 @@
         "clue": "The last line of output prints something like 'Truck@5a39699c' instead of the truck's description."
       }
     ]
+  },
+  {
+    "id": "week7-inheritance-04",
+    "title": "Measure Tools",
+    "week": 7,
+    "topic": "interfaces",
+    "description": "A Measurable interface requires getMeasurement and getUnit. Ruler and Scale implement it, and main totals their values.",
+    "code": [
+      { "line": 1, "text": "interface Measurable {" },
+      { "line": 2, "text": "  double getMeasurement();" },
+      { "line": 3, "text": "  String getUnit();" },
+      { "line": 4, "text": "}" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "class Ruler implements Measurable {" },
+      { "line": 7, "text": "  double inches;" },
+      { "line": 8, "text": "" },
+      { "line": 9, "text": "  public Ruler(double inches) {" },
+      { "line": 10, "text": "    inches = inches;", "bugId": "b1" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "" },
+      { "line": 13, "text": "  public double getMeasurement() { return inches; }" },
+      { "line": 14, "text": "  public String getUnit() { return \"inches\"; }" },
+      { "line": 15, "text": "}" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "class Scale implements Measurable {" },
+      { "line": 18, "text": "  double pounds;" },
+      { "line": 19, "text": "" },
+      { "line": 20, "text": "  public Scale(double pounds) {" },
+      { "line": 21, "text": "    this.pounds = pounds;" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "" },
+      { "line": 24, "text": "  public double getMeasurement() { return pounds; }" },
+      { "line": 25, "text": "  public String unit() { return \"pounds\"; }", "bugId": "b2" },
+      { "line": 26, "text": "}" },
+      { "line": 27, "text": "" },
+      { "line": 28, "text": "public class MeasureTools {" },
+      { "line": 29, "text": "  public static void main(String[] args) {" },
+      { "line": 30, "text": "    Measurable[] items = { new Ruler(12.0), new Scale(5.5) };" },
+      { "line": 31, "text": "" },
+      { "line": 32, "text": "    double total = 0;" },
+      { "line": 33, "text": "    for (int i = 0; i < items.length; i++) {" },
+      { "line": 34, "text": "      System.out.println(items[i].getMeasurement() + \" \" + items[i].getUnit());" },
+      { "line": 35, "text": "      total = items[i].getMeasurement();", "bugId": "b3" },
+      { "line": 36, "text": "    }" },
+      { "line": 37, "text": "    System.out.println(\"Total: \" + total);" },
+      { "line": 38, "text": "  }" },
+      { "line": 39, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 10,
+        "fix": "    this.inches = inches;",
+        "altFixes": [],
+        "clue": "The ruler shows 0.0 inches instead of 12.0."
+      },
+      {
+        "id": "b2",
+        "line": 25,
+        "fix": "  public String getUnit() { return \"pounds\"; }",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says Scale does not override getUnit() from Measurable."
+      },
+      {
+        "id": "b3",
+        "line": 35,
+        "fix": "      total += items[i].getMeasurement();",
+        "altFixes": [
+          "      total = total + items[i].getMeasurement();"
+        ],
+        "clue": "The total only shows 5.5 (the last measurement) instead of 17.5."
+      }
+    ]
+  },
+  {
+    "id": "week7-inheritance-05",
+    "title": "Student Ranking",
+    "week": 7,
+    "topic": "interfaces",
+    "description": "A Student class implements Comparable to sort students by GPA, then prints the ranked list.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "import java.util.Collections;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "class Student implements Comparable<Student> {" },
+      { "line": 5, "text": "  String name;" },
+      { "line": 6, "text": "  double gpa;" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "  public Student(String name, double gpa) {" },
+      { "line": 9, "text": "    this.name = name;" },
+      { "line": 10, "text": "    this.gpa = gpa;" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "" },
+      { "line": 13, "text": "  public int compareTo(Student other) {" },
+      { "line": 14, "text": "    return (int)(this.gpa - other.gpa);", "bugId": "b1" },
+      { "line": 15, "text": "  }" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "  public String toString() {" },
+      { "line": 18, "text": "    return name + \" (\" + gpa + \")\";" },
+      { "line": 19, "text": "  }" },
+      { "line": 20, "text": "}" },
+      { "line": 21, "text": "" },
+      { "line": 22, "text": "public class StudentRanking {" },
+      { "line": 23, "text": "  public static void main(String[] args) {" },
+      { "line": 24, "text": "    ArrayList<Student> list = new ArrayList<Student>();" },
+      { "line": 25, "text": "    list.add(new Student(\"Charlie\", 3.2));" },
+      { "line": 26, "text": "    list.add(new Student(\"Alice\", 3.9));" },
+      { "line": 27, "text": "    list.add(new Student(\"Bob\", 3.5));" },
+      { "line": 28, "text": "" },
+      { "line": 29, "text": "    Collections.sort(list);" },
+      { "line": 30, "text": "" },
+      { "line": 31, "text": "    for (int i = 0; i < list.size(); i++) {" },
+      { "line": 32, "text": "      System.out.println((i + 1) + \". \" + list.get(i));" },
+      { "line": 33, "text": "    }" },
+      { "line": 34, "text": "    System.out.println(\"Top: \" + list.get(0));", "bugId": "b2" },
+      { "line": 35, "text": "    System.out.println(\"Count: \" + list.size);", "bugId": "b3" },
+      { "line": 36, "text": "  }" },
+      { "line": 37, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 14,
+        "fix": "    return Double.compare(this.gpa, other.gpa);",
+        "altFixes": [],
+        "clue": "After sorting, some students remain out of order because small GPA differences are treated as equal."
+      },
+      {
+        "id": "b2",
+        "line": 34,
+        "fix": "    System.out.println(\"Top: \" + list.get(list.size() - 1));",
+        "altFixes": [],
+        "clue": "The Top student shows the lowest GPA instead of the highest after ascending sort."
+      },
+      {
+        "id": "b3",
+        "line": 35,
+        "fix": "    System.out.println(\"Count: \" + list.size());",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'size' cannot be resolved or is not a field."
+      }
+    ]
+  },
+  {
+    "id": "week7-inheritance-06",
+    "title": "Product Search",
+    "week": 7,
+    "topic": "interfaces",
+    "description": "A Filterable interface defines a matches method. Product implements it to search by keyword in the product name.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "interface Filterable {" },
+      { "line": 4, "text": "  boolean matches(String keyword);" },
+      { "line": 5, "text": "}" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "class Product implements Filterable {" },
+      { "line": 8, "text": "  String name;" },
+      { "line": 9, "text": "  double price;" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "  public Product(String name, double price) {" },
+      { "line": 12, "text": "    this.name = name;" },
+      { "line": 13, "text": "    this.price = price;" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "  public boolean matches(String keyword) {" },
+      { "line": 17, "text": "    return name.equals(keyword);", "bugId": "b1" },
+      { "line": 18, "text": "  }" },
+      { "line": 19, "text": "" },
+      { "line": 20, "text": "  public String toString() {" },
+      { "line": 21, "text": "    return name + \" ($\" + price + \")\";" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "}" },
+      { "line": 24, "text": "" },
+      { "line": 25, "text": "public class ProductSearch {" },
+      { "line": 26, "text": "  public static void main(String[] args) {" },
+      { "line": 27, "text": "    ArrayList<Filterable> products = new ArrayList<Filterable>();" },
+      { "line": 28, "text": "    products.add(new Product(\"Laptop\", 999.99));" },
+      { "line": 29, "text": "    products.add(new Product(\"Laptop Case\", 29.99));" },
+      { "line": 30, "text": "    products.add(new Product(\"Mouse\", 19.99));" },
+      { "line": 31, "text": "" },
+      { "line": 32, "text": "    String keyword = \"Laptop\";" },
+      { "line": 33, "text": "    int count = 0;" },
+      { "line": 34, "text": "    for (int i = 0; i <= products.size(); i++) {", "bugId": "b2" },
+      { "line": 35, "text": "      if (products.get(i).matches(keyword)) {" },
+      { "line": 36, "text": "        System.out.println(\"Match: \" + products.get(i));" },
+      { "line": 37, "text": "        count++;" },
+      { "line": 38, "text": "      }" },
+      { "line": 39, "text": "    }" },
+      { "line": 40, "text": "    System.out.println(\"Found: \" + products.size());", "bugId": "b3" },
+      { "line": 41, "text": "  }" },
+      { "line": 42, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 17,
+        "fix": "    return name.contains(keyword);",
+        "altFixes": [
+          "    return name.toLowerCase().contains(keyword.toLowerCase());"
+        ],
+        "clue": "Searching for 'Laptop' only finds 'Laptop' but misses 'Laptop Case'."
+      },
+      {
+        "id": "b2",
+        "line": 34,
+        "fix": "    for (int i = 0; i < products.size(); i++) {",
+        "altFixes": [],
+        "clue": "The program crashes with an IndexOutOfBoundsException."
+      },
+      {
+        "id": "b3",
+        "line": 40,
+        "fix": "    System.out.println(\"Found: \" + count);",
+        "altFixes": [],
+        "clue": "The Found count shows 3 (the total number of products) instead of how many matched."
+      }
+    ]
   }
 ]

@@ -1,0 +1,73 @@
+{
+  "id": "week7-inheritance-04",
+  "title": "Measure Tools",
+  "week": 7,
+  "topic": "interfaces",
+  "description": "A Measurable interface requires getMeasurement and getUnit. Ruler and Scale implement it, and main totals their values.",
+  "code": [
+    { "line": 1, "text": "interface Measurable {" },
+    { "line": 2, "text": "  double getMeasurement();" },
+    { "line": 3, "text": "  String getUnit();" },
+    { "line": 4, "text": "}" },
+    { "line": 5, "text": "" },
+    { "line": 6, "text": "class Ruler implements Measurable {" },
+    { "line": 7, "text": "  double inches;" },
+    { "line": 8, "text": "" },
+    { "line": 9, "text": "  public Ruler(double inches) {" },
+    { "line": 10, "text": "    inches = inches;", "bugId": "b1" },
+    { "line": 11, "text": "  }" },
+    { "line": 12, "text": "" },
+    { "line": 13, "text": "  public double getMeasurement() { return inches; }" },
+    { "line": 14, "text": "  public String getUnit() { return \"inches\"; }" },
+    { "line": 15, "text": "}" },
+    { "line": 16, "text": "" },
+    { "line": 17, "text": "class Scale implements Measurable {" },
+    { "line": 18, "text": "  double pounds;" },
+    { "line": 19, "text": "" },
+    { "line": 20, "text": "  public Scale(double pounds) {" },
+    { "line": 21, "text": "    this.pounds = pounds;" },
+    { "line": 22, "text": "  }" },
+    { "line": 23, "text": "" },
+    { "line": 24, "text": "  public double getMeasurement() { return pounds; }" },
+    { "line": 25, "text": "  public String unit() { return \"pounds\"; }", "bugId": "b2" },
+    { "line": 26, "text": "}" },
+    { "line": 27, "text": "" },
+    { "line": 28, "text": "public class MeasureTools {" },
+    { "line": 29, "text": "  public static void main(String[] args) {" },
+    { "line": 30, "text": "    Measurable[] items = { new Ruler(12.0), new Scale(5.5) };" },
+    { "line": 31, "text": "" },
+    { "line": 32, "text": "    double total = 0;" },
+    { "line": 33, "text": "    for (int i = 0; i < items.length; i++) {" },
+    { "line": 34, "text": "      System.out.println(items[i].getMeasurement() + \" \" + items[i].getUnit());" },
+    { "line": 35, "text": "      total = items[i].getMeasurement();", "bugId": "b3" },
+    { "line": 36, "text": "    }" },
+    { "line": 37, "text": "    System.out.println(\"Total: \" + total);" },
+    { "line": 38, "text": "  }" },
+    { "line": 39, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 10,
+      "fix": "    this.inches = inches;",
+      "altFixes": [],
+      "clue": "The ruler shows 0.0 inches instead of 12.0."
+    },
+    {
+      "id": "b2",
+      "line": 25,
+      "fix": "  public String getUnit() { return \"pounds\"; }",
+      "altFixes": [],
+      "clue": "The program won't compile. The error says Scale does not override getUnit() from Measurable."
+    },
+    {
+      "id": "b3",
+      "line": 35,
+      "fix": "      total += items[i].getMeasurement();",
+      "altFixes": [
+        "      total = total + items[i].getMeasurement();"
+      ],
+      "clue": "The total only shows 5.5 (the last measurement) instead of 17.5."
+    }
+  ]
+}

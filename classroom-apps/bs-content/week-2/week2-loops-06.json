@@ -1,0 +1,57 @@
+{
+  "id": "week2-loops-06",
+  "title": "Rectangle",
+  "week": 2,
+  "topic": "classes",
+  "description": "This Rectangle class stores width and height, and computes the area and perimeter.",
+  "code": [
+    { "line": 1, "text": "public class Rectangle {" },
+    { "line": 2, "text": "  double width;" },
+    { "line": 3, "text": "  double height;" },
+    { "line": 4, "text": "" },
+    { "line": 5, "text": "  public Rectangle(double width, double height) {" },
+    { "line": 6, "text": "    this.width = width;" },
+    { "line": 7, "text": "    this.height = width;", "bugId": "b1" },
+    { "line": 8, "text": "  }" },
+    { "line": 9, "text": "" },
+    { "line": 10, "text": "  public double getArea() {" },
+    { "line": 11, "text": "    return width + height;", "bugId": "b2" },
+    { "line": 12, "text": "  }" },
+    { "line": 13, "text": "" },
+    { "line": 14, "text": "  public double getPerimeter() {" },
+    { "line": 15, "text": "    return 2 * width + height;", "bugId": "b3" },
+    { "line": 16, "text": "  }" },
+    { "line": 17, "text": "" },
+    { "line": 18, "text": "  public static void main(String[] args) {" },
+    { "line": 19, "text": "    Rectangle r = new Rectangle(4.0, 6.0);" },
+    { "line": 20, "text": "    System.out.println(\"Area: \" + r.getArea());" },
+    { "line": 21, "text": "    System.out.println(\"Perimeter: \" + r.getPerimeter());" },
+    { "line": 22, "text": "  }" },
+    { "line": 23, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 7,
+      "fix": "    this.height = height;",
+      "altFixes": [],
+      "clue": "Creating a Rectangle(4.0, 6.0) stores height as 4.0 instead of 6.0."
+    },
+    {
+      "id": "b2",
+      "line": 11,
+      "fix": "    return width * height;",
+      "altFixes": [],
+      "clue": "The area of a 4x6 rectangle shows 10.0 instead of 24.0."
+    },
+    {
+      "id": "b3",
+      "line": 15,
+      "fix": "    return 2 * (width + height);",
+      "altFixes": [
+        "    return 2 * width + 2 * height;"
+      ],
+      "clue": "The perimeter of a 4x6 rectangle shows 14.0 instead of 20.0."
+    }
+  ]
+}

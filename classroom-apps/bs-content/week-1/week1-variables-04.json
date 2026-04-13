@@ -1,0 +1,52 @@
+{
+  "id": "week1-variables-04",
+  "title": "Ticket Pricer",
+  "week": 1,
+  "topic": "conditions",
+  "description": "This program determines the ticket price based on age: children under 12 pay $5, seniors 65 and over pay $7.50, everyone else pays $12.",
+  "code": [
+    { "line": 1, "text": "public class TicketPricer {" },
+    { "line": 2, "text": "  public static void main(String[] args) {" },
+    { "line": 3, "text": "    int age = 65;" },
+    { "line": 4, "text": "    double price;" },
+    { "line": 5, "text": "" },
+    { "line": 6, "text": "    if (age < 12) {" },
+    { "line": 7, "text": "      price = 5.00;" },
+    { "line": 8, "text": "    } else if (age > 65) {", "bugId": "b1" },
+    { "line": 9, "text": "      price = 7.50;" },
+    { "line": 10, "text": "    } else {" },
+    { "line": 11, "text": "      price = 12.00;" },
+    { "line": 12, "text": "    }" },
+    { "line": 13, "text": "" },
+    { "line": 14, "text": "    double tax = price * 0.08;" },
+    { "line": 15, "text": "    double total = price * tax;", "bugId": "b2" },
+    { "line": 16, "text": "" },
+    { "line": 17, "text": "    System.out.println(\"Age: \" + age);" },
+    { "line": 18, "text": "    System.out.println(\"Total: $\" + price);", "bugId": "b3" },
+    { "line": 19, "text": "  }" },
+    { "line": 20, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 8,
+      "fix": "    } else if (age >= 65) {",
+      "altFixes": [],
+      "clue": "A 65-year-old customer is charged $12.00 instead of the senior price of $7.50."
+    },
+    {
+      "id": "b2",
+      "line": 15,
+      "fix": "    double total = price + tax;",
+      "altFixes": [],
+      "clue": "The total for a $12.00 ticket comes out to $11.52 instead of $12.96."
+    },
+    {
+      "id": "b3",
+      "line": 18,
+      "fix": "    System.out.println(\"Total: $\" + total);",
+      "altFixes": [],
+      "clue": "The Total line shows the base ticket price without tax included."
+    }
+  ]
+}

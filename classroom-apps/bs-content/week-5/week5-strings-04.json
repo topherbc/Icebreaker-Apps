@@ -1,0 +1,60 @@
+{
+  "id": "week5-strings-04",
+  "title": "Thermostat",
+  "week": 5,
+  "topic": "OOP",
+  "description": "This Thermostat class stores a temperature setting with a valid range of 60 to 80 degrees.",
+  "code": [
+    { "line": 1, "text": "public class Thermostat {" },
+    { "line": 2, "text": "  private int temperature;" },
+    { "line": 3, "text": "" },
+    { "line": 4, "text": "  public Thermostat(int startTemp) {" },
+    { "line": 5, "text": "    startTemp = temperature;", "bugId": "b1" },
+    { "line": 6, "text": "  }" },
+    { "line": 7, "text": "" },
+    { "line": 8, "text": "  public void setTemperature(int temp) {" },
+    { "line": 9, "text": "    if (temp > 60 && temp < 80) {", "bugId": "b2" },
+    { "line": 10, "text": "      temperature = temp;" },
+    { "line": 11, "text": "    } else {" },
+    { "line": 12, "text": "      System.out.println(\"Out of range.\");" },
+    { "line": 13, "text": "    }" },
+    { "line": 14, "text": "  }" },
+    { "line": 15, "text": "" },
+    { "line": 16, "text": "  public int getTemperature() {" },
+    { "line": 17, "text": "    return temperature;" },
+    { "line": 18, "text": "  }" },
+    { "line": 19, "text": "" },
+    { "line": 20, "text": "  public static void main(String[] args) {" },
+    { "line": 21, "text": "    Thermostat t = new Thermostat(72);" },
+    { "line": 22, "text": "    System.out.println(\"Set to: \" + t.getTemperature());" },
+    { "line": 23, "text": "    t.setTemperature(75);" },
+    { "line": 24, "text": "    System.out.println(\"Now: \" + t.temperature);", "bugId": "b3" },
+    { "line": 25, "text": "  }" },
+    { "line": 26, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 5,
+      "fix": "    temperature = startTemp;",
+      "altFixes": [
+        "    this.temperature = startTemp;"
+      ],
+      "clue": "After creating Thermostat(72), the temperature reads 0 instead of 72."
+    },
+    {
+      "id": "b2",
+      "line": 9,
+      "fix": "    if (temp >= 60 && temp <= 80) {",
+      "altFixes": [],
+      "clue": "Setting the temperature to exactly 60 or 80 prints 'Out of range' even though those are valid settings."
+    },
+    {
+      "id": "b3",
+      "line": 24,
+      "fix": "    System.out.println(\"Now: \" + t.getTemperature());",
+      "altFixes": [],
+      "clue": "The program won't compile. The error says 'temperature has private access in Thermostat'."
+    }
+  ]
+}

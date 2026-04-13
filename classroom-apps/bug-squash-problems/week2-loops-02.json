@@ -35,7 +35,7 @@
       "altFixes": [
         "      for (int j = 1; j <= i; j++) {"
       ],
-      "clue": "Each row has one extra star -- row 1 prints 2 stars, row 2 prints 3, and so on."
+      "clue": "Each row has one extra star; row 1 prints 2 stars, row 2 prints 3, and so on."
     },
     {
       "id": "b3",

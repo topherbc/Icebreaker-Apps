@@ -174,7 +174,7 @@
         "altFixes": [
           "      for (int j = 1; j <= i; j++) {"
         ],
-        "clue": "Each row has one extra star -- row 1 prints 2 stars, row 2 prints 3, and so on."
+        "clue": "Each row has one extra star; row 1 prints 2 stars, row 2 prints 3, and so on."
       },
       {
         "id": "b3",
@@ -210,7 +210,7 @@
         "line": 4,
         "fix": "    for (int i = 1; i <= 20; i++) {",
         "altFixes": [],
-        "clue": "The result is 90 instead of 110 -- the number 20 is not being included."
+        "clue": "The result is 90 instead of 110; the number 20 is not being included."
       },
       {
         "id": "b2",

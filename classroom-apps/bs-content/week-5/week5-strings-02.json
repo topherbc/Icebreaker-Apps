@@ -25,7 +25,7 @@
       "line": 6,
       "fix": "    for (int i = word.length() - 1; i >= 0; i--) {",
       "altFixes": [],
-      "clue": "The output for 'hello' shows 'hello' instead of 'olleh' -- the characters are in the original order."
+      "clue": "The output for 'hello' shows 'hello' instead of 'olleh'; the characters are in the original order."
     },
     {
       "id": "b2",
@@ -39,7 +39,7 @@
       "line": 11,
       "fix": "    System.out.println(\"Reversed: \" + reversed);",
       "altFixes": [],
-      "clue": "Both the 'Original' and 'Reversed' lines print 'hello' -- the reversed variable is never displayed."
+      "clue": "Both the 'Original' and 'Reversed' lines print 'hello'; the reversed variable is never displayed."
     }
   ]
 }

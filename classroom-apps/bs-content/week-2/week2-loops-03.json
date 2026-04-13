@@ -23,7 +23,7 @@
       "line": 4,
       "fix": "    for (int i = 1; i <= 20; i++) {",
       "altFixes": [],
-      "clue": "The result is 90 instead of 110 -- the number 20 is not being included."
+      "clue": "The result is 90 instead of 110; the number 20 is not being included."
     },
     {
       "id": "b2",

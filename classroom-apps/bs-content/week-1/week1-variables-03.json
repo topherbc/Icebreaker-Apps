@@ -30,7 +30,7 @@
       "line": 6,
       "fix": "    double celsius = 5.0 / 9.0 * adjusted;",
       "altFixes": [],
-      "clue": "Even with the right subtraction, the Celsius value comes out as 37.56 instead of 37.0 -- the fraction is being added instead of multiplied."
+      "clue": "Even with the right subtraction, the Celsius value comes out as 37.56 instead of 37.0; the fraction is being added instead of multiplied."
     },
     {
       "id": "b3",

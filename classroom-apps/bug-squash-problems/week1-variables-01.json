@@ -33,7 +33,7 @@
       "altFixes": [
         "    double popcornBuckets = friends / 2.0;"
       ],
-      "clue": "When the group size is odd (say 5 friends), the popcorn count comes out wrong -- 5 friends somehow only need 2 buckets instead of 2.5."
+      "clue": "When the group size is odd (say 5 friends), the popcorn count comes out wrong; 5 friends somehow only need 2 buckets instead of 2.5."
     },
     {
       "id": "b2",

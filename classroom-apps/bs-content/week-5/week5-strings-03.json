@@ -36,7 +36,7 @@
       "altFixes": [
         "    if (email.indexOf(atSymbol) >= 0) {"
       ],
-      "clue": "The email 'student@school.edu' is reported as not valid -- the @ check never sets hasAt to true."
+      "clue": "The email 'student@school.edu' is reported as not valid; the @ check never sets hasAt to true."
     },
     {
       "id": "b2",

@@ -217,7 +217,7 @@
         "line": 25,
         "fix": "    return name + \" (Grade \" + grade + \", GPA: \" + gpa + \")\";",
         "altFixes": [],
-        "clue": "The toString output shows 'Alice (Grade 3.8, GPA: 3.8)' -- the grade level shows the GPA value instead of 10."
+        "clue": "The toString output shows 'Alice (Grade 3.8, GPA: 3.8)'; the grade level shows the GPA value instead of 10."
       }
     ]
   },

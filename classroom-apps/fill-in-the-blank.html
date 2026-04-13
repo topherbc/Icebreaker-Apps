@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Code Complete</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2316a34a'/><rect x='6' y='8' width='20' height='16' rx='3' fill='%23dcfce7'/><rect x='10' y='12' width='8' height='3' rx='1' fill='%2316a34a' opacity='0.3'/><rect x='10' y='17' width='12' height='3' rx='1' fill='%2316a34a' opacity='0.3'/><path d='M22 14l3 2.5-3 2.5' stroke='%2316a34a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+<title>Fill in the Blank</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2316a34a'/><rect x='5' y='9' width='8' height='3' rx='1' fill='%23dcfce7'/><rect x='5' y='15' width='5' height='3' rx='1' fill='%23dcfce7'/><rect x='12' y='15' width='8' height='3' rx='1.5' fill='none' stroke='%23dcfce7' stroke-width='1' stroke-dasharray='2 1.5'/><rect x='22' y='15' width='5' height='3' rx='1' fill='%23dcfce7'/><rect x='5' y='21' width='12' height='3' rx='1' fill='%23dcfce7'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
   (function(){
-    var t = localStorage.getItem('code-complete-theme');
+    var t = localStorage.getItem('fib-theme');
     if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
   })();
 </script>
@@ -555,12 +555,13 @@
   <div class="nav-brand">
     <svg class="nav-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
       <rect width="32" height="32" rx="6" fill="#16a34a"/>
-      <rect x="6" y="8" width="20" height="16" rx="3" fill="#dcfce7"/>
-      <rect x="10" y="12" width="8" height="3" rx="1" fill="#16a34a" opacity="0.3"/>
-      <rect x="10" y="17" width="12" height="3" rx="1" fill="#16a34a" opacity="0.3"/>
-      <path d="M22 14l3 2.5-3 2.5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="5" y="9" width="8" height="3" rx="1" fill="#dcfce7"/>
+      <rect x="5" y="15" width="5" height="3" rx="1" fill="#dcfce7"/>
+      <rect x="12" y="15" width="8" height="3" rx="1.5" fill="none" stroke="#dcfce7" stroke-width="1" stroke-dasharray="2 1.5"/>
+      <rect x="22" y="15" width="5" height="3" rx="1" fill="#dcfce7"/>
+      <rect x="5" y="21" width="12" height="3" rx="1" fill="#dcfce7"/>
     </svg>
-    <span>Code Complete</span>
+    <span>Fill in the Blank</span>
   </div>
   <div class="nav-right">
     <div class="nav-progress" id="nav-progress" title="Problems solved">
@@ -576,7 +577,7 @@
 <!-- ════ LIBRARY SCREEN ════ -->
 <div id="library-screen">
   <div class="library-header">
-    <h1>Code Complete</h1>
+    <h1>Fill in the Blank</h1>
     <p>Fill in the missing keywords. Select a week, then pick a problem.</p>
   </div>
 
@@ -621,8 +622,8 @@
 (function() {
   'use strict';
 
-  const TREE_PATH = 'cc-content/cc-set-tree.json';
-  const LS_KEY = 'code-complete-completed';
+  const TREE_PATH = 'fib-content/fib-set-tree.json';
+  const LS_KEY = 'fib-completed';
 
   const completedSet = new Set(JSON.parse(localStorage.getItem(LS_KEY) || '[]'));
 
@@ -672,10 +673,10 @@
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (isDark) {
       document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('code-complete-theme', 'light');
+      localStorage.setItem('fib-theme', 'light');
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('code-complete-theme', 'dark');
+      localStorage.setItem('fib-theme', 'dark');
     }
     updateThemeIcon();
   });
@@ -798,7 +799,7 @@
       weekSelect.appendChild(opt);
     });
 
-    const savedWeek = localStorage.getItem('code-complete-week');
+    const savedWeek = localStorage.getItem('fib-week');
     if (currentWeek !== null) {
       weekSelect.value = currentWeek;
       renderProblemList(currentWeek);
@@ -816,11 +817,11 @@
       problemList.hidden = true;
       weekMeta.textContent = '';
       currentWeek = null;
-      localStorage.removeItem('code-complete-week');
+      localStorage.removeItem('fib-week');
       return;
     }
     currentWeek = parseInt(val);
-    localStorage.setItem('code-complete-week', val);
+    localStorage.setItem('fib-week', val);
     renderProblemList(currentWeek);
   });
 

@@ -38,21 +38,21 @@
       "line": 6,
       "fix": "    return rand.nextInt(6) + 1;",
       "altFixes": [],
-      "clue": "nextInt(6) returns a number from 0 to 5. Real dice show values from 1 to 6. How do you shift the range?"
+      "clue": "Real dice show faces numbered 1 through 6. What range does this method currently return?"
     },
     {
       "id": "b2",
       "line": 18,
       "fix": "    System.out.println(\"Die 2: \" + die2);",
       "altFixes": [],
-      "clue": "The second print statement is labeled 'Die 2' but look carefully at which variable it actually prints."
+      "clue": "Both output lines claim to show different dice, but compare the variables at the end of each line."
     },
     {
       "id": "b3",
       "line": 20,
       "fix": "    if (isWin(total)) {",
       "altFixes": [],
-      "clue": "The isWin method checks whether a total is 7 or 11. But what argument is being passed to it here?"
+      "clue": "The win condition depends on the combined total of both dice. What value is actually being checked here?"
     }
   ]
 }

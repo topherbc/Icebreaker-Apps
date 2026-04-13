@@ -1,49 +1,55 @@
 {
   "id": "week1-variables-01",
-  "title": "Tip Calculator",
+  "title": "Movie Night Budget",
   "week": 1,
   "topic": "variables",
-  "description": "This program calculates a 20% tip on a restaurant bill and splits it three ways.",
+  "description": "This program calculates the total cost for 4 friends going to a movie with tickets, popcorn, and drinks.",
   "code": [
-    { "line": 1, "text": "public class TipCalculator {" },
+    { "line": 1, "text": "public class MovieNight {" },
     { "line": 2, "text": "  public static void main(String[] args) {" },
-    { "line": 3, "text": "    int billTotal = 85;" },
-    { "line": 4, "text": "    int tipPercent = 20;" },
-    { "line": 5, "text": "    double tipAmount = billTotal * tipPercent / 100;", "bugId": "b1" },
-    { "line": 6, "text": "    double total = billTotal + tipPercent;", "bugId": "b2" },
-    { "line": 7, "text": "    int perPerson = total / 3;", "bugId": "b3" },
-    { "line": 8, "text": "    System.out.println(\"Tip: $\" + tipAmount);" },
-    { "line": 9, "text": "    System.out.println(\"Total: $\" + total);" },
-    { "line": 10, "text": "    System.out.println(\"Each pays: $\" + perPerson);" },
-    { "line": 11, "text": "  }" },
-    { "line": 12, "text": "}" }
+    { "line": 3, "text": "    int friends = 4;" },
+    { "line": 4, "text": "    double ticketPrice = 12.50;" },
+    { "line": 5, "text": "    double popcornPrice = 8.75;" },
+    { "line": 6, "text": "    int drinksPerPerson = 1;" },
+    { "line": 7, "text": "    double drinkPrice = 4.50;" },
+    { "line": 8, "text": "" },
+    { "line": 9, "text": "    double ticketTotal = ticketPrice * friends;" },
+    { "line": 10, "text": "    int popcornBuckets = friends / 2;", "bugId": "b1" },
+    { "line": 11, "text": "    double popcornTotal = popcornBuckets * popcornPrice;" },
+    { "line": 12, "text": "    double drinkTotal = drinkPrice * drinksPerPerson;", "bugId": "b2" },
+    { "line": 13, "text": "" },
+    { "line": 14, "text": "    double grandTotal = ticketTotal + popcornTotal + drinkTotal;" },
+    { "line": 15, "text": "    double eachPays = grandTotal / friends;" },
+    { "line": 16, "text": "    System.out.println(\"Total: $\" + grandTotal);" },
+    { "line": 17, "text": "    System.out.println(\"Each: $\" + grandTotal);", "bugId": "b3" },
+    { "line": 18, "text": "  }" },
+    { "line": 19, "text": "}" }
   ],
   "bugs": [
     {
       "id": "b1",
-      "line": 5,
-      "fix": "    double tipAmount = billTotal * tipPercent / 100.0;",
+      "line": 10,
+      "fix": "    double popcornBuckets = (double) friends / 2;",
       "altFixes": [
-        "    double tipAmount = (double) billTotal * tipPercent / 100;",
-        "    double tipAmount = (double)(billTotal * tipPercent) / 100;"
+        "    double popcornBuckets = friends / 2.0;"
       ],
-      "clue": "The tip should be $17.00, but integer math truncates the decimal. How can you make the division produce a double?"
+      "clue": "Four friends sharing popcorn two-to-a-bucket should need exactly 2 buckets, but with different group sizes integer division could lose half a bucket."
     },
     {
       "id": "b2",
-      "line": 6,
-      "fix": "    double total = billTotal + tipAmount;",
-      "altFixes": [],
-      "clue": "The total should be the original bill plus the calculated tip amount, not the tip percentage."
+      "line": 12,
+      "fix": "    double drinkTotal = drinkPrice * drinksPerPerson * friends;",
+      "altFixes": [
+        "    double drinkTotal = drinkPrice * friends;"
+      ],
+      "clue": "Everyone in the group is buying a drink, not just one person."
     },
     {
       "id": "b3",
-      "line": 7,
-      "fix": "    double perPerson = total / 3;",
-      "altFixes": [
-        "    double perPerson = total / 3.0;"
-      ],
-      "clue": "Each person's share needs to include cents. What type should perPerson be?"
+      "line": 17,
+      "fix": "    System.out.println(\"Each: $\" + eachPays);",
+      "altFixes": [],
+      "clue": "The per-person cost was already calculated and stored. Check which variable this line is printing."
     }
   ]
 }

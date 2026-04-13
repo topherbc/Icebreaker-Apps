@@ -33,21 +33,21 @@
       "altFixes": [
         "    songs.remove(\"Hotel California\");"
       ],
-      "clue": "This line removes the song at index 0 (Bohemian Rhapsody), not Hotel California. ArrayList has a remove method that takes an object to match by value."
+      "clue": "The song to remove was already stored in a variable, but this line removes by position instead of by value."
     },
     {
       "id": "b2",
       "line": 14,
       "fix": "    System.out.println(\"Playlist (\" + songs.size() + \" songs):\");",
       "altFixes": [],
-      "clue": "ArrayList's size is retrieved via a method call, not a field access. Do not forget the parentheses."
+      "clue": "Arrays use a field to expose their length, but ArrayList uses something different."
     },
     {
       "id": "b3",
       "line": 15,
       "fix": "    for (int i = 0; i < songs.size(); i++) {",
       "altFixes": [],
-      "clue": "If the list has 3 songs, valid indices are 0, 1, and 2. Using <= in the condition tries to access index 3, which throws an IndexOutOfBoundsException."
+      "clue": "If the list has 3 elements, the last valid index is 2. The loop visits one index too many."
     }
   ]
 }

@@ -38,14 +38,14 @@
       "line": 7,
       "fix": "    if (username.length() < 3 || username.length() > 15) {",
       "altFixes": [],
-      "clue": "In Java, getting the length of a String requires calling a method, not accessing a field. Arrays use .length, but Strings are different."
+      "clue": "Arrays expose their size as a field, but Strings do it differently."
     },
     {
       "id": "b2",
       "line": 12,
       "fix": "    if (!Character.isLetter(username.charAt(0))) {",
       "altFixes": [],
-      "clue": "The first character of a String is at index 0, not index 1. This check is supposed to validate the very first character."
+      "clue": "The check is meant to inspect the very first character of the username."
     },
     {
       "id": "b3",
@@ -54,7 +54,7 @@
       "altFixes": [
         "    if (username.equalsIgnoreCase(banned)) {"
       ],
-      "clue": "Comparing Strings with == checks if they are the same object in memory, not if they have the same text. Use the right String method."
+      "clue": "Two Strings can hold identical text yet still be different objects in memory. Java has a method for comparing content."
     }
   ]
 }

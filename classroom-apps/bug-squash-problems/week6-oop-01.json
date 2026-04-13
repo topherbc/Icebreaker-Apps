@@ -44,21 +44,21 @@
       "altFixes": [
         "    this.balance = startBalance;"
       ],
-      "clue": "The constructor should store the parameter into the field. Right now the assignment is backwards -- the field's default value (0.0) overwrites the parameter."
+      "clue": "After construction, the balance is always 0.0 regardless of what was passed in. Look at which side of the assignment gets written to."
     },
     {
       "id": "b2",
       "line": 13,
       "fix": "    if (amount <= balance) {",
       "altFixes": [],
-      "clue": "If someone has exactly $30 and tries to withdraw $30, should that be allowed? The current comparison blocks exact-balance withdrawals."
+      "clue": "A customer with exactly $30 tries to withdraw $30 and gets denied. The guard condition is slightly too strict."
     },
     {
       "id": "b3",
       "line": 28,
       "fix": "    System.out.println(\"Balance: $\" + acct.getBalance());",
       "altFixes": [],
-      "clue": "The balance field is private. Outside code cannot access it directly. There is a getter method available."
+      "clue": "The balance field is marked private. Code outside the class needs another way to read it."
     }
   ]
 }

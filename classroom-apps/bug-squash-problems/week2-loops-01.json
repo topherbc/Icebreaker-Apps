@@ -3,18 +3,22 @@
   "title": "Multiplication Table",
   "week": 2,
   "topic": "loops",
-  "description": "This program prints the multiplication table for 7, from 7 x 1 through 7 x 10.",
+  "description": "This program prints the multiplication table for 7, from 7 x 1 through 7 x 10, then a summary.",
   "code": [
     { "line": 1, "text": "public class MultiplicationTable {" },
     { "line": 2, "text": "  public static void main(String[] args) {" },
     { "line": 3, "text": "    int number = 7;" },
     { "line": 4, "text": "    System.out.println(\"Multiplication table for \" + number);" },
     { "line": 5, "text": "    for (int i = 0; i <= 10; i++) {", "bugId": "b1" },
-    { "line": 6, "text": "      int result = number + i;", "bugId": "b2" },
-    { "line": 7, "text": "      System.out.println(number + \" x \" + i + \" = \" + number);", "bugId": "b3" },
+    { "line": 6, "text": "      int result = number * i;" },
+    { "line": 7, "text": "      System.out.println(number + \" x \" + i + \" = \" + result);" },
     { "line": 8, "text": "    }" },
-    { "line": 9, "text": "  }" },
-    { "line": 10, "text": "}" }
+    { "line": 9, "text": "    int sum = number * 10;", "bugId": "b2" },
+    { "line": 10, "text": "    System.out.println(\"Sum of all products: \" + sum);" },
+    { "line": 11, "text": "    System.out.print(\"Done! \");", "bugId": "b3" },
+    { "line": 12, "text": "    System.out.println(\"Printed 10 rows.\");" },
+    { "line": 13, "text": "  }" },
+    { "line": 14, "text": "}" }
   ],
   "bugs": [
     {
@@ -22,21 +26,23 @@
       "line": 5,
       "fix": "    for (int i = 1; i <= 10; i++) {",
       "altFixes": [],
-      "clue": "Multiplication tables normally start at 1, not 0. What value should i begin with?"
+      "clue": "Multiplication tables start from 1, not 0."
     },
     {
       "id": "b2",
-      "line": 6,
-      "fix": "      int result = number * i;",
-      "altFixes": [],
-      "clue": "This line should compute the product for each row of the table. Check the operator."
+      "line": 9,
+      "fix": "    int sum = number * 55;",
+      "altFixes": [
+        "    int sum = 7 * 55;"
+      ],
+      "clue": "The sum of all products (7x1 + 7x2 + ... + 7x10) equals 7 times the sum of 1 through 10. The current formula only computes the last product."
     },
     {
       "id": "b3",
-      "line": 7,
-      "fix": "      System.out.println(number + \" x \" + i + \" = \" + result);",
+      "line": 11,
+      "fix": "    System.out.println(\"Done! \");",
       "altFixes": [],
-      "clue": "The output should show the computed result, but right now it prints something else at the end."
+      "clue": "The 'Done' message and the row count should appear on separate lines, but they are running together on one line."
     }
   ]
 }

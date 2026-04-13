@@ -42,9 +42,10 @@
     { "line": 35, "text": "    Pet myDog = new Dog(\"Rex\");" },
     { "line": 36, "text": "    Pet myCat = new Cat(\"Whiskers\");" },
     { "line": 37, "text": "    System.out.println(myDog.speak());" },
-    { "line": 38, "text": "    System.out.println(myCat);", "bugId": "b3" },
-    { "line": 39, "text": "  }" },
-    { "line": 40, "text": "}" }
+    { "line": 38, "text": "    System.out.println(myCat.speak());" },
+    { "line": 39, "text": "    System.out.println(myDog.name + \" and \" + myDog.name);", "bugId": "b3" },
+    { "line": 40, "text": "  }" },
+    { "line": 41, "text": "}" }
   ],
   "bugs": [
     {
@@ -52,21 +53,21 @@
       "line": 15,
       "fix": "    super(name);",
       "altFixes": [],
-      "clue": "Subclass constructors should delegate to the parent constructor. Directly assigning an inherited field skips any setup the parent does."
+      "clue": "Subclass constructors should initialize through the parent. Bypassing it can skip important setup logic."
     },
     {
       "id": "b2",
       "line": 28,
       "fix": "  public String speak() {",
       "altFixes": [],
-      "clue": "For Cat's speak to override Pet's speak, the method signatures must match exactly. Compare the parameter lists."
+      "clue": "For a method to override its parent version, the signatures must be identical. Compare them carefully."
     },
     {
       "id": "b3",
-      "line": 38,
-      "fix": "    System.out.println(myCat.speak());",
+      "line": 39,
+      "fix": "    System.out.println(myDog.name + \" and \" + myCat.name);",
       "altFixes": [],
-      "clue": "Printing an object directly gives something like Cat@1a2b3c. To see the cat's sound, you need to call the speak method."
+      "clue": "This line should print both pets' names together, but both names shown belong to the same animal."
     }
   ]
 }

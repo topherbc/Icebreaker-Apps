@@ -424,12 +424,6 @@
   .code-line.bug-line:hover {
     background: var(--bg-panel);
   }
-  .code-line.bug-line.edited {
-    background: var(--bug-line-bg);
-  }
-  .code-line.bug-line.fixed {
-    background: var(--bug-fix-bg);
-  }
   .code-line.bug-line.editing {
     background: var(--bug-line-bg);
   }
@@ -548,14 +542,15 @@
     .code-panel { max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
   }
 
-  /* ── WRONG / NOT-FIXED STATE ── */
-  .code-line.bug-line.wrong {
-    background: var(--bug-line-bg);
-    animation: flash-wrong 0.6s ease;
+  /* ── CLUE HIGHLIGHT ON CHECK ── */
+  .clue-card.highlight {
+    border-color: var(--bug-amber);
+    background: var(--bug-amber-bg);
+    animation: flash-clue 0.6s ease;
   }
-  @keyframes flash-wrong {
-    0%, 100% { background: var(--bug-line-bg); }
-    50% { background: var(--bug-amber-bg); }
+  @keyframes flash-clue {
+    0%, 100% { border-color: var(--bug-amber); }
+    50% { border-color: var(--bug-amber); box-shadow: 0 0 0 3px var(--bug-amber-bg); }
   }
 
   .check-feedback {
@@ -921,8 +916,6 @@
       const isBug = !!line.bugId;
       if (isBug) {
         div.classList.add('bug-line');
-        if (fixedBugs.has(line.bugId)) div.classList.add('fixed');
-        else if (editedLines[line.bugId] !== undefined) div.classList.add('edited');
         div.dataset.bugId = line.bugId;
       }
 
@@ -978,7 +971,21 @@
       }
       const bugIdx = currentProblem.bugs.findIndex(b => b.id === line.bugId);
       if (bugIdx >= 0 && !fixedBugs.has(line.bugId) && editedLines[line.bugId] !== undefined) {
-        updateDot(bugIdx, 'amber');
+        const bug = currentProblem.bugs[bugIdx];
+        const normed = norm(editedLines[line.bugId]);
+        const accepted = [bug.fix, ...(bug.altFixes || [])].map(norm);
+        if (accepted.includes(normed)) {
+          fixedBugs.add(line.bugId);
+          updateDot(bugIdx, 'green');
+          if (fixedBugs.size === currentProblem.bugs.length) {
+            completedSet.add(currentProblem.id);
+            checkFeedback.textContent = 'All 3 bugs fixed! Nice work.';
+            checkFeedback.classList.remove('incomplete');
+            checkFeedback.classList.add('visible', 'success');
+          }
+        } else {
+          updateDot(bugIdx, 'amber');
+        }
       }
       renderCode();
     };
@@ -1007,14 +1014,14 @@
   btnCheck.addEventListener('click', () => {
     if (!currentProblem) return;
 
-    const wrongBugIds = [];
+    const wrongIndices = [];
 
     currentProblem.bugs.forEach((bug, i) => {
       if (fixedBugs.has(bug.id)) return;
 
       const edited = editedLines[bug.id];
       if (edited === undefined) {
-        wrongBugIds.push(bug.id);
+        wrongIndices.push(i);
         return;
       }
 
@@ -1024,11 +1031,14 @@
         fixedBugs.add(bug.id);
         updateDot(i, 'green');
       } else {
-        wrongBugIds.push(bug.id);
+        wrongIndices.push(i);
       }
     });
 
     renderCode();
+
+    // Clear previous clue highlights
+    clueCards.querySelectorAll('.clue-card').forEach(c => c.classList.remove('highlight'));
 
     checkFeedback.classList.remove('visible', 'success', 'incomplete');
     if (fixedBugs.size === currentProblem.bugs.length) {
@@ -1040,12 +1050,13 @@
       checkFeedback.textContent = remaining + ' bug' + (remaining > 1 ? 's' : '') + ' still need fixing.';
       checkFeedback.classList.add('visible', 'incomplete');
 
-      wrongBugIds.forEach(bugId => {
-        const lineEl = codePanel.querySelector('[data-bug-id="' + bugId + '"]');
-        if (lineEl) {
-          lineEl.classList.remove('wrong');
-          void lineEl.offsetWidth;
-          lineEl.classList.add('wrong');
+      // Highlight unfixed clue cards
+      const cards = clueCards.querySelectorAll('.clue-card');
+      wrongIndices.forEach(idx => {
+        if (cards[idx]) {
+          cards[idx].classList.remove('highlight');
+          void cards[idx].offsetWidth;
+          cards[idx].classList.add('highlight');
         }
       });
     }

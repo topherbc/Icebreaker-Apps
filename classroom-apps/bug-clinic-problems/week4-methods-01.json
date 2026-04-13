@@ -1,0 +1,58 @@
+{
+  "id": "week4-methods-01",
+  "title": "Dice Roller",
+  "week": 4,
+  "topic": "methods",
+  "description": "This program rolls two six-sided dice, prints each roll, and reports whether the total is 7 or 11 (a win).",
+  "code": [
+    { "line": 1, "text": "import java.util.Random;" },
+    { "line": 2, "text": "" },
+    { "line": 3, "text": "public class DiceRoller {" },
+    { "line": 4, "text": "  public static int rollDie() {" },
+    { "line": 5, "text": "    Random rand = new Random();" },
+    { "line": 6, "text": "    return rand.nextInt(6);", "bugId": "b1" },
+    { "line": 7, "text": "  }" },
+    { "line": 8, "text": "" },
+    { "line": 9, "text": "  public static boolean isWin(int total) {" },
+    { "line": 10, "text": "    return total == 7 || total == 11;" },
+    { "line": 11, "text": "  }" },
+    { "line": 12, "text": "" },
+    { "line": 13, "text": "  public static void main(String[] args) {" },
+    { "line": 14, "text": "    int die1 = rollDie();" },
+    { "line": 15, "text": "    int die2 = rollDie();" },
+    { "line": 16, "text": "    int total = die1 + die2;" },
+    { "line": 17, "text": "    System.out.println(\"Die 1: \" + die1);" },
+    { "line": 18, "text": "    System.out.println(\"Die 2: \" + die1);", "bugId": "b2" },
+    { "line": 19, "text": "    System.out.println(\"Total: \" + total);" },
+    { "line": 20, "text": "    if (isWin(die1)) {", "bugId": "b3" },
+    { "line": 21, "text": "      System.out.println(\"You win!\");" },
+    { "line": 22, "text": "    } else {" },
+    { "line": 23, "text": "      System.out.println(\"Try again.\");" },
+    { "line": 24, "text": "    }" },
+    { "line": 25, "text": "  }" },
+    { "line": 26, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 6,
+      "fix": "    return rand.nextInt(6) + 1;",
+      "altFixes": [],
+      "clue": "nextInt(6) returns a number from 0 to 5. Real dice show values from 1 to 6. How do you shift the range?"
+    },
+    {
+      "id": "b2",
+      "line": 18,
+      "fix": "    System.out.println(\"Die 2: \" + die2);",
+      "altFixes": [],
+      "clue": "The second print statement is labeled 'Die 2' but look carefully at which variable it actually prints."
+    },
+    {
+      "id": "b3",
+      "line": 20,
+      "fix": "    if (isWin(total)) {",
+      "altFixes": [],
+      "clue": "The isWin method checks whether a total is 7 or 11. But what argument is being passed to it here?"
+    }
+  ]
+}

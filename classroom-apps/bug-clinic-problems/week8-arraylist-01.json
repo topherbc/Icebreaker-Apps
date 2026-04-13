@@ -1,0 +1,53 @@
+{
+  "id": "week8-arraylist-01",
+  "title": "Playlist Manager",
+  "week": 8,
+  "topic": "ArrayList",
+  "description": "This program builds a playlist, removes a song by name, and prints the remaining tracks.",
+  "code": [
+    { "line": 1, "text": "import java.util.ArrayList;" },
+    { "line": 2, "text": "" },
+    { "line": 3, "text": "public class PlaylistManager {" },
+    { "line": 4, "text": "  public static void main(String[] args) {" },
+    { "line": 5, "text": "    ArrayList<String> songs = new ArrayList<String>();" },
+    { "line": 6, "text": "    songs.add(\"Bohemian Rhapsody\");" },
+    { "line": 7, "text": "    songs.add(\"Hotel California\");" },
+    { "line": 8, "text": "    songs.add(\"Stairway to Heaven\");" },
+    { "line": 9, "text": "    songs.add(\"Imagine\");" },
+    { "line": 10, "text": "" },
+    { "line": 11, "text": "    String toRemove = \"Hotel California\";" },
+    { "line": 12, "text": "    songs.remove(0);", "bugId": "b1" },
+    { "line": 13, "text": "" },
+    { "line": 14, "text": "    System.out.println(\"Playlist (\" + songs.size + \" songs):\");", "bugId": "b2" },
+    { "line": 15, "text": "    for (int i = 0; i <= songs.size(); i++) {", "bugId": "b3" },
+    { "line": 16, "text": "      System.out.println(\"  - \" + songs.get(i));" },
+    { "line": 17, "text": "    }" },
+    { "line": 18, "text": "  }" },
+    { "line": 19, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 12,
+      "fix": "    songs.remove(toRemove);",
+      "altFixes": [
+        "    songs.remove(\"Hotel California\");"
+      ],
+      "clue": "This line removes the song at index 0 (Bohemian Rhapsody), not Hotel California. ArrayList has a remove method that takes an object to match by value."
+    },
+    {
+      "id": "b2",
+      "line": 14,
+      "fix": "    System.out.println(\"Playlist (\" + songs.size() + \" songs):\");",
+      "altFixes": [],
+      "clue": "ArrayList's size is retrieved via a method call, not a field access. Do not forget the parentheses."
+    },
+    {
+      "id": "b3",
+      "line": 15,
+      "fix": "    for (int i = 0; i < songs.size(); i++) {",
+      "altFixes": [],
+      "clue": "If the list has 3 songs, valid indices are 0, 1, and 2. Using <= in the condition tries to access index 3, which throws an IndexOutOfBoundsException."
+    }
+  ]
+}

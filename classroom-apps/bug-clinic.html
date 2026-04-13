@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bug Clinic</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='%23e2e8f0' stroke='%2364748b' stroke-width='1.5'/><path d='M11 14 a1 1 0 0 1 10 0' fill='none' stroke='%23ef4444' stroke-width='2'/><circle cx='12' cy='12' r='1.5' fill='%2364748b'/><circle cx='20' cy='12' r='1.5' fill='%2364748b'/><path d='M10 20 q6 4 12 0' fill='none' stroke='%2322c55e' stroke-width='2'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var t = localStorage.getItem('bug-clinic-theme');
+    if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg:          #f8f9fb;
+    --bg-card:     #ffffff;
+    --bg-panel:    #f1f3f7;
+    --bg-code:     #f8f9fb;
+    --bg-topbar:   #ffffff;
+    --border:      #d4d9e3;
+    --border-light:#e8ecf2;
+    --ink:         #1a1d27;
+    --ink-soft:    #4a5066;
+    --ink-faint:   #6b7280;
+    --accent:      #3b82f6;
+    --accent-hover:#2563eb;
+    --accent-bg:   #eff6ff;
+    --bug-gray:    #9ca3af;
+    --bug-amber:   #d97706;
+    --bug-amber-bg:#fef3c7;
+    --bug-green:   #16a34a;
+    --bug-green-bg:#dcfce7;
+    --bug-line-bg: #fefce8;
+    --bug-fix-bg:  #f0fdf4;
+    --selected:    #dbeafe;
+    --selected-b:  #3b82f6;
+    --pill-bg:     #e8ecf2;
+    --pill-active: #3b82f6;
+    --pill-active-t:#ffffff;
+    --code-kw:     #7c3aed;
+    --code-str:    #059669;
+    --code-num:    #d97706;
+    --code-cmt:    #9ca3af;
+    --code-type:   #2563eb;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md:   0 4px 12px rgba(0,0,0,0.08);
+    --font-body:   'DM Sans', system-ui, sans-serif;
+    --font-mono:   'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --bg:          #0f1219;
+    --bg-card:     #1a1f2e;
+    --bg-panel:    #151a26;
+    --bg-code:     #0f1219;
+    --bg-topbar:   #1a1f2e;
+    --border:      #2d3548;
+    --border-light:#232b3d;
+    --ink:         #e2e8f0;
+    --ink-soft:    #94a3b8;
+    --ink-faint:   #64748b;
+    --accent:      #60a5fa;
+    --accent-hover:#3b82f6;
+    --accent-bg:   #1e293b;
+    --bug-gray:    #4b5563;
+    --bug-amber:   #f59e0b;
+    --bug-amber-bg:#422006;
+    --bug-green:   #22c55e;
+    --bug-green-bg:#052e16;
+    --bug-line-bg: #2a2510;
+    --bug-fix-bg:  #0a2e1a;
+    --selected:    #1e3a5f;
+    --selected-b:  #60a5fa;
+    --pill-bg:     #232b3d;
+    --pill-active: #60a5fa;
+    --pill-active-t:#0f1219;
+    --code-kw:     #a78bfa;
+    --code-str:    #34d399;
+    --code-num:    #fbbf24;
+    --code-cmt:    #4b5563;
+    --code-type:   #60a5fa;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.2);
+    --shadow-md:   0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: var(--font-body);
+    color: var(--ink);
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  button { cursor: pointer; font-family: inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    z-index: 100;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: background 0.2s;
+  }
+  .theme-toggle:hover { background: var(--bg-panel); }
+
+  /* ── LIBRARY SCREEN ── */
+  #library-screen {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .library-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .library-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .library-header p {
+    color: var(--ink-soft);
+    font-size: 1rem;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    align-items: center;
+  }
+  .filter-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin-right: 4px;
+  }
+  .filter-pill {
+    background: var(--pill-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: all 0.15s;
+    min-height: 36px;
+  }
+  .filter-pill:hover { border-color: var(--accent); color: var(--ink); }
+  .filter-pill.active {
+    background: var(--pill-active);
+    color: var(--pill-active-t);
+    border-color: var(--pill-active);
+  }
+  .filter-sep {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .problem-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    border-radius: 10px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .problem-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+  .problem-card.selected {
+    border-color: var(--selected-b);
+    background: var(--selected);
+    box-shadow: var(--shadow-md);
+  }
+  .problem-card .card-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .problem-card .card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--pill-bg);
+    color: var(--ink-faint);
+  }
+  .tag-week { background: var(--accent-bg); color: var(--accent); }
+  .card-check {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--bug-green);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .problem-card.completed .card-check { display: flex; }
+
+  .launch-bar {
+    text-align: center;
+  }
+  #launch-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 48px;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 48px;
+    transition: all 0.15s;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  #launch-btn.ready {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #launch-btn.ready:hover { background: var(--accent-hover); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-faint);
+    font-size: 0.95rem;
+  }
+
+  /* ── CLINIC SCREEN ── */
+  #clinic-screen {
+    display: none;
+    height: 100vh;
+    flex-direction: column;
+  }
+  #clinic-screen.active {
+    display: flex;
+  }
+
+  .clinic-topbar {
+    background: var(--bg-topbar);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+    min-height: 56px;
+  }
+  .back-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .topbar-title {
+    font-weight: 600;
+    font-size: 1rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .bug-tracker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .bug-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.25s;
+    border: 2px solid var(--bug-gray);
+    background: transparent;
+    color: var(--bug-gray);
+  }
+  .bug-dot[data-state="gray"] {
+    border-color: var(--bug-gray);
+    color: var(--bug-gray);
+  }
+  .bug-dot[data-state="amber"] {
+    border-color: var(--bug-amber);
+    background: var(--bug-amber-bg);
+    color: var(--bug-amber);
+    border-radius: 6px;
+  }
+  .bug-dot[data-state="green"] {
+    border-color: var(--bug-green);
+    background: var(--bug-green-bg);
+    color: var(--bug-green);
+  }
+
+  .clinic-panels {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Left: code panel */
+  .code-panel {
+    width: 60%;
+    overflow-y: auto;
+    padding: 20px 0;
+    background: var(--bg-code);
+    border-right: 1px solid var(--border);
+  }
+  .code-line {
+    display: flex;
+    align-items: stretch;
+    min-height: 28px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  .line-num {
+    width: 48px;
+    text-align: right;
+    padding-right: 16px;
+    color: var(--ink-faint);
+    user-select: none;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    opacity: 0.6;
+  }
+  .line-text {
+    flex: 1;
+    padding-right: 20px;
+    white-space: pre;
+    min-width: 0;
+  }
+  .code-line.bug-line {
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .code-line.bug-line:hover {
+    background: var(--bg-panel);
+  }
+  .code-line.bug-line.edited {
+    background: var(--bug-line-bg);
+  }
+  .code-line.bug-line.fixed {
+    background: var(--bug-fix-bg);
+  }
+  .code-line.bug-line.editing {
+    background: var(--bug-line-bg);
+  }
+  .bug-line .line-text { cursor: text; }
+  .bug-line-input {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    background: var(--bg-card);
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    padding: 0 4px;
+    margin-right: 12px;
+    color: var(--ink);
+    outline: none;
+  }
+
+  /* Right panel */
+  .right-panel {
+    width: 40%;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .problem-desc {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .clue-section-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .clue-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .clue-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .clue-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--pill-bg);
+    color: var(--ink-faint);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 16px;
+  }
+  .btn-check {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 48px;
+    transition: background 0.15s;
+  }
+  .btn-check:hover { background: var(--accent-hover); }
+  .btn-next {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-height: 48px;
+    transition: all 0.15s;
+  }
+  .btn-next:hover { border-color: var(--accent); background: var(--accent-bg); }
+
+  .all-fixed-msg {
+    text-align: center;
+    padding: 12px;
+    background: var(--bug-green-bg);
+    border: 1px solid var(--bug-green);
+    border-radius: 8px;
+    color: var(--bug-green);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: none;
+  }
+  .all-fixed-msg.visible { display: block; }
+
+  /* ── SYNTAX HIGHLIGHTING ── */
+  .kw { color: var(--code-kw); font-weight: 500; }
+  .str { color: var(--code-str); }
+  .num { color: var(--code-num); }
+  .cmt { color: var(--code-cmt); font-style: italic; }
+  .typ { color: var(--code-type); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .clinic-panels { flex-direction: column; }
+    .code-panel, .right-panel { width: 100%; }
+    .code-panel { max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* Hidden utility */
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+  <span id="theme-icon">&#9789;</span>
+</button>
+
+<!-- ════ LIBRARY SCREEN ════ -->
+<div id="library-screen">
+  <div class="library-header">
+    <h1>Bug Clinic</h1>
+    <p>Find and fix the bugs. Pick a problem to get started.</p>
+  </div>
+
+  <div class="filter-row" id="filter-row">
+    <span class="filter-label">Week</span>
+    <div id="week-filters"></div>
+    <div class="filter-sep"></div>
+    <span class="filter-label">Topic</span>
+    <div id="topic-filters"></div>
+  </div>
+
+  <div class="problem-grid" id="problem-grid"></div>
+  <div class="empty-state" id="empty-state" hidden>No problems match your filters.</div>
+
+  <div class="launch-bar">
+    <button id="launch-btn">Launch</button>
+  </div>
+</div>
+
+<!-- ════ CLINIC SCREEN ════ -->
+<div id="clinic-screen">
+  <div class="clinic-topbar">
+    <a href="#" class="back-link" id="back-link">&larr; Library</a>
+    <div class="topbar-title">
+      <span id="clinic-title"></span>
+      <span class="tag tag-week" id="clinic-week-tag"></span>
+      <span class="tag" id="clinic-topic-tag"></span>
+    </div>
+    <div class="bug-tracker" id="bug-tracker" aria-label="Bug fix progress">
+      <span class="bug-dot" data-state="gray" aria-label="Bug 1: not found">&#9679;</span>
+      <span class="bug-dot" data-state="gray" aria-label="Bug 2: not found">&#9679;</span>
+      <span class="bug-dot" data-state="gray" aria-label="Bug 3: not found">&#9679;</span>
+    </div>
+  </div>
+
+  <div class="clinic-panels">
+    <div class="code-panel" id="code-panel"></div>
+    <div class="right-panel">
+      <div class="problem-desc" id="problem-desc"></div>
+      <div>
+        <div class="clue-section-title">Clues</div>
+        <div class="clue-cards" id="clue-cards"></div>
+      </div>
+      <div class="all-fixed-msg" id="all-fixed-msg">All 3 bugs fixed! Nice work.</div>
+      <div class="action-buttons">
+        <button class="btn-check" id="btn-check">Check Fixes</button>
+        <button class="btn-next" id="btn-next">Next Problem</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const PROBLEMS_DIR = 'bug-clinic-problems/';
+  const completedSet = new Set();
+
+  let manifest = [];
+  let problemCache = {};
+  let allProblems = [];       // loaded metadata
+  let selectedId = null;
+  let currentProblem = null;
+  let editedLines = {};       // bugId -> current text
+  let fixedBugs = new Set();
+  let activeWeeks = new Set();
+  let activeTopics = new Set();
+
+  // ── DOM refs ──
+  const $ = id => document.getElementById(id);
+  const libraryScreen = $('library-screen');
+  const clinicScreen  = $('clinic-screen');
+  const problemGrid   = $('problem-grid');
+  const emptyState    = $('empty-state');
+  const launchBtn     = $('launch-btn');
+  const backLink      = $('back-link');
+  const codePanel     = $('code-panel');
+  const clueCards     = $('clue-cards');
+  const bugDots       = document.querySelectorAll('.bug-dot');
+  const btnCheck      = $('btn-check');
+  const btnNext       = $('btn-next');
+  const allFixedMsg   = $('all-fixed-msg');
+
+  // ── Theme toggle ──
+  const themeToggle = $('theme-toggle');
+  const themeIcon   = $('theme-icon');
+  function updateThemeIcon() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeIcon.innerHTML = dark ? '&#9788;' : '&#9789;';
+  }
+  updateThemeIcon();
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('bug-clinic-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('bug-clinic-theme', 'dark');
+    }
+    updateThemeIcon();
+  });
+
+  // ── Norm for fix validation ──
+  function norm(s) {
+    return s.trim().replace(/\s+/g, ' ');
+  }
+
+  // ── Java syntax highlighting ──
+  const JAVA_KEYWORDS = new Set([
+    'abstract','assert','boolean','break','byte','case','catch','char','class',
+    'const','continue','default','do','double','else','enum','extends','final',
+    'finally','float','for','goto','if','implements','import','instanceof','int',
+    'interface','long','native','new','package','private','protected','public',
+    'return','short','static','strictfp','super','switch','synchronized','this',
+    'throw','throws','transient','try','void','volatile','while','true','false','null'
+  ]);
+  const JAVA_TYPES = new Set([
+    'String','System','Scanner','ArrayList','List','Map','HashMap','Set','HashSet',
+    'Integer','Double','Boolean','Object','File','Arrays','Collections','Math',
+    'StringBuilder','Exception','IOException','FileNotFoundException',
+    'PrintWriter','BufferedReader','FileReader','Random'
+  ]);
+
+  function highlightJava(text) {
+    let result = '';
+    let i = 0;
+    while (i < text.length) {
+      // String literal
+      if (text[i] === '"') {
+        let end = i + 1;
+        while (end < text.length && text[end] !== '"') {
+          if (text[end] === '\\') end++;
+          end++;
+        }
+        end = Math.min(end + 1, text.length);
+        result += '<span class="str">' + esc(text.slice(i, end)) + '</span>';
+        i = end;
+        continue;
+      }
+      // Char literal
+      if (text[i] === "'") {
+        let end = i + 1;
+        while (end < text.length && text[end] !== "'") {
+          if (text[end] === '\\') end++;
+          end++;
+        }
+        end = Math.min(end + 1, text.length);
+        result += '<span class="str">' + esc(text.slice(i, end)) + '</span>';
+        i = end;
+        continue;
+      }
+      // Line comment
+      if (text[i] === '/' && text[i+1] === '/') {
+        result += '<span class="cmt">' + esc(text.slice(i)) + '</span>';
+        break;
+      }
+      // Word
+      if (/[a-zA-Z_$]/.test(text[i])) {
+        let end = i + 1;
+        while (end < text.length && /[a-zA-Z0-9_$]/.test(text[end])) end++;
+        const word = text.slice(i, end);
+        if (JAVA_KEYWORDS.has(word)) {
+          result += '<span class="kw">' + esc(word) + '</span>';
+        } else if (JAVA_TYPES.has(word)) {
+          result += '<span class="typ">' + esc(word) + '</span>';
+        } else {
+          result += esc(word);
+        }
+        i = end;
+        continue;
+      }
+      // Number
+      if (/[0-9]/.test(text[i])) {
+        let end = i + 1;
+        while (end < text.length && /[0-9.]/.test(text[end])) end++;
+        result += '<span class="num">' + esc(text.slice(i, end)) + '</span>';
+        i = end;
+        continue;
+      }
+      result += esc(text[i]);
+      i++;
+    }
+    return result;
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Load manifest + problems ──
+  async function init() {
+    try {
+      const res = await fetch(PROBLEMS_DIR + 'index.json');
+      manifest = await res.json();
+    } catch(e) {
+      problemGrid.innerHTML = '<div class="empty-state">Could not load problems.</div>';
+      return;
+    }
+
+    // Load all problem metadata
+    const loads = manifest.map(async id => {
+      try {
+        const res = await fetch(PROBLEMS_DIR + id + '.json');
+        const data = await res.json();
+        problemCache[id] = data;
+        return data;
+      } catch(e) {
+        return null;
+      }
+    });
+    allProblems = (await Promise.all(loads)).filter(Boolean);
+    buildFilters();
+    renderGrid();
+  }
+
+  // ── Filters ──
+  function buildFilters() {
+    const weeks = [...new Set(allProblems.map(p => p.week))].sort((a,b) => a - b);
+    const topics = [...new Set(allProblems.map(p => p.topic))].sort();
+
+    const wf = $('week-filters');
+    weeks.forEach(w => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-pill';
+      btn.textContent = 'W' + w;
+      btn.dataset.week = w;
+      btn.addEventListener('click', () => {
+        if (activeWeeks.has(w)) { activeWeeks.delete(w); btn.classList.remove('active'); }
+        else { activeWeeks.add(w); btn.classList.add('active'); }
+        renderGrid();
+      });
+      wf.appendChild(btn);
+    });
+
+    const tf = $('topic-filters');
+    topics.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-pill';
+      btn.textContent = t;
+      btn.dataset.topic = t;
+      btn.addEventListener('click', () => {
+        if (activeTopics.has(t)) { activeTopics.delete(t); btn.classList.remove('active'); }
+        else { activeTopics.add(t); btn.classList.add('active'); }
+        renderGrid();
+      });
+      tf.appendChild(btn);
+    });
+  }
+
+  function renderGrid() {
+    const filtered = allProblems.filter(p => {
+      if (activeWeeks.size && !activeWeeks.has(p.week)) return false;
+      if (activeTopics.size && !activeTopics.has(p.topic)) return false;
+      return true;
+    });
+
+    problemGrid.innerHTML = '';
+    emptyState.hidden = filtered.length > 0;
+
+    filtered.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'problem-card';
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', p.title + ', Week ' + p.week + ', ' + p.topic);
+      if (completedSet.has(p.id)) card.classList.add('completed');
+      if (p.id === selectedId) card.classList.add('selected');
+
+      card.innerHTML =
+        '<div class="card-title">' + esc(p.title) + '</div>' +
+        '<div class="card-tags">' +
+          '<span class="tag tag-week">W' + p.week + '</span>' +
+          '<span class="tag">' + esc(p.topic) + '</span>' +
+        '</div>' +
+        '<div class="card-check" aria-label="Completed">&#10003;</div>';
+
+      card.addEventListener('click', () => selectCard(p.id));
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCard(p.id); }
+      });
+      problemGrid.appendChild(card);
+    });
+  }
+
+  function selectCard(id) {
+    selectedId = id;
+    document.querySelectorAll('.problem-card').forEach(c => c.classList.remove('selected'));
+    const cards = document.querySelectorAll('.problem-card');
+    cards.forEach(c => {
+      const title = c.querySelector('.card-title').textContent;
+      const prob = allProblems.find(p => p.title === title);
+      if (prob && prob.id === id) c.classList.add('selected');
+    });
+    launchBtn.classList.add('ready');
+  }
+
+  // ── Launch ──
+  launchBtn.addEventListener('click', () => {
+    if (!selectedId) return;
+    openClinic(selectedId);
+  });
+
+  function openClinic(id) {
+    currentProblem = problemCache[id];
+    if (!currentProblem) return;
+
+    editedLines = {};
+    fixedBugs = new Set();
+
+    // Topbar
+    $('clinic-title').textContent = currentProblem.title;
+    $('clinic-week-tag').textContent = 'W' + currentProblem.week;
+    $('clinic-topic-tag').textContent = currentProblem.topic;
+
+    // Reset dots
+    bugDots.forEach((d, i) => {
+      d.setAttribute('data-state', 'gray');
+      d.innerHTML = '&#9679;';
+      d.setAttribute('aria-label', 'Bug ' + (i+1) + ': not found');
+    });
+
+    allFixedMsg.classList.remove('visible');
+
+    // Render code
+    renderCode();
+
+    // Render clues
+    clueCards.innerHTML = '';
+    currentProblem.bugs.forEach((bug, i) => {
+      const card = document.createElement('div');
+      card.className = 'clue-card';
+      card.innerHTML =
+        '<div class="clue-num">' + (i + 1) + '</div>' +
+        '<div>' + esc(bug.clue || '') + '</div>';
+      clueCards.appendChild(card);
+    });
+
+    // Show clinic
+    libraryScreen.hidden = true;
+    clinicScreen.classList.add('active');
+  }
+
+  function renderCode() {
+    codePanel.innerHTML = '';
+    currentProblem.code.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+
+      const isBug = !!line.bugId;
+      if (isBug) {
+        div.classList.add('bug-line');
+        if (fixedBugs.has(line.bugId)) div.classList.add('fixed');
+        else if (editedLines[line.bugId] !== undefined) div.classList.add('edited');
+        div.dataset.bugId = line.bugId;
+      }
+
+      const numSpan = document.createElement('span');
+      numSpan.className = 'line-num';
+      numSpan.textContent = line.line;
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'line-text';
+
+      const currentText = isBug && editedLines[line.bugId] !== undefined
+        ? editedLines[line.bugId] : line.text;
+
+      textSpan.innerHTML = highlightJava(currentText);
+      div.appendChild(numSpan);
+      div.appendChild(textSpan);
+
+      if (isBug && !fixedBugs.has(line.bugId)) {
+        div.addEventListener('click', () => startEdit(div, line));
+        div.setAttribute('tabindex', '0');
+        div.setAttribute('role', 'button');
+        div.setAttribute('aria-label', 'Line ' + line.line + ': click to edit');
+        div.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); startEdit(div, line); }
+        });
+      }
+
+      codePanel.appendChild(div);
+    });
+  }
+
+  function startEdit(div, line) {
+    if (div.classList.contains('editing')) return;
+    div.classList.add('editing');
+
+    const textSpan = div.querySelector('.line-text');
+    const currentText = editedLines[line.bugId] !== undefined
+      ? editedLines[line.bugId] : line.text;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'bug-line-input';
+    input.value = currentText;
+    input.setAttribute('aria-label', 'Edit line ' + line.line);
+
+    textSpan.replaceWith(input);
+    input.focus();
+
+    const finish = () => {
+      const val = input.value;
+      if (val !== line.text) {
+        editedLines[line.bugId] = val;
+      }
+      // Update dot to amber if edited but not yet checked
+      const bugIdx = currentProblem.bugs.findIndex(b => b.id === line.bugId);
+      if (bugIdx >= 0 && !fixedBugs.has(line.bugId) && editedLines[line.bugId] !== undefined) {
+        updateDot(bugIdx, 'amber');
+      }
+      renderCode();
+    };
+
+    input.addEventListener('blur', finish);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') {
+        input.value = editedLines[line.bugId] !== undefined ? editedLines[line.bugId] : line.text;
+        input.blur();
+      }
+    });
+  }
+
+  function updateDot(idx, state) {
+    const dot = bugDots[idx];
+    if (!dot) return;
+    dot.setAttribute('data-state', state);
+    const labels = { gray: 'not found', amber: 'edited', green: 'fixed' };
+    const icons  = { gray: '&#9679;', amber: '&#9998;', green: '&#10003;' };
+    dot.innerHTML = icons[state];
+    dot.setAttribute('aria-label', 'Bug ' + (idx+1) + ': ' + labels[state]);
+  }
+
+  // ── Check fixes ──
+  btnCheck.addEventListener('click', () => {
+    if (!currentProblem) return;
+
+    let allFixed = true;
+    currentProblem.bugs.forEach((bug, i) => {
+      if (fixedBugs.has(bug.id)) return; // already fixed
+
+      const edited = editedLines[bug.id];
+      if (edited === undefined) {
+        allFixed = false;
+        return;
+      }
+
+      const normed = norm(edited);
+      const accepted = [bug.fix, ...(bug.altFixes || [])].map(norm);
+      if (accepted.includes(normed)) {
+        fixedBugs.add(bug.id);
+        updateDot(i, 'green');
+      } else {
+        allFixed = false;
+      }
+    });
+
+    if (fixedBugs.size === currentProblem.bugs.length) {
+      completedSet.add(currentProblem.id);
+      allFixedMsg.classList.add('visible');
+    }
+
+    renderCode();
+  });
+
+  // ── Next problem ──
+  btnNext.addEventListener('click', () => {
+    goBack(currentProblem ? currentProblem.week : null);
+  });
+
+  // ── Back to library ──
+  backLink.addEventListener('click', e => {
+    e.preventDefault();
+    goBack(null);
+  });
+
+  function goBack(prefilterWeek) {
+    clinicScreen.classList.remove('active');
+    libraryScreen.hidden = false;
+    selectedId = null;
+    launchBtn.classList.remove('ready');
+
+    if (prefilterWeek !== null) {
+      // Pre-filter to same week
+      activeWeeks.clear();
+      activeWeeks.add(prefilterWeek);
+      document.querySelectorAll('#week-filters .filter-pill').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.week) === prefilterWeek);
+      });
+    }
+    renderGrid();
+  }
+
+  // ── Init ──
+  init();
+})();
+</script>
+</body>
+</html>

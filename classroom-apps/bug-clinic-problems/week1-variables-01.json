@@ -1,0 +1,49 @@
+{
+  "id": "week1-variables-01",
+  "title": "Tip Calculator",
+  "week": 1,
+  "topic": "variables",
+  "description": "This program calculates a 20% tip on a restaurant bill and splits it three ways.",
+  "code": [
+    { "line": 1, "text": "public class TipCalculator {" },
+    { "line": 2, "text": "  public static void main(String[] args) {" },
+    { "line": 3, "text": "    int billTotal = 85;" },
+    { "line": 4, "text": "    int tipPercent = 20;" },
+    { "line": 5, "text": "    double tipAmount = billTotal * tipPercent / 100;", "bugId": "b1" },
+    { "line": 6, "text": "    double total = billTotal + tipPercent;", "bugId": "b2" },
+    { "line": 7, "text": "    int perPerson = total / 3;", "bugId": "b3" },
+    { "line": 8, "text": "    System.out.println(\"Tip: $\" + tipAmount);" },
+    { "line": 9, "text": "    System.out.println(\"Total: $\" + total);" },
+    { "line": 10, "text": "    System.out.println(\"Each pays: $\" + perPerson);" },
+    { "line": 11, "text": "  }" },
+    { "line": 12, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 5,
+      "fix": "    double tipAmount = billTotal * tipPercent / 100.0;",
+      "altFixes": [
+        "    double tipAmount = (double) billTotal * tipPercent / 100;",
+        "    double tipAmount = (double)(billTotal * tipPercent) / 100;"
+      ],
+      "clue": "The tip should be $17.00, but integer math truncates the decimal. How can you make the division produce a double?"
+    },
+    {
+      "id": "b2",
+      "line": 6,
+      "fix": "    double total = billTotal + tipAmount;",
+      "altFixes": [],
+      "clue": "The total should be the original bill plus the calculated tip amount, not the tip percentage."
+    },
+    {
+      "id": "b3",
+      "line": 7,
+      "fix": "    double perPerson = total / 3;",
+      "altFixes": [
+        "    double perPerson = total / 3.0;"
+      ],
+      "clue": "Each person's share needs to include cents. What type should perPerson be?"
+    }
+  ]
+}

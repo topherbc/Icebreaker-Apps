@@ -1,0 +1,48 @@
+{
+  "id": "week2-loops-02",
+  "title": "Star Pyramid",
+  "week": 2,
+  "topic": "loops",
+  "description": "This program prints a right-aligned pyramid of stars with 5 rows, where row n has n stars.",
+  "code": [
+    { "line": 1, "text": "public class StarPyramid {" },
+    { "line": 2, "text": "  public static void main(String[] args) {" },
+    { "line": 3, "text": "    int rows = 5;" },
+    { "line": 4, "text": "    for (int i = 1; i < rows; i++) {", "bugId": "b1" },
+    { "line": 5, "text": "      for (int s = 0; s < rows - i; s++) {" },
+    { "line": 6, "text": "        System.out.print(\" \");" },
+    { "line": 7, "text": "      }" },
+    { "line": 8, "text": "      for (int j = 0; j <= i; j++) {", "bugId": "b2" },
+    { "line": 9, "text": "        System.out.print(\"+\");", "bugId": "b3" },
+    { "line": 10, "text": "      }" },
+    { "line": 11, "text": "      System.out.println();" },
+    { "line": 12, "text": "    }" },
+    { "line": 13, "text": "  }" },
+    { "line": 14, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 4,
+      "fix": "    for (int i = 1; i <= rows; i++) {",
+      "altFixes": [],
+      "clue": "The pyramid should have 5 rows, but only 4 are printing. Check the loop condition -- is row 5 being included?"
+    },
+    {
+      "id": "b2",
+      "line": 8,
+      "fix": "      for (int j = 0; j < i; j++) {",
+      "altFixes": [
+        "      for (int j = 1; j <= i; j++) {"
+      ],
+      "clue": "Row 1 should have 1 star, row 2 should have 2. This inner loop runs one too many times per row."
+    },
+    {
+      "id": "b3",
+      "line": 9,
+      "fix": "        System.out.print(\"*\");",
+      "altFixes": [],
+      "clue": "The program is supposed to print a pyramid of stars (*), but a different character is being used."
+    }
+  ]
+}

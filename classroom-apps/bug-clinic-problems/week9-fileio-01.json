@@ -1,0 +1,59 @@
+{
+  "id": "week9-fileio-01",
+  "title": "Word Counter",
+  "week": 9,
+  "topic": "file I/O",
+  "description": "This program reads lines from a text file and counts the total number of words across all lines.",
+  "code": [
+    { "line": 1, "text": "import java.io.File;" },
+    { "line": 2, "text": "import java.util.Scanner;" },
+    { "line": 3, "text": "import java.io.FileNotFoundException;" },
+    { "line": 4, "text": "" },
+    { "line": 5, "text": "public class WordCounter {" },
+    { "line": 6, "text": "  public static void main(String[] args) throws FileNotFoundException {" },
+    { "line": 7, "text": "    File file = new File(\"story.txt\");" },
+    { "line": 8, "text": "    Scanner reader = new Scanner(file);" },
+    { "line": 9, "text": "    int wordCount = 0;" },
+    { "line": 10, "text": "    int lineCount = 0;" },
+    { "line": 11, "text": "" },
+    { "line": 12, "text": "    while (reader.hasNext()) {", "bugId": "b1" },
+    { "line": 13, "text": "      String line = reader.nextLine();" },
+    { "line": 14, "text": "      String[] words = line.split(\" \");", "bugId": "b2" },
+    { "line": 15, "text": "      wordCount = words.length;", "bugId": "b3" },
+    { "line": 16, "text": "      lineCount++;" },
+    { "line": 17, "text": "    }" },
+    { "line": 18, "text": "" },
+    { "line": 19, "text": "    reader.close();" },
+    { "line": 20, "text": "    System.out.println(\"Lines: \" + lineCount);" },
+    { "line": 21, "text": "    System.out.println(\"Words: \" + wordCount);" },
+    { "line": 22, "text": "  }" },
+    { "line": 23, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 12,
+      "fix": "    while (reader.hasNextLine()) {",
+      "altFixes": [],
+      "clue": "Since we read full lines with nextLine(), we should check for the next line, not just the next token."
+    },
+    {
+      "id": "b2",
+      "line": 14,
+      "fix": "      String[] words = line.split(\"\\\\s+\");",
+      "altFixes": [
+        "      String[] words = line.split(\" +\");"
+      ],
+      "clue": "Splitting on a single space fails when words are separated by multiple spaces or tabs. A regex for whitespace is safer."
+    },
+    {
+      "id": "b3",
+      "line": 15,
+      "fix": "      wordCount = wordCount + words.length;",
+      "altFixes": [
+        "      wordCount += words.length;"
+      ],
+      "clue": "The word count should accumulate across all lines. Right now it only stores the count from the current line."
+    }
+  ]
+}

@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bug Repair</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='%23e2e8f0' stroke='%2364748b' stroke-width='1.5'/><path d='M11 14 a1 1 0 0 1 10 0' fill='none' stroke='%23ef4444' stroke-width='2'/><circle cx='12' cy='12' r='1.5' fill='%2364748b'/><circle cx='20' cy='12' r='1.5' fill='%2364748b'/><path d='M10 20 q6 4 12 0' fill='none' stroke='%2322c55e' stroke-width='2'/></svg>">
+<title>Bug Squash</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2316a34a'/><ellipse cx='16' cy='19' rx='7' ry='8' fill='%23dcfce7'/><line x1='16' y1='11' x2='16' y2='27' stroke='%2316a34a' stroke-width='1.5'/><circle cx='12' cy='17' r='1.8' fill='%2316a34a' opacity='0.25'/><circle cx='20' cy='17' r='1.8' fill='%2316a34a' opacity='0.25'/><circle cx='14' cy='23' r='1.5' fill='%2316a34a' opacity='0.25'/><circle cx='18' cy='23' r='1.5' fill='%2316a34a' opacity='0.25'/><circle cx='16' cy='11' r='3.5' fill='%23dcfce7'/><line x1='13' y1='9' x2='10' y2='5' stroke='%23dcfce7' stroke-width='1.5' stroke-linecap='round'/><line x1='19' y1='9' x2='22' y2='5' stroke='%23dcfce7' stroke-width='1.5' stroke-linecap='round'/><circle cx='10' cy='5' r='1.2' fill='%23dcfce7'/><circle cx='22' cy='5' r='1.2' fill='%23dcfce7'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
   (function(){
-    var t = localStorage.getItem('bug-repair-theme');
+    var t = localStorage.getItem('bug-squash-theme');
     if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
   })();
 </script>
@@ -27,9 +27,10 @@
     --ink:         #1a1d27;
     --ink-soft:    #4a5066;
     --ink-faint:   #6b7280;
-    --accent:      #3b82f6;
-    --accent-hover:#2563eb;
-    --accent-bg:   #eff6ff;
+    --accent:      #16a34a;
+    --accent-hover:#15803d;
+    --accent-bg:   #f0fdf4;
+    --accent-light:#dcfce7;
     --bug-gray:    #9ca3af;
     --bug-amber:   #d97706;
     --bug-amber-bg:#fef3c7;
@@ -37,10 +38,10 @@
     --bug-green-bg:#dcfce7;
     --bug-line-bg: #fefce8;
     --bug-fix-bg:  #f0fdf4;
-    --selected:    #dbeafe;
-    --selected-b:  #3b82f6;
+    --selected:    #dcfce7;
+    --selected-b:  #16a34a;
     --pill-bg:     #e8ecf2;
-    --pill-active: #3b82f6;
+    --pill-active: #16a34a;
     --pill-active-t:#ffffff;
     --code-kw:     #7c3aed;
     --code-str:    #059669;
@@ -65,9 +66,10 @@
     --ink:         #e2e8f0;
     --ink-soft:    #94a3b8;
     --ink-faint:   #64748b;
-    --accent:      #60a5fa;
-    --accent-hover:#3b82f6;
-    --accent-bg:   #1e293b;
+    --accent:      #4ade80;
+    --accent-hover:#22c55e;
+    --accent-bg:   #052e16;
+    --accent-light:#052e16;
     --bug-gray:    #4b5563;
     --bug-amber:   #f59e0b;
     --bug-amber-bg:#422006;
@@ -75,10 +77,10 @@
     --bug-green-bg:#052e16;
     --bug-line-bg: #2a2510;
     --bug-fix-bg:  #0a2e1a;
-    --selected:    #1e3a5f;
-    --selected-b:  #60a5fa;
+    --selected:    #0a2e1a;
+    --selected-b:  #4ade80;
     --pill-bg:     #232b3d;
-    --pill-active: #60a5fa;
+    --pill-active: #4ade80;
     --pill-active-t:#0f1219;
     --code-kw:     #a78bfa;
     --code-str:    #34d399;
@@ -101,7 +103,7 @@
   }
 
   button { cursor: pointer; font-family: inherit; }
-  button:focus-visible, a:focus-visible, input:focus-visible {
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
@@ -119,13 +121,22 @@
     top: 0;
     z-index: 50;
   }
-  .top-nav .nav-brand {
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 700;
     font-size: 1.05rem;
     letter-spacing: -0.3px;
     color: var(--ink);
   }
-  .top-nav .nav-right {
+  .nav-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .nav-right {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -140,106 +151,135 @@
     align-items: center;
     justify-content: center;
     font-size: 16px;
-    cursor: pointer;
     transition: background 0.15s;
   }
   .nav-theme-btn:hover { background: var(--bg-panel); }
 
   /* ── LIBRARY SCREEN ── */
   #library-screen {
-    max-width: 960px;
+    max-width: 640px;
     margin: 0 auto;
     padding: 32px 24px 80px;
   }
 
   .library-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
   .library-header h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     letter-spacing: -0.5px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .library-header p {
     color: var(--ink-soft);
-    font-size: 1rem;
-  }
-
-  .filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 24px;
-    align-items: center;
-  }
-  .filter-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ink-faint);
-    margin-right: 4px;
-  }
-  .filter-pill {
-    background: var(--pill-bg);
-    border: 1px solid var(--border-light);
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--ink-soft);
-    transition: all 0.15s;
-    min-height: 36px;
-  }
-  .filter-pill:hover { border-color: var(--accent); color: var(--ink); }
-  .filter-pill.active {
-    background: var(--pill-active);
-    color: var(--pill-active-t);
-    border-color: var(--pill-active);
-  }
-  .filter-sep {
-    width: 1px;
-    height: 24px;
-    background: var(--border);
-    margin: 0 8px;
-  }
-
-  .problem-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-  .problem-card {
-    background: var(--bg-card);
-    border: 2px solid var(--border-light);
-    border-radius: 10px;
-    padding: 16px 18px;
-    cursor: pointer;
-    transition: all 0.15s;
-    position: relative;
-    min-height: 48px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .problem-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
-  .problem-card.selected {
-    border-color: var(--selected-b);
-    background: var(--selected);
-    box-shadow: var(--shadow-md);
-  }
-  .problem-card .card-title {
-    font-weight: 600;
     font-size: 0.95rem;
   }
-  .problem-card .card-tags {
+
+  /* Set bar (PSA-style dropdown) */
+  .set-bar {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
     display: flex;
-    gap: 6px;
+    align-items: center;
+    gap: 14px;
     flex-wrap: wrap;
   }
+  .set-bar label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .set-bar select {
+    flex: 1;
+    min-width: 180px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--bg-panel);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    transition: border-color 0.15s;
+  }
+  .set-bar select:hover { border-color: var(--accent); }
+  .set-meta {
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+  }
+
+  /* Problem list */
+  .problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .problem-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--ink);
+    text-align: left;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+    min-height: 48px;
+  }
+  .problem-option:hover {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+  .problem-option .prob-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--pill-bg);
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .problem-option .prob-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .problem-option .prob-title {
+    font-weight: 600;
+  }
+  .problem-option .prob-check {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--bug-green);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .problem-option.completed .prob-check { display: flex; }
+  .problem-option.completed .prob-num { display: none; }
+
   .tag {
     display: inline-block;
     font-size: 0.72rem;
@@ -252,48 +292,10 @@
     color: var(--ink-faint);
   }
   .tag-week { background: var(--accent-bg); color: var(--accent); }
-  .card-check {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--bug-green);
-    color: #fff;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
-  }
-  .problem-card.completed .card-check { display: flex; }
-
-  .launch-bar {
-    text-align: center;
-  }
-  #launch-btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 14px 48px;
-    font-size: 1rem;
-    font-weight: 600;
-    min-height: 48px;
-    transition: all 0.15s;
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  #launch-btn.ready {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  #launch-btn.ready:hover { background: var(--accent-hover); }
 
   .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 48px 20px;
     color: var(--ink-faint);
     font-size: 0.95rem;
   }
@@ -532,19 +534,6 @@
   }
   .btn-next:hover { border-color: var(--accent); background: var(--accent-bg); }
 
-  .all-fixed-msg {
-    text-align: center;
-    padding: 12px;
-    background: var(--bug-green-bg);
-    border: 1px solid var(--bug-green);
-    border-radius: 8px;
-    color: var(--bug-green);
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: none;
-  }
-  .all-fixed-msg.visible { display: block; }
-
   /* ── SYNTAX HIGHLIGHTING ── */
   .kw { color: var(--code-kw); font-weight: 500; }
   .str { color: var(--code-str); }
@@ -595,7 +584,23 @@
 </head>
 <body>
 <nav class="top-nav">
-  <span class="nav-brand">Bug Repair</span>
+  <div class="nav-brand">
+    <svg class="nav-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="6" fill="#16a34a"/>
+      <ellipse cx="16" cy="19" rx="7" ry="8" fill="#dcfce7"/>
+      <line x1="16" y1="11" x2="16" y2="27" stroke="#16a34a" stroke-width="1.5"/>
+      <circle cx="12" cy="17" r="1.8" fill="#16a34a" opacity="0.25"/>
+      <circle cx="20" cy="17" r="1.8" fill="#16a34a" opacity="0.25"/>
+      <circle cx="14" cy="23" r="1.5" fill="#16a34a" opacity="0.25"/>
+      <circle cx="18" cy="23" r="1.5" fill="#16a34a" opacity="0.25"/>
+      <circle cx="16" cy="11" r="3.5" fill="#dcfce7"/>
+      <line x1="13" y1="9" x2="10" y2="5" stroke="#dcfce7" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="19" y1="9" x2="22" y2="5" stroke="#dcfce7" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="10" cy="5" r="1.2" fill="#dcfce7"/>
+      <circle cx="22" cy="5" r="1.2" fill="#dcfce7"/>
+    </svg>
+    <span>Bug Squash</span>
+  </div>
   <div class="nav-right">
     <button class="nav-theme-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
       <span id="theme-icon">&#9789;</span>
@@ -606,24 +611,20 @@
 <!-- ════ LIBRARY SCREEN ════ -->
 <div id="library-screen">
   <div class="library-header">
-    <h1>Bug Repair</h1>
-    <p>Find and fix the bugs. Pick a problem to get started.</p>
+    <h1>Bug Squash</h1>
+    <p>Find and fix the bugs. Select a week, then pick a problem.</p>
   </div>
 
-  <div class="filter-row" id="filter-row">
-    <span class="filter-label">Week</span>
-    <div id="week-filters"></div>
-    <div class="filter-sep"></div>
-    <span class="filter-label">Topic</span>
-    <div id="topic-filters"></div>
+  <div class="set-bar" role="region" aria-label="Week selection">
+    <label for="week-select">Week</label>
+    <select id="week-select">
+      <option value="">-- Choose a week --</option>
+    </select>
+    <span class="set-meta" id="week-meta" aria-live="polite"></span>
   </div>
 
-  <div class="problem-grid" id="problem-grid"></div>
-  <div class="empty-state" id="empty-state" hidden>No problems match your filters.</div>
-
-  <div class="launch-bar">
-    <button id="launch-btn">Launch</button>
-  </div>
+  <div id="no-week-msg" class="empty-state">Select a week above to see available problems.</div>
+  <div id="problem-list" class="problem-list" hidden></div>
 </div>
 
 <!-- ════ CLINIC SCREEN ════ -->
@@ -663,26 +664,25 @@
 (function() {
   'use strict';
 
-  const PROBLEMS_DIR = 'bug-repair-problems/';
+  const PROBLEMS_DIR = 'bug-squash-problems/';
   const completedSet = new Set();
 
   let manifest = [];
   let problemCache = {};
-  let allProblems = [];       // loaded metadata
-  let selectedId = null;
+  let allProblems = [];
   let currentProblem = null;
-  let editedLines = {};       // bugId -> current text
+  let editedLines = {};
   let fixedBugs = new Set();
-  let activeWeeks = new Set();
-  let activeTopics = new Set();
+  let currentWeek = null;
 
   // ── DOM refs ──
   const $ = id => document.getElementById(id);
   const libraryScreen = $('library-screen');
   const clinicScreen  = $('clinic-screen');
-  const problemGrid   = $('problem-grid');
-  const emptyState    = $('empty-state');
-  const launchBtn     = $('launch-btn');
+  const weekSelect    = $('week-select');
+  const weekMeta      = $('week-meta');
+  const noWeekMsg     = $('no-week-msg');
+  const problemList   = $('problem-list');
   const backLink      = $('back-link');
   const codePanel     = $('code-panel');
   const clueCards     = $('clue-cards');
@@ -703,10 +703,10 @@
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (isDark) {
       document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('bug-repair-theme', 'light');
+      localStorage.setItem('bug-squash-theme', 'light');
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('bug-repair-theme', 'dark');
+      localStorage.setItem('bug-squash-theme', 'dark');
     }
     updateThemeIcon();
   });
@@ -736,7 +736,6 @@
     let result = '';
     let i = 0;
     while (i < text.length) {
-      // String literal
       if (text[i] === '"') {
         let end = i + 1;
         while (end < text.length && text[end] !== '"') {
@@ -748,7 +747,6 @@
         i = end;
         continue;
       }
-      // Char literal
       if (text[i] === "'") {
         let end = i + 1;
         while (end < text.length && text[end] !== "'") {
@@ -760,12 +758,10 @@
         i = end;
         continue;
       }
-      // Line comment
       if (text[i] === '/' && text[i+1] === '/') {
         result += '<span class="cmt">' + esc(text.slice(i)) + '</span>';
         break;
       }
-      // Word
       if (/[a-zA-Z_$]/.test(text[i])) {
         let end = i + 1;
         while (end < text.length && /[a-zA-Z0-9_$]/.test(text[end])) end++;
@@ -780,7 +776,6 @@
         i = end;
         continue;
       }
-      // Number
       if (/[0-9]/.test(text[i])) {
         let end = i + 1;
         while (end < text.length && /[0-9.]/.test(text[end])) end++;
@@ -804,11 +799,10 @@
       const res = await fetch(PROBLEMS_DIR + 'index.json');
       manifest = await res.json();
     } catch(e) {
-      problemGrid.innerHTML = '<div class="empty-state">Could not load problems.</div>';
+      noWeekMsg.textContent = 'Could not load problems.';
       return;
     }
 
-    // Load all problem metadata
     const loads = manifest.map(async id => {
       try {
         const res = await fetch(PROBLEMS_DIR + id + '.json');
@@ -820,97 +814,69 @@
       }
     });
     allProblems = (await Promise.all(loads)).filter(Boolean);
-    buildFilters();
-    renderGrid();
+    buildWeekDropdown();
   }
 
-  // ── Filters ──
-  function buildFilters() {
+  // ── Week dropdown ──
+  function buildWeekDropdown() {
     const weeks = [...new Set(allProblems.map(p => p.week))].sort((a,b) => a - b);
-    const topics = [...new Set(allProblems.map(p => p.topic))].sort();
-
-    const wf = $('week-filters');
     weeks.forEach(w => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-pill';
-      btn.textContent = 'W' + w;
-      btn.dataset.week = w;
-      btn.addEventListener('click', () => {
-        if (activeWeeks.has(w)) { activeWeeks.delete(w); btn.classList.remove('active'); }
-        else { activeWeeks.add(w); btn.classList.add('active'); }
-        renderGrid();
-      });
-      wf.appendChild(btn);
+      const count = allProblems.filter(p => p.week === w).length;
+      const opt = document.createElement('option');
+      opt.value = w;
+      opt.textContent = 'Week ' + w + ' (' + count + ' problem' + (count > 1 ? 's' : '') + ')';
+      weekSelect.appendChild(opt);
     });
 
-    const tf = $('topic-filters');
-    topics.forEach(t => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-pill';
-      btn.textContent = t;
-      btn.dataset.topic = t;
-      btn.addEventListener('click', () => {
-        if (activeTopics.has(t)) { activeTopics.delete(t); btn.classList.remove('active'); }
-        else { activeTopics.add(t); btn.classList.add('active'); }
-        renderGrid();
-      });
-      tf.appendChild(btn);
-    });
+    // If returning from clinic with a prefiltered week, select it
+    if (currentWeek !== null) {
+      weekSelect.value = currentWeek;
+      renderProblemList(currentWeek);
+    }
   }
 
-  function renderGrid() {
-    const filtered = allProblems.filter(p => {
-      if (activeWeeks.size && !activeWeeks.has(p.week)) return false;
-      if (activeTopics.size && !activeTopics.has(p.topic)) return false;
-      return true;
-    });
-
-    problemGrid.innerHTML = '';
-    emptyState.hidden = filtered.length > 0;
-
-    filtered.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'problem-card';
-      card.tabIndex = 0;
-      card.setAttribute('role', 'button');
-      card.setAttribute('aria-label', p.title + ', Week ' + p.week + ', ' + p.topic);
-      if (completedSet.has(p.id)) card.classList.add('completed');
-      if (p.id === selectedId) card.classList.add('selected');
-
-      card.innerHTML =
-        '<div class="card-title">' + esc(p.title) + '</div>' +
-        '<div class="card-tags">' +
-          '<span class="tag tag-week">W' + p.week + '</span>' +
-          '<span class="tag">' + esc(p.topic) + '</span>' +
-        '</div>' +
-        '<div class="card-check" aria-label="Completed">&#10003;</div>';
-
-      card.addEventListener('click', () => selectCard(p.id));
-      card.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCard(p.id); }
-      });
-      problemGrid.appendChild(card);
-    });
-  }
-
-  function selectCard(id) {
-    selectedId = id;
-    document.querySelectorAll('.problem-card').forEach(c => c.classList.remove('selected'));
-    const cards = document.querySelectorAll('.problem-card');
-    cards.forEach(c => {
-      const title = c.querySelector('.card-title').textContent;
-      const prob = allProblems.find(p => p.title === title);
-      if (prob && prob.id === id) c.classList.add('selected');
-    });
-    launchBtn.classList.add('ready');
-  }
-
-  // ── Launch ──
-  launchBtn.addEventListener('click', () => {
-    if (!selectedId) return;
-    openClinic(selectedId);
+  weekSelect.addEventListener('change', () => {
+    const val = weekSelect.value;
+    if (!val) {
+      noWeekMsg.hidden = false;
+      problemList.hidden = true;
+      weekMeta.textContent = '';
+      currentWeek = null;
+      return;
+    }
+    currentWeek = parseInt(val);
+    renderProblemList(currentWeek);
   });
 
+  function renderProblemList(week) {
+    const problems = allProblems.filter(p => p.week === week);
+    noWeekMsg.hidden = true;
+    problemList.hidden = false;
+    problemList.innerHTML = '';
+
+    const topics = [...new Set(problems.map(p => p.topic))];
+    weekMeta.textContent = problems.length + ' problem' + (problems.length > 1 ? 's' : '') + ' -- ' + topics.join(', ');
+
+    problems.forEach((p, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'problem-option';
+      if (completedSet.has(p.id)) btn.classList.add('completed');
+      btn.setAttribute('aria-label', p.title + ', ' + p.topic + (completedSet.has(p.id) ? ', completed' : ''));
+
+      btn.innerHTML =
+        '<span class="prob-num">' + (i + 1) + '</span>' +
+        '<span class="prob-check" aria-hidden="true">&#10003;</span>' +
+        '<span class="prob-info">' +
+          '<span class="prob-title">' + esc(p.title) + '</span>' +
+          '<span class="tag">' + esc(p.topic) + '</span>' +
+        '</span>';
+
+      btn.addEventListener('click', () => openClinic(p.id));
+      problemList.appendChild(btn);
+    });
+  }
+
+  // ── Open clinic ──
   function openClinic(id) {
     currentProblem = problemCache[id];
     if (!currentProblem) return;
@@ -918,12 +884,10 @@
     editedLines = {};
     fixedBugs = new Set();
 
-    // Topbar
     $('clinic-title').textContent = currentProblem.title;
     $('clinic-week-tag').textContent = 'W' + currentProblem.week;
     $('clinic-topic-tag').textContent = currentProblem.topic;
 
-    // Reset dots
     bugDots.forEach((d, i) => {
       d.setAttribute('data-state', 'gray');
       d.innerHTML = '&#9679;';
@@ -932,10 +896,8 @@
 
     checkFeedback.classList.remove('visible', 'success', 'incomplete');
 
-    // Render code
     renderCode();
 
-    // Render clues
     clueCards.innerHTML = '';
     currentProblem.bugs.forEach((bug, i) => {
       const card = document.createElement('div');
@@ -946,7 +908,6 @@
       clueCards.appendChild(card);
     });
 
-    // Show clinic
     libraryScreen.hidden = true;
     clinicScreen.classList.add('active');
   }
@@ -1015,7 +976,6 @@
       if (val !== line.text) {
         editedLines[line.bugId] = val;
       }
-      // Update dot to amber if edited but not yet checked
       const bugIdx = currentProblem.bugs.findIndex(b => b.id === line.bugId);
       if (bugIdx >= 0 && !fixedBugs.has(line.bugId) && editedLines[line.bugId] !== undefined) {
         updateDot(bugIdx, 'amber');
@@ -1070,7 +1030,6 @@
 
     renderCode();
 
-    // Show feedback
     checkFeedback.classList.remove('visible', 'success', 'incomplete');
     if (fixedBugs.size === currentProblem.bugs.length) {
       completedSet.add(currentProblem.id);
@@ -1081,12 +1040,11 @@
       checkFeedback.textContent = remaining + ' bug' + (remaining > 1 ? 's' : '') + ' still need fixing.';
       checkFeedback.classList.add('visible', 'incomplete');
 
-      // Highlight unfixed lines yellow with flash
       wrongBugIds.forEach(bugId => {
         const lineEl = codePanel.querySelector('[data-bug-id="' + bugId + '"]');
         if (lineEl) {
           lineEl.classList.remove('wrong');
-          void lineEl.offsetWidth; // force reflow to restart animation
+          void lineEl.offsetWidth;
           lineEl.classList.add('wrong');
         }
       });
@@ -1107,18 +1065,14 @@
   function goBack(prefilterWeek) {
     clinicScreen.classList.remove('active');
     libraryScreen.hidden = false;
-    selectedId = null;
-    launchBtn.classList.remove('ready');
 
     if (prefilterWeek !== null) {
-      // Pre-filter to same week
-      activeWeeks.clear();
-      activeWeeks.add(prefilterWeek);
-      document.querySelectorAll('#week-filters .filter-pill').forEach(btn => {
-        btn.classList.toggle('active', parseInt(btn.dataset.week) === prefilterWeek);
-      });
+      currentWeek = prefilterWeek;
+      weekSelect.value = prefilterWeek;
+      renderProblemList(prefilterWeek);
+    } else if (currentWeek !== null) {
+      renderProblemList(currentWeek);
     }
-    renderGrid();
   }
 
   // ── Init ──

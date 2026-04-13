@@ -2289,6 +2289,7 @@ const S = {
   myRole: 'student',
   roomCode: '',
   instName: '',          // instructor's display name (students track this)
+  instClientId: '',      // instructor's clientId (students track for disconnect detection)
 
   // Ably
   ablyClient:    null,
@@ -3141,6 +3142,7 @@ function onPresenceEnter(member) {
 
   // Student tracks instructor name / reconnect
   if (S.myRole === 'student' && data.role === 'instructor') {
+    S.instClientId = id;
     setInstName(data.name);
     if (_instOffline) onInstructorRejoin();
     else clearInstLeaveTimers(); // returned before offline badge appeared
@@ -3173,8 +3175,9 @@ function onPresenceLeave(member) {
   const data = member.data || {};
   if (id === S.myClientId) return;
 
-  // Student detects instructor departure
-  if (S.myRole === 'student' && data.role === 'instructor') {
+  // Student detects instructor departure (match by tracked clientId —
+  // data.role may be missing on abrupt disconnects)
+  if (S.myRole === 'student' && (id === S.instClientId || data.role === 'instructor')) {
     onInstructorLeave();
   }
 
@@ -5339,6 +5342,7 @@ function leaveRoom() {
   S.instTabs    = [];
   S.instActive  = 0;
   S.instConnected = false;
+  S.instClientId  = '';
   S.isReady     = false;
   S.expandedId  = null;
   S.stuChannels = {};

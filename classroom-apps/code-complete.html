@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Complete</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2316a34a'/><rect x='6' y='8' width='20' height='16' rx='3' fill='%23dcfce7'/><rect x='10' y='12' width='8' height='3' rx='1' fill='%2316a34a' opacity='0.3'/><rect x='10' y='17' width='12' height='3' rx='1' fill='%2316a34a' opacity='0.3'/><path d='M22 14l3 2.5-3 2.5' stroke='%2316a34a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var t = localStorage.getItem('code-complete-theme');
+    if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg:          #f8f9fb;
+    --bg-card:     #ffffff;
+    --bg-panel:    #f1f3f7;
+    --bg-code:     #f8f9fb;
+    --bg-topbar:   #ffffff;
+    --border:      #d4d9e3;
+    --border-light:#e8ecf2;
+    --ink:         #1a1d27;
+    --ink-soft:    #4a5066;
+    --ink-faint:   #6b7280;
+    --accent:      #16a34a;
+    --accent-hover:#15803d;
+    --accent-bg:   #f0fdf4;
+    --accent-light:#dcfce7;
+    --dot-gray:    #9ca3af;
+    --dot-green:   #16a34a;
+    --dot-green-bg:#dcfce7;
+    --dot-red:     #dc2626;
+    --blank-bg:    #fefce8;
+    --blank-correct-bg: #f0fdf4;
+    --selected:    #dcfce7;
+    --selected-b:  #16a34a;
+    --pill-bg:     #e8ecf2;
+    --pill-active: #16a34a;
+    --pill-active-t:#ffffff;
+    --code-kw:     #7c3aed;
+    --code-str:    #059669;
+    --code-num:    #d97706;
+    --code-cmt:    #9ca3af;
+    --code-type:   #2563eb;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md:   0 4px 12px rgba(0,0,0,0.08);
+    --font-body:   'DM Sans', system-ui, sans-serif;
+    --font-mono:   'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --bg:          #0f1219;
+    --bg-card:     #1a1f2e;
+    --bg-panel:    #151a26;
+    --bg-code:     #0f1219;
+    --bg-topbar:   #1a1f2e;
+    --border:      #2d3548;
+    --border-light:#232b3d;
+    --ink:         #e2e8f0;
+    --ink-soft:    #94a3b8;
+    --ink-faint:   #64748b;
+    --accent:      #4ade80;
+    --accent-hover:#22c55e;
+    --accent-bg:   #052e16;
+    --accent-light:#052e16;
+    --dot-gray:    #4b5563;
+    --dot-green:   #22c55e;
+    --dot-green-bg:#052e16;
+    --dot-red:     #ef4444;
+    --blank-bg:    #2a2510;
+    --blank-correct-bg: #0a2e1a;
+    --selected:    #0a2e1a;
+    --selected-b:  #4ade80;
+    --pill-bg:     #232b3d;
+    --pill-active: #4ade80;
+    --pill-active-t:#0f1219;
+    --code-kw:     #a78bfa;
+    --code-str:    #34d399;
+    --code-num:    #fbbf24;
+    --code-cmt:    #4b5563;
+    --code-type:   #60a5fa;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.2);
+    --shadow-md:   0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: var(--font-body);
+    color: var(--ink);
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  button { cursor: pointer; font-family: inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ── TOP NAV ── */
+  .top-nav {
+    background: var(--bg-topbar);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+  }
+  .nav-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-light);
+    border-radius: 6px;
+    padding: 4px 12px;
+    height: 36px;
+  }
+  .nav-progress .progress-icon {
+    font-size: 0.9rem;
+  }
+  .nav-theme-btn {
+    background: var(--pill-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background 0.15s;
+  }
+  .nav-theme-btn:hover { background: var(--bg-panel); }
+
+  /* ── LIBRARY SCREEN ── */
+  #library-screen {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  .library-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .library-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .library-header p {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* Set bar */
+  .set-bar {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .set-bar label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .set-bar select {
+    flex: 1;
+    min-width: 180px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--bg-panel);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    transition: border-color 0.15s;
+  }
+  .set-bar select:hover { border-color: var(--accent); }
+  .set-meta {
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+  }
+
+  /* Problem list */
+  .problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .problem-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--ink);
+    text-align: left;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+    min-height: 48px;
+  }
+  .problem-option:hover {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+  .problem-option .prob-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--pill-bg);
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .problem-option .prob-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .problem-option .prob-title {
+    font-weight: 600;
+  }
+  .problem-option .prob-check {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--dot-green);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .problem-option.completed .prob-check { display: flex; }
+  .problem-option.completed .prob-num { display: none; }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--pill-bg);
+    color: var(--ink-faint);
+  }
+  .tag-week { background: var(--accent-bg); color: var(--accent); }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--ink-faint);
+    font-size: 0.95rem;
+  }
+
+  /* ── EXERCISE SCREEN ── */
+  #exercise-screen {
+    display: none;
+    height: 100vh;
+    flex-direction: column;
+  }
+  #exercise-screen.active {
+    display: flex;
+  }
+
+  .exercise-topbar {
+    background: var(--bg-topbar);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+    min-height: 56px;
+  }
+  .back-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .topbar-title {
+    font-weight: 600;
+    font-size: 1rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .blank-tracker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .blank-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.25s;
+    border: 2px solid var(--dot-gray);
+    background: transparent;
+    color: var(--dot-gray);
+  }
+  .blank-dot[data-state="gray"] {
+    border-color: var(--dot-gray);
+    color: var(--dot-gray);
+  }
+  .blank-dot[data-state="green"] {
+    border-color: var(--dot-green);
+    background: var(--dot-green-bg);
+    color: var(--dot-green);
+  }
+
+  .exercise-panels {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Left: code panel */
+  .code-panel {
+    width: 60%;
+    overflow-y: auto;
+    padding: 20px 0;
+    background: var(--bg-code);
+    border-right: 1px solid var(--border);
+  }
+  .code-line {
+    display: flex;
+    align-items: stretch;
+    min-height: 28px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  .line-num {
+    width: 48px;
+    text-align: right;
+    padding-right: 16px;
+    color: var(--ink-faint);
+    user-select: none;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    opacity: 0.6;
+  }
+  .line-text {
+    flex: 1;
+    padding-right: 20px;
+    white-space: pre;
+    min-width: 0;
+  }
+  .line-text .blank-input {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background: var(--blank-bg);
+    border: 1.5px solid var(--accent);
+    border-radius: 3px;
+    padding: 0 6px;
+    color: var(--ink);
+    outline: none;
+    min-width: 60px;
+    vertical-align: baseline;
+  }
+  .line-text .blank-input:focus {
+    box-shadow: 0 0 0 2px var(--accent-light);
+  }
+  .line-text .blank-input.correct {
+    background: var(--blank-correct-bg);
+    border-color: var(--dot-green);
+    border-style: solid;
+    color: var(--dot-green);
+    font-weight: 600;
+  }
+  .line-text .blank-input.correct::after {
+    content: '';
+  }
+
+  /* Right panel */
+  .right-panel {
+    width: 40%;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .problem-desc {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 16px;
+  }
+  .btn-check {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 48px;
+    transition: background 0.15s;
+  }
+  .btn-check:hover { background: var(--accent-hover); }
+  .btn-next {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-height: 48px;
+    transition: all 0.15s;
+  }
+  .btn-next:hover { border-color: var(--accent); background: var(--accent-bg); }
+
+  /* ── SYNTAX HIGHLIGHTING ── */
+  .kw { color: var(--code-kw); font-weight: 500; }
+  .str { color: var(--code-str); }
+  .num { color: var(--code-num); }
+  .cmt { color: var(--code-cmt); font-style: italic; }
+  .typ { color: var(--code-type); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .exercise-panels { flex-direction: column; }
+    .code-panel, .right-panel { width: 100%; }
+    .code-panel { max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* ── SHAKE ANIMATION ── */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+  .blank-input.shake {
+    animation: shake 0.4s ease;
+    border-color: var(--dot-red) !important;
+  }
+
+  .check-feedback {
+    text-align: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    display: none;
+  }
+  .check-feedback.visible { display: block; }
+  .check-feedback.success {
+    background: var(--dot-green-bg);
+    border: 1px solid var(--dot-green);
+    color: var(--dot-green);
+  }
+  .check-feedback.incomplete {
+    background: var(--blank-bg);
+    border: 1px solid var(--dot-gray);
+    color: var(--ink-soft);
+  }
+
+  /* Hidden utility */
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="nav-brand">
+    <svg class="nav-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="6" fill="#16a34a"/>
+      <rect x="6" y="8" width="20" height="16" rx="3" fill="#dcfce7"/>
+      <rect x="10" y="12" width="8" height="3" rx="1" fill="#16a34a" opacity="0.3"/>
+      <rect x="10" y="17" width="12" height="3" rx="1" fill="#16a34a" opacity="0.3"/>
+      <path d="M22 14l3 2.5-3 2.5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <span>Code Complete</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-progress" id="nav-progress" title="Problems solved">
+      <span class="progress-icon">&#10003;</span>
+      <span id="progress-count">0 / 0</span>
+    </div>
+    <button class="nav-theme-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <span id="theme-icon">&#9789;</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ════ LIBRARY SCREEN ════ -->
+<div id="library-screen">
+  <div class="library-header">
+    <h1>Code Complete</h1>
+    <p>Fill in the missing keywords. Select a week, then pick a problem.</p>
+  </div>
+
+  <div class="set-bar" role="region" aria-label="Week selection">
+    <label for="week-select">Week</label>
+    <select id="week-select">
+      <option value="">-- Choose a week --</option>
+    </select>
+    <span class="set-meta" id="week-meta" aria-live="polite"></span>
+  </div>
+
+  <div id="no-week-msg" class="empty-state">Select a week above to see available problems.</div>
+  <div id="problem-list" class="problem-list" hidden></div>
+</div>
+
+<!-- ════ EXERCISE SCREEN ════ -->
+<div id="exercise-screen">
+  <div class="exercise-topbar">
+    <a href="#" class="back-link" id="back-link">&larr; Library</a>
+    <div class="topbar-title">
+      <span id="exercise-title"></span>
+      <span class="tag tag-week" id="exercise-week-tag"></span>
+      <span class="tag" id="exercise-topic-tag"></span>
+    </div>
+    <div class="blank-tracker" id="blank-tracker" aria-label="Blank fill progress"></div>
+  </div>
+
+  <div class="exercise-panels">
+    <div class="code-panel" id="code-panel"></div>
+    <div class="right-panel">
+      <div class="problem-desc" id="problem-desc"></div>
+      <div class="check-feedback" id="check-feedback"></div>
+      <div class="action-buttons">
+        <button class="btn-check" id="btn-check">Check Answers</button>
+        <button class="btn-next" id="btn-next">Next Problem</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const TREE_PATH = 'cc-content/cc-set-tree.json';
+  const LS_KEY = 'code-complete-completed';
+
+  const completedSet = new Set(JSON.parse(localStorage.getItem(LS_KEY) || '[]'));
+
+  let tree = [];
+  let problemCache = {};
+  let allProblems = [];
+  let currentProblem = null;
+  let filledBlanks = new Set();
+  let currentWeek = null;
+
+  function saveCompleted() {
+    localStorage.setItem(LS_KEY, JSON.stringify([...completedSet]));
+    updateProgressCounter();
+  }
+
+  function updateProgressCounter() {
+    const total = allProblems.length;
+    const done = allProblems.filter(p => completedSet.has(p.id)).length;
+    const el = document.getElementById('progress-count');
+    if (el) el.textContent = done + ' / ' + total;
+  }
+
+  // ── DOM refs ──
+  const $ = id => document.getElementById(id);
+  const libraryScreen   = $('library-screen');
+  const exerciseScreen   = $('exercise-screen');
+  const weekSelect       = $('week-select');
+  const weekMeta         = $('week-meta');
+  const noWeekMsg        = $('no-week-msg');
+  const problemList      = $('problem-list');
+  const backLink         = $('back-link');
+  const codePanel        = $('code-panel');
+  const blankTracker     = $('blank-tracker');
+  const btnCheck         = $('btn-check');
+  const btnNext          = $('btn-next');
+  const checkFeedback    = $('check-feedback');
+
+  // ── Theme toggle ──
+  const themeToggle = $('theme-toggle');
+  const themeIcon   = $('theme-icon');
+  function updateThemeIcon() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeIcon.innerHTML = dark ? '&#9788;' : '&#9789;';
+  }
+  updateThemeIcon();
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('code-complete-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('code-complete-theme', 'dark');
+    }
+    updateThemeIcon();
+  });
+
+  // ── Java syntax highlighting ──
+  const JAVA_KEYWORDS = new Set([
+    'abstract','assert','boolean','break','byte','case','catch','char','class',
+    'const','continue','default','do','double','else','enum','extends','final',
+    'finally','float','for','goto','if','implements','import','instanceof','int',
+    'interface','long','native','new','package','private','protected','public',
+    'return','short','static','strictfp','super','switch','synchronized','this',
+    'throw','throws','transient','try','void','volatile','while','true','false','null'
+  ]);
+  const JAVA_TYPES = new Set([
+    'String','System','Scanner','ArrayList','List','Map','HashMap','Set','HashSet',
+    'Integer','Double','Boolean','Object','File','Arrays','Collections','Math',
+    'StringBuilder','Exception','IOException','FileNotFoundException',
+    'PrintWriter','BufferedReader','BufferedWriter','FileReader','FileWriter','Random'
+  ]);
+
+  function highlightJava(text) {
+    let result = '';
+    let i = 0;
+    while (i < text.length) {
+      if (text[i] === '"') {
+        let end = i + 1;
+        while (end < text.length && text[end] !== '"') {
+          if (text[end] === '\\') end++;
+          end++;
+        }
+        end = Math.min(end + 1, text.length);
+        result += '<span class="str">' + esc(text.slice(i, end)) + '</span>';
+        i = end;
+        continue;
+      }
+      if (text[i] === "'") {
+        let end = i + 1;
+        while (end < text.length && text[end] !== "'") {
+          if (text[end] === '\\') end++;
+          end++;
+        }
+        end = Math.min(end + 1, text.length);
+        result += '<span class="str">' + esc(text.slice(i, end)) + '</span>';
+        i = end;
+        continue;
+      }
+      if (text[i] === '/' && text[i+1] === '/') {
+        result += '<span class="cmt">' + esc(text.slice(i)) + '</span>';
+        break;
+      }
+      if (/[a-zA-Z_$@]/.test(text[i])) {
+        let end = i + 1;
+        while (end < text.length && /[a-zA-Z0-9_$]/.test(text[end])) end++;
+        const word = text.slice(i, end);
+        if (JAVA_KEYWORDS.has(word)) {
+          result += '<span class="kw">' + esc(word) + '</span>';
+        } else if (JAVA_TYPES.has(word)) {
+          result += '<span class="typ">' + esc(word) + '</span>';
+        } else {
+          result += esc(word);
+        }
+        i = end;
+        continue;
+      }
+      if (/[0-9]/.test(text[i])) {
+        let end = i + 1;
+        while (end < text.length && /[0-9.]/.test(text[end])) end++;
+        result += '<span class="num">' + esc(text.slice(i, end)) + '</span>';
+        i = end;
+        continue;
+      }
+      result += esc(text[i]);
+      i++;
+    }
+    return result;
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Load tree + all sets ──
+  async function init() {
+    try {
+      const res = await fetch(TREE_PATH);
+      tree = await res.json();
+    } catch(e) {
+      noWeekMsg.textContent = 'Could not load problem sets.';
+      return;
+    }
+
+    const loads = tree.map(async entry => {
+      try {
+        const res = await fetch(entry.path);
+        if (!res.ok) return [];
+        const problems = await res.json();
+        problems.forEach(p => { problemCache[p.id] = p; });
+        return problems;
+      } catch(e) {
+        return [];
+      }
+    });
+    const results = await Promise.all(loads);
+    allProblems = results.flat();
+    buildWeekDropdown();
+    updateProgressCounter();
+  }
+
+  // ── Week dropdown ──
+  function buildWeekDropdown() {
+    tree.forEach(entry => {
+      const weekNum = parseInt(entry.id.replace('week-', ''));
+      const weekProblems = allProblems.filter(p => p.week === weekNum);
+      if (weekProblems.length === 0) return;
+      const done = weekProblems.filter(p => completedSet.has(p.id)).length;
+      const opt = document.createElement('option');
+      opt.value = weekNum;
+      opt.textContent = entry.title + ' (' + done + '/' + weekProblems.length + ')';
+      opt.dataset.treeId = entry.id;
+      weekSelect.appendChild(opt);
+    });
+
+    const savedWeek = localStorage.getItem('code-complete-week');
+    if (currentWeek !== null) {
+      weekSelect.value = currentWeek;
+      renderProblemList(currentWeek);
+    } else if (savedWeek) {
+      weekSelect.value = savedWeek;
+      currentWeek = parseInt(savedWeek);
+      renderProblemList(currentWeek);
+    }
+  }
+
+  weekSelect.addEventListener('change', () => {
+    const val = weekSelect.value;
+    if (!val) {
+      noWeekMsg.hidden = false;
+      problemList.hidden = true;
+      weekMeta.textContent = '';
+      currentWeek = null;
+      localStorage.removeItem('code-complete-week');
+      return;
+    }
+    currentWeek = parseInt(val);
+    localStorage.setItem('code-complete-week', val);
+    renderProblemList(currentWeek);
+  });
+
+  function renderProblemList(week) {
+    const problems = allProblems.filter(p => p.week === week);
+    noWeekMsg.hidden = true;
+    problemList.hidden = false;
+    problemList.innerHTML = '';
+
+    const topics = [...new Set(problems.map(p => p.topic))];
+    weekMeta.textContent = problems.length + ' problem' + (problems.length > 1 ? 's' : '') + ' -- ' + topics.join(', ');
+
+    problems.forEach((p, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'problem-option';
+      if (completedSet.has(p.id)) btn.classList.add('completed');
+      btn.setAttribute('aria-label', p.title + ', ' + p.topic + (completedSet.has(p.id) ? ', completed' : ''));
+
+      btn.innerHTML =
+        '<span class="prob-num">' + (i + 1) + '</span>' +
+        '<span class="prob-check" aria-hidden="true">&#10003;</span>' +
+        '<span class="prob-info">' +
+          '<span class="prob-title">' + esc(p.title) + '</span>' +
+          '<span class="tag">' + esc(p.topic) + '</span>' +
+        '</span>';
+
+      btn.addEventListener('click', () => openExercise(p.id));
+      problemList.appendChild(btn);
+    });
+  }
+
+  // ── Open exercise ──
+  function openExercise(id) {
+    currentProblem = problemCache[id];
+    if (!currentProblem) return;
+
+    filledBlanks = new Set();
+
+    $('exercise-title').textContent = currentProblem.title;
+    $('exercise-week-tag').textContent = 'W' + currentProblem.week;
+    $('exercise-topic-tag').textContent = currentProblem.topic;
+
+    // Build blank tracker dots
+    blankTracker.innerHTML = '';
+    currentProblem.blanks.forEach((blank, i) => {
+      const dot = document.createElement('span');
+      dot.className = 'blank-dot';
+      dot.setAttribute('data-state', 'gray');
+      dot.setAttribute('aria-label', 'Blank ' + (i+1) + ': empty');
+      dot.innerHTML = '&#9679;';
+      blankTracker.appendChild(dot);
+    });
+
+    checkFeedback.classList.remove('visible', 'success', 'incomplete');
+
+    renderCode();
+
+    $('problem-desc').textContent = currentProblem.description;
+
+    libraryScreen.hidden = true;
+    exerciseScreen.classList.add('active');
+  }
+
+  function renderCode() {
+    codePanel.innerHTML = '';
+    currentProblem.code.forEach((line) => {
+      const div = document.createElement('div');
+      div.className = 'code-line';
+
+      const numSpan = document.createElement('span');
+      numSpan.className = 'line-num';
+      numSpan.textContent = line.line;
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'line-text';
+
+      if (line.blankId) {
+        // Line with a blank: before + input + after
+        const blank = currentProblem.blanks.find(b => b.id === line.blankId);
+        const isCorrect = filledBlanks.has(line.blankId);
+
+        textSpan.innerHTML = highlightJava(line.before || '');
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'blank-input';
+        if (isCorrect) input.classList.add('correct');
+        input.setAttribute('data-blank-id', line.blankId);
+        input.setAttribute('aria-label', 'Blank on line ' + line.line);
+        input.setAttribute('spellcheck', 'false');
+        input.setAttribute('autocomplete', 'off');
+
+        // Size input to expected answer length
+        const answerLen = blank ? Math.max(blank.answer.length, 3) : 6;
+        input.style.width = (answerLen * 0.65 + 1.2) + 'em';
+
+        if (isCorrect) {
+          input.value = blank.answer;
+          input.readOnly = true;
+        }
+
+        // Validate on Enter
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            validateBlank(input, blank);
+          }
+        });
+
+        textSpan.appendChild(input);
+
+        // Append the after portion
+        const afterSpan = document.createElement('span');
+        afterSpan.innerHTML = highlightJava(line.after || '');
+        textSpan.appendChild(afterSpan);
+      } else {
+        // Normal line
+        textSpan.innerHTML = highlightJava(line.text || '');
+      }
+
+      div.appendChild(numSpan);
+      div.appendChild(textSpan);
+      codePanel.appendChild(div);
+    });
+  }
+
+  function validateBlank(input, blank) {
+    if (!blank || filledBlanks.has(blank.id)) return;
+
+    const val = input.value.trim();
+    const accepted = [blank.answer, ...(blank.altAnswers || [])];
+
+    if (accepted.includes(val)) {
+      // Correct
+      filledBlanks.add(blank.id);
+      input.classList.add('correct');
+      input.readOnly = true;
+      input.value = blank.answer;
+
+      // Update dot
+      const blankIdx = currentProblem.blanks.findIndex(b => b.id === blank.id);
+      updateDot(blankIdx, 'green');
+
+      // Check if all blanks filled
+      if (filledBlanks.size === currentProblem.blanks.length) {
+        completedSet.add(currentProblem.id);
+        saveCompleted();
+        checkFeedback.textContent = 'All blanks filled! Nice work.';
+        checkFeedback.classList.remove('incomplete');
+        checkFeedback.classList.add('visible', 'success');
+      }
+    } else {
+      // Incorrect -- shake and clear
+      input.classList.add('shake');
+      setTimeout(() => {
+        input.classList.remove('shake');
+        input.value = '';
+        input.focus();
+      }, 400);
+    }
+  }
+
+  function updateDot(idx, state) {
+    const dots = blankTracker.querySelectorAll('.blank-dot');
+    const dot = dots[idx];
+    if (!dot) return;
+    dot.setAttribute('data-state', state);
+    const labels = { gray: 'empty', green: 'correct' };
+    const icons  = { gray: '&#9679;', green: '&#10003;' };
+    dot.innerHTML = icons[state];
+    dot.setAttribute('aria-label', 'Blank ' + (idx+1) + ': ' + labels[state]);
+  }
+
+  // ── Check answers ──
+  btnCheck.addEventListener('click', () => {
+    if (!currentProblem) return;
+
+    const inputs = codePanel.querySelectorAll('.blank-input');
+    let allCorrect = true;
+
+    inputs.forEach(input => {
+      const blankId = input.getAttribute('data-blank-id');
+      if (filledBlanks.has(blankId)) return;
+
+      const blank = currentProblem.blanks.find(b => b.id === blankId);
+      if (!blank) return;
+
+      const val = input.value.trim();
+      const accepted = [blank.answer, ...(blank.altAnswers || [])];
+
+      if (accepted.includes(val)) {
+        filledBlanks.add(blank.id);
+        input.classList.add('correct');
+        input.readOnly = true;
+        input.value = blank.answer;
+        const blankIdx = currentProblem.blanks.findIndex(b => b.id === blank.id);
+        updateDot(blankIdx, 'green');
+      } else {
+        allCorrect = false;
+        input.classList.add('shake');
+        setTimeout(() => {
+          input.classList.remove('shake');
+          if (val === '') return;
+          input.value = '';
+        }, 400);
+      }
+    });
+
+    checkFeedback.classList.remove('visible', 'success', 'incomplete');
+    if (filledBlanks.size === currentProblem.blanks.length) {
+      completedSet.add(currentProblem.id);
+      saveCompleted();
+      checkFeedback.textContent = 'All blanks filled! Nice work.';
+      checkFeedback.classList.add('visible', 'success');
+    } else {
+      const remaining = currentProblem.blanks.length - filledBlanks.size;
+      checkFeedback.textContent = remaining + ' blank' + (remaining > 1 ? 's' : '') + ' still need filling.';
+      checkFeedback.classList.add('visible', 'incomplete');
+    }
+  });
+
+  // ── Next problem ──
+  btnNext.addEventListener('click', () => {
+    goBack(currentProblem ? currentProblem.week : null);
+  });
+
+  // ── Back to library ──
+  backLink.addEventListener('click', e => {
+    e.preventDefault();
+    goBack(null);
+  });
+
+  function refreshDropdownCounts() {
+    Array.from(weekSelect.options).forEach(opt => {
+      if (!opt.value) return;
+      const weekNum = parseInt(opt.value);
+      const entry = tree.find(e => e.id === 'week-' + weekNum);
+      if (!entry) return;
+      const weekProblems = allProblems.filter(p => p.week === weekNum);
+      const done = weekProblems.filter(p => completedSet.has(p.id)).length;
+      opt.textContent = entry.title + ' (' + done + '/' + weekProblems.length + ')';
+    });
+  }
+
+  function goBack(prefilterWeek) {
+    exerciseScreen.classList.remove('active');
+    libraryScreen.hidden = false;
+    refreshDropdownCounts();
+
+    if (prefilterWeek !== null) {
+      currentWeek = prefilterWeek;
+      weekSelect.value = prefilterWeek;
+      renderProblemList(prefilterWeek);
+    } else if (currentWeek !== null) {
+      renderProblemList(currentWeek);
+    }
+  }
+
+  // ── Init ──
+  init();
+})();
+</script>
+</body>
+</html>

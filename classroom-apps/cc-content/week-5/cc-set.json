@@ -1,0 +1,83 @@
+[
+  {
+    "id": "week5-oop-01",
+    "title": "Student Constructor",
+    "week": 5,
+    "topic": "constructors",
+    "description": "A Student class with a constructor that sets the name using the this keyword.",
+    "code": [
+      { "line": 1, "text": "public class Student {" },
+      { "line": 2, "blankId": "b1", "before": "  ", "after": " String name;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public Student(String name) {" },
+      { "line": 5, "blankId": "b2", "before": "    ", "after": ".name = name;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b3", "before": "  public String ", "after": "() {" },
+      { "line": 9, "text": "    return name;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "private", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "this", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "getName", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-oop-02",
+    "title": "Bank Account",
+    "week": 5,
+    "topic": "getters",
+    "description": "A BankAccount class with a private balance and a getter method to access it.",
+    "code": [
+      { "line": 1, "text": "public class BankAccount {" },
+      { "line": 2, "text": "  private double balance;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public BankAccount(double balance) {" },
+      { "line": 5, "text": "    this.balance = balance;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b1", "before": "  ", "after": " double getBalance() {" },
+      { "line": 9, "blankId": "b2", "before": "    ", "after": " balance;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "blankId": "b3", "before": "  public ", "after": " deposit(double amount) {" },
+      { "line": 13, "text": "    balance = balance + amount;" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 8, "answer": "public", "altAnswers": [] },
+      { "id": "b2", "line": 9, "answer": "return", "altAnswers": [] },
+      { "id": "b3", "line": 12, "answer": "void", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-oop-03",
+    "title": "Rectangle",
+    "week": 5,
+    "topic": "constructors",
+    "description": "A Rectangle class that stores width and height and calculates the area.",
+    "code": [
+      { "line": 1, "text": "public class Rectangle {" },
+      { "line": 2, "text": "  private int width;" },
+      { "line": 3, "text": "  private int height;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "blankId": "b1", "before": "  public ", "after": "(int width, int height) {" },
+      { "line": 6, "blankId": "b2", "before": "    ", "after": ".width = width;" },
+      { "line": 7, "text": "    this.height = height;" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "  public int getArea() {" },
+      { "line": 11, "blankId": "b3", "before": "    ", "after": " width * height;" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "Rectangle", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "this", "altAnswers": [] },
+      { "id": "b3", "line": 11, "answer": "return", "altAnswers": [] }
+    ]
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "week1-variables-01",
+    "title": "Name and Age",
+    "week": 1,
+    "topic": "variables",
+    "description": "A program that declares a name and age and prints them.",
+    "code": [
+      { "line": 1, "text": "public class NameAndAge {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    ", "after": " name = \"Ada\";" },
+      { "line": 4, "blankId": "b2", "before": "    ", "after": " age = 30;" },
+      { "line": 5, "blankId": "b3", "before": "    System.out.", "after": "(name + \" is \" + age);" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "String", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "int", "altAnswers": [] },
+      { "id": "b3", "line": 5, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week1-variables-02",
+    "title": "Circle Area",
+    "week": 1,
+    "topic": "variables",
+    "description": "A program that calculates and prints the area of a circle with radius 5.",
+    "code": [
+      { "line": 1, "text": "public class CircleArea {" },
+      { "line": 2, "blankId": "b1", "before": "  public static ", "after": " main(String[] args) {" },
+      { "line": 3, "text": "    double radius = 5.0;" },
+      { "line": 4, "blankId": "b2", "before": "    ", "after": " area = Math.PI * radius * radius;" },
+      { "line": 5, "blankId": "b3", "before": "    System.out.", "after": "(\"Area: \" + area);" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "void", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "double", "altAnswers": [] },
+      { "id": "b3", "line": 5, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week1-conditions-01",
+    "title": "Voting Age",
+    "week": 1,
+    "topic": "conditions",
+    "description": "A program that checks if a person is old enough to vote (18 or older) and prints the result.",
+    "code": [
+      { "line": 1, "text": "public class VotingAge {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    ", "after": " age = 17;" },
+      { "line": 4, "blankId": "b2", "before": "    ", "after": " (age >= 18) {" },
+      { "line": 5, "text": "      System.out.println(\"You can vote!\");" },
+      { "line": 6, "blankId": "b3", "before": "    } ", "after": " {" },
+      { "line": 7, "text": "      System.out.println(\"Too young to vote.\");" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "int", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "if", "altAnswers": [] },
+      { "id": "b3", "line": 6, "answer": "else", "altAnswers": [] }
+    ]
+  }
+]

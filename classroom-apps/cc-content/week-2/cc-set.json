@@ -1,0 +1,73 @@
+[
+  {
+    "id": "week2-loops-01",
+    "title": "Countdown",
+    "week": 2,
+    "topic": "loops",
+    "description": "A program that counts down from 5 to 1 and prints \"Go!\" at the end.",
+    "code": [
+      { "line": 1, "text": "public class Countdown {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    ", "after": " (int i = 5; i >= 1; i--) {" },
+      { "line": 4, "blankId": "b2", "before": "      System.out.", "after": "(i);" },
+      { "line": 5, "text": "    }" },
+      { "line": 6, "blankId": "b3", "before": "    System.out.println(", "after": ");" },
+      { "line": 7, "text": "  }" },
+      { "line": 8, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "for", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "println", "altAnswers": [] },
+      { "id": "b3", "line": 6, "answer": "\"Go!\"", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week2-methods-01",
+    "title": "Greeting Method",
+    "week": 2,
+    "topic": "methods",
+    "description": "A program with a method that returns a greeting message for a given name.",
+    "code": [
+      { "line": 1, "text": "public class Greeter {" },
+      { "line": 2, "blankId": "b1", "before": "  public static ", "after": " greet(String name) {" },
+      { "line": 3, "blankId": "b2", "before": "    ", "after": " \"Hello, \" + name + \"!\";" },
+      { "line": 4, "text": "  }" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "  public static void main(String[] args) {" },
+      { "line": 7, "blankId": "b3", "before": "    String message = ", "after": "(\"Alice\");" },
+      { "line": 8, "text": "    System.out.println(message);" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "String", "altAnswers": [] },
+      { "id": "b2", "line": 3, "answer": "return", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "greet", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week2-classes-01",
+    "title": "Dog Class",
+    "week": 2,
+    "topic": "classes",
+    "description": "A simple class representing a dog with a name and a bark method.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public ", "after": " Dog {" },
+      { "line": 2, "text": "  String name;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  Dog(String name) {" },
+      { "line": 5, "blankId": "b2", "before": "    ", "after": ".name = name;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b3", "before": "  ", "after": " bark() {" },
+      { "line": 9, "text": "    System.out.println(name + \" says Woof!\");" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "class", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "this", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "void", "altAnswers": [] }
+    ]
+  }
+]

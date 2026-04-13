@@ -1,0 +1,75 @@
+[
+  {
+    "id": "week3-fileio-01",
+    "title": "Write to File",
+    "week": 3,
+    "topic": "file I/O",
+    "description": "A program that writes a greeting to a text file using BufferedWriter.",
+    "code": [
+      { "line": 1, "text": "import java.io.*;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class WriteFile {" },
+      { "line": 4, "blankId": "b1", "before": "  public static void main(String[] args) ", "after": " IOException {" },
+      { "line": 5, "blankId": "b2", "before": "    ", "after": " writer = new BufferedWriter(new FileWriter(\"hello.txt\"));" },
+      { "line": 6, "blankId": "b3", "before": "    writer.", "after": "(\"Hello, file!\");" },
+      { "line": 7, "text": "    writer.close();" },
+      { "line": 8, "text": "    System.out.println(\"File written.\");" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "throws", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "BufferedWriter", "altAnswers": [] },
+      { "id": "b3", "line": 6, "answer": "write", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-hashmap-01",
+    "title": "Fruit Prices",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "A program that stores fruit prices in a HashMap and looks up the price of an apple.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class FruitPrices {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b1", "before": "    HashMap<String, Double> prices = ", "after": " HashMap<>();" },
+      { "line": 6, "blankId": "b2", "before": "    prices.", "after": "(\"apple\", 1.50);" },
+      { "line": 7, "text": "    prices.put(\"banana\", 0.75);" },
+      { "line": 8, "blankId": "b3", "before": "    System.out.println(\"Apple: $\" + prices.", "after": "(\"apple\"));" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "new", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "put", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "get", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-arraylist-01",
+    "title": "Color List",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "A program that builds an ArrayList of colors and prints how many there are.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class ColorList {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b1", "before": "    ", "after": "<String> colors = new ArrayList<>();" },
+      { "line": 6, "blankId": "b2", "before": "    colors.", "after": "(\"red\");" },
+      { "line": 7, "text": "    colors.add(\"blue\");" },
+      { "line": 8, "text": "    colors.add(\"green\");" },
+      { "line": 9, "blankId": "b3", "before": "    System.out.println(\"Count: \" + colors.", "after": "());" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "ArrayList", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "add", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "size", "altAnswers": [] }
+    ]
+  }
+]

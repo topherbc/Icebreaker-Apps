@@ -1,0 +1,75 @@
+[
+  {
+    "id": "week7-interfaces-01",
+    "title": "Drawable Interface",
+    "week": 7,
+    "topic": "interfaces",
+    "description": "A Square class that implements the Drawable interface and its draw method.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public ", "after": " Drawable {" },
+      { "line": 2, "text": "  void draw();" },
+      { "line": 3, "text": "}" },
+      { "line": 4, "text": "" },
+      { "line": 5, "blankId": "b2", "before": "public class Square ", "after": " Drawable {" },
+      { "line": 6, "text": "  @Override" },
+      { "line": 7, "blankId": "b3", "before": "  public ", "after": " draw() {" },
+      { "line": 8, "text": "    System.out.println(\"Drawing a square\");" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "interface", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "implements", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "void", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-generics-01",
+    "title": "Generic Box",
+    "week": 7,
+    "topic": "generics",
+    "description": "A generic Box class that can hold any type of item and return it.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public class Box", "after": " {" },
+      { "line": 2, "text": "  private T item;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "blankId": "b2", "before": "  public ", "after": " set(T item) {" },
+      { "line": 5, "text": "    this.item = item;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b3", "before": "  public ", "after": " get() {" },
+      { "line": 9, "text": "    return item;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "<T>", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "void", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "T", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-streams-01",
+    "title": "Stream Filter",
+    "week": 7,
+    "topic": "streams",
+    "description": "A program that uses a stream to filter and print numbers greater than 3 from a list.",
+    "code": [
+      { "line": 1, "text": "import java.util.List;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class StreamFilter {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b1", "before": "    List<Integer> nums = List.", "after": "(1, 2, 3, 4, 5);" },
+      { "line": 6, "blankId": "b2", "before": "    nums.", "after": "()" },
+      { "line": 7, "blankId": "b3", "before": "      .", "after": "(n -> n > 3)" },
+      { "line": 8, "text": "      .forEach(System.out::println);" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "of", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "stream", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "filter", "altAnswers": [] }
+    ]
+  }
+]

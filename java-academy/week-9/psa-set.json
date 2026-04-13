@@ -1,0 +1,266 @@
+{
+  "id": "week-9",
+  "title": "Basics of SQL",
+  "labels": [
+    {
+      "id": "select",
+      "name": "Select",
+      "desc": "Specifying which columns to retrieve from the database",
+      "example": "SELECT name, email\nFROM customers;"
+    },
+    {
+      "id": "filter",
+      "name": "Filter",
+      "desc": "A condition that limits which rows are included",
+      "example": "SELECT * FROM orders\nWHERE order_date >= CURRENT_DATE - INTERVAL '90 days';"
+    },
+    {
+      "id": "aggregate",
+      "name": "Aggregate",
+      "desc": "A calculation across multiple rows — COUNT, SUM, AVG, MIN, MAX",
+      "example": "SELECT category, COUNT(*) AS total, AVG(price) AS avg_price\nFROM products\nGROUP BY category;"
+    },
+    {
+      "id": "having",
+      "name": "Having",
+      "desc": "A condition that filters grouped results after aggregation",
+      "example": "SELECT category, COUNT(*) AS total\nFROM products\nGROUP BY category\nHAVING COUNT(*) > 5;"
+    },
+    {
+      "id": "join",
+      "name": "Join",
+      "desc": "Combining rows from two related tables using a shared key",
+      "example": "SELECT c.name, o.total\nFROM customers c\nJOIN orders o ON o.customer_id = c.id;"
+    },
+    {
+      "id": "sort",
+      "name": "Sort",
+      "desc": "Controlling the order of returned rows with ORDER BY",
+      "example": "SELECT name, total_sales\nFROM summary\nORDER BY total_sales DESC;"
+    },
+    {
+      "id": "modify",
+      "name": "Modify",
+      "desc": "Adding new rows or changing existing data with INSERT or UPDATE",
+      "example": "INSERT INTO customers (name, email) VALUES ('Alice', 'alice@example.com');\nUPDATE products SET price = 19.99 WHERE id = 42;"
+    }
+  ],
+  "prompts": [
+    {
+      "title": "Frequent Customers",
+      "statement": "The marketing team wants to target customers who placed at least three orders in the last 90 days. Write a query to retrieve their names and email addresses.",
+      "expectedTags": [
+        {
+          "phrase": "placed at least three orders",
+          "labels": ["aggregate", "having"],
+          "explanation": "Counting orders per customer and keeping only those with three or more requires both grouping (to count per customer) and a post-aggregation condition to exclude customers below the threshold.",
+          "codeSnippets": {
+            "aggregate": "GROUP BY c.id, c.name, c.email",
+            "having": "HAVING COUNT(o.id) >= 3"
+          }
+        },
+        {
+          "phrase": "in the last 90 days",
+          "labels": ["filter"],
+          "explanation": "This date condition limits which orders are counted — only those placed within the last 90 days qualify.",
+          "codeSnippets": {
+            "filter": "WHERE o.order_date >= CURRENT_DATE - INTERVAL '90 days'"
+          }
+        },
+        {
+          "phrase": "retrieve their names and email addresses",
+          "labels": ["select", "join"],
+          "explanation": "Returning customer columns from the query requires selecting them explicitly, and because the order data lives in a separate table, the two tables must be joined to bring them together.",
+          "codeSnippets": {
+            "select": "SELECT c.name, c.email",
+            "join": "FROM customers c\nJOIN orders o ON o.customer_id = c.id"
+          }
+        }
+      ],
+      "code": "SELECT c.name, c.email\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.order_date >= CURRENT_DATE - INTERVAL '90 days'\nGROUP BY c.id, c.name, c.email\nHAVING COUNT(o.id) >= 3;"
+    },
+    {
+      "title": "Category Summary",
+      "statement": "A product manager wants a breakdown of each category: its name, how many products it contains, and the average price — but only for categories with more than five products.",
+      "expectedTags": [
+        {
+          "phrase": "breakdown of each category",
+          "labels": ["aggregate", "select"],
+          "explanation": "Producing a per-category breakdown means grouping rows by category and applying aggregate functions — each group collapses into one summary row in the results.",
+          "codeSnippets": {
+            "aggregate": "COUNT(*) AS product_count,\nAVG(price) AS avg_price\nGROUP BY category_name",
+            "select": "SELECT category_name, COUNT(*) AS product_count, AVG(price) AS avg_price"
+          }
+        },
+        {
+          "phrase": "how many products it contains, and the average price",
+          "labels": ["aggregate"],
+          "explanation": "Counting products and computing an average price are both aggregate calculations — they collapse multiple rows into a single summary value per group.",
+          "codeSnippets": {
+            "aggregate": "COUNT(*) AS product_count,\nAVG(price) AS avg_price"
+          }
+        },
+        {
+          "phrase": "only for categories with more than five products",
+          "labels": ["having"],
+          "explanation": "Restricting results based on a count requires filtering after aggregation. WHERE cannot reference aggregate results, so HAVING is used instead.",
+          "codeSnippets": {
+            "having": "HAVING COUNT(*) > 5"
+          }
+        }
+      ],
+      "code": "SELECT category_name,\n       COUNT(*) AS product_count,\n       AVG(price) AS avg_price\nFROM products\nGROUP BY category_name\nHAVING COUNT(*) > 5\nORDER BY avg_price DESC;"
+    },
+    {
+      "title": "Order Lookup by Customer",
+      "statement": "Customer service needs to look up orders by customer name. Write a query that returns each matching order's ID, date, and total for the customer named 'Maria Santos'.",
+      "expectedTags": [
+        {
+          "phrase": "look up orders by customer name",
+          "labels": ["join", "filter"],
+          "explanation": "Order and customer data live in separate tables, so a join is needed to link them. The customer name then acts as the condition that limits which rows are returned.",
+          "codeSnippets": {
+            "join": "FROM orders o\nJOIN customers c ON c.id = o.customer_id",
+            "filter": "WHERE c.name = 'Maria Santos'"
+          }
+        },
+        {
+          "phrase": "order's ID, date, and total",
+          "labels": ["select"],
+          "explanation": "Naming the columns to return is the SELECT clause — it determines exactly which fields appear in the result.",
+          "codeSnippets": {
+            "select": "SELECT o.id, o.order_date, o.total"
+          }
+        }
+      ],
+      "code": "SELECT o.id, o.order_date, o.total\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nWHERE c.name = 'Maria Santos'\nORDER BY o.order_date DESC;"
+    },
+    {
+      "title": "Employee–Manager Report",
+      "statement": "HR wants to see every employee listed alongside their manager's name. Employees who don't have a manager assigned should still appear in the results.",
+      "expectedTags": [
+        {
+          "phrase": "every employee listed alongside their manager's name",
+          "labels": ["join", "select"],
+          "explanation": "Pairing each employee with their manager's name means joining the employees table with itself — one copy represents employees, the other represents managers.",
+          "codeSnippets": {
+            "join": "FROM employees e\nLEFT JOIN employees m ON m.id = e.manager_id",
+            "select": "SELECT e.name AS employee, m.name AS manager"
+          }
+        },
+        {
+          "phrase": "don't have a manager assigned should still appear",
+          "labels": ["join"],
+          "explanation": "A LEFT JOIN keeps every row from the left table even when no match exists on the right — employees without a manager get a NULL in the manager column rather than being dropped.",
+          "codeSnippets": {
+            "join": "LEFT JOIN employees m ON m.id = e.manager_id"
+          }
+        }
+      ],
+      "code": "SELECT e.name AS employee, m.name AS manager\nFROM employees e\nLEFT JOIN employees m ON m.id = e.manager_id\nORDER BY e.name;"
+    },
+    {
+      "title": "Customers Without Orders",
+      "statement": "The sales team wants to identify customers who have never placed an order, so they can reach out to them. Write a query to find those customers.",
+      "expectedTags": [
+        {
+          "phrase": "never placed an order",
+          "labels": ["join", "filter"],
+          "explanation": "Finding customers with no matching orders means joining the tables and then filtering for the unmatched side — rows where the join produced no order record.",
+          "codeSnippets": {
+            "join": "FROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id",
+            "filter": "WHERE o.id IS NULL"
+          }
+        },
+        {
+          "phrase": "find those customers",
+          "labels": ["select"],
+          "explanation": "Naming the columns to return — here the customer name and email — is the SELECT clause.",
+          "codeSnippets": {
+            "select": "SELECT c.name, c.email"
+          }
+        }
+      ],
+      "code": "SELECT c.name, c.email\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL\nORDER BY c.name;"
+    },
+    {
+      "title": "Sales Leaderboard",
+      "statement": "Sales leadership wants to see each salesperson's total sales for the current year, ranked from highest to lowest.",
+      "expectedTags": [
+        {
+          "phrase": "each salesperson's total sales",
+          "labels": ["aggregate", "join"],
+          "explanation": "Summing sales per person requires grouping order totals by salesperson, which is an aggregation. The salesperson names live in a separate table, so a join is needed to bring them in.",
+          "codeSnippets": {
+            "aggregate": "SUM(o.total) AS total_sales\nGROUP BY e.id, e.name",
+            "join": "FROM employees e\nJOIN orders o ON o.salesperson_id = e.id"
+          }
+        },
+        {
+          "phrase": "for the current year",
+          "labels": ["filter"],
+          "explanation": "Restricting totals to orders from the current year is a date-based filter applied before grouping.",
+          "codeSnippets": {
+            "filter": "WHERE EXTRACT(YEAR FROM o.order_date) = EXTRACT(YEAR FROM CURRENT_DATE)"
+          }
+        },
+        {
+          "phrase": "ranked from highest to lowest",
+          "labels": ["sort"],
+          "explanation": "Ordering results from largest to smallest total is controlled by ORDER BY with the DESC direction.",
+          "codeSnippets": {
+            "sort": "ORDER BY total_sales DESC"
+          }
+        }
+      ],
+      "code": "SELECT e.name, SUM(o.total) AS total_sales\nFROM employees e\nJOIN orders o ON o.salesperson_id = e.id\nWHERE EXTRACT(YEAR FROM o.order_date) = EXTRACT(YEAR FROM CURRENT_DATE)\nGROUP BY e.id, e.name\nORDER BY total_sales DESC;"
+    },
+    {
+      "title": "Safe Price Update",
+      "statement": "A product manager needs to change the price of product ID 7 to $24.99. Write a SQL statement to update that record.",
+      "expectedTags": [
+        {
+          "phrase": "change the price",
+          "labels": ["modify"],
+          "explanation": "Changing an existing value in a row is an UPDATE — it targets a specific column and sets a new value without replacing the whole row.",
+          "codeSnippets": {
+            "modify": "UPDATE products\nSET price = 24.99"
+          }
+        },
+        {
+          "phrase": "product ID 7",
+          "labels": ["filter"],
+          "explanation": "The WHERE clause identifies exactly which row to update — without it, every row in the table would be changed.",
+          "codeSnippets": {
+            "filter": "WHERE id = 7"
+          }
+        }
+      ],
+      "code": "UPDATE products\nSET price = 24.99\nWHERE id = 7;"
+    },
+    {
+      "title": "Department Headcount",
+      "statement": "HR wants a report showing how many employees are in each department, listed alphabetically by department name.",
+      "expectedTags": [
+        {
+          "phrase": "how many employees are in each department",
+          "labels": ["aggregate", "select"],
+          "explanation": "Counting employees per department means grouping all rows by department and applying COUNT — each group collapses into one summary row with the department's total.",
+          "codeSnippets": {
+            "aggregate": "COUNT(*) AS headcount\nGROUP BY department",
+            "select": "SELECT department, COUNT(*) AS headcount"
+          }
+        },
+        {
+          "phrase": "listed alphabetically by department name",
+          "labels": ["sort"],
+          "explanation": "Ordering results alphabetically is controlled by ORDER BY on the department column.",
+          "codeSnippets": {
+            "sort": "ORDER BY department ASC"
+          }
+        }
+      ],
+      "code": "SELECT department, COUNT(*) AS headcount\nFROM employees\nGROUP BY department\nORDER BY department ASC;"
+    }
+  ]
+}

@@ -48,11 +48,11 @@ function createWindow() {
   });
 
   // Load the canonical web app.
-  // Packaged: extraResources puts it at Resources/visualization-tools/live-code.html
+  // Packaged: extraResources puts it at Resources/classroom-apps/live-code.html
   // Dev:      sibling folder relative to live-code/
   const htmlPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'visualization-tools', 'live-code.html')
-    : path.join(__dirname, '..', 'visualization-tools', 'live-code.html');
+    ? path.join(process.resourcesPath, 'classroom-apps', 'live-code.html')
+    : path.join(__dirname, '..', 'classroom-apps', 'live-code.html');
   mainWindow.loadFile(htmlPath);
 }
 

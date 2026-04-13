@@ -7,13 +7,13 @@ files:
   - "!.git/**"
   - "!*.md"
 
-# Bundle live-code.html from the sibling web-app folder.
-# extraResources places it at Resources/visualization-tools/live-code.html
+# Bundle live-code.html from the sibling classroom-apps folder.
+# extraResources places it at Resources/classroom-apps/live-code.html
 # (a real filesystem path, not inside the asar), which main.js reads via
 # process.resourcesPath when app.isPackaged is true.
 extraResources:
-  - from: "../visualization-tools/live-code.html"
-    to: "visualization-tools/live-code.html"
+  - from: "../classroom-apps/live-code.html"
+    to: "classroom-apps/live-code.html"
 
 # Inject Ably key at build time via CI environment variable.
 # GitHub Actions sets ABLY_API_KEY; electron-builder substitutes it here

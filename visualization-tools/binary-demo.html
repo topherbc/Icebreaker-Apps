@@ -272,11 +272,55 @@
   }
   .reset-btn:hover { background: var(--surface2); color: var(--text); }
 
+  /* 16-bit mode */
+  .bits-grid.bits-16 { gap: 6px; }
+  .bits-grid.bits-16 .bit-btn { width: 48px; height: 48px; font-size: 1.3rem; border-radius: 8px; }
+  .bits-grid.bits-16 .bit-pos-val { font-size: 0.62rem; min-width: 32px; }
+  .byte-separator {
+    width: 2px;
+    align-self: stretch;
+    background: var(--border2);
+    border-radius: 1px;
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+  .byte-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    text-align: center;
+    width: 100%;
+    margin-top: -2px;
+  }
+  .byte-group { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .values-grid.four-col { grid-template-columns: repeat(4, 1fr); }
+
+  .sub-tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+  .sub-tab {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .sub-tab:hover { background: var(--surface2); color: var(--text); }
+  .sub-tab.active { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+
   @media (max-width: 640px) {
     .bit-btn { width: 54px; height: 54px; font-size: 1.5rem; }
     .bits-grid { gap: 6px; }
     .values-grid { grid-template-columns: 1fr; }
+    .values-grid.four-col { grid-template-columns: 1fr; }
     header h1 { font-size: 1.6rem; }
+    .bits-grid.bits-16 .bit-btn { width: 36px; height: 36px; font-size: 1rem; }
+    .bits-grid.bits-16 .bit-pos-val { font-size: 0.55rem; min-width: 26px; }
   }
 </style>
 </head>
@@ -288,8 +332,9 @@
 
 <div class="card">
   <div class="tabs">
-    <button class="tab active" onclick="setMode('examples')" id="tab-examples">Examples</button>
-    <button class="tab" onclick="setMode('free')" id="tab-free">Demo</button>
+    <button class="tab active" onclick="setMode('examples')" id="tab-examples">8-bit</button>
+    <button class="tab" onclick="setMode('free')" id="tab-free">8-bit Demo</button>
+    <button class="tab" onclick="setMode('16bit')" id="tab-16bit">16-bit / Signed</button>
   </div>
 
   <div class="example-nav" id="example-nav">
@@ -303,7 +348,12 @@
     <button class="reset-btn" onclick="resetBits()">Clear all bits</button>
   </div>
 
-  <div class="bits-section-label">8 bits &mdash; 1 byte</div>
+  <div id="sub-tabs-16" class="sub-tabs" style="display:none">
+    <button class="sub-tab active" onclick="set16Sub('examples')" id="sub-16-examples">Examples</button>
+    <button class="sub-tab" onclick="set16Sub('free')" id="sub-16-free">Free play</button>
+  </div>
+
+  <div class="bits-section-label" id="bits-section-label">8 bits &mdash; 1 byte</div>
   <div class="bits-grid" id="bits-grid"></div>
   <div class="sum-row" id="sum-row"></div>
 
@@ -314,9 +364,14 @@
       <div class="val-sub">8 bits = 0&ndash;255</div>
     </div>
     <div class="val-card">
-      <div class="val-label"><span class="badge badge-green">Base 10</span> Decimal</div>
+      <div class="val-label"><span class="badge badge-green">Base 10</span> Unsigned</div>
       <div class="val-number green" id="val-dec">0</div>
       <div class="val-sub" id="val-dec-sub">no bits on</div>
+    </div>
+    <div class="val-card" id="val-signed-card" style="display:none">
+      <div class="val-label"><span class="badge badge-green">Signed</span> Two's complement</div>
+      <div class="val-number green" id="val-signed">0</div>
+      <div class="val-sub" id="val-signed-sub">sign bit off &rarr; positive</div>
     </div>
     <div class="val-card">
       <div class="val-label"><span class="badge badge-amber">Base 16</span> Hex </div>
@@ -357,125 +412,292 @@ const EXAMPLES = [
   },
 ];
 
-const POS_VALS = [128, 64, 32, 16, 8, 4, 2, 1];
+const EXAMPLES_16 = [
+  {
+    label: '16-bit 1 &mdash; number 256 (too big for 8 bits)',
+    bits: [0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,0],
+    hint: '256 is one more than a single byte can hold (max 255). We need a 9th bit &mdash; that\'s why 16-bit integers exist. Range: 0&ndash;65,535 unsigned.'
+  },
+  {
+    label: '16-bit 2 &mdash; signed: -1 (all bits on)',
+    bits: [1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1],
+    hint: 'In two\'s complement, all bits ON = -1 (signed) or 65,535 (unsigned). The leftmost bit is the <strong>sign bit</strong>: when it\'s 1, the number is negative.'
+  },
+  {
+    label: '16-bit 3 &mdash; signed: -32,768 (minimum)',
+    bits: [1,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0],
+    hint: 'Only the sign bit is on. In two\'s complement this is the most negative value: -32,768. The signed 16-bit range is -32,768 to +32,767.'
+  },
+  {
+    label: '16-bit 4 &mdash; 0x7FFF = +32,767 (maximum signed)',
+    bits: [0,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1],
+    hint: '0x7FFF = 32,767 is the largest positive signed 16-bit integer. Add 1 and you get 0x8000 = -32,768. This wrap-around is called <strong>integer overflow</strong> &mdash; a classic source of bugs!'
+  },
+  {
+    label: '16-bit 5 &mdash; signed: -256',
+    bits: [1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0],
+    hint: 'The high byte is 0xFF and the low byte is 0x00. Unsigned that\'s 65,280, but signed (two\'s complement) it\'s -256. Same bits, different interpretation!'
+  },
+];
 
-let mode = 'examples';
+function getPosVals(w) { return Array.from({length: w}, (_, i) => Math.pow(2, w - 1 - i)); }
+
+let mode = 'examples';   // 'examples' | 'free' | '16bit'
+let sub16 = 'examples';  // '16bit' sub-mode: 'examples' | 'free'
 let exIdx = 0;
+let exIdx16 = 0;
+let bitWidth = 8;
 let bits = [...EXAMPLES[0].bits];
 let hexInputActive = false;
 
-function decVal(b) { return b.reduce((acc,v,i) => acc + v * POS_VALS[i], 0); }
+function curPosVals() { return getPosVals(bitWidth); }
+function decVal(b) { const pv = curPosVals(); return b.reduce((acc,v,i) => acc + v * pv[i], 0); }
+function signedVal(b) {
+  const u = decVal(b);
+  return b[0] === 1 ? u - Math.pow(2, bitWidth) : u;
+}
 function nibbleHex(b4) { return b4.reduce((a,v,i) => a + v * Math.pow(2,3-i), 0).toString(16).toUpperCase(); }
+function maxUnsigned() { return Math.pow(2, bitWidth) - 1; }
+function hexDigits() { return bitWidth / 4; }
+function zeroBits() { return new Array(bitWidth).fill(0); }
+
+function curExamples() { return mode === '16bit' ? EXAMPLES_16 : EXAMPLES; }
+function curExIdx() { return mode === '16bit' ? exIdx16 : exIdx; }
+function showExNav() {
+  return mode === 'examples' || (mode === '16bit' && sub16 === 'examples');
+}
 
 function buildDots() {
+  const exs = curExamples();
+  const idx = curExIdx();
   document.getElementById('ex-dots').innerHTML =
-    EXAMPLES.map((_,i) => `<div class="dot${i===exIdx?' active':''}"></div>`).join('');
+    exs.map((_,i) => `<div class="dot${i===idx?' active':''}"></div>`).join('');
 }
 
 function buildBits() {
-  document.getElementById('bits-grid').innerHTML = bits.map((b, i) => {
-    const pval = POS_VALS[i];
-    return `<div class="bit-col">
-      <span class="bit-pos-val${b?' on':''}">${pval}</span>
-      <button class="bit-btn${b?' on':''}"
-        onclick="toggleBit(${i})"
-        aria-label="Bit with value ${pval}, currently ${b ? 'on' : 'off'}, click to toggle"
-        tabindex="0">${b}</button>
-    </div>`;
-  }).join('');
+  const grid = document.getElementById('bits-grid');
+  const pv = curPosVals();
+
+  if (bitWidth === 16) {
+    grid.className = 'bits-grid bits-16';
+    const makeCol = (b, i) => {
+      const val = pv[i];
+      const label = val >= 1000 ? (val/1024 >= 1 && val % 1024 === 0 ? Math.floor(val/1024)+'K' : val) : val;
+      return `<div class="bit-col">
+        <span class="bit-pos-val${b?' on':''}">${label}</span>
+        <button class="bit-btn${b?' on':''}"
+          onclick="toggleBit(${i})"
+          aria-label="Bit with value ${val}, currently ${b ? 'on' : 'off'}"
+          tabindex="0">${b}</button>
+      </div>`;
+    };
+    const highByte = bits.slice(0,8).map((b,i) => makeCol(b,i)).join('');
+    const lowByte  = bits.slice(8,16).map((b,i) => makeCol(b,i+8)).join('');
+    grid.innerHTML =
+      `<div><div class="byte-group">${highByte}</div><div class="byte-label">High byte</div></div>` +
+      `<div class="byte-separator"></div>` +
+      `<div><div class="byte-group">${lowByte}</div><div class="byte-label">Low byte</div></div>`;
+  } else {
+    grid.className = 'bits-grid';
+    grid.innerHTML = bits.map((b, i) => {
+      const val = pv[i];
+      return `<div class="bit-col">
+        <span class="bit-pos-val${b?' on':''}">${val}</span>
+        <button class="bit-btn${b?' on':''}"
+          onclick="toggleBit(${i})"
+          aria-label="Bit with value ${val}, currently ${b ? 'on' : 'off'}"
+          tabindex="0">${b}</button>
+      </div>`;
+    }).join('');
+  }
 }
 
 function buildSumRow() {
   const row = document.getElementById('sum-row');
-  const ons = bits.map((b,i) => b ? POS_VALS[i] : null).filter(v => v !== null);
+  const pv = curPosVals();
+  const ons = bits.map((b,i) => b ? pv[i] : null).filter(v => v !== null);
   if (!ons.length) { row.textContent = ''; return; }
-  row.innerHTML = ons.map(v => `<span class="addend">${v}</span>`).join(' + ') +
-    ' = <span class="addend">' + decVal(bits) + '</span>';
+  if (ons.length > 8) {
+    row.innerHTML = '<span class="addend">' + decVal(bits) + '</span> (sum of ' + ons.length + ' position values)';
+  } else {
+    row.innerHTML = ons.map(v => `<span class="addend">${v}</span>`).join(' + ') +
+      ' = <span class="addend">' + decVal(bits) + '</span>';
+  }
 }
 
 function buildValues() {
   const dec = decVal(bits);
-  const hex = dec.toString(16).toUpperCase().padStart(2,'0');
+  const hd = hexDigits();
+  const hex = dec.toString(16).toUpperCase().padStart(hd, '0');
+  const max = maxUnsigned();
 
   document.getElementById('val-bin').textContent = bits.join('');
-  document.getElementById('val-dec').textContent = dec;
+  document.getElementById('val-bin').style.fontSize = bitWidth === 16 ? '0.85rem' : '1.2rem';
+
+  document.getElementById('val-dec').textContent = dec.toLocaleString();
   document.getElementById('val-dec-sub').textContent =
-    dec === 0 ? 'no bits on' : dec === 255 ? 'max byte value' : `${dec} out of 255`;
+    dec === 0 ? 'no bits on' : dec === max ? `max ${bitWidth}-bit value` : `${dec.toLocaleString()} of ${max.toLocaleString()}`;
 
-  if (!hexInputActive) document.getElementById('hex-input').value = hex;
+  // Signed value card
+  const signedCard = document.getElementById('val-signed-card');
+  if (bitWidth === 16) {
+    signedCard.style.display = '';
+    const sv = signedVal(bits);
+    document.getElementById('val-signed').textContent = sv.toLocaleString();
+    const signBit = bits[0];
+    const minSigned = -Math.pow(2, bitWidth - 1);
+    const maxSigned = Math.pow(2, bitWidth - 1) - 1;
+    if (sv === 0) document.getElementById('val-signed-sub').textContent = 'zero';
+    else if (sv === -1) document.getElementById('val-signed-sub').innerHTML = 'all bits on = -1';
+    else if (sv === minSigned) document.getElementById('val-signed-sub').innerHTML = 'minimum signed value';
+    else if (sv === maxSigned) document.getElementById('val-signed-sub').innerHTML = 'maximum signed value';
+    else document.getElementById('val-signed-sub').innerHTML =
+      signBit ? 'sign bit on &rarr; negative' : 'sign bit off &rarr; positive';
+  } else {
+    signedCard.style.display = 'none';
+  }
 
-  const ln = nibbleHex(bits.slice(0,4));
-  const rn = nibbleHex(bits.slice(4,8));
-  document.getElementById('nibble-breakdown').innerHTML = `
-    <div class="nibble-card">
-      <span class="n-bits">${bits.slice(0,4).join('')}</span>
+  // Hex
+  const hexIn = document.getElementById('hex-input');
+  hexIn.maxLength = hd;
+  hexIn.style.width = (hd * 28 + 4) + 'px';
+  if (!hexInputActive) hexIn.value = hex;
+
+  // Nibbles
+  const nibbleCount = bitWidth / 4;
+  let html = '';
+  for (let n = 0; n < nibbleCount; n++) {
+    const nBits = bits.slice(n*4, n*4+4);
+    const nh = nibbleHex(nBits);
+    html += `<div class="nibble-card">
+      <span class="n-bits">${nBits.join('')}</span>
       <span class="n-eq">=</span>
-      <span class="n-dec">${parseInt(ln,16)}</span>
+      <span class="n-dec">${parseInt(nh,16)}</span>
       <span class="n-eq">=</span>
-      <span class="n-hex">0x${ln}</span>
-    </div>
-    <div class="nibble-card">
-      <span class="n-bits">${bits.slice(4,8).join('')}</span>
-      <span class="n-eq">=</span>
-      <span class="n-dec">${parseInt(rn,16)}</span>
-      <span class="n-eq">=</span>
-      <span class="n-hex">0x${rn}</span>
+      <span class="n-hex">0x${nh}</span>
     </div>`;
+  }
+  document.getElementById('nibble-breakdown').innerHTML = html;
+
+  // Grid columns
+  const vg = document.querySelector('.values-grid');
+  vg.className = bitWidth === 16 ? 'values-grid four-col' : 'values-grid';
 }
 
 function buildHint() {
   const box = document.getElementById('hint-box');
-  if (mode === 'examples') {
+  if (mode === 'examples' || (mode === '16bit' && sub16 === 'examples')) {
     box.style.display = 'block';
-    document.getElementById('hint-text').innerHTML = EXAMPLES[exIdx].hint;
+    const exs = curExamples();
+    const idx = curExIdx();
+    document.getElementById('hint-text').innerHTML = exs[idx].hint;
   } else {
     box.style.display = 'none';
   }
 }
 
 function render() {
+  const is16 = mode === '16bit';
+  bitWidth = is16 ? 16 : 8;
+
   buildDots(); buildBits(); buildSumRow(); buildValues(); buildHint();
-  document.getElementById('example-nav').style.display   = mode === 'examples' ? 'flex'  : 'none';
-  document.getElementById('freeplay-hint').style.display = mode === 'free'     ? 'block' : 'none';
-  document.getElementById('ex-title').innerHTML = mode === 'examples' ? EXAMPLES[exIdx].label : '';
+
+  // Section label
+  document.getElementById('bits-section-label').innerHTML =
+    is16 ? '16 bits &mdash; 2 bytes' : '8 bits &mdash; 1 byte';
+
+  // Example nav
+  document.getElementById('example-nav').style.display = showExNav() ? 'flex' : 'none';
+  document.getElementById('ex-title').innerHTML = showExNav() ? curExamples()[curExIdx()].label : '';
+
+  // Freeplay hint
+  document.getElementById('freeplay-hint').style.display =
+    (mode === 'free' || (is16 && sub16 === 'free')) ? 'block' : 'none';
+
+  // 16-bit sub-tabs
+  document.getElementById('sub-tabs-16').style.display = is16 ? 'flex' : 'none';
+  document.getElementById('sub-16-examples').className = 'sub-tab' + (sub16 === 'examples' ? ' active' : '');
+  document.getElementById('sub-16-free').className     = 'sub-tab' + (sub16 === 'free'     ? ' active' : '');
+
+  // Top tabs
   document.getElementById('tab-examples').className = 'tab' + (mode === 'examples' ? ' active' : '');
-  document.getElementById('tab-free').className    = 'tab' + (mode === 'free'     ? ' active' : '');
+  document.getElementById('tab-free').className     = 'tab' + (mode === 'free'     ? ' active' : '');
+  document.getElementById('tab-16bit').className    = 'tab' + (mode === '16bit'    ? ' active' : '');
 }
 
 function toggleBit(i) { bits[i] = bits[i] ? 0 : 1; render(); }
 
 function setMode(m) {
   mode = m;
-  bits = m === 'free' ? [0,0,0,0,0,0,0,0] : [...EXAMPLES[exIdx].bits];
+  if (m === 'examples') {
+    bitWidth = 8;
+    bits = [...EXAMPLES[exIdx].bits];
+  } else if (m === 'free') {
+    bitWidth = 8;
+    bits = zeroBits();
+  } else if (m === '16bit') {
+    bitWidth = 16;
+    sub16 = 'examples';
+    bits = [...EXAMPLES_16[exIdx16].bits];
+  }
   render();
 }
 
-function prevEx() { exIdx = (exIdx - 1 + EXAMPLES.length) % EXAMPLES.length; bits = [...EXAMPLES[exIdx].bits]; render(); }
-function nextEx() { exIdx = (exIdx + 1) % EXAMPLES.length; bits = [...EXAMPLES[exIdx].bits]; render(); }
-function resetBits() { bits = [0,0,0,0,0,0,0,0]; render(); }
+function set16Sub(s) {
+  sub16 = s;
+  if (s === 'free') { bits = zeroBits(); }
+  else { bits = [...EXAMPLES_16[exIdx16].bits]; }
+  render();
+}
+
+function prevEx() {
+  if (mode === '16bit') {
+    exIdx16 = (exIdx16 - 1 + EXAMPLES_16.length) % EXAMPLES_16.length;
+    bits = [...EXAMPLES_16[exIdx16].bits];
+  } else {
+    exIdx = (exIdx - 1 + EXAMPLES.length) % EXAMPLES.length;
+    bits = [...EXAMPLES[exIdx].bits];
+  }
+  render();
+}
+function nextEx() {
+  if (mode === '16bit') {
+    exIdx16 = (exIdx16 + 1) % EXAMPLES_16.length;
+    bits = [...EXAMPLES_16[exIdx16].bits];
+  } else {
+    exIdx = (exIdx + 1) % EXAMPLES.length;
+    bits = [...EXAMPLES[exIdx].bits];
+  }
+  render();
+}
+
+function resetBits() { bits = zeroBits(); render(); }
 
 const hexIn = document.getElementById('hex-input');
 hexIn.addEventListener('focus', () => { hexInputActive = true; });
 hexIn.addEventListener('blur', () => {
   hexInputActive = false;
-  let dec = Math.max(0, Math.min(255, parseInt(
-    hexIn.value.toUpperCase().replace(/[^0-9A-F]/g,'').padStart(2,'0').slice(-2) || '00', 16) || 0));
-  bits = dec.toString(2).padStart(8,'0').split('').map(Number);
+  const hd = hexDigits();
+  const max = maxUnsigned();
+  let dec = Math.max(0, Math.min(max, parseInt(
+    hexIn.value.toUpperCase().replace(/[^0-9A-F]/g,'').padStart(hd,'0').slice(-hd) || '00', 16) || 0));
+  bits = dec.toString(2).padStart(bitWidth,'0').split('').map(Number);
   render();
-  hexIn.value = dec.toString(16).toUpperCase().padStart(2,'0');
+  hexIn.value = dec.toString(16).toUpperCase().padStart(hd,'0');
 });
 hexIn.addEventListener('input', () => {
+  const hd = hexDigits();
   const v = hexIn.value.toUpperCase().replace(/[^0-9A-F]/g,'');
-  if (v.length === 2) {
+  if (v.length === hd) {
     const dec = parseInt(v, 16);
-    if (!isNaN(dec)) { bits = dec.toString(2).padStart(8,'0').split('').map(Number); buildBits(); buildSumRow(); buildValues(); buildHint(); }
+    if (!isNaN(dec)) { bits = dec.toString(2).padStart(bitWidth,'0').split('').map(Number); buildBits(); buildSumRow(); buildValues(); buildHint(); }
   }
 });
 hexIn.addEventListener('keydown', e => { if (e.key === 'Enter') hexIn.blur(); });
 document.addEventListener('keydown', e => {
   if (document.activeElement === hexIn) return;
-  if (e.key === 'ArrowRight' && mode === 'examples') nextEx();
-  if (e.key === 'ArrowLeft'  && mode === 'examples') prevEx();
+  if (e.key === 'ArrowRight' && showExNav()) nextEx();
+  if (e.key === 'ArrowLeft'  && showExNav()) prevEx();
 });
 
 render();

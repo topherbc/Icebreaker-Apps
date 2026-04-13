@@ -692,6 +692,48 @@
   </div>
 </div>
 
+<!-- Settings Modal -->
+<div id="settings-overlay" class="settings-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="settings-box">
+    <div class="settings-header">
+      <span class="settings-title" id="settings-title">Settings</span>
+      <button class="settings-close" id="settings-close" aria-label="Close settings">&#10005;</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Dark Mode</div>
+          <div class="settings-desc">Reduces screen brightness.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-dark" aria-label="Enable dark mode">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Dyslexia-Friendly Font</div>
+          <div class="settings-desc">Switches to OpenDyslexic for all text.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-dyslexia" aria-label="Enable dyslexia-friendly font">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Rainbow Brackets</div>
+          <div class="settings-desc">Colors matched brackets by nesting depth.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-rainbow" checked aria-label="Enable rainbow brackets">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function() {
   'use strict';
@@ -1263,47 +1305,5 @@
   init().then(applyHash);
 })();
 </script>
-
-<!-- Settings Modal -->
-<div id="settings-overlay" class="settings-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-  <div class="settings-box">
-    <div class="settings-header">
-      <span class="settings-title" id="settings-title">Settings</span>
-      <button class="settings-close" id="settings-close" aria-label="Close settings">&#10005;</button>
-    </div>
-    <div class="settings-body">
-      <div class="settings-row">
-        <div class="settings-label">
-          <div>Dark Mode</div>
-          <div class="settings-desc">Reduces screen brightness.</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-dark" aria-label="Enable dark mode">
-          <span class="toggle-track"></span>
-        </label>
-      </div>
-      <div class="settings-row">
-        <div class="settings-label">
-          <div>Dyslexia-Friendly Font</div>
-          <div class="settings-desc">Switches to OpenDyslexic for all text.</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-dyslexia" aria-label="Enable dyslexia-friendly font">
-          <span class="toggle-track"></span>
-        </label>
-      </div>
-      <div class="settings-row">
-        <div class="settings-label">
-          <div>Rainbow Brackets</div>
-          <div class="settings-desc">Colors matched brackets by nesting depth.</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggle-rainbow" checked aria-label="Enable rainbow brackets">
-          <span class="toggle-track"></span>
-        </label>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 </html>

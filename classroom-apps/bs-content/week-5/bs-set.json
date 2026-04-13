@@ -139,5 +139,109 @@
         "clue": "Typing 'admin' as the username does not trigger the banned-name message."
       }
     ]
+  },
+  {
+    "id": "week5-strings-02",
+    "title": "Word Reverser",
+    "week": 5,
+    "topic": "strings",
+    "description": "This program reverses a word character by character and prints the reversed result.",
+    "code": [
+      { "line": 1, "text": "public class WordReverser {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String word = \"hello\";" },
+      { "line": 4, "text": "    String reversed = \"\";" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "    for (int i = 0; i < word.length(); i++) {", "bugId": "b1" },
+      { "line": 7, "text": "      reversed = reversed + word.charAt(i + 1);", "bugId": "b2" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    System.out.println(\"Original: \" + word);" },
+      { "line": 11, "text": "    System.out.println(\"Reversed: \" + word);", "bugId": "b3" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 6,
+        "fix": "    for (int i = word.length() - 1; i >= 0; i--) {",
+        "altFixes": [],
+        "clue": "The output for 'hello' shows 'hello' instead of 'olleh' -- the characters are in the original order."
+      },
+      {
+        "id": "b2",
+        "line": 7,
+        "fix": "      reversed = reversed + word.charAt(i);",
+        "altFixes": [],
+        "clue": "The program crashes with a StringIndexOutOfBoundsException."
+      },
+      {
+        "id": "b3",
+        "line": 11,
+        "fix": "    System.out.println(\"Reversed: \" + reversed);",
+        "altFixes": [],
+        "clue": "Both the 'Original' and 'Reversed' lines print 'hello' -- the reversed variable is never displayed."
+      }
+    ]
+  },
+  {
+    "id": "week5-strings-03",
+    "title": "Email Checker",
+    "week": 5,
+    "topic": "strings",
+    "description": "This program checks whether a string looks like a valid email by verifying it contains an @ symbol and a dot.",
+    "code": [
+      { "line": 1, "text": "public class EmailChecker {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String email = \"student@school.edu\";" },
+      { "line": 4, "text": "    boolean hasAt = false;" },
+      { "line": 5, "text": "    boolean hasDot = false;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    String atSymbol = \"@\";" },
+      { "line": 8, "text": "    if (email.substring(0, 1) == atSymbol) {", "bugId": "b1" },
+      { "line": 9, "text": "      hasAt = true;" },
+      { "line": 10, "text": "    }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "    if (email.indexOf(\".\") == 0) {", "bugId": "b2" },
+      { "line": 13, "text": "      hasDot = true;" },
+      { "line": 14, "text": "    }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "    if (hasAt || hasDot) {", "bugId": "b3" },
+      { "line": 17, "text": "      System.out.println(email + \" looks valid.\");" },
+      { "line": 18, "text": "    } else {" },
+      { "line": 19, "text": "      System.out.println(email + \" is not valid.\");" },
+      { "line": 20, "text": "    }" },
+      { "line": 21, "text": "  }" },
+      { "line": 22, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    if (email.contains(atSymbol)) {",
+        "altFixes": [
+          "    if (email.indexOf(atSymbol) >= 0) {"
+        ],
+        "clue": "The email 'student@school.edu' is reported as not valid -- the @ check never sets hasAt to true."
+      },
+      {
+        "id": "b2",
+        "line": 12,
+        "fix": "    if (email.indexOf(\".\") >= 0) {",
+        "altFixes": [
+          "    if (email.indexOf(\".\") != -1) {",
+          "    if (email.contains(\".\")) {"
+        ],
+        "clue": "The email 'student@school.edu' fails the dot check even though it clearly contains a dot."
+      },
+      {
+        "id": "b3",
+        "line": 16,
+        "fix": "    if (hasAt && hasDot) {",
+        "altFixes": [],
+        "clue": "The email 'nodot@schooledu' is reported as valid even though it has no dot."
+      }
+    ]
   }
 ]

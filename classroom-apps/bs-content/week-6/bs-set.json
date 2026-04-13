@@ -155,5 +155,141 @@
         "clue": "The program won't compile. The error says 'balance has private access in BankAccount'."
       }
     ]
+  },
+  {
+    "id": "week6-oop-02",
+    "title": "Student Record",
+    "week": 6,
+    "topic": "OOP",
+    "description": "This Student class stores a name, grade level, and GPA, and provides getters and a toString method.",
+    "code": [
+      { "line": 1, "text": "public class Student {" },
+      { "line": 2, "text": "  private String name;" },
+      { "line": 3, "text": "  private int grade;" },
+      { "line": 4, "text": "  private double gpa;" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "  public Student(String name, int grade, double gpa) {" },
+      { "line": 7, "text": "    this.name = this.name;", "bugId": "b1" },
+      { "line": 8, "text": "    this.grade = grade;" },
+      { "line": 9, "text": "    this.gpa = gpa;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public String getName() {" },
+      { "line": 13, "text": "    return name;" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "  public int getGrade() {" },
+      { "line": 17, "text": "    return grade;" },
+      { "line": 18, "text": "  }" },
+      { "line": 19, "text": "" },
+      { "line": 20, "text": "  public double getGpa() {" },
+      { "line": 21, "text": "    return grade;", "bugId": "b2" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "" },
+      { "line": 24, "text": "  public String toString() {" },
+      { "line": 25, "text": "    return name + \" (Grade \" + gpa + \", GPA: \" + gpa + \")\";", "bugId": "b3" },
+      { "line": 26, "text": "  }" },
+      { "line": 27, "text": "" },
+      { "line": 28, "text": "  public static void main(String[] args) {" },
+      { "line": 29, "text": "    Student s = new Student(\"Alice\", 10, 3.8);" },
+      { "line": 30, "text": "    System.out.println(s);" },
+      { "line": 31, "text": "    System.out.println(\"GPA: \" + s.getGpa());" },
+      { "line": 32, "text": "  }" },
+      { "line": 33, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    this.name = name;",
+        "altFixes": [],
+        "clue": "Printing the student shows 'null' instead of 'Alice' for the name."
+      },
+      {
+        "id": "b2",
+        "line": 21,
+        "fix": "    return gpa;",
+        "altFixes": [],
+        "clue": "Calling getGpa() on a student with GPA 3.8 returns 10.0 instead of 3.8."
+      },
+      {
+        "id": "b3",
+        "line": 25,
+        "fix": "    return name + \" (Grade \" + grade + \", GPA: \" + gpa + \")\";",
+        "altFixes": [],
+        "clue": "The toString output shows 'Alice (Grade 3.8, GPA: 3.8)' -- the grade level shows the GPA value instead of 10."
+      }
+    ]
+  },
+  {
+    "id": "week6-oop-03",
+    "title": "Counter App",
+    "week": 6,
+    "topic": "OOP",
+    "description": "This Counter class supports increment, decrement (no negatives), and reset operations.",
+    "code": [
+      { "line": 1, "text": "public class Counter {" },
+      { "line": 2, "text": "  private int count;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public Counter() {" },
+      { "line": 5, "text": "    count = 0;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "  public void increment() {" },
+      { "line": 9, "text": "    count--;", "bugId": "b1" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public void decrement() {" },
+      { "line": 13, "text": "    if (count < 0) {", "bugId": "b3" },
+      { "line": 14, "text": "      count--;" },
+      { "line": 15, "text": "    }" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "" },
+      { "line": 18, "text": "  public void reset() {" },
+      { "line": 19, "text": "    count = 1;", "bugId": "b2" },
+      { "line": 20, "text": "  }" },
+      { "line": 21, "text": "" },
+      { "line": 22, "text": "  public int getCount() {" },
+      { "line": 23, "text": "    return count;" },
+      { "line": 24, "text": "  }" },
+      { "line": 25, "text": "" },
+      { "line": 26, "text": "  public static void main(String[] args) {" },
+      { "line": 27, "text": "    Counter c = new Counter();" },
+      { "line": 28, "text": "    c.increment();" },
+      { "line": 29, "text": "    c.increment();" },
+      { "line": 30, "text": "    c.increment();" },
+      { "line": 31, "text": "    System.out.println(\"After 3 increments: \" + c.getCount());" },
+      { "line": 32, "text": "    c.decrement();" },
+      { "line": 33, "text": "    System.out.println(\"After decrement: \" + c.getCount());" },
+      { "line": 34, "text": "    c.reset();" },
+      { "line": 35, "text": "    System.out.println(\"After reset: \" + c.getCount());" },
+      { "line": 36, "text": "  }" },
+      { "line": 37, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 9,
+        "fix": "    count++;",
+        "altFixes": [
+          "    count = count + 1;"
+        ],
+        "clue": "After calling increment() three times, the count prints as -3 instead of 3."
+      },
+      {
+        "id": "b2",
+        "line": 19,
+        "fix": "    count = 0;",
+        "altFixes": [],
+        "clue": "After calling reset(), the count prints as 1 instead of 0."
+      },
+      {
+        "id": "b3",
+        "line": 13,
+        "fix": "    if (count > 0) {",
+        "altFixes": [],
+        "clue": "Calling decrement() on a counter at 0 makes the count go to -1 instead of staying at 0."
+      }
+    ]
   }
 ]

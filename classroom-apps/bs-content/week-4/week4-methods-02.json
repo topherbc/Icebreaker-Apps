@@ -1,0 +1,51 @@
+{
+  "id": "week4-methods-02",
+  "title": "Circle Calculator",
+  "week": 4,
+  "topic": "methods",
+  "description": "This program computes and prints the area and circumference of a circle given its radius.",
+  "code": [
+    { "line": 1, "text": "public class CircleCalculator {" },
+    { "line": 2, "text": "" },
+    { "line": 3, "text": "  public static double computeArea(double radius) {" },
+    { "line": 4, "text": "    return Math.PI * radius * radius;" },
+    { "line": 5, "text": "  }" },
+    { "line": 6, "text": "" },
+    { "line": 7, "text": "  public static double computeCircumference(double radius) {" },
+    { "line": 8, "text": "    return 2 * radius;", "bugId": "b1" },
+    { "line": 9, "text": "  }" },
+    { "line": 10, "text": "" },
+    { "line": 11, "text": "  public static void main(String[] args) {" },
+    { "line": 12, "text": "    double radius = 5.0;" },
+    { "line": 13, "text": "    double area = computeArea(radius);" },
+    { "line": 14, "text": "    double circumference = computeCircumference(area);", "bugId": "b2" },
+    { "line": 15, "text": "" },
+    { "line": 16, "text": "    System.out.println(\"Circumference: \" + area);", "bugId": "b3" },
+    { "line": 17, "text": "    System.out.println(\"Area: \" + circumference);" },
+    { "line": 18, "text": "  }" },
+    { "line": 19, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 8,
+      "fix": "    return 2 * Math.PI * radius;",
+      "altFixes": [],
+      "clue": "For a circle with radius 5, the circumference prints as 10.0 instead of roughly 31.42."
+    },
+    {
+      "id": "b2",
+      "line": 14,
+      "fix": "    double circumference = computeCircumference(radius);",
+      "altFixes": [],
+      "clue": "The circumference value is enormous (hundreds) instead of roughly 31.42 for a radius-5 circle."
+    },
+    {
+      "id": "b3",
+      "line": 16,
+      "fix": "    System.out.println(\"Area: \" + area);",
+      "altFixes": [],
+      "clue": "The labels are swapped: the line that says 'Circumference' shows ~78.54 and the line that says 'Area' shows ~31.42."
+    }
+  ]
+}

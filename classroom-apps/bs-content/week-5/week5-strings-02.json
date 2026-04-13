@@ -1,0 +1,45 @@
+{
+  "id": "week5-strings-02",
+  "title": "Word Reverser",
+  "week": 5,
+  "topic": "strings",
+  "description": "This program reverses a word character by character and prints the reversed result.",
+  "code": [
+    { "line": 1, "text": "public class WordReverser {" },
+    { "line": 2, "text": "  public static void main(String[] args) {" },
+    { "line": 3, "text": "    String word = \"hello\";" },
+    { "line": 4, "text": "    String reversed = \"\";" },
+    { "line": 5, "text": "" },
+    { "line": 6, "text": "    for (int i = 0; i < word.length(); i++) {", "bugId": "b1" },
+    { "line": 7, "text": "      reversed = reversed + word.charAt(i + 1);", "bugId": "b2" },
+    { "line": 8, "text": "    }" },
+    { "line": 9, "text": "" },
+    { "line": 10, "text": "    System.out.println(\"Original: \" + word);" },
+    { "line": 11, "text": "    System.out.println(\"Reversed: \" + word);", "bugId": "b3" },
+    { "line": 12, "text": "  }" },
+    { "line": 13, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 6,
+      "fix": "    for (int i = word.length() - 1; i >= 0; i--) {",
+      "altFixes": [],
+      "clue": "The output for 'hello' shows 'hello' instead of 'olleh' -- the characters are in the original order."
+    },
+    {
+      "id": "b2",
+      "line": 7,
+      "fix": "      reversed = reversed + word.charAt(i);",
+      "altFixes": [],
+      "clue": "The program crashes with a StringIndexOutOfBoundsException."
+    },
+    {
+      "id": "b3",
+      "line": 11,
+      "fix": "    System.out.println(\"Reversed: \" + reversed);",
+      "altFixes": [],
+      "clue": "Both the 'Original' and 'Reversed' lines print 'hello' -- the reversed variable is never displayed."
+    }
+  ]
+}

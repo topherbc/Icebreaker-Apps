@@ -1,0 +1,42 @@
+{
+  "id": "week1-variables-03",
+  "title": "Temperature Log",
+  "week": 1,
+  "topic": "variables",
+  "description": "This program converts a temperature from Fahrenheit to Celsius and prints the result.",
+  "code": [
+    { "line": 1, "text": "public class TemperatureLog {" },
+    { "line": 2, "text": "  public static void main(String[] args) {" },
+    { "line": 3, "text": "    double fahrenheit = 98.6;" },
+    { "line": 4, "text": "" },
+    { "line": 5, "text": "    double celsius = 5.0 / 9.0 * fahrenheit - 212;", "bugId": "b1" },
+    { "line": 6, "text": "" },
+    { "line": 7, "text": "    System.out.println(\"Fahrenheit: \" + fahrenheit);" },
+    { "line": 8, "text": "    System.out.println(\"Celsius: \" + fahrenheit);", "bugId": "b3" },
+    { "line": 9, "text": "  }" },
+    { "line": 10, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 5,
+      "fix": "    double celsius = 5.0 / 9.0 * (fahrenheit - 32);",
+      "altFixes": [],
+      "clue": "The Celsius result is a huge negative number like -157.22 instead of 37.0."
+    },
+    {
+      "id": "b2",
+      "line": 5,
+      "fix": "    double celsius = 5.0 / 9.0 * fahrenheit - 32;",
+      "altFixes": [],
+      "clue": "Even after fixing the parentheses, the result is still way off because the formula subtracts 212 instead of 32."
+    },
+    {
+      "id": "b3",
+      "line": 8,
+      "fix": "    System.out.println(\"Celsius: \" + celsius);",
+      "altFixes": [],
+      "clue": "The 'Celsius' line displays 98.6, which is the same as the Fahrenheit value."
+    }
+  ]
+}

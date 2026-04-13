@@ -141,6 +141,22 @@
     align-items: center;
     gap: 12px;
   }
+  .nav-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-light);
+    border-radius: 6px;
+    padding: 4px 12px;
+    height: 36px;
+  }
+  .nav-progress .progress-icon {
+    font-size: 0.9rem;
+  }
   .nav-theme-btn {
     background: var(--pill-bg);
     border: 1px solid var(--border-light);
@@ -597,6 +613,10 @@
     <span>Bug Squash</span>
   </div>
   <div class="nav-right">
+    <div class="nav-progress" id="nav-progress" title="Problems solved">
+      <span class="progress-icon">&#10003;</span>
+      <span id="progress-count">0 / 0</span>
+    </div>
     <button class="nav-theme-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
       <span id="theme-icon">&#9789;</span>
     </button>
@@ -659,16 +679,31 @@
 (function() {
   'use strict';
 
-  const PROBLEMS_DIR = 'bug-squash-problems/';
-  const completedSet = new Set();
+  const TREE_PATH = 'bs-content/bs-set-tree.json';
+  const LS_KEY = 'bug-squash-completed';
 
-  let manifest = [];
+  // Load completed from localStorage
+  const completedSet = new Set(JSON.parse(localStorage.getItem(LS_KEY) || '[]'));
+
+  let tree = [];
   let problemCache = {};
   let allProblems = [];
   let currentProblem = null;
   let editedLines = {};
   let fixedBugs = new Set();
   let currentWeek = null;
+
+  function saveCompleted() {
+    localStorage.setItem(LS_KEY, JSON.stringify([...completedSet]));
+    updateProgressCounter();
+  }
+
+  function updateProgressCounter() {
+    const total = allProblems.length;
+    const done = allProblems.filter(p => completedSet.has(p.id)).length;
+    const el = document.getElementById('progress-count');
+    if (el) el.textContent = done + ' / ' + total;
+  }
 
   // ── DOM refs ──
   const $ = id => document.getElementById(id);
@@ -788,44 +823,57 @@
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ── Load manifest + problems ──
+  // ── Load bs-set tree + all sets ──
   async function init() {
     try {
-      const res = await fetch(PROBLEMS_DIR + 'index.json');
-      manifest = await res.json();
+      const res = await fetch(TREE_PATH);
+      tree = await res.json();
     } catch(e) {
-      noWeekMsg.textContent = 'Could not load problems.';
+      noWeekMsg.textContent = 'Could not load problem sets.';
       return;
     }
 
-    const loads = manifest.map(async id => {
+    // Probe each set and load in parallel
+    const loads = tree.map(async entry => {
       try {
-        const res = await fetch(PROBLEMS_DIR + id + '.json');
-        const data = await res.json();
-        problemCache[id] = data;
-        return data;
+        const res = await fetch(entry.path);
+        if (!res.ok) return [];
+        const problems = await res.json();
+        problems.forEach(p => { problemCache[p.id] = p; });
+        return problems;
       } catch(e) {
-        return null;
+        return [];
       }
     });
-    allProblems = (await Promise.all(loads)).filter(Boolean);
+    const results = await Promise.all(loads);
+    allProblems = results.flat();
     buildWeekDropdown();
+    updateProgressCounter();
   }
 
   // ── Week dropdown ──
   function buildWeekDropdown() {
-    const weeks = [...new Set(allProblems.map(p => p.week))].sort((a,b) => a - b);
-    weeks.forEach(w => {
-      const count = allProblems.filter(p => p.week === w).length;
+    // Build options from tree entries that loaded successfully
+    tree.forEach(entry => {
+      const weekNum = parseInt(entry.id.replace('week-', ''));
+      const weekProblems = allProblems.filter(p => p.week === weekNum);
+      if (weekProblems.length === 0) return;
+      const done = weekProblems.filter(p => completedSet.has(p.id)).length;
       const opt = document.createElement('option');
-      opt.value = w;
-      opt.textContent = 'Week ' + w + ' (' + count + ' problem' + (count > 1 ? 's' : '') + ')';
+      opt.value = weekNum;
+      opt.textContent = entry.title + ' (' + done + '/' + weekProblems.length + ')';
+      opt.dataset.treeId = entry.id;
       weekSelect.appendChild(opt);
     });
 
-    // If returning from clinic with a prefiltered week, select it
+    // Restore last selected week from localStorage
+    const savedWeek = localStorage.getItem('bug-squash-week');
     if (currentWeek !== null) {
       weekSelect.value = currentWeek;
+      renderProblemList(currentWeek);
+    } else if (savedWeek) {
+      weekSelect.value = savedWeek;
+      currentWeek = parseInt(savedWeek);
       renderProblemList(currentWeek);
     }
   }
@@ -837,9 +885,11 @@
       problemList.hidden = true;
       weekMeta.textContent = '';
       currentWeek = null;
+      localStorage.removeItem('bug-squash-week');
       return;
     }
     currentWeek = parseInt(val);
+    localStorage.setItem('bug-squash-week', val);
     renderProblemList(currentWeek);
   });
 
@@ -978,7 +1028,7 @@
           fixedBugs.add(line.bugId);
           updateDot(bugIdx, 'green');
           if (fixedBugs.size === currentProblem.bugs.length) {
-            completedSet.add(currentProblem.id);
+            completedSet.add(currentProblem.id); saveCompleted();
             checkFeedback.textContent = 'All 3 bugs fixed! Nice work.';
             checkFeedback.classList.remove('incomplete');
             checkFeedback.classList.add('visible', 'success');
@@ -1042,7 +1092,7 @@
 
     checkFeedback.classList.remove('visible', 'success', 'incomplete');
     if (fixedBugs.size === currentProblem.bugs.length) {
-      completedSet.add(currentProblem.id);
+      completedSet.add(currentProblem.id); saveCompleted();
       checkFeedback.textContent = 'All 3 bugs fixed! Nice work.';
       checkFeedback.classList.add('visible', 'success');
     } else {
@@ -1073,9 +1123,22 @@
     goBack(null);
   });
 
+  function refreshDropdownCounts() {
+    Array.from(weekSelect.options).forEach(opt => {
+      if (!opt.value) return;
+      const weekNum = parseInt(opt.value);
+      const entry = tree.find(e => e.id === 'week-' + weekNum);
+      if (!entry) return;
+      const weekProblems = allProblems.filter(p => p.week === weekNum);
+      const done = weekProblems.filter(p => completedSet.has(p.id)).length;
+      opt.textContent = entry.title + ' (' + done + '/' + weekProblems.length + ')';
+    });
+  }
+
   function goBack(prefilterWeek) {
     clinicScreen.classList.remove('active');
     libraryScreen.hidden = false;
+    refreshDropdownCounts();
 
     if (prefilterWeek !== null) {
       currentWeek = prefilterWeek;

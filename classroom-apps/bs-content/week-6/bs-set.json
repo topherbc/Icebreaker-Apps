@@ -1,0 +1,159 @@
+[
+  {
+    "id": "week6-oop-01",
+    "title": "Bank Account",
+    "week": 6,
+    "topic": "OOP",
+    "description": "This BankAccount class lets you deposit and withdraw money, and prints the balance after each operation.",
+    "code": [
+      {
+        "line": 1,
+        "text": "public class BankAccount {"
+      },
+      {
+        "line": 2,
+        "text": "  private double balance;"
+      },
+      {
+        "line": 3,
+        "text": ""
+      },
+      {
+        "line": 4,
+        "text": "  public BankAccount(double startBalance) {"
+      },
+      {
+        "line": 5,
+        "text": "    startBalance = balance;",
+        "bugId": "b1"
+      },
+      {
+        "line": 6,
+        "text": "  }"
+      },
+      {
+        "line": 7,
+        "text": ""
+      },
+      {
+        "line": 8,
+        "text": "  public void deposit(double amount) {"
+      },
+      {
+        "line": 9,
+        "text": "    balance = balance + amount;"
+      },
+      {
+        "line": 10,
+        "text": "  }"
+      },
+      {
+        "line": 11,
+        "text": ""
+      },
+      {
+        "line": 12,
+        "text": "  public void withdraw(double amount) {"
+      },
+      {
+        "line": 13,
+        "text": "    if (amount < balance) {",
+        "bugId": "b2"
+      },
+      {
+        "line": 14,
+        "text": "      balance = balance - amount;"
+      },
+      {
+        "line": 15,
+        "text": "    } else {"
+      },
+      {
+        "line": 16,
+        "text": "      System.out.println(\"Insufficient funds.\");"
+      },
+      {
+        "line": 17,
+        "text": "    }"
+      },
+      {
+        "line": 18,
+        "text": "  }"
+      },
+      {
+        "line": 19,
+        "text": ""
+      },
+      {
+        "line": 20,
+        "text": "  public double getBalance() {"
+      },
+      {
+        "line": 21,
+        "text": "    return balance;"
+      },
+      {
+        "line": 22,
+        "text": "  }"
+      },
+      {
+        "line": 23,
+        "text": ""
+      },
+      {
+        "line": 24,
+        "text": "  public static void main(String[] args) {"
+      },
+      {
+        "line": 25,
+        "text": "    BankAccount acct = new BankAccount(100.0);"
+      },
+      {
+        "line": 26,
+        "text": "    acct.deposit(50.0);"
+      },
+      {
+        "line": 27,
+        "text": "    acct.withdraw(30.0);"
+      },
+      {
+        "line": 28,
+        "text": "    System.out.println(\"Balance: $\" + acct.balance);",
+        "bugId": "b3"
+      },
+      {
+        "line": 29,
+        "text": "  }"
+      },
+      {
+        "line": 30,
+        "text": "}"
+      }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    balance = startBalance;",
+        "altFixes": [
+          "    this.balance = startBalance;"
+        ],
+        "clue": "Creating new BankAccount(100.0) results in a balance of 0.0 immediately after construction."
+      },
+      {
+        "id": "b2",
+        "line": 13,
+        "fix": "    if (amount <= balance) {",
+        "altFixes": [],
+        "clue": "Withdrawing exactly the full balance prints 'Insufficient funds' even though there is enough money."
+      },
+      {
+        "id": "b3",
+        "line": 28,
+        "fix": "    System.out.println(\"Balance: $\" + acct.getBalance());",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'balance has private access in BankAccount'."
+      }
+    ]
+  }
+]

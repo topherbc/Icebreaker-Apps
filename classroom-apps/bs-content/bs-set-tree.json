@@ -1,0 +1,11 @@
+[
+  { "id": "week-1", "title": "Week 1 -- Variables & Types",   "path": "bs-content/week-1/bs-set.json" },
+  { "id": "week-2", "title": "Week 2 -- Loops",               "path": "bs-content/week-2/bs-set.json" },
+  { "id": "week-3", "title": "Week 3 -- Arrays",              "path": "bs-content/week-3/bs-set.json" },
+  { "id": "week-4", "title": "Week 4 -- Methods",             "path": "bs-content/week-4/bs-set.json" },
+  { "id": "week-5", "title": "Week 5 -- Strings",             "path": "bs-content/week-5/bs-set.json" },
+  { "id": "week-6", "title": "Week 6 -- OOP",                 "path": "bs-content/week-6/bs-set.json" },
+  { "id": "week-7", "title": "Week 7 -- Inheritance",         "path": "bs-content/week-7/bs-set.json" },
+  { "id": "week-8", "title": "Week 8 -- ArrayList",           "path": "bs-content/week-8/bs-set.json" },
+  { "id": "week-9", "title": "Week 9 -- File I/O",            "path": "bs-content/week-9/bs-set.json" }
+]

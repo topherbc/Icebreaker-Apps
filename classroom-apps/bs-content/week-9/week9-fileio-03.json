@@ -1,0 +1,141 @@
+{
+  "id": "week9-fileio-03",
+  "title": "Log Analyzer",
+  "week": 9,
+  "topic": "file I/O",
+  "description": "This program reads a server log file and counts how many lines contain ERROR entries.",
+  "code": [
+    {
+      "line": 1,
+      "text": "import java.io.File;"
+    },
+    {
+      "line": 2,
+      "text": "import java.io.FileNotFoundException;"
+    },
+    {
+      "line": 3,
+      "text": "import java.util.Scanner;"
+    },
+    {
+      "line": 4,
+      "text": ""
+    },
+    {
+      "line": 5,
+      "text": "public class LogAnalyzer {"
+    },
+    {
+      "line": 6,
+      "text": "  public static void main(String[] args) throws FileNotFoundException {"
+    },
+    {
+      "line": 7,
+      "text": "    File logFile = new File(\"server.log\");"
+    },
+    {
+      "line": 8,
+      "text": "    Scanner reader = new Scanner(logFile);"
+    },
+    {
+      "line": 9,
+      "text": "    int errorCount = 0;"
+    },
+    {
+      "line": 10,
+      "text": "    int totalLines = 0;"
+    },
+    {
+      "line": 11,
+      "text": ""
+    },
+    {
+      "line": 12,
+      "text": "    while (reader.hasNextLine()) {"
+    },
+    {
+      "line": 13,
+      "text": "      String line = reader.next();",
+      "bugId": "b1"
+    },
+    {
+      "line": 14,
+      "text": "      totalLines++;"
+    },
+    {
+      "line": 15,
+      "text": ""
+    },
+    {
+      "line": 16,
+      "text": "      if (line.startsWith(\"ERROR\")) {",
+      "bugId": "b2"
+    },
+    {
+      "line": 17,
+      "text": "        System.out.println(\"Found: \" + line);"
+    },
+    {
+      "line": 18,
+      "text": "        errorCount = 1;",
+      "bugId": "b3"
+    },
+    {
+      "line": 19,
+      "text": "      }"
+    },
+    {
+      "line": 20,
+      "text": "    }"
+    },
+    {
+      "line": 21,
+      "text": ""
+    },
+    {
+      "line": 22,
+      "text": "    reader.close();"
+    },
+    {
+      "line": 23,
+      "text": "    System.out.println(\"Total lines: \" + totalLines);"
+    },
+    {
+      "line": 24,
+      "text": "    System.out.println(\"Error count: \" + errorCount);"
+    },
+    {
+      "line": 25,
+      "text": "  }"
+    },
+    {
+      "line": 26,
+      "text": "}"
+    }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 13,
+      "fix": "      String line = reader.nextLine();",
+      "altFixes": [],
+      "clue": "The total line count is much higher than the actual number of lines in the file."
+    },
+    {
+      "id": "b2",
+      "line": 16,
+      "fix": "      if (line.contains(\"ERROR\")) {",
+      "altFixes": [],
+      "clue": "Lines like '2024-01-15 ERROR disk full' are not detected as errors even though they contain 'ERROR'."
+    },
+    {
+      "id": "b3",
+      "line": 18,
+      "fix": "        errorCount++;",
+      "altFixes": [
+        "        errorCount = errorCount + 1;"
+      ],
+      "clue": "The error count always reports 1 no matter how many ERROR lines appear in the log."
+    }
+  ]
+}

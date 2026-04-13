@@ -1,0 +1,139 @@
+{
+  "id": "week8-arraylist-02",
+  "title": "Grade Book",
+  "week": 8,
+  "topic": "ArrayList",
+  "description": "This program stores student grades in an ArrayList, calculates the average, and lists all failing grades.",
+  "code": [
+    {
+      "line": 1,
+      "text": "import java.util.ArrayList;"
+    },
+    {
+      "line": 2,
+      "text": ""
+    },
+    {
+      "line": 3,
+      "text": "public class GradeBook {"
+    },
+    {
+      "line": 4,
+      "text": "  public static void main(String[] args) {"
+    },
+    {
+      "line": 5,
+      "text": "    ArrayList<Integer> grades = new ArrayList<Integer>();"
+    },
+    {
+      "line": 6,
+      "text": "    grades.add(92);"
+    },
+    {
+      "line": 7,
+      "text": "    grades.add(55);"
+    },
+    {
+      "line": 8,
+      "text": "    grades.add(78);"
+    },
+    {
+      "line": 9,
+      "text": "    grades.add(43);"
+    },
+    {
+      "line": 10,
+      "text": "    grades.add(88);"
+    },
+    {
+      "line": 11,
+      "text": ""
+    },
+    {
+      "line": 12,
+      "text": "    int sum = 0;"
+    },
+    {
+      "line": 13,
+      "text": "    for (int i = 0; i < grades.size(); i++) {"
+    },
+    {
+      "line": 14,
+      "text": "      sum += grades.get(i);"
+    },
+    {
+      "line": 15,
+      "text": "    }"
+    },
+    {
+      "line": 16,
+      "text": "    double average = (double) sum / (grades.size() - 1);",
+      "bugId": "b1"
+    },
+    {
+      "line": 17,
+      "text": "    System.out.println(\"Average: \" + average);"
+    },
+    {
+      "line": 18,
+      "text": ""
+    },
+    {
+      "line": 19,
+      "text": "    System.out.println(\"Failing grades:\");"
+    },
+    {
+      "line": 20,
+      "text": "    for (int i = 0; i < grades.size(); i++) {"
+    },
+    {
+      "line": 21,
+      "text": "      if (grades.get(i) > 60) {",
+      "bugId": "b2"
+    },
+    {
+      "line": 22,
+      "text": "        System.out.println(\"  Student \" + (i + 1) + \": \" + grades.get(i + 1));",
+      "bugId": "b3"
+    },
+    {
+      "line": 23,
+      "text": "      }"
+    },
+    {
+      "line": 24,
+      "text": "    }"
+    },
+    {
+      "line": 25,
+      "text": "  }"
+    },
+    {
+      "line": 26,
+      "text": "}"
+    }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 16,
+      "fix": "    double average = (double) sum / grades.size();",
+      "altFixes": [],
+      "clue": "The average prints 89.0 instead of the correct 71.2 for five grades totaling 356."
+    },
+    {
+      "id": "b2",
+      "line": 21,
+      "fix": "      if (grades.get(i) < 60) {",
+      "altFixes": [],
+      "clue": "The 'failing' list shows 92, 78, and 88 (the passing grades) instead of 55 and 43."
+    },
+    {
+      "id": "b3",
+      "line": 22,
+      "fix": "        System.out.println(\"  Student \" + (i + 1) + \": \" + grades.get(i));",
+      "altFixes": [],
+      "clue": "Each failing student's printed grade shows the next student's grade instead of their own."
+    }
+  ]
+}

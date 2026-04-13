@@ -1,0 +1,44 @@
+{
+  "id": "week3-arrays-02",
+  "title": "Reverse Printer",
+  "week": 3,
+  "topic": "arrays",
+  "description": "This program prints the elements of an array in reverse order.",
+  "code": [
+    { "line": 1, "text": "public class ReversePrinter {" },
+    { "line": 2, "text": "  public static void main(String[] args) {" },
+    { "line": 3, "text": "    String[] words = {\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"};" },
+    { "line": 4, "text": "" },
+    { "line": 5, "text": "    System.out.println(\"Reversed:\");" },
+    { "line": 6, "text": "    int i = words.length;", "bugId": "b1" },
+    { "line": 7, "text": "    while (i >= 0) {" },
+    { "line": 8, "text": "      System.out.println(i);", "bugId": "b2" },
+    { "line": 9, "text": "      i++;", "bugId": "b3" },
+    { "line": 10, "text": "    }" },
+    { "line": 11, "text": "  }" },
+    { "line": 12, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 6,
+      "fix": "    int i = words.length - 1;",
+      "altFixes": [],
+      "clue": "The program crashes with an ArrayIndexOutOfBoundsException on the first iteration."
+    },
+    {
+      "id": "b2",
+      "line": 8,
+      "fix": "      System.out.println(words[i]);",
+      "altFixes": [],
+      "clue": "The output shows numbers like 4, 3, 2, 1, 0 instead of the actual words."
+    },
+    {
+      "id": "b3",
+      "line": 9,
+      "fix": "      i--;",
+      "altFixes": [],
+      "clue": "The loop never terminates and the program hangs forever."
+    }
+  ]
+}

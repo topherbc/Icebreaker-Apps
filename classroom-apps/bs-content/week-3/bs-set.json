@@ -117,5 +117,101 @@
         "clue": "The average is reporting 81 instead of 80."
       }
     ]
+  },
+  {
+    "id": "week3-arrays-02",
+    "title": "Reverse Printer",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program prints the elements of an array in reverse order.",
+    "code": [
+      { "line": 1, "text": "public class ReversePrinter {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String[] words = {\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"};" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "    System.out.println(\"Reversed:\");" },
+      { "line": 6, "text": "    int i = words.length;", "bugId": "b1" },
+      { "line": 7, "text": "    while (i >= 0) {" },
+      { "line": 8, "text": "      System.out.println(i);", "bugId": "b2" },
+      { "line": 9, "text": "      i++;", "bugId": "b3" },
+      { "line": 10, "text": "    }" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 6,
+        "fix": "    int i = words.length - 1;",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException on the first iteration."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "      System.out.println(words[i]);",
+        "altFixes": [],
+        "clue": "The output shows numbers like 4, 3, 2, 1, 0 instead of the actual words."
+      },
+      {
+        "id": "b3",
+        "line": 9,
+        "fix": "      i--;",
+        "altFixes": [],
+        "clue": "The loop never terminates and the program hangs forever."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-03",
+    "title": "Element Search",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program searches for a target value in an array and reports whether it was found.",
+    "code": [
+      { "line": 1, "text": "public class ElementSearch {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] numbers = {10, 25, 30, 47, 55, 62};" },
+      { "line": 4, "text": "    int target = 10;" },
+      { "line": 5, "text": "    boolean found = false;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    for (int i = 1; i < numbers.length; i++) {", "bugId": "b1" },
+      { "line": 8, "text": "      if (numbers[i] = target) {", "bugId": "b2" },
+      { "line": 9, "text": "        found = true;" },
+      { "line": 10, "text": "        System.out.println(\"Found \" + i + \" at index \" + i);", "bugId": "b3" },
+      { "line": 11, "text": "      }" },
+      { "line": 12, "text": "    }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "    if (!found) {" },
+      { "line": 15, "text": "      System.out.println(target + \" was not found.\");" },
+      { "line": 16, "text": "    }" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    for (int i = 0; i < numbers.length; i++) {",
+        "altFixes": [],
+        "clue": "Searching for 10 says it was not found, even though 10 is the first element in the array."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "      if (numbers[i] == target) {",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'incompatible types: int cannot be converted to boolean'."
+      },
+      {
+        "id": "b3",
+        "line": 10,
+        "fix": "        System.out.println(\"Found \" + target + \" at index \" + i);",
+        "altFixes": [
+          "        System.out.println(\"Found \" + numbers[i] + \" at index \" + i);"
+        ],
+        "clue": "When searching for 30, the output says 'Found 2 at index 2' instead of 'Found 30 at index 2'."
+      }
+    ]
   }
 ]

@@ -1,0 +1,45 @@
+{
+  "id": "week2-loops-03",
+  "title": "Even Sum",
+  "week": 2,
+  "topic": "loops",
+  "description": "This program sums all even numbers from 1 to 20 and prints the result.",
+  "code": [
+    { "line": 1, "text": "public class EvenSum {" },
+    { "line": 2, "text": "  public static void main(String[] args) {" },
+    { "line": 3, "text": "    int sum = 0;" },
+    { "line": 4, "text": "    for (int i = 1; i < 20; i++) {", "bugId": "b1" },
+    { "line": 5, "text": "      if (i % 2 == 1) {", "bugId": "b2" },
+    { "line": 6, "text": "        sum = i;", "bugId": "b3" },
+    { "line": 7, "text": "      }" },
+    { "line": 8, "text": "    }" },
+    { "line": 9, "text": "    System.out.println(\"Sum of even numbers from 1 to 20: \" + sum);" },
+    { "line": 10, "text": "  }" },
+    { "line": 11, "text": "}" }
+  ],
+  "bugs": [
+    {
+      "id": "b1",
+      "line": 4,
+      "fix": "    for (int i = 1; i <= 20; i++) {",
+      "altFixes": [],
+      "clue": "The result is 90 instead of 110 -- the number 20 is not being included."
+    },
+    {
+      "id": "b2",
+      "line": 5,
+      "fix": "      if (i % 2 == 0) {",
+      "altFixes": [],
+      "clue": "The program is adding up 1, 3, 5, 7... instead of 2, 4, 6, 8..."
+    },
+    {
+      "id": "b3",
+      "line": 6,
+      "fix": "        sum += i;",
+      "altFixes": [
+        "        sum = sum + i;"
+      ],
+      "clue": "The final sum just shows 19 instead of a large accumulated total."
+    }
+  ]
+}

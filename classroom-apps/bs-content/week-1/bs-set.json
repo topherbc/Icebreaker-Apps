@@ -113,5 +113,98 @@
         "clue": "The 'Each' line prints the exact same dollar amount as the 'Total' line."
       }
     ]
+  },
+  {
+    "id": "week1-variables-02",
+    "title": "Score Tracker",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program tracks three game scores and prints the total and average.",
+    "code": [
+      { "line": 1, "text": "public class ScoreTracker {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int score1 = 85;" },
+      { "line": 4, "text": "    int score2 = 92;" },
+      { "line": 5, "text": "    int score3 = 78;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    int total = score1 * score2 + score3;", "bugId": "b1" },
+      { "line": 8, "text": "    int average = total / 3;", "bugId": "b2" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    System.out.println(\"Score 1: \" + score1);" },
+      { "line": 11, "text": "    System.out.println(\"Score 2: \" + score2);" },
+      { "line": 12, "text": "    System.out.println(\"Score 3: \" + score3);" },
+      { "line": 13, "text": "    System.out.println(\"Total: \" + total);" },
+      { "line": 14, "text": "    System.out.println(\"Average: \" + total);", "bugId": "b3" },
+      { "line": 15, "text": "  }" },
+      { "line": 16, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    int total = score1 + score2 + score3;",
+        "altFixes": [],
+        "clue": "The total prints as 7898 instead of 255."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "    double average = (double) total / 3;",
+        "altFixes": [
+          "    double average = total / 3.0;"
+        ],
+        "clue": "The average of 85, 92, and 78 displays as 85 instead of 85.0 -- the decimal part is always missing."
+      },
+      {
+        "id": "b3",
+        "line": 14,
+        "fix": "    System.out.println(\"Average: \" + average);",
+        "altFixes": [],
+        "clue": "The 'Average' line prints the exact same number as the 'Total' line."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-03",
+    "title": "Temperature Log",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program converts a temperature from Fahrenheit to Celsius and prints the result.",
+    "code": [
+      { "line": 1, "text": "public class TemperatureLog {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    double fahrenheit = 98.6;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "    double adjusted = fahrenheit - 212;", "bugId": "b1" },
+      { "line": 6, "text": "    double celsius = 5.0 / 9.0 + adjusted;", "bugId": "b2" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "    System.out.println(\"Fahrenheit: \" + fahrenheit);" },
+      { "line": 9, "text": "    System.out.println(\"Celsius: \" + fahrenheit);", "bugId": "b3" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    double adjusted = fahrenheit - 32;",
+        "altFixes": [],
+        "clue": "The Celsius result is a huge negative number like -62.89 instead of 37.0."
+      },
+      {
+        "id": "b2",
+        "line": 6,
+        "fix": "    double celsius = 5.0 / 9.0 * adjusted;",
+        "altFixes": [],
+        "clue": "Even with the right subtraction, the Celsius value comes out as 37.56 instead of 37.0 -- the fraction is being added instead of multiplied."
+      },
+      {
+        "id": "b3",
+        "line": 9,
+        "fix": "    System.out.println(\"Celsius: \" + celsius);",
+        "altFixes": [],
+        "clue": "The 'Celsius' line displays 98.6, which is the same as the Fahrenheit value."
+      }
+    ]
   }
 ]

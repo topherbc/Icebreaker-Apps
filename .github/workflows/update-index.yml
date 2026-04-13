@@ -36,16 +36,16 @@ jobs:
           sed -i "s|ABLY_PART_3|$P3|g" java-academy/shared/trace-liveshare.js
           sed -i "s|ABLY_PART_4|$P4|g" java-academy/shared/trace-liveshare.js
           sed -i "s|ABLY_PART_5|$P5|g" java-academy/shared/trace-liveshare.js
-          sed -i "s|ABLY_PART_1|$P1|g" visualization-tools/live-code.html
-          sed -i "s|ABLY_PART_2|$P2|g" visualization-tools/live-code.html
-          sed -i "s|ABLY_PART_3|$P3|g" visualization-tools/live-code.html
-          sed -i "s|ABLY_PART_4|$P4|g" visualization-tools/live-code.html
-          sed -i "s|ABLY_PART_5|$P5|g" visualization-tools/live-code.html
-          sed -i "s|ABLY_PART_1|$P1|g" visualization-tools/amnesty-box.html
-          sed -i "s|ABLY_PART_2|$P2|g" visualization-tools/amnesty-box.html
-          sed -i "s|ABLY_PART_3|$P3|g" visualization-tools/amnesty-box.html
-          sed -i "s|ABLY_PART_4|$P4|g" visualization-tools/amnesty-box.html
-          sed -i "s|ABLY_PART_5|$P5|g" visualization-tools/amnesty-box.html
+          sed -i "s|ABLY_PART_1|$P1|g" classroom-apps/live-code.html
+          sed -i "s|ABLY_PART_2|$P2|g" classroom-apps/live-code.html
+          sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/live-code.html
+          sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/live-code.html
+          sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/live-code.html
+          sed -i "s|ABLY_PART_1|$P1|g" classroom-apps/amnesty-box.html
+          sed -i "s|ABLY_PART_2|$P2|g" classroom-apps/amnesty-box.html
+          sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/amnesty-box.html
+          sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/amnesty-box.html
+          sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/amnesty-box.html
 
       - name: Generate index.html
         run: |
@@ -184,7 +184,7 @@ jobs:
           git add index.html
           git add java-academy/week-1/1-mon-monkey-bot.html
           git add java-academy/shared/trace-liveshare.js
-          git add visualization-tools/live-code.html
-          git add visualization-tools/amnesty-box.html
+          git add classroom-apps/live-code.html
+          git add classroom-apps/amnesty-box.html
           git diff --staged --quiet || git commit -m "chore: inject keys and regenerate index [skip ci]"
           git push

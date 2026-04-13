@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bug Clinic</title>
+<title>Bug Repair</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='%23e2e8f0' stroke='%2364748b' stroke-width='1.5'/><path d='M11 14 a1 1 0 0 1 10 0' fill='none' stroke='%23ef4444' stroke-width='2'/><circle cx='12' cy='12' r='1.5' fill='%2364748b'/><circle cx='20' cy='12' r='1.5' fill='%2364748b'/><path d='M10 20 q6 4 12 0' fill='none' stroke='%2322c55e' stroke-width='2'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
   (function(){
-    var t = localStorage.getItem('bug-clinic-theme');
+    var t = localStorage.getItem('bug-repair-theme');
     if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
   })();
 </script>
@@ -106,31 +106,50 @@
     outline-offset: 2px;
   }
 
-  /* ── THEME TOGGLE ── */
-  .theme-toggle {
-    position: fixed;
-    top: 12px;
-    right: 16px;
-    z-index: 100;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    width: 40px;
-    height: 40px;
+  /* ── TOP NAV ── */
+  .top-nav {
+    background: var(--bg-topbar);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .top-nav .nav-brand {
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+  }
+  .top-nav .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-theme-btn {
+    background: var(--pill-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    box-shadow: var(--shadow-sm);
-    transition: background 0.2s;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.15s;
   }
-  .theme-toggle:hover { background: var(--bg-panel); }
+  .nav-theme-btn:hover { background: var(--bg-panel); }
 
   /* ── LIBRARY SCREEN ── */
   #library-screen {
     max-width: 960px;
     margin: 0 auto;
-    padding: 48px 24px 80px;
+    padding: 32px 24px 80px;
   }
 
   .library-header {
@@ -540,19 +559,54 @@
     .code-panel { max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
   }
 
+  /* ── WRONG / NOT-FIXED STATE ── */
+  .code-line.bug-line.wrong {
+    background: var(--bug-line-bg);
+    animation: flash-wrong 0.6s ease;
+  }
+  @keyframes flash-wrong {
+    0%, 100% { background: var(--bug-line-bg); }
+    50% { background: var(--bug-amber-bg); }
+  }
+
+  .check-feedback {
+    text-align: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    display: none;
+  }
+  .check-feedback.visible { display: block; }
+  .check-feedback.success {
+    background: var(--bug-green-bg);
+    border: 1px solid var(--bug-green);
+    color: var(--bug-green);
+  }
+  .check-feedback.incomplete {
+    background: var(--bug-line-bg);
+    border: 1px solid var(--bug-amber);
+    color: var(--bug-amber);
+  }
+
   /* Hidden utility */
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
-<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-  <span id="theme-icon">&#9789;</span>
-</button>
+<nav class="top-nav">
+  <span class="nav-brand">Bug Repair</span>
+  <div class="nav-right">
+    <button class="nav-theme-btn" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <span id="theme-icon">&#9789;</span>
+    </button>
+  </div>
+</nav>
 
 <!-- ════ LIBRARY SCREEN ════ -->
 <div id="library-screen">
   <div class="library-header">
-    <h1>Bug Clinic</h1>
+    <h1>Bug Repair</h1>
     <p>Find and fix the bugs. Pick a problem to get started.</p>
   </div>
 
@@ -596,7 +650,7 @@
         <div class="clue-section-title">Clues</div>
         <div class="clue-cards" id="clue-cards"></div>
       </div>
-      <div class="all-fixed-msg" id="all-fixed-msg">All 3 bugs fixed! Nice work.</div>
+      <div class="check-feedback" id="check-feedback"></div>
       <div class="action-buttons">
         <button class="btn-check" id="btn-check">Check Fixes</button>
         <button class="btn-next" id="btn-next">Next Problem</button>
@@ -609,7 +663,7 @@
 (function() {
   'use strict';
 
-  const PROBLEMS_DIR = 'bug-clinic-problems/';
+  const PROBLEMS_DIR = 'bug-repair-problems/';
   const completedSet = new Set();
 
   let manifest = [];
@@ -635,7 +689,7 @@
   const bugDots       = document.querySelectorAll('.bug-dot');
   const btnCheck      = $('btn-check');
   const btnNext       = $('btn-next');
-  const allFixedMsg   = $('all-fixed-msg');
+  const checkFeedback = $('check-feedback');
 
   // ── Theme toggle ──
   const themeToggle = $('theme-toggle');
@@ -649,10 +703,10 @@
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if (isDark) {
       document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('bug-clinic-theme', 'light');
+      localStorage.setItem('bug-repair-theme', 'light');
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('bug-clinic-theme', 'dark');
+      localStorage.setItem('bug-repair-theme', 'dark');
     }
     updateThemeIcon();
   });
@@ -876,7 +930,7 @@
       d.setAttribute('aria-label', 'Bug ' + (i+1) + ': not found');
     });
 
-    allFixedMsg.classList.remove('visible');
+    checkFeedback.classList.remove('visible', 'success', 'incomplete');
 
     // Render code
     renderCode();
@@ -993,13 +1047,14 @@
   btnCheck.addEventListener('click', () => {
     if (!currentProblem) return;
 
-    let allFixed = true;
+    const wrongBugIds = [];
+
     currentProblem.bugs.forEach((bug, i) => {
-      if (fixedBugs.has(bug.id)) return; // already fixed
+      if (fixedBugs.has(bug.id)) return;
 
       const edited = editedLines[bug.id];
       if (edited === undefined) {
-        allFixed = false;
+        wrongBugIds.push(bug.id);
         return;
       }
 
@@ -1009,16 +1064,33 @@
         fixedBugs.add(bug.id);
         updateDot(i, 'green');
       } else {
-        allFixed = false;
+        wrongBugIds.push(bug.id);
       }
     });
 
+    renderCode();
+
+    // Show feedback
+    checkFeedback.classList.remove('visible', 'success', 'incomplete');
     if (fixedBugs.size === currentProblem.bugs.length) {
       completedSet.add(currentProblem.id);
-      allFixedMsg.classList.add('visible');
-    }
+      checkFeedback.textContent = 'All 3 bugs fixed! Nice work.';
+      checkFeedback.classList.add('visible', 'success');
+    } else {
+      const remaining = currentProblem.bugs.length - fixedBugs.size;
+      checkFeedback.textContent = remaining + ' bug' + (remaining > 1 ? 's' : '') + ' still need fixing.';
+      checkFeedback.classList.add('visible', 'incomplete');
 
-    renderCode();
+      // Highlight unfixed lines yellow with flash
+      wrongBugIds.forEach(bugId => {
+        const lineEl = codePanel.querySelector('[data-bug-id="' + bugId + '"]');
+        if (lineEl) {
+          lineEl.classList.remove('wrong');
+          void lineEl.offsetWidth; // force reflow to restart animation
+          lineEl.classList.add('wrong');
+        }
+      });
+    }
   });
 
   // ── Next problem ──

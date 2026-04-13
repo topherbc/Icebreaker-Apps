@@ -81,8 +81,8 @@ function startJava({ files, mainClass }, { onStdout, onStderr, onDone }) {
 
       const timer = setTimeout(() => {
         _child.kill();
-        onStderr('\n[Timeout: process killed after 10s]\n');
-      }, 10000);
+        onStderr('\n[Timeout: process killed after 60s]\n');
+      }, 60000);
 
       _child.on('close', code => {
         clearTimeout(timer);

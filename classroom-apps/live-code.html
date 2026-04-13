@@ -1376,6 +1376,22 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 #confirm-overlay .modal-box { max-width: 400px; }
 .confirm-msg { font-size: 17px; line-height: 1.5; color: var(--text); margin-bottom: 8px; }
 .confirm-btns { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+
+/* -- Prompt dialog -- */
+#prompt-overlay .modal-box { max-width: 400px; }
+.prompt-msg { font-size: 17px; line-height: 1.5; color: var(--text); margin-bottom: 8px; }
+#prompt-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+#prompt-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.prompt-btns { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
 .btn-danger {
   height: 44px;
   padding: 0 20px;
@@ -2199,6 +2215,23 @@ sc.close();</code></div>
       <div class="confirm-btns">
         <button class="btn-cancel" id="confirm-cancel">Cancel</button>
         <button class="btn-danger" id="confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROMPT DIALOG (replaces window.prompt for Electron compat) -->
+<div id="prompt-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="prompt-title">
+  <div class="modal-box" id="prompt-modal">
+    <div class="modal-header">
+      <span class="modal-title" id="prompt-title">Prompt</span>
+    </div>
+    <div class="modal-body">
+      <div class="prompt-msg" id="prompt-msg"></div>
+      <input type="text" id="prompt-input" autocomplete="off" />
+      <div class="prompt-btns">
+        <button class="btn-cancel" id="prompt-cancel">Cancel</button>
+        <button class="btn-danger" id="prompt-ok" style="background:var(--accent);">OK</button>
       </div>
     </div>
   </div>
@@ -3648,11 +3681,12 @@ function deleteTab(owner, idx) {
 
 function renameTab(owner, idx) {
   const current = S.myTabs[idx].name;
-  const newName = prompt('New file name:', current);
-  if (!newName || !newName.trim()) return;
-  S.myTabs[idx].name = ensureJavaExt(newName.trim());
-  const barId = owner === 'stu' ? 'stu-tab-bar' : 'inst-tab-bar';
-  renderTabBar(document.getElementById(barId), S.myTabs, S.myActiveTab, owner);
+  showPrompt('New file name:', current, newName => {
+    if (!newName || !newName.trim()) return;
+    S.myTabs[idx].name = ensureJavaExt(newName.trim());
+    const barId = owner === 'stu' ? 'stu-tab-bar' : 'inst-tab-bar';
+    renderTabBar(document.getElementById(barId), S.myTabs, S.myActiveTab, owner);
+  });
 }
 
 function renderSidebar(owner) {
@@ -5070,6 +5104,36 @@ document.getElementById('confirm-cancel').addEventListener('click', () => {
 });
 
 // ================================================================
+// PROMPT DIALOG (replaces window.prompt for Electron compatibility)
+// ================================================================
+let _promptCallback = null;
+function showPrompt(msg, defaultVal, onResult) {
+  _promptCallback = onResult;
+  document.getElementById('prompt-msg').textContent = msg;
+  const inp = document.getElementById('prompt-input');
+  inp.value = defaultVal || '';
+  inp.type = 'text';
+  document.getElementById('prompt-overlay').classList.remove('hidden');
+  trapFocus(document.querySelector('#prompt-overlay .modal-box'));
+  inp.focus();
+  inp.select();
+}
+function _resolvePrompt(value) {
+  document.getElementById('prompt-overlay').classList.add('hidden');
+  if (_promptCallback) { _promptCallback(value); _promptCallback = null; }
+}
+document.getElementById('prompt-ok').addEventListener('click', () => {
+  _resolvePrompt(document.getElementById('prompt-input').value);
+});
+document.getElementById('prompt-cancel').addEventListener('click', () => {
+  _resolvePrompt(null);
+});
+document.getElementById('prompt-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); _resolvePrompt(document.getElementById('prompt-input').value); }
+  if (e.key === 'Escape') { e.preventDefault(); _resolvePrompt(null); }
+});
+
+// ================================================================
 // FOCUS TRAP (accessibility)
 // ================================================================
 function trapFocus(el) {
@@ -5098,6 +5162,8 @@ document.addEventListener('keydown', e => {
     document.getElementById('a11y-overlay').classList.add('hidden');
   if (!document.getElementById('confirm-overlay').classList.contains('hidden'))
     document.getElementById('confirm-overlay').classList.add('hidden');
+  if (!document.getElementById('prompt-overlay').classList.contains('hidden'))
+    _resolvePrompt(null);
   ctxMenu.style.display = 'none';
   dlMenu.style.display  = 'none';
 });
@@ -5239,17 +5305,25 @@ joinBtn.addEventListener('click', () => {
   joinBtn.textContent = 'Connecting...';
   joinErr.textContent = '';
 
-  // Instructor session token check
+  // Instructor session token check (uses modal instead of window.prompt for Electron compat)
   if (S.myRole === 'instructor') {
-    const _tk = (window.prompt('Enter room passphrase:') || '').trim();
-    if (!_matchToken(_tk, room, [_fmtDelimA, _fmtDelimB])) {
-      joinErr.innerHTML = '<span style="color:var(--error)">Incorrect passphrase.</span>';
-      joinBtn.disabled = false;
-      joinBtn.textContent = 'Join Room';
-      return;
-    }
+    showPrompt('Enter room passphrase:', '', _tk => {
+      _tk = (_tk || '').trim();
+      if (!_matchToken(_tk, room, [_fmtDelimA, _fmtDelimB])) {
+        joinErr.innerHTML = '<span style="color:var(--error)">Incorrect passphrase.</span>';
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join Room';
+        return;
+      }
+      _continueJoin(room);
+    });
+    return;
   }
 
+  _continueJoin(room);
+});
+
+function _continueJoin(room) {
   loadAbly(() => {
     initAbly(() => {
       // Connected to Ably
@@ -5269,18 +5343,20 @@ joinBtn.addEventListener('click', () => {
               'font-size:13px;cursor:pointer;background:var(--error);color:#fff;' +
               'border:none;border-radius:4px;font-family:inherit;">Force Join (Take Over)</button>';
             document.getElementById('btn-force-join').addEventListener('click', function onForceJoin() {
-              const entered = (window.prompt('Enter override password to take over this room:') || '').trim();
-              if (!_matchToken(entered, room, [_fmtDelimA])) {
-                joinErr.innerHTML =
-                  '<span style="color:var(--error)">Incorrect password.</span>' +
-                  '<br><button id="btn-force-join" style="margin-top:8px;padding:4px 14px;' +
-                  'font-size:13px;cursor:pointer;background:var(--error);color:#fff;' +
-                  'border:none;border-radius:4px;font-family:inherit;">Force Join (Take Over)</button>';
-                document.getElementById('btn-force-join').addEventListener('click', onForceJoin);
-                return;
-              }
-              joinErr.textContent = '';
-              proceedToApp(); // Ably connection is already open — reuse it
+              showPrompt('Enter override password to take over this room:', '', entered => {
+                entered = (entered || '').trim();
+                if (!_matchToken(entered, room, [_fmtDelimA])) {
+                  joinErr.innerHTML =
+                    '<span style="color:var(--error)">Incorrect password.</span>' +
+                    '<br><button id="btn-force-join" style="margin-top:8px;padding:4px 14px;' +
+                    'font-size:13px;cursor:pointer;background:var(--error);color:#fff;' +
+                    'border:none;border-radius:4px;font-family:inherit;">Force Join (Take Over)</button>';
+                  document.getElementById('btn-force-join').addEventListener('click', onForceJoin);
+                  return;
+                }
+                joinErr.textContent = '';
+                proceedToApp(); // Ably connection is already open — reuse it
+              });
             });
             joinBtn.disabled    = false;
             joinBtn.textContent = 'Join Room';
@@ -5312,7 +5388,7 @@ joinBtn.addEventListener('click', () => {
       }
     });
   });
-});
+}
 
 // ================================================================
 // PAGE UNLOAD -- clean Ably connection

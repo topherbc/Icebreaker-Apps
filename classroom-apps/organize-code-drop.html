@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@500&display=swap" rel="stylesheet">
+<script>(function(){var t=localStorage.getItem('ocd-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,6 +29,20 @@
   --font-mono: 'Source Code Pro', 'Courier New', monospace;
   --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
   --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 40px;
+}
+
+[data-theme="dark"] {
+  --bg-page:    #0f1117;
+  --bg-surface: #1a1f2a;
+  --bg-inset:   #151a24;
+  --bg-stripe:  #1e2430;
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --border-light:  rgba(226,232,240,0.10);
+  --border-medium: rgba(226,232,240,0.18);
+  --border-strong: rgba(226,232,240,0.30);
+  --focus-color: #60a5fa;
 }
 
 html { font-size: 15px; }
@@ -235,6 +250,103 @@ select {
 select:hover { border-color: var(--border-strong); }
 select:focus-visible { border-color: var(--focus-color); outline: 3px solid var(--focus-color); outline-offset: 2px; }
 
+/* ── DYSLEXIA FONT ── */
+body.dyslexia-font, body.dyslexia-font * {
+  font-family: 'OpenDyslexic', 'Atkinson Hyperlegible', sans-serif !important;
+}
+body.dyslexia-font code, body.dyslexia-font pre,
+body.dyslexia-font .code-line {
+  font-family: 'OpenDyslexic Mono', 'OpenDyslexic', monospace !important;
+}
+
+/* ── SETTINGS MODAL ── */
+.settings-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 900; padding: 16px;
+}
+.settings-overlay.hidden { display: none; }
+.settings-box {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-medium);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  border-radius: 12px;
+  width: 100%; max-width: 440px;
+  overflow: hidden;
+}
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg-inset);
+  border-bottom: 1px solid var(--border-medium);
+}
+.settings-title { font-size: 1.05rem; font-weight: 700; }
+.settings-close {
+  background: none; border: none; font-size: 1.2rem;
+  color: var(--text-muted); cursor: pointer; padding: 4px 8px;
+  border-radius: 4px; font-family: var(--font-body);
+}
+.settings-close:hover { background: var(--bg-inset); color: var(--text-primary); }
+.settings-body { padding: 8px 20px 20px; }
+.settings-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-label { flex: 1; }
+.settings-label div:first-child { font-size: 0.95rem; font-weight: 700; }
+.settings-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+
+/* Toggle switch */
+.toggle-switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--border-medium); transition: background 0.2s; border-radius: 13px;
+}
+.toggle-track::before {
+  content: ''; position: absolute; left: 3px; top: 3px;
+  width: 20px; height: 20px; background: white;
+  border-radius: 50%; transition: transform 0.2s;
+}
+.toggle-switch input:checked + .toggle-track { background: var(--focus-color); }
+.toggle-switch input:checked + .toggle-track::before { transform: translateX(18px); }
+
+/* ── RAINBOW BRACKETS ── */
+.rb-d0 { color: #005fa3 !important; font-weight: 700; }
+.rb-d1 { color: #6a0dad !important; font-weight: 700; }
+.rb-d2 { color: #b45309 !important; font-weight: 700; }
+.rb-d3 { color: #0d7c3d !important; font-weight: 700; }
+.rb-d4 { color: #7c4dff !important; font-weight: 700; }
+[data-theme="dark"] .rb-d0 { color: #66aaff !important; }
+[data-theme="dark"] .rb-d1 { color: #cc88ff !important; }
+[data-theme="dark"] .rb-d2 { color: #ffaa44 !important; }
+[data-theme="dark"] .rb-d3 { color: #00dd77 !important; }
+[data-theme="dark"] .rb-d4 { color: #c4a0ff !important; }
+
+/* ── Settings gear in header ── */
+.header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-md); }
+.btn-settings {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--r-md);
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; cursor: pointer; color: var(--text-muted);
+  transition: all 0.15s; flex-shrink: 0; margin-top: 4px;
+}
+.btn-settings:hover { background: var(--bg-inset); color: var(--text-primary); border-color: var(--border-strong); }
+.btn-settings:focus-visible { outline: 3px solid var(--focus-color); outline-offset: 3px; }
+
+[data-theme="dark"] .drop-zone.drag-over {
+  border-color: var(--focus-color);
+  background: #1a2540;
+}
+[data-theme="dark"] .result-bar.correct { background: #0a2e1a; color: #4ade80; border-color: #16a34a; }
+[data-theme="dark"] .result-bar.incorrect { background: #2a1010; color: #f87171; border-color: #dc2626; }
+
 @media (max-width: 780px) {
   body { padding: var(--sp-md); }
   #game-area { flex-direction: column; }
@@ -248,8 +360,13 @@ select:focus-visible { border-color: var(--focus-color); outline: 3px solid var(
 <div class="page-wrap">
 
   <header class="site-header">
-    <h1>Organize Code Drop</h1>
-    <p class="tagline">Drag or click the tiles to assemble each program in the correct order.</p>
+    <div class="header-row">
+      <div>
+        <h1>Organize Code Drop</h1>
+        <p class="tagline">Drag or click the tiles to assemble each program in the correct order.</p>
+      </div>
+      <button class="btn-settings" id="btn-settings" aria-label="Settings" title="Settings">&#9881;</button>
+    </div>
   </header>
 
   <div class="controls-bar">
@@ -300,6 +417,48 @@ select:focus-visible { border-color: var(--focus-color); outline: 3px solid var(
     <button class="btn btn-primary" onclick="checkAnswer()">Check Answer</button>
   </div>
 
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-overlay" class="settings-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="settings-box">
+    <div class="settings-header">
+      <span class="settings-title" id="settings-title">Settings</span>
+      <button class="settings-close" id="settings-close" aria-label="Close settings">&#10005;</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Dark Mode</div>
+          <div class="settings-desc">Reduces screen brightness.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-dark" aria-label="Enable dark mode">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Dyslexia-Friendly Font</div>
+          <div class="settings-desc">Switches to OpenDyslexic for all text.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-dyslexia" aria-label="Enable dyslexia-friendly font">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">
+          <div>Rainbow Brackets</div>
+          <div class="settings-desc">Colors matched brackets by nesting depth.</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-rainbow" checked aria-label="Enable rainbow brackets">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -412,6 +571,7 @@ const problems = {
 
 let currentKey = null;
 const lastShuffles = {};
+let rainbowOn = localStorage.getItem('ocd-rainbow') !== 'false';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -440,11 +600,35 @@ function freshShuffle(key) {
   return result;
 }
 
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightBrackets(text) {
+  if (!rainbowOn) return esc(text);
+  let result = '', stack = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if ('({['.includes(c)) {
+      const depth = stack.length;
+      stack.push(c);
+      result += '<span class="rb-d' + (depth % 5) + '">' + esc(c) + '</span>';
+    } else if (')]}' .includes(c) && stack.length > 0) {
+      stack.pop();
+      result += '<span class="rb-d' + (stack.length % 5) + '">' + esc(c) + '</span>';
+    } else {
+      result += esc(c);
+    }
+  }
+  return result;
+}
+
 function createLineElement(text) {
   const div = document.createElement("div");
   div.className = "code-line";
   div.setAttribute("role", "listitem");
-  div.textContent = text;
+  div.innerHTML = highlightBrackets(text);
+  div.dataset.rawText = text;
   div.draggable = true;
 
   div.addEventListener("dragstart", e => {
@@ -535,7 +719,7 @@ function checkAnswer() {
 
   const assembled = Array.from(
     document.getElementById("assembled").children
-  ).map(div => div.textContent.trim());
+  ).map(div => (div.dataset.rawText || div.textContent).trim());
 
   // Normalize swap groups: sort both arrays at the swappable indices so
   // any ordering within a group is accepted as correct.
@@ -569,6 +753,84 @@ function clearResult() {
 
 enableDrop(document.getElementById("shuffled"));
 enableDrop(document.getElementById("assembled"));
+
+/* ── Settings modal ──────────────────────────────────────────── */
+document.getElementById('btn-settings').addEventListener('click', () => {
+  const overlay = document.getElementById('settings-overlay');
+  overlay.classList.remove('hidden');
+  document.getElementById('toggle-dark').checked = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('toggle-dyslexia').checked = document.body.classList.contains('dyslexia-font');
+  document.getElementById('toggle-rainbow').checked = rainbowOn;
+  document.getElementById('settings-close').focus();
+});
+
+document.getElementById('settings-close').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.add('hidden');
+});
+
+document.getElementById('settings-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('settings-overlay'))
+    document.getElementById('settings-overlay').classList.add('hidden');
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !document.getElementById('settings-overlay').classList.contains('hidden'))
+    document.getElementById('settings-overlay').classList.add('hidden');
+});
+
+document.getElementById('toggle-dark').addEventListener('change', e => {
+  if (e.target.checked) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('ocd-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ocd-theme', 'light');
+  }
+});
+
+document.getElementById('toggle-dyslexia').addEventListener('change', e => {
+  if (e.target.checked) {
+    loadDyslexicFont();
+    document.body.classList.add('dyslexia-font');
+    localStorage.setItem('ocd-dyslexia', 'true');
+  } else {
+    document.body.classList.remove('dyslexia-font');
+    localStorage.setItem('ocd-dyslexia', 'false');
+  }
+});
+
+document.getElementById('toggle-rainbow').addEventListener('change', e => {
+  rainbowOn = e.target.checked;
+  localStorage.setItem('ocd-rainbow', rainbowOn ? 'true' : 'false');
+  // Re-render tiles with/without rainbow brackets
+  document.querySelectorAll('.code-line').forEach(div => {
+    const raw = div.dataset.rawText || div.textContent;
+    div.innerHTML = highlightBrackets(raw);
+  });
+});
+
+function loadDyslexicFont() {
+  if (!document.getElementById('dyslexic-font-link')) {
+    const link = document.createElement('link');
+    link.id = 'dyslexic-font-link';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.cdnfonts.com/css/opendyslexic';
+    document.head.appendChild(link);
+  }
+  if (!document.getElementById('dyslexic-mono-font-link')) {
+    const link2 = document.createElement('link');
+    link2.id = 'dyslexic-mono-font-link';
+    link2.rel = 'stylesheet';
+    link2.href = 'https://fonts.cdnfonts.com/css/opendyslexic-mono';
+    document.head.appendChild(link2);
+  }
+}
+
+// Restore dyslexia setting
+if (localStorage.getItem('ocd-dyslexia') === 'true') {
+  loadDyslexicFont();
+  document.body.classList.add('dyslexia-font');
+}
 
 /* ── Resizable panels ─────────────────────────────────────────── */
 (function () {

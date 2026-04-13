@@ -823,6 +823,7 @@
     currentWeek = parseInt(val);
     localStorage.setItem('fib-week', val);
     renderProblemList(currentWeek);
+    updateHash();
   });
 
   function renderProblemList(week) {
@@ -857,6 +858,7 @@
   function openExercise(id) {
     currentProblem = problemCache[id];
     if (!currentProblem) return;
+    updateHash();
 
     filledBlanks = new Set();
 
@@ -1067,9 +1069,11 @@
   }
 
   function goBack(prefilterWeek) {
+    currentProblem = null;
     exerciseScreen.classList.remove('active');
     libraryScreen.hidden = false;
     refreshDropdownCounts();
+    updateHash();
 
     if (prefilterWeek !== null) {
       currentWeek = prefilterWeek;
@@ -1080,8 +1084,39 @@
     }
   }
 
+  // ── Hash routing: #week-1 or #week-1/problem-id ──
+  function applyHash() {
+    const hash = location.hash.replace(/^#\/?/, '');
+    if (!hash) return;
+    const parts = hash.split('/');
+    const weekId = parts[0];
+    const problemId = parts[1] || null;
+    const weekNum = parseInt(weekId.replace('week-', ''));
+    if (isNaN(weekNum)) return;
+
+    currentWeek = weekNum;
+    weekSelect.value = weekNum;
+    renderProblemList(weekNum);
+
+    if (problemId && problemCache[problemId]) {
+      openExercise(problemId);
+    }
+  }
+
+  function updateHash() {
+    let h = '';
+    if (currentProblem) {
+      h = '#week-' + currentProblem.week + '/' + currentProblem.id;
+    } else if (currentWeek !== null) {
+      h = '#week-' + currentWeek;
+    }
+    if (h && location.hash !== h) history.replaceState(null, '', h);
+  }
+
+  window.addEventListener('hashchange', applyHash);
+
   // ── Init ──
-  init();
+  init().then(applyHash);
 })();
 </script>
 </body>

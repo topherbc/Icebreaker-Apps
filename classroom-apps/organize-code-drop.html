@@ -503,9 +503,11 @@ function getDragAfterElement(container, y) {
   }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-function loadProblem() {
-  currentKey = document.getElementById("problemSelect").value;
+function loadProblem(key) {
+  currentKey = key || document.getElementById("problemSelect").value;
+  document.getElementById("problemSelect").value = currentKey;
   const problem = problems[currentKey];
+  if (location.hash !== '#' + currentKey) history.replaceState(null, '', '#' + currentKey);
 
   document.getElementById("problemEyebrow").textContent = problem.week + " — " + problem.title;
   document.getElementById("problemStatement").textContent = problem.statement;
@@ -601,6 +603,18 @@ enableDrop(document.getElementById("assembled"));
     if (e.key === "ArrowLeft") { leftPanel.style.width = Math.max(200, leftPanel.offsetWidth - step) + "px"; e.preventDefault(); }
     if (e.key === "ArrowRight") { leftPanel.style.width = Math.min(760, leftPanel.offsetWidth + step) + "px"; e.preventDefault(); }
   });
+}());
+
+// ── Hash routing: #w1_salary ──
+(function() {
+  function applyHash() {
+    const hash = location.hash.replace(/^#\/?/, '');
+    if (hash && problems[hash]) {
+      loadProblem(hash);
+    }
+  }
+  applyHash();
+  window.addEventListener('hashchange', applyHash);
 }());
 </script>
 </body>

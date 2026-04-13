@@ -891,6 +891,7 @@
     currentWeek = parseInt(val);
     localStorage.setItem('bug-squash-week', val);
     renderProblemList(currentWeek);
+    updateHash();
   });
 
   function renderProblemList(week) {
@@ -925,6 +926,7 @@
   function openClinic(id) {
     currentProblem = problemCache[id];
     if (!currentProblem) return;
+    updateHash();
 
     editedLines = {};
     fixedBugs = new Set();
@@ -1141,9 +1143,11 @@
   }
 
   function goBack(prefilterWeek) {
+    currentProblem = null;
     clinicScreen.classList.remove('active');
     libraryScreen.hidden = false;
     refreshDropdownCounts();
+    updateHash();
 
     if (prefilterWeek !== null) {
       currentWeek = prefilterWeek;
@@ -1154,8 +1158,41 @@
     }
   }
 
+  // ── Hash routing: #week-1 or #week-1/problem-id ──
+  function applyHash() {
+    const hash = location.hash.replace(/^#\/?/, '');
+    if (!hash) return;
+    const parts = hash.split('/');
+    const weekId = parts[0];                  // e.g. "week-1"
+    const problemId = parts[1] || null;       // e.g. "week1-variables-01"
+    const weekNum = parseInt(weekId.replace('week-', ''));
+    if (isNaN(weekNum)) return;
+
+    // Select the week
+    currentWeek = weekNum;
+    weekSelect.value = weekNum;
+    renderProblemList(weekNum);
+
+    // Open specific problem if provided
+    if (problemId && problemCache[problemId]) {
+      openClinic(problemId);
+    }
+  }
+
+  function updateHash() {
+    let h = '';
+    if (currentProblem) {
+      h = '#week-' + currentProblem.week + '/' + currentProblem.id;
+    } else if (currentWeek !== null) {
+      h = '#week-' + currentWeek;
+    }
+    if (h && location.hash !== h) history.replaceState(null, '', h);
+  }
+
+  window.addEventListener('hashchange', applyHash);
+
   // ── Init ──
-  init();
+  init().then(applyHash);
 })();
 </script>
 </body>

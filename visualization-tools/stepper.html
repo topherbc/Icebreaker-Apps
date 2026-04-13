@@ -927,6 +927,9 @@ function selectLang(lang) {
 function selectTopic(topic) {
   activeTopic = topic;
   savePrefs();
+  if (location.hash.replace(/^#\/?/, '') !== topic.id) {
+    history.replaceState(null, '', '#' + topic.id);
+  }
   document.getElementById('topicBtnValue').textContent = topic.label;
   buildTopicMenu(); closeAllDropdowns();
   scenIdx = 0; stepIdx = 0;
@@ -1704,15 +1707,45 @@ document.addEventListener('keydown', e => {
 
 <script>
 (function() {
-  const prefs = loadPrefs();
-  if (prefs.lang && MANIFEST[prefs.lang]) {
-    activeLang = prefs.lang;
-    document.getElementById('langBtnValue').textContent = prefs.lang;
+  // Hash routing: #java-17/loops -> lang "Java 17", topic "java-17/loops"
+  function resolveFromHash() {
+    const hash = location.hash.replace(/^#\/?/, '');
+    if (!hash) return null;
+    for (const [lang, topics] of Object.entries(MANIFEST)) {
+      const match = topics.find(t => t.id === hash);
+      if (match) return { lang, topic: match };
+    }
+    return null;
   }
-  buildLangMenu();
-  const topics  = MANIFEST[activeLang] || [];
-  const target  = (prefs.topicId && topics.find(t => t.id === prefs.topicId)) || topics[0];
-  if (target) selectTopic(target);
+
+  const hashResult = resolveFromHash();
+  if (hashResult) {
+    activeLang = hashResult.lang;
+    document.getElementById('langBtnValue').textContent = hashResult.lang;
+    buildLangMenu();
+    selectTopic(hashResult.topic);
+  } else {
+    const prefs = loadPrefs();
+    if (prefs.lang && MANIFEST[prefs.lang]) {
+      activeLang = prefs.lang;
+      document.getElementById('langBtnValue').textContent = prefs.lang;
+    }
+    buildLangMenu();
+    const topics  = MANIFEST[activeLang] || [];
+    const target  = (prefs.topicId && topics.find(t => t.id === prefs.topicId)) || topics[0];
+    if (target) selectTopic(target);
+  }
+
+  // Update hash when topic changes; listen for back/forward
+  window.addEventListener('hashchange', () => {
+    const r = resolveFromHash();
+    if (r && r.topic.id !== (activeTopic && activeTopic.id)) {
+      activeLang = r.lang;
+      document.getElementById('langBtnValue').textContent = r.lang;
+      buildLangMenu();
+      selectTopic(r.topic);
+    }
+  });
 })();
 </script>
 

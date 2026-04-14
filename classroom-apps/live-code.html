@@ -168,7 +168,19 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   position: relative;
 }
 .panel:last-child { border-right: none; }
-#inst-panel { flex: 0 0 50%; transition: box-shadow 0.20s; }
+#inst-panel { flex: 0 0 50%; transition: box-shadow 0.20s; min-width: 20%; }
+.resize-handle {
+  flex: 0 0 6px;
+  cursor: col-resize;
+  background: var(--border);
+  position: relative;
+  z-index: 5;
+  transition: background 0.15s;
+}
+.resize-handle:hover,
+.resize-handle.active {
+  background: var(--accent);
+}
 #inst-panel.typing {
   box-shadow: 0 0 0 3px rgba(234,137,12,0.70), 0 0 22px rgba(234,137,12,0.22);
 }
@@ -179,9 +191,9 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   background: rgba(234,137,12,0.18);
   color: var(--text);
 }
-#student-panel { flex: 1; }
-#instructor-work { flex: 0 0 45%; }
-#dashboard-panel { flex: 1; }
+#student-panel { flex: 1; min-width: 20%; }
+#instructor-work { flex: 0 0 45%; min-width: 20%; }
+#dashboard-panel { flex: 1; min-width: 20%; }
 
 /* ---- Panel label badge (INSTRUCTOR / STUDENT) ---- */
 .panel-badge {
@@ -1889,10 +1901,11 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         </div>
       </div>
 
-      <!-- Problem banner (student) -->
+      <!-- Resize handle (student layout) -->
+      <div class="resize-handle" id="student-resize-handle" title="Drag to resize panels"></div>
 
       <!-- Right: student editor -->
-      <div class="panel" id="student-panel" style="flex:1">
+      <div class="panel" id="student-panel" style="flex:1"
         <div id="stu-problem-banner" class="collapsible" style="border-bottom:2px solid var(--accent);max-height:0;" role="region" aria-label="Problem statement">
           <div class="collapsible-header collapse-toggle" id="stu-problem-toggle" style="background:var(--accent);color:#fff;">
             <span aria-hidden="true">&#128196;</span>
@@ -2137,6 +2150,9 @@ sc.close();</code></div>
           </div>
         </div>
       </div>
+
+      <!-- Resize handle (instructor layout) -->
+      <div class="resize-handle" id="instructor-resize-handle" title="Drag to resize panels"></div>
 
       <!-- Right: dashboard -->
       <div class="panel" id="dashboard-panel" style="flex:1;">
@@ -5731,6 +5747,59 @@ document.getElementById('btn-leave').addEventListener('click', () => {
     const label = document.querySelector('.nab-label');
     if (label) label.title = 'Native app not yet available';
   }
+})();
+
+// ================================================================
+// RESIZABLE PANELS -- drag handle between left/right panels
+// ================================================================
+(function initResizeHandles() {
+  function setupResize(handleId, leftId, rightId, getEditors) {
+    const handle = document.getElementById(handleId);
+    const left   = document.getElementById(leftId);
+    const right  = document.getElementById(rightId);
+    if (!handle || !left || !right) return;
+
+    let dragging = false;
+
+    function refreshEditors() {
+      getEditors().forEach(function (cm) { if (cm) cm.refresh(); });
+    }
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      handle.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      const container = left.parentElement;
+      const rect = container.getBoundingClientRect();
+      const offset = e.clientX - rect.left;
+      const total = rect.width;
+      const pct = (offset / total) * 100;
+      const clamped = Math.min(80, Math.max(20, pct));
+      left.style.flex = '0 0 ' + clamped + '%';
+      right.style.flex = '1';
+      refreshEditors();
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      refreshEditors();
+    });
+  }
+
+  setupResize('student-resize-handle', 'inst-panel', 'student-panel',
+    function () { return [cmInst, cmMy]; });
+  setupResize('instructor-resize-handle', 'instructor-work', 'dashboard-panel',
+    function () { return [cmMy]; });
 })();
 
 // ================================================================

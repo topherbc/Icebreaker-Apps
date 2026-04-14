@@ -787,19 +787,19 @@ const FUN_QUESTIONS = [
 ];
 
 const TECH_QUESTIONS = [
-  { q: "An Employee class has a constructor that takes a name and a department. What keyword do you use to create a new Employee object?", answer: "The new keyword" },
-  { q: "A field is marked private. Can a method outside the class read it directly?", answer: "No, private fields cannot be accessed directly from outside the class" },
-  { q: "Inside a constructor, what does 'this.name = name' actually do?", answer: "It assigns the constructor parameter to the instance field with the same name" },
-  { q: "What is the difference between a getter and a setter?", answer: "A getter reads a field's value; a setter writes a new value to it" },
-  { q: "You have a StringBuilder called sb. You want to add the word 'hello' to it. What method do you call?", answer: "sb.append(\"hello\")" },
-  { q: "Why would you mark a field private instead of public?", answer: "To hide internal data and control how it is accessed or changed" },
-  { q: "A class has two fields: name and salary. Where do you set their initial values when the object is created?", answer: "Inside the constructor" },
-  { q: "What does encapsulation mean in plain terms?", answer: "Bundling data with the methods that operate on it, and restricting direct access to that data" },
-  { q: "If a class field is private, how does code outside the class change its value?", answer: "Through a public setter method" },
-  { q: "You call 'new Employee()'. What part of the class runs at that moment?", answer: "The constructor runs" },
-  { q: "What happens if you do not write a constructor for a class in Java?", answer: "Java provides a default no-argument constructor automatically" },
-  { q: "Can a class have more than one constructor? What is that called?", answer: "Yes, it is called constructor overloading" },
-  { q: "A StringBuilder starts empty. After calling append('Hello') and append(' World'), what does toString() return?", answer: "\"Hello World\"" }
+  { q: "What does the escape character \\n do inside a Java String?", answer: "It inserts a newline; the text after it starts on the next line" },
+  { q: "You want to print a tab between two words. What escape character do you place between them?", answer: "\\t" },
+  { q: "You create a Scanner with Scanner scanner = new Scanner(System.in). What method do you call to read an entire line of text?", answer: "scanner.nextLine()" },
+  { q: "You call scanner.nextInt() and then scanner.nextLine(). The nextLine() returns an empty String. Why does this happen?", answer: "nextInt() leaves the newline character in the buffer; nextLine() consumes that leftover newline instead of waiting for new input" },
+  { q: "You have an int called score and want to check three ranges: above 90, above 70, and everything else. What three keywords do you use to build that logic?", answer: "if, else if, else" },
+  { q: "What happens if two else-if conditions are both true? Which block runs?", answer: "Only the first one that evaluates to true runs; the rest are skipped" },
+  { q: "You have a String called name. What method and argument do you use to get the name in all uppercase letters?", answer: "name.toUpperCase()" },
+  { q: "Given String age = \"25\", how do you convert that String into an int?", answer: "Integer.parseInt(age)" },
+  { q: "You have String csv = \"red,green,blue\". What does csv.split(\",\") return?", answer: "A String array with three elements: \"red\", \"green\", and \"blue\"" },
+  { q: "After calling split(\",\") on a String, how do you access the second element of the result?", answer: "Use index 1 on the returned array, for example parts[1]" },
+  { q: "A method is declared as public static int add(int a, int b). What does the word int before the method name tell you?", answer: "It is the return type; the method will return an int value" },
+  { q: "When do you use void as a return type for a method?", answer: "When the method performs an action but does not return a value" },
+  { q: "What is the difference between a JDK and an IDE?", answer: "The JDK is the toolkit that compiles and runs Java code; the IDE is the editor you write code in, such as IntelliJ or VS Code" }
 ];
 
 // ═══ STATE ═══

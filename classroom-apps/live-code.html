@@ -3479,10 +3479,12 @@ function onInstructorSelection(data) {
   // Determine the incoming cursor line before clearing the old gutter class,
   // so we can skip the clear/re-add if the line hasn't changed (prevents flicker)
   let incomingActiveLine = -1;
-  data.ranges.forEach(r => {
-    const a = r.anchor, h = r.head;
-    if (a.line === h.line && a.ch === h.ch) incomingActiveLine = a.line;
-  });
+  if (data.showLineNum !== false) {
+    data.ranges.forEach(r => {
+      const a = r.anchor, h = r.head;
+      if (a.line === h.line && a.ch === h.ch) incomingActiveLine = a.line;
+    });
+  }
   if (incomingActiveLine !== _instActiveLine) clearInstActiveLine();
 
   data.ranges.forEach(r => {

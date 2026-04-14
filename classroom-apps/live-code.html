@@ -3457,21 +3457,35 @@ function onInstructorClickIndicator(data) {
     if (data.targetClientId !== S.myClientId) return;
     if (data.targetTab != null && data.targetTab !== S.myActiveTab) return;
     if (!cmMy) return;
-    showClickCircle(cmMy, data.pos);
+    showClickCircleAtPos(cmMy, data.pos);
   } else {
     // Broadcast click: instructor clicked in their own editor
     if (!cmInst) return;
-    showClickCircle(cmInst, data.pos);
+    showClickCircleAtPos(cmInst, data.pos);
   }
 }
 
-function showClickCircle(cm, pos) {
-  const coords = cm.charCoords(pos, 'local');
-  const scroll = cm.getScrollInfo();
+function showClickCircleAtPos(cm, pos) {
+  // Remote: position from character coordinates
+  const coords = cm.charCoords(pos, 'page');
+  const rect = cm.getScrollerElement().getBoundingClientRect();
+  _placeClickCircle(cm, coords.left - rect.left + cm.getScrollerElement().scrollLeft,
+                        coords.top  - rect.top  + cm.getScrollerElement().scrollTop
+                        + (coords.bottom - coords.top) / 2);
+}
+
+function showClickCircleAtPixel(cm, clientX, clientY) {
+  // Local: position from raw mouse coordinates — pixel-perfect
+  const rect = cm.getScrollerElement().getBoundingClientRect();
+  _placeClickCircle(cm, clientX - rect.left + cm.getScrollerElement().scrollLeft,
+                        clientY - rect.top  + cm.getScrollerElement().scrollTop);
+}
+
+function _placeClickCircle(cm, x, y) {
   const circle = document.createElement('div');
   circle.className = 'cm-inst-click-circle';
-  circle.style.left = (coords.left - scroll.left) + 'px';
-  circle.style.top  = (coords.top  - scroll.top + (coords.bottom - coords.top) / 2) + 'px';
+  circle.style.left = x + 'px';
+  circle.style.top  = y + 'px';
   const scroller = cm.getScrollerElement();
   scroller.style.position = 'relative';
   scroller.appendChild(circle);
@@ -4105,8 +4119,9 @@ function initInstructorView() {
     clearTimeout(_typingPubTimer);
     _typingPubTimer = setTimeout(publishInstTyping, 150);
   });
-  // Broadcast click circle to all students
+  // Broadcast click circle to all students + show locally
   cmMy.getWrapperElement().addEventListener('mousedown', e => {
+    showClickCircleAtPixel(cmMy, e.clientX, e.clientY);
     if (!S.chInstructor) return;
     const pos = cmMy.coordsChar({ left: e.clientX, top: e.clientY });
     try { S.chInstructor.publish('click-indicator', { pos }); } catch(e2) {}
@@ -4392,6 +4407,7 @@ function openExpanded(clientId) {
 
   // Click circle from expanded view to the targeted student
   _expClickHandler = e => {
+    showClickCircleAtPixel(cmExpanded, e.clientX, e.clientY);
     if (!S.chInstructor || !S.expandedId) return;
     const pos = cmExpanded.coordsChar({ left: e.clientX, top: e.clientY });
     try { S.chInstructor.publish('click-indicator', { pos, targetClientId: S.expandedId, targetTab: S.expTabIdx }); } catch(e2) {}

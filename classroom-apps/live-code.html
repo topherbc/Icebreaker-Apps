@@ -1549,6 +1549,27 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   50%       { opacity: 0; }
 }
 
+/* Instructor click circle indicator (visible on student panels) */
+.cm-inst-click-circle {
+  position: absolute;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(234, 137, 12, 0.85);
+  background: rgba(234, 137, 12, 0.12);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: inst-click-fade 0.6s ease-out forwards;
+  z-index: 20;
+}
+[data-theme="dark"] .cm-inst-click-circle {
+  border-color: rgba(251, 191, 36, 0.85);
+  background: rgba(251, 191, 36, 0.12);
+}
+@keyframes inst-click-fade {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+}
+
 /* Java syntax token colors */
 .cm-s-livecode .cm-keyword   { color: #005fa3; font-weight: 600; }
 .cm-s-livecode .cm-atom      { color: #b45309; }
@@ -2372,6 +2393,12 @@ let _fmtDelimA = '\x21';     // output format delimiter
 let _instSelMarks   = [];
 let _instActiveLine = -1; // line number of last instructor cursor line class
 let _lastInstSelData = null; // last selection data — re-applied after setValue clears marks
+// Instructor selection marks on student's OWN editor (when instructor views student)
+let _instStuSelMarks = [];
+let _lastInstStuSelData = null;
+// Expanded view event handlers (for cleanup)
+let _expCursorHandler = null;
+let _expClickHandler  = null;
 let _instHeartbeat  = null; // instructor presence keepalive
 let _appStarted     = false; // guard: proceedToApp runs exactly once per session
 let _instLeaveTimer1 = null; // 50s  → offline badge on instructor panel
@@ -3072,6 +3099,7 @@ function setupChannels() {
     S.chInstructor = S.ablyClient.channels.get(channelName('instructor'));
     S.chInstructor.subscribe('code', msg => onInstructorCode(msg.data));
     S.chInstructor.subscribe('selection', msg => onInstructorSelection(msg.data));
+    S.chInstructor.subscribe('click-indicator', msg => onInstructorClickIndicator(msg.data));
     S.chInstructor.subscribe('typing', () => onInstructorTyping());
     S.chInstructor.subscribe('output', msg => onInstructorOutput(msg.data));
 
@@ -3346,7 +3374,39 @@ function clearInstActiveLine() {
 }
 
 function onInstructorSelection(data) {
-  if (!cmInst || !data || !data.ranges) return;
+  if (!data || !data.ranges) return;
+
+  // Targeted selection: instructor is viewing this student's code
+  if (data.targetClientId) {
+    if (data.targetClientId !== S.myClientId) return;
+    if (!cmMy) return;
+    if (data.targetTab != null && data.targetTab !== S.myActiveTab) return;
+    _lastInstStuSelData = data;
+    // Clear previous targeted marks
+    _instStuSelMarks.forEach(m => m.clear());
+    _instStuSelMarks = [];
+    data.ranges.forEach(r => {
+      let from = r.anchor, to = r.head;
+      if (from.line > to.line || (from.line === to.line && from.ch > to.ch)) {
+        [from, to] = [to, from];
+      }
+      if (from.line === to.line && from.ch === to.ch) {
+        const widget = document.createElement('span');
+        widget.className = 'cm-inst-cursor-widget';
+        widget.title = 'Instructor cursor';
+        _instStuSelMarks.push(cmMy.setBookmark(from, { widget, insertLeft: true }));
+      } else {
+        _instStuSelMarks.push(cmMy.markText(from, to, {
+          className: 'cm-inst-selection',
+          title: 'Instructor selection',
+        }));
+      }
+    });
+    return;
+  }
+
+  // Broadcast selection: instructor's own code → student read-only panel
+  if (!cmInst) return;
   _lastInstSelData = data;
   // Clear previous marks
   _instSelMarks.forEach(m => m.clear());
@@ -3387,6 +3447,34 @@ function onInstructorSelection(data) {
     }
   });
 
+}
+
+function onInstructorClickIndicator(data) {
+  if (!data || !data.pos) return;
+  // Targeted click: only for the specific student being viewed
+  if (data.targetClientId) {
+    if (data.targetClientId !== S.myClientId) return;
+    if (data.targetTab != null && data.targetTab !== S.myActiveTab) return;
+    if (!cmMy) return;
+    showClickCircle(cmMy, data.pos);
+  } else {
+    // Broadcast click: instructor clicked in their own editor
+    if (!cmInst) return;
+    showClickCircle(cmInst, data.pos);
+  }
+}
+
+function showClickCircle(cm, pos) {
+  const coords = cm.charCoords(pos, 'local');
+  const scroll = cm.getScrollInfo();
+  const circle = document.createElement('div');
+  circle.className = 'cm-inst-click-circle';
+  circle.style.left = (coords.left - scroll.left) + 'px';
+  circle.style.top  = (coords.top  - scroll.top + (coords.bottom - coords.top) / 2) + 'px';
+  const scroller = cm.getScrollerElement();
+  scroller.style.position = 'relative';
+  scroller.appendChild(circle);
+  circle.addEventListener('animationend', () => circle.remove());
 }
 
 function onInstructorTyping() {
@@ -4016,6 +4104,12 @@ function initInstructorView() {
     clearTimeout(_typingPubTimer);
     _typingPubTimer = setTimeout(publishInstTyping, 150);
   });
+  // Broadcast click circle to all students
+  cmMy.getWrapperElement().addEventListener('mousedown', e => {
+    if (!S.chInstructor) return;
+    const pos = cmMy.coordsChar({ left: e.clientX, top: e.clientY });
+    try { S.chInstructor.publish('click-indicator', { pos }); } catch(e2) {}
+  });
   scheduleRainbow(cmMy);
 
   renderTabBar(document.getElementById('inst-tab-bar'), S.myTabs, S.myActiveTab, 'inst');
@@ -4269,6 +4363,9 @@ function removeStudent(clientId) {
 // EXPANDED STUDENT VIEW
 // ================================================================
 function openExpanded(clientId) {
+  // Clean up previous expanded handlers if navigating between students
+  cleanupExpandedHandlers();
+
   S.expandedId = clientId;
   S.expTabIdx  = S.students[clientId].activeTab || 0;
   document.getElementById('expanded-overlay').classList.remove('hidden');
@@ -4279,6 +4376,30 @@ function openExpanded(clientId) {
     cmExpanded = makeCM(wrap, { readOnly: true });
   }
   updateExpandedEditor();
+
+  // Publish selection from expanded view to the targeted student
+  let _expSelTimer = null;
+  _expCursorHandler = () => {
+    clearTimeout(_expSelTimer);
+    _expSelTimer = setTimeout(() => {
+      if (!S.chInstructor || !S.expandedId) return;
+      const ranges = cmExpanded.getDoc().listSelections().map(r => ({
+        anchor: { line: r.anchor.line, ch: r.anchor.ch },
+        head:   { line: r.head.line,   ch: r.head.ch   },
+      }));
+      try { S.chInstructor.publish('selection', { ranges, targetClientId: S.expandedId, targetTab: S.expTabIdx }); } catch(e) {}
+    }, 50);
+  };
+  cmExpanded.on('cursorActivity', _expCursorHandler);
+
+  // Click circle from expanded view to the targeted student
+  _expClickHandler = e => {
+    if (!S.chInstructor || !S.expandedId) return;
+    const pos = cmExpanded.coordsChar({ left: e.clientX, top: e.clientY });
+    try { S.chInstructor.publish('click-indicator', { pos, targetClientId: S.expandedId, targetTab: S.expTabIdx }); } catch(e2) {}
+  };
+  cmExpanded.getWrapperElement().addEventListener('mousedown', _expClickHandler);
+
   trapFocus(document.querySelector('#expanded-overlay .modal-box'));
 }
 
@@ -4336,15 +4457,31 @@ document.getElementById('exp-unready-btn').addEventListener('click', () => {
 document.getElementById('exp-prev').addEventListener('click', () => {
   const ids = Object.keys(S.students);
   const idx = ids.indexOf(S.expandedId);
-  if (idx > 0) { S.expandedId = ids[idx - 1]; S.expTabIdx = 0; updateExpandedEditor(); }
+  if (idx > 0) openExpanded(ids[idx - 1]);
 });
 document.getElementById('exp-next').addEventListener('click', () => {
   const ids = Object.keys(S.students);
   const idx = ids.indexOf(S.expandedId);
-  if (idx < ids.length - 1) { S.expandedId = ids[idx + 1]; S.expTabIdx = 0; updateExpandedEditor(); }
+  if (idx < ids.length - 1) openExpanded(ids[idx + 1]);
 });
 
+function cleanupExpandedHandlers() {
+  if (cmExpanded && _expCursorHandler) {
+    cmExpanded.off('cursorActivity', _expCursorHandler);
+    _expCursorHandler = null;
+  }
+  if (cmExpanded && _expClickHandler) {
+    cmExpanded.getWrapperElement().removeEventListener('mousedown', _expClickHandler);
+    _expClickHandler = null;
+  }
+}
+
 function closeExpanded() {
+  // Clear targeted highlights on the student's screen
+  if (S.expandedId && S.chInstructor) {
+    try { S.chInstructor.publish('selection', { ranges: [], targetClientId: S.expandedId }); } catch(e) {}
+  }
+  cleanupExpandedHandlers();
   S.expandedId = null;
   document.getElementById('expanded-overlay').classList.add('hidden');
 }

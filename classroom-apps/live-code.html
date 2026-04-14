@@ -1343,6 +1343,17 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 .a11y-row:last-child { border-bottom: none; }
 .a11y-label { flex: 1; font-size: 16px; }
 .a11y-desc { font-size: 14px; color: var(--text-mid); margin-top: 2px; }
+.a11y-section-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 16px 0 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
 .toggle-switch {
   position: relative;
   width: 48px;
@@ -2220,6 +2231,53 @@ sc.close();</code></div>
           <span class="toggle-track"></span>
         </label>
       </div>
+
+      <!-- Instructor-only share tools -->
+      <div class="inst-only hidden">
+        <div class="a11y-section-label">Share to All Students</div>
+        <div class="a11y-row">
+          <div class="a11y-label">
+            <div>Cursor &amp; Selection Highlight</div>
+            <div class="a11y-desc">Shows your cursor position and text selections on students' read-only panel.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-share-cursor" checked aria-label="Share cursor and selection highlight">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+        <div class="a11y-row">
+          <div class="a11y-label">
+            <div>Click Circle</div>
+            <div class="a11y-desc">Shows a brief circle where you click in your editor.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-share-click" checked aria-label="Share click circle indicator">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+        <div class="a11y-row">
+          <div class="a11y-label">
+            <div>Line Number Highlight</div>
+            <div class="a11y-desc">Highlights the active line number in the gutter on students' panel.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-share-linenum" checked aria-label="Share line number highlight">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="a11y-section-label">Share to Viewed Student</div>
+        <div class="a11y-row">
+          <div class="a11y-label">
+            <div>Highlights &amp; Clicks on Student Editor</div>
+            <div class="a11y-desc">When viewing a student, share your selections and clicks onto their own editor.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-share-to-student" checked aria-label="Share highlights to viewed student">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2370,6 +2428,12 @@ const S = {
   isRunning:     false,
   rainbowOn:     true,
   instConnected: false, // student: has instructor sent any code
+
+  // Instructor share-tool toggles (default: all on)
+  shareCursor:    true, // broadcast cursor & selection highlight to students
+  shareClick:     true, // broadcast click circle to students
+  shareLineNum:   true, // broadcast line-number gutter highlight to students
+  shareToStudent: true, // share highlights & clicks to viewed student's own editor
 
   // Context menu state
   ctxTabOwner: null, // 'stu' | 'inst'
@@ -3435,10 +3499,12 @@ function onInstructorSelection(data) {
       _instSelMarks.push(cmInst.setBookmark(from, { widget, insertLeft: true }));
 
       // Active line gutter glow (number highlight only, no line background)
-      _instActiveLine = from.line;
-      try {
-        cmInst.addLineClass(from.line, 'gutter', 'cm-inst-active-gutter');
-      } catch(e) {}
+      if (data.showLineNum !== false) {
+        _instActiveLine = from.line;
+        try {
+          cmInst.addLineClass(from.line, 'gutter', 'cm-inst-active-gutter');
+        } catch(e) {}
+      }
     } else {
       // Range selection — highlight it
       _instSelMarks.push(cmInst.markText(from, to, {
@@ -4121,6 +4187,7 @@ function initInstructorView() {
   });
   // Broadcast click circle to all students + show locally
   cmMy.getWrapperElement().addEventListener('mousedown', e => {
+    if (!S.shareClick) return;
     showClickCircleAtPixel(cmMy, e.clientX, e.clientY);
     if (!S.chInstructor) return;
     const pos = cmMy.coordsChar({ left: e.clientX, top: e.clientY });
@@ -4192,12 +4259,12 @@ function publishInstCode() {
 }
 
 function publishInstSelection() {
-  if (!S.chInstructor) return;
+  if (!S.chInstructor || !S.shareCursor) return;
   const ranges = cmMy.getDoc().listSelections().map(r => ({
     anchor: { line: r.anchor.line, ch: r.anchor.ch },
     head:   { line: r.head.line,   ch: r.head.ch   },
   }));
-  try { S.chInstructor.publish('selection', { ranges }); } catch(e) {}
+  try { S.chInstructor.publish('selection', { ranges, showLineNum: S.shareLineNum }); } catch(e) {}
 }
 
 function publishInstTyping() {
@@ -4393,6 +4460,7 @@ function openExpanded(clientId) {
   // Publish selection from expanded view to the targeted student
   let _expSelTimer = null;
   _expCursorHandler = () => {
+    if (!S.shareToStudent) return;
     clearTimeout(_expSelTimer);
     _expSelTimer = setTimeout(() => {
       if (!S.chInstructor || !S.expandedId) return;
@@ -4407,6 +4475,7 @@ function openExpanded(clientId) {
 
   // Click circle from expanded view to the targeted student
   _expClickHandler = e => {
+    if (!S.shareToStudent) return;
     showClickCircleAtPixel(cmExpanded, e.clientX, e.clientY);
     if (!S.chInstructor || !S.expandedId) return;
     const pos = cmExpanded.coordsChar({ left: e.clientX, top: e.clientY });
@@ -5190,6 +5259,13 @@ document.getElementById('btn-a11y').addEventListener('click', () => {
     document.getElementById('toggle-dark').checked    = document.documentElement.getAttribute('data-theme') === 'dark';
     document.getElementById('toggle-rainbow').checked = S.rainbowOn;
     document.getElementById('toggle-dyslexia').checked = document.body.classList.contains('dyslexia-font');
+    // Sync instructor share-tool toggles
+    if (S.myRole === 'instructor') {
+      document.getElementById('toggle-share-cursor').checked     = S.shareCursor;
+      document.getElementById('toggle-share-click').checked      = S.shareClick;
+      document.getElementById('toggle-share-linenum').checked    = S.shareLineNum;
+      document.getElementById('toggle-share-to-student').checked = S.shareToStudent;
+    }
   }
 });
 document.getElementById('a11y-close').addEventListener('click', () => {
@@ -5206,6 +5282,30 @@ document.getElementById('toggle-rainbow').addEventListener('change', e => {
   if (cmMy) {
     if (S.rainbowOn) applyRainbow(cmMy);
     else cmMy.getAllMarks().filter(m=>m._rb).forEach(m=>m.clear());
+  }
+});
+
+// Instructor share-tool toggles
+document.getElementById('toggle-share-cursor').addEventListener('change', e => {
+  S.shareCursor = e.target.checked;
+  // If turning off, clear existing highlights on students by sending empty selection
+  if (!S.shareCursor && S.chInstructor) {
+    try { S.chInstructor.publish('selection', { ranges: [] }); } catch(ex) {}
+  }
+});
+document.getElementById('toggle-share-click').addEventListener('change', e => {
+  S.shareClick = e.target.checked;
+});
+document.getElementById('toggle-share-linenum').addEventListener('change', e => {
+  S.shareLineNum = e.target.checked;
+  // Publish current selection with updated flag
+  if (S.shareCursor && S.chInstructor) publishInstSelection();
+});
+document.getElementById('toggle-share-to-student').addEventListener('change', e => {
+  S.shareToStudent = e.target.checked;
+  // If turning off, clear highlights on the currently viewed student
+  if (!S.shareToStudent && S.expandedId && S.chInstructor) {
+    try { S.chInstructor.publish('selection', { ranges: [], targetClientId: S.expandedId }); } catch(ex) {}
   }
 });
 

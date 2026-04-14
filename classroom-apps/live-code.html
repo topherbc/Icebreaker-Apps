@@ -4119,9 +4119,6 @@ function initInstructorView() {
     document.getElementById('inst-sidebar').classList.toggle('open');
   });
 
-  // Problem statement toggle
-  setupCollapsible('ps-toggle', 'ps-panel');
-
   // Instructor output panel
   document.getElementById('inst-output-panel').addEventListener('click', e => {
     if (e.target.closest('#btn-clear-inst-output')) return;
@@ -5019,6 +5016,9 @@ document.getElementById('btn-broadcast').addEventListener('click', () => {
     showToast('Problem broadcast to all students', '&#128225;');
   }
 });
+
+// Problem statement toggle — wired at script level so it works before any problem is loaded
+setupCollapsible('ps-toggle', 'ps-panel');
 
 document.getElementById('btn-send-problem').addEventListener('click', () => {
   const text = document.getElementById('ps-textarea').value.trim();

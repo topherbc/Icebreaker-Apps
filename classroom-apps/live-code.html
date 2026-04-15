@@ -692,7 +692,6 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   transition: background 0.12s, border-color 0.12s;
 }
 .tb-btn:hover { background: var(--bg); border-color: var(--accent); }
-#btn-broadcast:hover { background: var(--accent); border-color: var(--accent); color: #ffffff; }
 .tb-btn.primary {
   background: var(--accent);
   border-color: var(--accent);
@@ -2168,6 +2167,9 @@ sc.close();</code></div>
             <button class="tb-btn primary" id="btn-send-problem" style="height:36px;font-size:14px;" aria-label="Send problem statement to all students">
               <span aria-hidden="true">&#128225;</span> Send to Students
             </button>
+            <button class="tb-btn" id="btn-clear-problem" style="height:36px;font-size:14px;" aria-label="Clear problem statement from student screens">
+              <span aria-hidden="true">&#10005;</span> Clear from Students
+            </button>
           </div>
         </div>
 
@@ -3436,6 +3438,11 @@ function handleControlMsg(data) {
         showStudentProblem(data.text || '');
       }
       break;
+    case 'clear-problem':
+      if (S.myRole === 'student') {
+        clearStudentProblem();
+      }
+      break;
     case 'clear':
       if (S.myRole === 'student') {
         clearMyEditor();
@@ -4257,6 +4264,15 @@ function showStudentProblem(text) {
   banner.classList.add('open');
   toggle.classList.add('open');
   toggle.setAttribute('aria-expanded', 'true');
+}
+
+function clearStudentProblem() {
+  document.getElementById('stu-problem-text').textContent = '';
+  const banner = document.getElementById('stu-problem-banner');
+  const toggle = document.getElementById('stu-problem-toggle');
+  banner.classList.remove('open');
+  toggle.classList.remove('open');
+  toggle.setAttribute('aria-expanded', 'false');
 }
 
 function clearMyEditor() {
@@ -5235,6 +5251,13 @@ document.getElementById('btn-send-problem').addEventListener('click', () => {
   if (S.chControl) {
     S.chControl.publish('control', { type: 'problem-statement', text });
     showToast('Problem statement sent to students', '&#128196;');
+  }
+});
+
+document.getElementById('btn-clear-problem').addEventListener('click', () => {
+  if (S.chControl) {
+    S.chControl.publish('control', { type: 'clear-problem' });
+    showToast('Problem statement cleared from students', '&#10005;');
   }
 });
 

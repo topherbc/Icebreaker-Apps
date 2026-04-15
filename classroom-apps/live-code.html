@@ -3628,12 +3628,19 @@ function onInstructorOutput(data) {
 function onStudentCode(clientId, data) {
   if (!data || !data.tabs) return;
   if (!S.students[clientId]) return;
+  const prevActive = S.students[clientId].activeTab;
   S.students[clientId].tabs      = data.tabs;
   S.students[clientId].activeTab = data.activeTab || 0;
   S.students[clientId].disconnected = false;
   updateDashCard(clientId);
   // Update expanded view if this student is expanded
-  if (S.expandedId === clientId) updateExpandedEditor();
+  if (S.expandedId === clientId) {
+    // Follow student to their new file when they switch (not on every keystroke)
+    if (S.students[clientId].activeTab !== prevActive) {
+      S.expTabIdx = S.students[clientId].activeTab;
+    }
+    updateExpandedEditor();
+  }
 }
 
 // ================================================================

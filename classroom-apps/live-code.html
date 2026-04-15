@@ -1940,13 +1940,15 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
       <!-- Right: student editor -->
       <div class="panel" id="student-panel" style="flex:1">
-        <div id="stu-problem-banner" class="collapsible" style="border-bottom:2px solid var(--accent);" role="region" aria-label="Problem statement">
-          <div class="collapsible-header collapse-toggle" id="stu-problem-toggle" style="background:var(--accent);color:#fff;">
+        <div id="stu-problem-wrap" hidden>
+          <div class="collapsible-header collapse-toggle" id="stu-problem-toggle" style="background:var(--accent);color:#fff;border-bottom:2px solid var(--accent);">
             <span aria-hidden="true">&#128196;</span>
             <span>PROBLEM</span>
             <span class="chevron">&#8964;</span>
           </div>
-          <div id="stu-problem-text" class="collapsible-body" style="background:var(--surface);"></div>
+          <div id="stu-problem-banner" class="collapsible" style="border-bottom:2px solid var(--accent);" role="region" aria-label="Problem statement">
+            <div id="stu-problem-text" class="collapsible-body" style="background:var(--surface);"></div>
+          </div>
         </div>
         <div id="stu-inst-message" hidden></div>
         <!-- Student panel actions -->
@@ -4259,6 +4261,7 @@ function loadProblemIntoStudent(data) {
 
 function showStudentProblem(text) {
   document.getElementById('stu-problem-text').textContent = text;
+  document.getElementById('stu-problem-wrap').hidden = false;
   const banner = document.getElementById('stu-problem-banner');
   const toggle = document.getElementById('stu-problem-toggle');
   banner.classList.add('open');
@@ -4268,6 +4271,7 @@ function showStudentProblem(text) {
 
 function clearStudentProblem() {
   document.getElementById('stu-problem-text').textContent = '';
+  document.getElementById('stu-problem-wrap').hidden = true;
   const banner = document.getElementById('stu-problem-banner');
   const toggle = document.getElementById('stu-problem-toggle');
   banner.classList.remove('open');

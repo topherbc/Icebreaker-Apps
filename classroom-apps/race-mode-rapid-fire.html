@@ -1756,7 +1756,7 @@ const _kp3 = 'ABLY_PART_3';
 const _kp4 = 'ABLY_PART_4';
 const _kp5 = 'ABLY_PART_5';
 const _assembled = [_kp1,_kp2,_kp3,_kp4,_kp5].join('');
-const ABLY_KEY = _assembled.length > 10 ? _assembled : '';
+const ABLY_KEY = _assembled.length > 10 && _assembled.indexOf('ABLY_PART') === -1 ? _assembled : '';
 
 // ================================================================
 //  UUID

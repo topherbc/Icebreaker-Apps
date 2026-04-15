@@ -4185,6 +4185,9 @@ function initStudentView() {
     }
   });
 
+  // Problem banner collapse toggle
+  setupCollapsible('stu-problem-toggle', 'stu-problem-banner');
+
   // Reference sheet collapsible sections
   initRefCollapsibles();
 }
@@ -4250,7 +4253,10 @@ function loadProblemIntoStudent(data) {
 function showStudentProblem(text) {
   document.getElementById('stu-problem-text').textContent = text;
   const banner = document.getElementById('stu-problem-banner');
-  banner.style.maxHeight = '180px';
+  const toggle = document.getElementById('stu-problem-toggle');
+  banner.classList.add('open');
+  toggle.classList.add('open');
+  toggle.setAttribute('aria-expanded', 'true');
 }
 
 function clearMyEditor() {
@@ -5205,11 +5211,9 @@ function triggerDownload(content, filename, type) {
 // ================================================================
 document.getElementById('btn-broadcast').addEventListener('click', () => {
   if (cmMy) S.myTabs[S.myActiveTab].content = cmMy.getValue();
-  const ps = document.getElementById('ps-textarea').value.trim();
   const payload = {
     type:             'broadcast',
     files:            S.myTabs.map(t => ({ name: t.name, content: t.content })),
-    problemStatement: ps,
     activeTab:        S.myActiveTab,
   };
   if (S.chControl) {

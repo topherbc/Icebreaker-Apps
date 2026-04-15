@@ -2163,11 +2163,11 @@ sc.close();</code></div>
         </button>
         <div id="ps-panel" class="collapsible" style="border-top:1px solid var(--border);">
           <textarea class="collapsible-body" id="ps-textarea" placeholder="Type or paste the problem statement here..." aria-label="Problem statement"></textarea>
-          <div style="padding:6px 12px;background:var(--surface2);border-top:1px solid var(--border);flex-shrink:0;">
+          <div style="display:flex;gap:8px;padding:6px 12px;background:var(--surface2);border-top:1px solid var(--border);flex-shrink:0;">
             <button class="tb-btn primary" id="btn-send-problem" style="height:36px;font-size:14px;" aria-label="Send problem statement to all students">
               <span aria-hidden="true">&#128225;</span> Send to Students
             </button>
-            <button class="tb-btn" id="btn-clear-problem" style="height:36px;font-size:14px;" aria-label="Clear problem statement from student screens">
+            <button class="tb-btn" id="btn-clear-problem" style="display:none;height:36px;font-size:14px;" aria-label="Clear problem statement from student screens">
               <span aria-hidden="true">&#10005;</span> Clear from Students
             </button>
           </div>
@@ -5250,6 +5250,7 @@ document.getElementById('btn-send-problem').addEventListener('click', () => {
   if (!text) { showToast('Problem statement is empty', '&#9888;'); return; }
   if (S.chControl) {
     S.chControl.publish('control', { type: 'problem-statement', text });
+    document.getElementById('btn-clear-problem').style.display = '';
     showToast('Problem statement sent to students', '&#128196;');
   }
 });
@@ -5257,6 +5258,7 @@ document.getElementById('btn-send-problem').addEventListener('click', () => {
 document.getElementById('btn-clear-problem').addEventListener('click', () => {
   if (S.chControl) {
     S.chControl.publish('control', { type: 'clear-problem' });
+    document.getElementById('btn-clear-problem').style.display = 'none';
     showToast('Problem statement cleared from students', '&#10005;');
   }
 });

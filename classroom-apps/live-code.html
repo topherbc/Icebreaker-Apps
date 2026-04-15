@@ -2382,6 +2382,20 @@ sc.close();</code></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <!-- Java (C-like) mode -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<!-- Extend Java mode with common standard library types -->
+<script>
+(function() {
+  var t = CodeMirror.mimeModes['text/x-java'].types;
+  ('LocalDate LocalTime LocalDateTime Period Duration Instant ZoneId DateTimeFormatter ' +
+   'ArrayList LinkedList HashMap HashSet TreeMap TreeSet ' +
+   'Collections Arrays List Map Set Queue Stack Deque ' +
+   'Iterator Optional Random Date Calendar Scanner System Math ' +
+   'File BufferedReader FileReader FileWriter PrintWriter ' +
+   'BigInteger BigDecimal Stream Collectors ' +
+   'Pattern Matcher Exception RuntimeException IOException ' +
+   'Comparable Iterable Runnable').split(' ').forEach(function(w) { t[w] = true; });
+})();
+</script>
 <!-- Addons -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>

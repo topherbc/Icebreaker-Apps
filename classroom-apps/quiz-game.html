@@ -311,7 +311,7 @@ label {
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
-.hidden { display: none !important; }
+.hidden { display: none; }
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
@@ -968,6 +968,7 @@ label {
   overflow-x: auto;
 }
 .live-q-image {
+  display: block;
   max-width: 500px;
   max-height: 250px;
   margin: 0 auto 16px;
@@ -2927,6 +2928,16 @@ function endTimerEarly() {
 
 function skipQuestion() {
   clearInterval(hostState.timerInterval);
+  // Send a reveal so students aren't stuck; mark all answers as non-scoring
+  var q = hostState.liveQuiz.questions[hostState.currentQuestionIndex];
+  var correctIds = q.answers.filter(function(a) { return a.isCorrect; }).map(function(a) { return a.id; });
+  var ranked = computeRankings();
+  hostState.gameChannel.publish('question:reveal', {
+    correctAnswerIds: correctIds,
+    explanation: '',
+    tally: hostState.answerTally,
+    rankings: ranked.slice(0, 10)
+  });
   advanceQuestion();
 }
 
@@ -3158,6 +3169,15 @@ function spawnConfetti() {
 // ================================================================
 function playAgain() {
   if (!hostState.liveQuiz) return;
+
+  // Detach old channels before creating new ones
+  if (hostState.gameChannel) { try { hostState.gameChannel.detach(); } catch(e) {} }
+  if (hostState.presenceChannel) {
+    try { hostState.presenceChannel.presence.leave(); } catch(e) {}
+    try { hostState.presenceChannel.detach(); } catch(e) {}
+  }
+  if (hostState.answersChannel) { try { hostState.answersChannel.detach(); } catch(e) {} }
+
   // Reset scores, re-launch with same quiz in lobby
   hostState.players = {};
   hostState.roomCode = generateRoomCode();
@@ -3239,6 +3259,11 @@ function exportResults() {
   URL.revokeObjectURL(a.href);
 }
 
+// Fallback for the HTML onclick before a game is launched
+function leaderboardNext() {
+  // No-op: showLeaderboard overwrites lb-next-btn.onclick each time
+}
+
 // ================================================================
 //  STUDENT STATE
 // ================================================================
@@ -3271,6 +3296,13 @@ function initStudent() {
   if (lastName) {
     document.getElementById('join-name-input').value = lastName;
   }
+
+  // Enter key submits join form
+  ['join-code-input', 'join-name-input'].forEach(function(id) {
+    document.getElementById(id).addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); studentJoin(); }
+    });
+  });
 }
 
 function studentJoin() {
@@ -3439,6 +3471,10 @@ function showStudentScreen(screen) {
 function showStudentQuestion(q) {
   showStudentScreen('question');
 
+  // Clean up any leftover multi-submit wrap from previous question
+  var oldWrap = document.getElementById('multi-submit-wrap');
+  if (oldWrap) oldWrap.remove();
+
   document.getElementById('student-q-text').textContent = q.body.text;
 
   // Code
@@ -3591,20 +3627,12 @@ function showStudentFeedback(data) {
     isCorrect = myAnswer.length === 1 && correctIds.indexOf(myAnswer[0]) >= 0;
   }
 
-  // Calculate points
+  // Save score before this round so we can derive earned from host data
   var q = studentState.currentQuestion;
+  var scoreBeforeRound = studentState.score;
   var earned = 0;
+
   if (isCorrect && myAnswer.length > 0) {
-    var basePoints = q.points || 1000;
-    if (q.pointsMode === 'double') basePoints *= 2;
-    if (q.pointsMode === 'none') basePoints = 0;
-    var speedMult = 1;
-    if (q.speedBonus !== false) {
-      var storedTime = studentState.timerRemaining; // approximate
-      speedMult = Math.max(0.5, Math.min(1, storedTime / q.timer));
-    }
-    earned = Math.round(basePoints * speedMult);
-    studentState.score += earned;
     studentState.streak++;
     playCorrect();
   } else {
@@ -3612,16 +3640,28 @@ function showStudentFeedback(data) {
     if (myAnswer.length > 0) playWrong();
   }
 
-  // Find rank from rankings data
+  // Use host-authoritative score and rank when available
   var rankings = data.rankings || [];
   var myRanking = rankings.find(function(r) { return r.name === studentState.name; });
   if (myRanking) {
     studentState.rank = myRanking.rank;
-    studentState.score = myRanking.score; // sync with host
+    earned = myRanking.score - scoreBeforeRound;
+    if (earned < 0) earned = 0;
+    studentState.score = myRanking.score;
+  } else if (isCorrect) {
+    // Fallback: local calculation if not in rankings (shouldn't happen normally)
+    var basePoints = q.points || 1000;
+    if (q.pointsMode === 'double') basePoints *= 2;
+    if (q.pointsMode === 'none') basePoints = 0;
+    var speedMult = 1;
+    if (q.speedBonus !== false) {
+      speedMult = Math.max(0.5, Math.min(1, studentState.timerRemaining / q.timer));
+    }
+    earned = Math.round(basePoints * speedMult);
+    studentState.score += earned;
   }
 
   // Render
-  document.getElementById('fb-icon').textContent = isCorrect ? '&#10003;' : '&#10007;';
   document.getElementById('fb-icon').innerHTML = isCorrect ? '&#10003;' : '&#10007;';
   var fbText = document.getElementById('fb-text');
   fbText.textContent = isCorrect ? 'Correct!' : (myAnswer.length === 0 ? 'Time\'s up!' : 'Incorrect');

@@ -8,6 +8,7 @@ on:
       - 'live-code/**'
       - 'java-academy/week-1/1-mon-monkey-bot.html'
       - 'java-academy/shared/trace-liveshare.js'
+      - 'classroom-apps/race-mode-rapid-fire.html'
 
 jobs:
   maintain:
@@ -191,5 +192,6 @@ jobs:
           git add java-academy/shared/trace-liveshare.js
           git add classroom-apps/live-code.html
           git add classroom-apps/amnesty-box.html
+          git add classroom-apps/race-mode-rapid-fire.html
           git diff --staged --quiet || git commit -m "chore: inject keys and regenerate index [skip ci]"
           git push

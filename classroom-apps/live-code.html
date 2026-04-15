@@ -1329,6 +1329,40 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
   flex-shrink: 0;
 }
 .nav-btn:hover { background: var(--bg); }
+.expanded-msg-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.expanded-msg-bar input {
+  flex: 1; height: 36px; padding: 0 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); border-radius: 2px;
+}
+.expanded-msg-bar input:focus { outline: none; border-color: var(--accent); }
+.expanded-msg-bar button {
+  height: 36px; padding: 0 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); cursor: pointer;
+}
+.expanded-msg-bar button:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.inst-message-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface); border-bottom: 2px solid var(--accent);
+  font-size: 15px; color: var(--text);
+  animation: toast-in 0.22s ease;
+}
+.inst-message-banner .msg-text { flex: 1; white-space: pre-wrap; }
+.inst-message-banner .msg-close {
+  background: none; border: none; color: var(--text-dim);
+  font-size: 18px; cursor: pointer; padding: 0 2px; flex-shrink: 0;
+}
+.inst-message-banner .msg-close:hover { color: var(--text); }
 .expanded-stu-info {
   padding: 8px 16px;
   display: flex;
@@ -1915,6 +1949,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
           </div>
           <div id="stu-problem-text" class="collapsible-body" style="background:var(--surface);"></div>
         </div>
+        <div id="stu-inst-message" hidden></div>
         <!-- Student panel actions -->
         <div class="panel-actions">
           <button class="tb-btn" id="btn-ready" aria-pressed="false" title="Toggle ready status">
@@ -2204,6 +2239,10 @@ sc.close();</code></div>
       <button class="nav-btn" id="exp-prev" aria-label="Previous student">&#8592; Prev</button>
       <div class="expanded-tab-bar" id="exp-tab-bar" role="tablist" aria-label="Student files"></div>
       <button class="nav-btn" id="exp-next" aria-label="Next student">Next &#8594;</button>
+    </div>
+    <div class="expanded-msg-bar">
+      <input type="text" id="exp-msg-input" placeholder="Send a message to this student..." aria-label="Message to student" />
+      <button id="exp-msg-send">Send</button>
     </div>
   </div>
 </div>
@@ -3447,7 +3486,31 @@ function handleControlMsg(data) {
         }, 2000);
       }
       break;
+    case 'inst-message':
+      if (S.myRole === 'student' && data.clientId === S.myClientId) {
+        showInstMessage(data.text);
+      }
+      break;
   }
+}
+
+function showInstMessage(text) {
+  const container = document.getElementById('stu-inst-message');
+  container.hidden = false;
+  container.innerHTML = '';
+  const banner = document.createElement('div');
+  banner.className = 'inst-message-banner';
+  banner.innerHTML =
+    '<span aria-hidden="true">&#128172;</span>' +
+    '<span class="msg-text"></span>' +
+    '<button class="msg-close" aria-label="Dismiss message">&#10005;</button>';
+  banner.querySelector('.msg-text').textContent = text;
+  banner.querySelector('.msg-close').addEventListener('click', () => {
+    container.hidden = true;
+    container.innerHTML = '';
+  });
+  container.appendChild(banner);
+  showToast('Message from instructor', '&#128172;');
 }
 
 function onInstructorCode(data) {
@@ -4587,6 +4650,22 @@ document.getElementById('exp-next').addEventListener('click', () => {
   const idx = ids.indexOf(S.expandedId);
   if (idx < ids.length - 1) openExpanded(ids[idx + 1]);
 });
+document.getElementById('exp-msg-send').addEventListener('click', sendExpMessage);
+document.getElementById('exp-msg-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendExpMessage();
+});
+function sendExpMessage() {
+  const input = document.getElementById('exp-msg-input');
+  const text = input.value.trim();
+  if (!text || !S.expandedId || !S.chControl) return;
+  S.chControl.publish('control', {
+    type: 'inst-message',
+    clientId: S.expandedId,
+    text: text,
+  });
+  input.value = '';
+  showToast('Message sent', '&#128172;', 2000);
+}
 
 function cleanupExpandedHandlers() {
   if (cmExpanded && _expCursorHandler) {

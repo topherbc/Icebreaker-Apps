@@ -3,19 +3,19 @@
 <head>
 <!-- FOUC prevention: restore a11y + theme prefs before paint -->
 <script>(function(){
-  var t=localStorage.getItem('quizapp:theme')||'light';
+  var t=localStorage.getItem('rmrf:theme')||'light';
   document.documentElement.setAttribute('data-theme',t);
-  var d=localStorage.getItem('quizapp:a11y:dyslexia')==='true';
+  var d=localStorage.getItem('rmrf:a11y:dyslexia')==='true';
   if(d) document.documentElement.setAttribute('data-dyslexia','true');
-  var r=localStorage.getItem('quizapp:a11y:reducedMotion')==='true';
+  var r=localStorage.getItem('rmrf:a11y:reducedMotion')==='true';
   if(r) document.documentElement.setAttribute('data-reduced-motion','true');
-  var h=localStorage.getItem('quizapp:a11y:highContrast')==='true';
+  var h=localStorage.getItem('rmrf:a11y:highContrast')==='true';
   if(h) document.documentElement.setAttribute('data-high-contrast','true');
 })();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quiz Game</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23276ef1'/><text x='7' y='24' font-size='22' font-family='sans-serif' font-weight='bold' fill='white'>Q</text></svg>">
+<title>Race Mode: Rapid Fire</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23276ef1'/><text x='4' y='24' font-size='20' font-family='sans-serif' font-weight='bold' fill='white'>RF</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -1480,7 +1480,7 @@ label {
      LANDING PAGE
      ============================================================ -->
 <div id="view-landing">
-  <div class="landing-logo display-font">Quiz<span>Game</span></div>
+  <div class="landing-logo display-font">Race Mode<span>: Rapid Fire</span></div>
   <p class="landing-subtitle">Real-time classroom quiz battles</p>
   <div class="landing-buttons">
     <button class="landing-btn" onclick="navigateTo('host')" aria-label="Host a game">
@@ -1499,7 +1499,7 @@ label {
      ============================================================ -->
 <div id="view-host">
   <div class="host-topbar">
-    <h1 class="display-font">QuizGame</h1>
+    <h1 class="display-font">Race Mode: Rapid Fire</h1>
     <div class="host-tabs">
       <button class="host-tab active" data-tab="builder" onclick="switchHostTab('builder')" aria-label="Quiz Builder tab">Builder</button>
       <button class="host-tab" data-tab="live" onclick="switchHostTab('live')" aria-label="Live Game tab">Live Game</button>
@@ -1820,13 +1820,13 @@ function initRouter() {
 // ================================================================
 function loadQuizzes() {
   try {
-    var d = localStorage.getItem('quizapp:quizzes');
+    var d = localStorage.getItem('rmrf:quizzes');
     return d ? JSON.parse(d) : [];
   } catch(e) { return []; }
 }
 
 function saveQuizzes(quizzes) {
-  localStorage.setItem('quizapp:quizzes', JSON.stringify(quizzes));
+  localStorage.setItem('rmrf:quizzes', JSON.stringify(quizzes));
 }
 
 var _saveTimer = null;
@@ -1937,11 +1937,11 @@ function toggleDyslexia(on) {
   if (on) {
     document.documentElement.setAttribute('data-dyslexia', 'true');
     document.body.setAttribute('data-dyslexia', 'true');
-    localStorage.setItem('quizapp:a11y:dyslexia', 'true');
+    localStorage.setItem('rmrf:a11y:dyslexia', 'true');
   } else {
     document.documentElement.removeAttribute('data-dyslexia');
     document.body.removeAttribute('data-dyslexia');
-    localStorage.setItem('quizapp:a11y:dyslexia', 'false');
+    localStorage.setItem('rmrf:a11y:dyslexia', 'false');
   }
 }
 
@@ -1949,21 +1949,21 @@ function toggleReducedMotion(on) {
   if (on) {
     document.documentElement.setAttribute('data-reduced-motion', 'true');
     document.body.setAttribute('data-reduced-motion', 'true');
-    localStorage.setItem('quizapp:a11y:reducedMotion', 'true');
+    localStorage.setItem('rmrf:a11y:reducedMotion', 'true');
   } else {
     document.documentElement.removeAttribute('data-reduced-motion');
     document.body.removeAttribute('data-reduced-motion');
-    localStorage.setItem('quizapp:a11y:reducedMotion', 'false');
+    localStorage.setItem('rmrf:a11y:reducedMotion', 'false');
   }
 }
 
 function toggleHighContrast(on) {
   if (on) {
     document.documentElement.setAttribute('data-high-contrast', 'true');
-    localStorage.setItem('quizapp:a11y:highContrast', 'true');
+    localStorage.setItem('rmrf:a11y:highContrast', 'true');
   } else {
     document.documentElement.removeAttribute('data-high-contrast');
-    localStorage.setItem('quizapp:a11y:highContrast', 'false');
+    localStorage.setItem('rmrf:a11y:highContrast', 'false');
   }
 }
 
@@ -1971,7 +1971,7 @@ function toggleTheme() {
   var current = document.documentElement.getAttribute('data-theme') || 'light';
   var next = current === 'light' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('quizapp:theme', next);
+  localStorage.setItem('rmrf:theme', next);
   updateThemeLabel();
 }
 
@@ -1983,10 +1983,10 @@ function updateThemeLabel() {
 
 // Restore a11y on body after DOM ready
 function restoreA11y() {
-  if (localStorage.getItem('quizapp:a11y:dyslexia') === 'true') {
+  if (localStorage.getItem('rmrf:a11y:dyslexia') === 'true') {
     document.body.setAttribute('data-dyslexia', 'true');
   }
-  if (localStorage.getItem('quizapp:a11y:reducedMotion') === 'true') {
+  if (localStorage.getItem('rmrf:a11y:reducedMotion') === 'true') {
     document.body.setAttribute('data-reduced-motion', 'true');
   }
   updateThemeLabel();
@@ -2622,9 +2622,9 @@ function initHostAbly(onReady) {
 }
 
 function setupHostChannels(code) {
-  hostState.gameChannel = hostState.ablyClient.channels.get('quiz-game-' + code);
-  hostState.presenceChannel = hostState.ablyClient.channels.get('quiz-presence-' + code);
-  hostState.answersChannel = hostState.ablyClient.channels.get('quiz-answers-' + code);
+  hostState.gameChannel = hostState.ablyClient.channels.get('rmrf-game-' + code);
+  hostState.presenceChannel = hostState.ablyClient.channels.get('rmrf-presence-' + code);
+  hostState.answersChannel = hostState.ablyClient.channels.get('rmrf-answers-' + code);
 
   // Presence: track players joining/leaving
   hostState.presenceChannel.presence.subscribe('enter', function(msg) {
@@ -3292,7 +3292,7 @@ var studentState = {
 // ================================================================
 function initStudent() {
   // Restore last name
-  var lastName = localStorage.getItem('quizapp:lastStudentName');
+  var lastName = localStorage.getItem('rmrf:lastStudentName');
   if (lastName) {
     document.getElementById('join-name-input').value = lastName;
   }
@@ -3333,7 +3333,7 @@ function studentJoin() {
   studentState.score = 0;
   studentState.streak = 0;
 
-  localStorage.setItem('quizapp:lastStudentName', name);
+  localStorage.setItem('rmrf:lastStudentName', name);
 
   initStudentAbly(function() {
     setupStudentChannels(code);
@@ -3360,33 +3360,42 @@ function initStudentAbly(onReady) {
 }
 
 function setupStudentChannels(code) {
-  studentState.gameChannel = studentState.ablyClient.channels.get('quiz-game-' + code);
-  studentState.presenceChannel = studentState.ablyClient.channels.get('quiz-presence-' + code);
-  studentState.answersChannel = studentState.ablyClient.channels.get('quiz-answers-' + code);
+  studentState.gameChannel = studentState.ablyClient.channels.get('rmrf-game-' + code);
+  studentState.presenceChannel = studentState.ablyClient.channels.get('rmrf-presence-' + code);
+  studentState.answersChannel = studentState.ablyClient.channels.get('rmrf-answers-' + code);
 
-  // Check if room exists (host is present)
-  studentState.presenceChannel.presence.get(function(err, members) {
-    if (err || !members || members.length === 0) {
-      document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
-      document.getElementById('join-btn').disabled = false;
-      return;
-    }
-    var hostPresent = members.some(function(m) { return m.data && m.data.role === 'host'; });
-    if (!hostPresent) {
-      document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
+  // Wait for the presence channel to attach before querying presence
+  studentState.presenceChannel.attach(function(attachErr) {
+    if (attachErr) {
+      document.getElementById('join-error').textContent = 'Connection error. Try again.';
       document.getElementById('join-btn').disabled = false;
       return;
     }
 
-    // Enter presence
-    studentState.presenceChannel.presence.enter({ name: studentState.name }, function(err) {
-      if (err) {
-        document.getElementById('join-error').textContent = 'Failed to join. Try again.';
+    // Check if room exists (host is present)
+    studentState.presenceChannel.presence.get(function(err, members) {
+      if (err || !members || members.length === 0) {
+        document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
         document.getElementById('join-btn').disabled = false;
         return;
       }
-      showStudentScreen('waiting');
-      subscribeToStudentEvents();
+      var hostPresent = members.some(function(m) { return m.data && m.data.role === 'host'; });
+      if (!hostPresent) {
+        document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
+        document.getElementById('join-btn').disabled = false;
+        return;
+      }
+
+      // Enter presence
+      studentState.presenceChannel.presence.enter({ name: studentState.name }, function(err) {
+        if (err) {
+          document.getElementById('join-error').textContent = 'Failed to join. Try again.';
+          document.getElementById('join-btn').disabled = false;
+          return;
+        }
+        showStudentScreen('waiting');
+        subscribeToStudentEvents();
+      });
     });
   });
 

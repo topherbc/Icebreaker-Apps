@@ -46,11 +46,11 @@ jobs:
           sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/amnesty-box.html
           sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/amnesty-box.html
           sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/amnesty-box.html
-          sed -i "s|ABLY_PART_1|$P1|g" classroom-apps/quiz-game.html
-          sed -i "s|ABLY_PART_2|$P2|g" classroom-apps/quiz-game.html
-          sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/quiz-game.html
-          sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/quiz-game.html
-          sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/quiz-game.html
+          sed -i "s|ABLY_PART_1|$P1|g" classroom-apps/race-mode-rapid-fire.html
+          sed -i "s|ABLY_PART_2|$P2|g" classroom-apps/race-mode-rapid-fire.html
+          sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/race-mode-rapid-fire.html
+          sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/race-mode-rapid-fire.html
+          sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/race-mode-rapid-fire.html
 
       - name: Generate index.html
         run: |

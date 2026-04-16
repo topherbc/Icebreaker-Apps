@@ -1542,6 +1542,11 @@ label {
 .student-shape-btn.shape-circle   { background: var(--shape-circle)   !important; }
 .student-shape-btn.shape-square   { background: var(--shape-square)   !important; }
 .student-shape-btn.shape-diamond  { background: var(--shape-diamond)  !important; }
+/* Shape icons inside answer buttons must always be white */
+.student-shape-btn svg,
+.shape-btn svg {
+  color: #ffffff;
+}
 .student-shape-btn:active { transform: scale(0.96); }
 .student-shape-btn.selected {
   border-color: #fff;

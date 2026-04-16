@@ -644,6 +644,15 @@
     0%, 100% { border-color: var(--bug-amber); }
     50% { border-color: var(--bug-amber); box-shadow: 0 0 0 3px var(--bug-amber-bg); }
   }
+  .clue-card.fixed {
+    border-color: var(--bug-green);
+    background: var(--bug-green-bg);
+    animation: flash-clue-green 0.6s ease;
+  }
+  @keyframes flash-clue-green {
+    0%, 100% { border-color: var(--bug-green); }
+    50% { border-color: var(--bug-green); box-shadow: 0 0 0 3px var(--bug-green-bg); }
+  }
 
   .check-feedback {
     text-align: center;
@@ -1217,9 +1226,10 @@
           if (accepted.includes(normed)) {
             fixedBugs.add(line.bugId);
             updateDot(bugIdx, 'green');
+            updateClueCard(bugIdx, 'fixed');
             if (fixedBugs.size === currentProblem.bugs.length) {
               completedSet.add(currentProblem.id); saveCompleted();
-              checkFeedback.textContent = 'All 3 bugs fixed! Nice work.';
+              checkFeedback.textContent = 'All ' + currentProblem.bugs.length + ' bugs fixed! Nice work.';
               checkFeedback.classList.remove('incomplete');
               checkFeedback.classList.add('visible', 'success');
             }
@@ -1251,6 +1261,14 @@
     dot.setAttribute('aria-label', 'Bug ' + (idx+1) + ': ' + labels[state]);
   }
 
+  function updateClueCard(idx, state) {
+    const cards = clueCards.querySelectorAll('.clue-card');
+    if (!cards[idx]) return;
+    cards[idx].classList.remove('highlight');
+    void cards[idx].offsetWidth;
+    cards[idx].classList.add(state);
+  }
+
   // ── Check fixes ──
   btnCheck.addEventListener('click', () => {
     if (!currentProblem) return;
@@ -1273,6 +1291,7 @@
       if (accepted.includes(normed)) {
         fixedBugs.add(bug.id);
         updateDot(i, 'green');
+        updateClueCard(i, 'fixed');
       } else {
         wrongIndices.push(i);
       }
@@ -1286,7 +1305,7 @@
     checkFeedback.classList.remove('visible', 'success', 'incomplete');
     if (fixedBugs.size === currentProblem.bugs.length) {
       completedSet.add(currentProblem.id); saveCompleted();
-      checkFeedback.textContent = 'All 3 bugs fixed! Nice work.';
+      checkFeedback.textContent = 'All ' + currentProblem.bugs.length + ' bugs fixed! Nice work.';
       checkFeedback.classList.add('visible', 'success');
     } else {
       const remaining = currentProblem.bugs.length - fixedBugs.size;

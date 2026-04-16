@@ -225,11 +225,11 @@ body[data-reduced-motion="true"] * {
 
 /* ---- BUTTONS ---- */
 button, .btn {
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   cursor: pointer;
   min-height: 48px;
   min-width: 48px;
@@ -239,7 +239,9 @@ button, .btn {
   justify-content: center;
   gap: 8px;
   transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-  line-height: 1.6;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 button:active { transform: scale(0.97); }
 button:disabled {
@@ -251,33 +253,55 @@ button:disabled {
 .btn-primary {
   background: var(--near-black);
   color: var(--amber);
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--near-black-mid);
 }
 .btn-secondary {
-  background: var(--surface2);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-on-dark);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
 }
 .btn-secondary:hover:not(:disabled) {
-  background: var(--border);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.35);
+}
+/* Secondary on light backgrounds (builder, lobby) */
+.builder-wrap .btn-secondary,
+.lobby .btn-secondary,
+.quiz-header .btn-secondary {
+  color: var(--near-black);
+  border-color: rgba(26,26,46,0.25);
+  background: transparent;
+}
+.builder-wrap .btn-secondary:hover:not(:disabled),
+.lobby .btn-secondary:hover:not(:disabled),
+.quiz-header .btn-secondary:hover:not(:disabled) {
+  background: rgba(26,26,46,0.06);
+  border-color: rgba(26,26,46,0.4);
 }
 .btn-danger {
   background: var(--error);
   color: #ffffff;
+  border-radius: 6px;
 }
 .btn-danger:hover:not(:disabled) {
   opacity: 0.85;
 }
 .btn-ghost {
   background: transparent;
-  color: var(--text-mid);
+  color: rgba(255,255,255,0.6);
   padding: 8px 12px;
 }
 .btn-ghost:hover:not(:disabled) {
-  background: var(--surface2);
-  color: var(--text);
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
 }
 .btn-icon {
   padding: 8px;
@@ -492,11 +516,12 @@ label {
   width: 100%;
   max-width: 320px;
   height: 64px;
-  border-radius: var(--radius);
+  border-radius: 4px;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
   cursor: pointer;
   border: none;
   display: flex;
@@ -1324,32 +1349,55 @@ label {
   background: var(--near-black);
   color: var(--amber);
   border: none;
-  border-radius: var(--radius);
-  font-size: 32px;
-  letter-spacing: 0.2em;
+  border-radius: 4px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
   text-align: center;
   padding: 16px;
+  min-height: 64px;
 }
 #join-code-input::placeholder { color: rgba(245,166,35,0.3); }
 #join-name-input {
-  background: rgba(26,26,46,0.08);
-  border: 2px solid rgba(26,26,46,0.15);
-  border-radius: var(--radius);
-  color: var(--near-black);
+  background: var(--near-black);
+  border: none;
+  border-radius: 4px;
+  color: #ffffff;
   font-size: 18px;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-align: center;
-  padding: 14px;
+  padding: 14px 18px;
+  min-height: 56px;
 }
-#join-name-input::placeholder { color: rgba(26,26,46,0.35); }
+#join-name-input:focus {
+  outline: 3px solid var(--near-black);
+  outline-offset: 2px;
+}
+#join-name-input::placeholder { color: rgba(255,255,255,0.35); }
 .join-form input[type="text"].name-input {
   font-size: 18px;
   letter-spacing: 0.02em;
 }
 .join-error {
-  color: var(--error);
-  font-size: 15px;
+  color: var(--near-black);
+  font-weight: 700;
+  font-size: 14px;
   min-height: 24px;
+}
+/* Student join button */
+.join-form .btn-primary,
+#join-btn {
+  background: var(--near-black);
+  color: var(--amber);
+  border-radius: 4px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  min-height: 56px;
+  border: none;
 }
 
 /* Student waiting */

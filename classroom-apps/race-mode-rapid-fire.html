@@ -3365,49 +3365,37 @@ function setupStudentChannels(code) {
   studentState.presenceChannel = studentState.ablyClient.channels.get('rmrf-presence-' + code);
   studentState.answersChannel = studentState.ablyClient.channels.get('rmrf-answers-' + code);
 
-  // Wait for the presence channel to attach before querying presence
-  studentState.presenceChannel.attach(function(attachErr) {
-    if (attachErr) {
-      document.getElementById('join-error').textContent = 'Connection error. Try again.';
+  // Ably v2 uses promises, not callbacks
+  studentState.presenceChannel.attach().then(function() {
+    return studentState.presenceChannel.presence.get();
+  }).then(function(members) {
+    if (!members || members.length === 0) {
+      document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
+      document.getElementById('join-btn').disabled = false;
+      return;
+    }
+    var hostPresent = members.some(function(m) { return m.data && m.data.role === 'host'; });
+    if (!hostPresent) {
+      document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
       document.getElementById('join-btn').disabled = false;
       return;
     }
 
-    // Check if room exists (host is present)
-    studentState.presenceChannel.presence.get(function(err, members) {
-      if (err || !members || members.length === 0) {
-        document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
-        document.getElementById('join-btn').disabled = false;
-        return;
-      }
-      var hostPresent = members.some(function(m) { return m.data && m.data.role === 'host'; });
-      if (!hostPresent) {
-        document.getElementById('join-error').textContent = 'Room not found. Check the code and try again.';
-        document.getElementById('join-btn').disabled = false;
-        return;
-      }
-
-      // Enter presence
-      studentState.presenceChannel.presence.enter({ name: studentState.name }, function(err) {
-        if (err) {
-          document.getElementById('join-error').textContent = 'Failed to join. Try again.';
-          document.getElementById('join-btn').disabled = false;
-          return;
-        }
-        showStudentScreen('waiting');
-        subscribeToStudentEvents();
-      });
+    return studentState.presenceChannel.presence.enter({ name: studentState.name }).then(function() {
+      showStudentScreen('waiting');
+      subscribeToStudentEvents();
     });
+  }).catch(function() {
+    document.getElementById('join-error').textContent = 'Failed to join. Try again.';
+    document.getElementById('join-btn').disabled = false;
   });
 
   // Track player count in waiting room
   studentState.presenceChannel.presence.subscribe(function() {
-    studentState.presenceChannel.presence.get(function(err, members) {
-      if (!err && members) {
-        var count = members.filter(function(m) { return !m.data || m.data.role !== 'host'; }).length;
-        var el = document.getElementById('student-player-count');
-        if (el) el.textContent = count + ' players in the lobby';
-      }
+    studentState.presenceChannel.presence.get().then(function(members) {
+      var count = members.filter(function(m) { return !m.data || m.data.role !== 'host'; }).length;
+      var el = document.getElementById('student-player-count');
+      if (el) el.textContent = count + ' players in the lobby';
     });
   });
 }

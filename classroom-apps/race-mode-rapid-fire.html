@@ -2626,10 +2626,11 @@ function setupHostChannels(code) {
   hostState.presenceChannel = hostState.ablyClient.channels.get('rmrf-presence-' + code);
   hostState.answersChannel = hostState.ablyClient.channels.get('rmrf-answers-' + code);
 
-  // Presence: track players joining/leaving
+  // Presence: track players joining/leaving (skip the host's own entry)
   hostState.presenceChannel.presence.subscribe('enter', function(msg) {
     if (hostState.isRoomLocked) return;
     var data = msg.data || {};
+    if (data.role === 'host') return;
     hostState.players[msg.clientId] = {
       id: msg.clientId,
       name: data.name || 'Anonymous',

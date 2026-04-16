@@ -69,5 +69,157 @@
       { "id": "b2", "line": 5, "answer": "this", "altAnswers": [] },
       { "id": "b3", "line": 8, "answer": "void", "altAnswers": [] }
     ]
+  },
+  {
+    "id": "week2-loops-02",
+    "title": "Sum 1 to 10",
+    "week": 2,
+    "topic": "loops",
+    "description": "A program that uses a while loop to add up the numbers 1 through 10.",
+    "code": [
+      { "line": 1, "text": "public class SumToTen {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int sum = 0;" },
+      { "line": 4, "text": "    int i = 1;" },
+      { "line": 5, "blankId": "b1", "before": "    ", "after": " (i <= 10) {" },
+      { "line": 6, "blankId": "b2", "before": "      sum ", "after": " i;" },
+      { "line": 7, "text": "      i++;" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "blankId": "b3", "before": "    System.out.println(\"Sum: \" + ", "after": ");" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "while", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "+=", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "sum", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week2-loops-03",
+    "title": "Multiplication Table",
+    "week": 2,
+    "topic": "loops",
+    "description": "A program that prints the multiplication table for 7 using a for loop.",
+    "code": [
+      { "line": 1, "text": "public class TimesTable {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    ", "after": " (int i = 1; i <= 10; i++) {" },
+      { "line": 4, "blankId": "b2", "before": "      int result = 7 ", "after": " i;" },
+      { "line": 5, "blankId": "b3", "before": "      System.out.", "after": "(\"7 x \" + i + \" = \" + result);" },
+      { "line": 6, "text": "    }" },
+      { "line": 7, "text": "  }" },
+      { "line": 8, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "for", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "*", "altAnswers": [] },
+      { "id": "b3", "line": 5, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week2-methods-02",
+    "title": "Max of Two",
+    "week": 2,
+    "topic": "methods",
+    "description": "A program with a method that returns the larger of two integers.",
+    "code": [
+      { "line": 1, "text": "public class MaxFinder {" },
+      { "line": 2, "blankId": "b1", "before": "  public static ", "after": " max(int a, int b) {" },
+      { "line": 3, "text": "    if (a > b) {" },
+      { "line": 4, "blankId": "b2", "before": "      ", "after": " a;" },
+      { "line": 5, "text": "    }" },
+      { "line": 6, "text": "    return b;" },
+      { "line": 7, "text": "  }" },
+      { "line": 8, "text": "" },
+      { "line": 9, "text": "  public static void main(String[] args) {" },
+      { "line": 10, "blankId": "b3", "before": "    int biggest = ", "after": "(10, 25);" },
+      { "line": 11, "text": "    System.out.println(\"Max: \" + biggest);" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "int", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "return", "altAnswers": [] },
+      { "id": "b3", "line": 10, "answer": "max", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week2-classes-02",
+    "title": "Book Class",
+    "week": 2,
+    "topic": "classes",
+    "description": "A Book class with a title and page count, and a method that prints a summary.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public ", "after": " Book {" },
+      { "line": 2, "text": "  String title;" },
+      { "line": 3, "text": "  int pages;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "  Book(String title, int pages) {" },
+      { "line": 6, "blankId": "b2", "before": "    ", "after": ".title = title;" },
+      { "line": 7, "text": "    this.pages = pages;" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "blankId": "b3", "before": "  ", "after": " summary() {" },
+      { "line": 11, "text": "    System.out.println(title + \" (\" + pages + \" pages)\");" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "class", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "this", "altAnswers": [] },
+      { "id": "b3", "line": 10, "answer": "void", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week2-loops-04",
+    "title": "Password Retry",
+    "week": 2,
+    "topic": "loops",
+    "description": "A program that uses a do-while loop to keep asking until the correct password is entered.",
+    "code": [
+      { "line": 1, "text": "import java.util.Scanner;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class PasswordRetry {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    Scanner sc = new Scanner(System.in);" },
+      { "line": 6, "text": "    String input;" },
+      { "line": 7, "blankId": "b1", "before": "    ", "after": " {" },
+      { "line": 8, "text": "      System.out.print(\"Password: \");" },
+      { "line": 9, "blankId": "b2", "before": "      input = sc.", "after": "();" },
+      { "line": 10, "blankId": "b3", "before": "    } ", "after": " (!input.equals(\"secret\"));" },
+      { "line": 11, "text": "    System.out.println(\"Access granted!\");" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 7, "answer": "do", "altAnswers": [] },
+      { "id": "b2", "line": 9, "answer": "nextLine", "altAnswers": [] },
+      { "id": "b3", "line": 10, "answer": "while", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week2-methods-03",
+    "title": "Is Even Method",
+    "week": 2,
+    "topic": "methods",
+    "description": "A program with a method that returns true if a number is even.",
+    "code": [
+      { "line": 1, "text": "public class EvenChecker {" },
+      { "line": 2, "blankId": "b1", "before": "  public static ", "after": " isEven(int num) {" },
+      { "line": 3, "blankId": "b2", "before": "    ", "after": " num % 2 == 0;" },
+      { "line": 4, "text": "  }" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "  public static void main(String[] args) {" },
+      { "line": 7, "blankId": "b3", "before": "    System.out.println(", "after": "(4));" },
+      { "line": 8, "text": "    System.out.println(isEven(7));" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "boolean", "altAnswers": [] },
+      { "id": "b2", "line": 3, "answer": "return", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "isEven", "altAnswers": [] }
+    ]
   }
 ]

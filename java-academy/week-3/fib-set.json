@@ -1,0 +1,226 @@
+[
+  {
+    "id": "week3-fileio-01",
+    "title": "Write to File",
+    "week": 3,
+    "topic": "file I/O",
+    "description": "A program that writes a greeting to a text file using BufferedWriter.",
+    "code": [
+      { "line": 1, "text": "import java.io.*;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class WriteFile {" },
+      { "line": 4, "blankId": "b1", "before": "  public static void main(String[] args) ", "after": " IOException {" },
+      { "line": 5, "blankId": "b2", "before": "    ", "after": " writer = new BufferedWriter(new FileWriter(\"hello.txt\"));" },
+      { "line": 6, "blankId": "b3", "before": "    writer.", "after": "(\"Hello, file!\");" },
+      { "line": 7, "text": "    writer.close();" },
+      { "line": 8, "text": "    System.out.println(\"File written.\");" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "throws", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "BufferedWriter", "altAnswers": [] },
+      { "id": "b3", "line": 6, "answer": "write", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-hashmap-01",
+    "title": "Fruit Prices",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "A program that stores fruit prices in a HashMap and looks up the price of an apple.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class FruitPrices {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b1", "before": "    HashMap<String, Double> prices = ", "after": " HashMap<>();" },
+      { "line": 6, "blankId": "b2", "before": "    prices.", "after": "(\"apple\", 1.50);" },
+      { "line": 7, "text": "    prices.put(\"banana\", 0.75);" },
+      { "line": 8, "blankId": "b3", "before": "    System.out.println(\"Apple: $\" + prices.", "after": "(\"apple\"));" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "new", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "put", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "get", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-arraylist-01",
+    "title": "Color List",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "A program that builds an ArrayList of colors and prints how many there are.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class ColorList {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b1", "before": "    ", "after": "<String> colors = new ArrayList<>();" },
+      { "line": 6, "blankId": "b2", "before": "    colors.", "after": "(\"red\");" },
+      { "line": 7, "text": "    colors.add(\"blue\");" },
+      { "line": 8, "text": "    colors.add(\"green\");" },
+      { "line": 9, "blankId": "b3", "before": "    System.out.println(\"Count: \" + colors.", "after": "());" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "ArrayList", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "add", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "size", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-arrays-01",
+    "title": "Days of the Week",
+    "week": 3,
+    "topic": "arrays",
+    "description": "A program that creates a String array of days and prints the first and last day.",
+    "code": [
+      { "line": 1, "text": "public class DaysOfWeek {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    String[] days = ", "after": " String[]{\"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\"};" },
+      { "line": 4, "blankId": "b2", "before": "    System.out.println(\"First: \" + days[", "after": "]);" },
+      { "line": 5, "blankId": "b3", "before": "    System.out.println(\"Last: \" + days[days.", "after": " - 1]);" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "new", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "0", "altAnswers": [] },
+      { "id": "b3", "line": 5, "answer": "length", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-arrays-02",
+    "title": "Array Sum",
+    "week": 3,
+    "topic": "arrays",
+    "description": "A program that loops through an int array to find the total sum.",
+    "code": [
+      { "line": 1, "text": "public class ArraySum {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] scores = {90, 85, 78, 92, 88};" },
+      { "line": 4, "text": "    int total = 0;" },
+      { "line": 5, "blankId": "b1", "before": "    for (int i = 0; i < scores.", "after": "; i++) {" },
+      { "line": 6, "blankId": "b2", "before": "      total ", "after": " scores[i];" },
+      { "line": 7, "text": "    }" },
+      { "line": 8, "blankId": "b3", "before": "    System.out.", "after": "(\"Total: \" + total);" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "length", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "+=", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-arraylist-02",
+    "title": "Student Roster",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "A program that adds students to a list, removes one, and prints who is left.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class Roster {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    ArrayList<String> students = new ArrayList<>();" },
+      { "line": 6, "text": "    students.add(\"Mia\");" },
+      { "line": 7, "text": "    students.add(\"Liam\");" },
+      { "line": 8, "text": "    students.add(\"Zara\");" },
+      { "line": 9, "blankId": "b1", "before": "    students.", "after": "(\"Liam\");" },
+      { "line": 10, "blankId": "b2", "before": "    for (String name : ", "after": ") {" },
+      { "line": 11, "blankId": "b3", "before": "      System.out.", "after": "(name);" },
+      { "line": 12, "text": "    }" },
+      { "line": 13, "text": "  }" },
+      { "line": 14, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 9, "answer": "remove", "altAnswers": [] },
+      { "id": "b2", "line": 10, "answer": "students", "altAnswers": [] },
+      { "id": "b3", "line": 11, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-hashmap-02",
+    "title": "State Capitals",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "A program that maps states to their capitals and checks if a key exists.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class Capitals {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b1", "before": "    HashMap<String, String> caps = ", "after": " HashMap<>();" },
+      { "line": 6, "text": "    caps.put(\"Texas\", \"Austin\");" },
+      { "line": 7, "text": "    caps.put(\"Ohio\", \"Columbus\");" },
+      { "line": 8, "blankId": "b2", "before": "    if (caps.", "after": "(\"Texas\")) {" },
+      { "line": 9, "blankId": "b3", "before": "      System.out.println(\"Capital: \" + caps.", "after": "(\"Texas\"));" },
+      { "line": 10, "text": "    }" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "new", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "containsKey", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "get", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-fileio-02",
+    "title": "Read from File",
+    "week": 3,
+    "topic": "file I/O",
+    "description": "A program that reads lines from a text file and prints each one.",
+    "code": [
+      { "line": 1, "text": "import java.io.*;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class ReadFile {" },
+      { "line": 4, "blankId": "b1", "before": "  public static void main(String[] args) ", "after": " IOException {" },
+      { "line": 5, "blankId": "b2", "before": "    BufferedReader reader = new BufferedReader(new ", "after": "(\"data.txt\"));" },
+      { "line": 6, "text": "    String line;" },
+      { "line": 7, "blankId": "b3", "before": "    while ((line = reader.", "after": "()) != null) {" },
+      { "line": 8, "text": "      System.out.println(line);" },
+      { "line": 9, "text": "    }" },
+      { "line": 10, "text": "    reader.close();" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "throws", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "FileReader", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "readLine", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week3-arrays-03",
+    "title": "Find Maximum",
+    "week": 3,
+    "topic": "arrays",
+    "description": "A program that loops through an array to find and print the largest value.",
+    "code": [
+      { "line": 1, "text": "public class FindMax {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] nums = {14, 7, 23, 9, 18};" },
+      { "line": 4, "blankId": "b1", "before": "    int max = nums[", "after": "];" },
+      { "line": 5, "text": "    for (int i = 1; i < nums.length; i++) {" },
+      { "line": 6, "blankId": "b2", "before": "      if (nums[i] ", "after": " max) {" },
+      { "line": 7, "blankId": "b3", "before": "        ", "after": " = nums[i];" },
+      { "line": 8, "text": "      }" },
+      { "line": 9, "text": "    }" },
+      { "line": 10, "text": "    System.out.println(\"Max: \" + max);" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "0", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": ">", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "max", "altAnswers": [] }
+    ]
+  }
+]

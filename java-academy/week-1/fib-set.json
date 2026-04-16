@@ -64,5 +64,153 @@
       { "id": "b2", "line": 4, "answer": "if", "altAnswers": [] },
       { "id": "b3", "line": 6, "answer": "else", "altAnswers": [] }
     ]
+  },
+  {
+    "id": "week1-scanner-01",
+    "title": "User Greeting",
+    "week": 1,
+    "topic": "Scanner",
+    "description": "A program that reads a name from the keyboard and prints a greeting.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "", "after": " java.util.Scanner;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class UserGreeting {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b2", "before": "    Scanner scanner = new ", "after": "(System.in);" },
+      { "line": 6, "text": "    System.out.print(\"Enter your name: \");" },
+      { "line": 7, "blankId": "b3", "before": "    String name = scanner.", "after": "();" },
+      { "line": 8, "text": "    System.out.println(\"Hello, \" + name + \"!\");" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "import", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "Scanner", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "nextLine", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week1-scanner-02",
+    "title": "Sum Two Numbers",
+    "week": 1,
+    "topic": "Scanner",
+    "description": "A program that reads two integers from the user and prints their sum.",
+    "code": [
+      { "line": 1, "text": "import java.util.Scanner;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class SumTwo {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    Scanner sc = new Scanner(System.in);" },
+      { "line": 6, "text": "    System.out.print(\"First number: \");" },
+      { "line": 7, "blankId": "b1", "before": "    int a = sc.", "after": "();" },
+      { "line": 8, "text": "    System.out.print(\"Second number: \");" },
+      { "line": 9, "text": "    int b = sc.nextInt();" },
+      { "line": 10, "blankId": "b2", "before": "    ", "after": " sum = a + b;" },
+      { "line": 11, "blankId": "b3", "before": "    System.out.", "after": "(\"Sum: \" + sum);" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 7, "answer": "nextInt", "altAnswers": [] },
+      { "id": "b2", "line": 10, "answer": "int", "altAnswers": [] },
+      { "id": "b3", "line": 11, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week1-variables-03",
+    "title": "Temperature Converter",
+    "week": 1,
+    "topic": "variables",
+    "description": "A program that converts a Celsius temperature to Fahrenheit.",
+    "code": [
+      { "line": 1, "text": "public class TempConverter {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    ", "after": " celsius = 25.0;" },
+      { "line": 4, "blankId": "b2", "before": "    double fahrenheit = celsius * ", "after": " / 5 + 32;" },
+      { "line": 5, "blankId": "b3", "before": "    System.out.println(celsius + \"C = \" + fahrenheit + ", "after": ");" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "double", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "9", "altAnswers": [] },
+      { "id": "b3", "line": 5, "answer": "\"F\"", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week1-conditions-02",
+    "title": "Letter Grade",
+    "week": 1,
+    "topic": "conditions",
+    "description": "A program that assigns a letter grade based on a numeric score.",
+    "code": [
+      { "line": 1, "text": "public class LetterGrade {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int score = 85;" },
+      { "line": 4, "blankId": "b1", "before": "    ", "after": " (score >= 90) {" },
+      { "line": 5, "text": "      System.out.println(\"A\");" },
+      { "line": 6, "blankId": "b2", "before": "    } ", "after": " (score >= 80) {" },
+      { "line": 7, "text": "      System.out.println(\"B\");" },
+      { "line": 8, "text": "    } else if (score >= 70) {" },
+      { "line": 9, "text": "      System.out.println(\"C\");" },
+      { "line": 10, "blankId": "b3", "before": "    } ", "after": " {" },
+      { "line": 11, "text": "      System.out.println(\"F\");" },
+      { "line": 12, "text": "    }" },
+      { "line": 13, "text": "  }" },
+      { "line": 14, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "if", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "else if", "altAnswers": [] },
+      { "id": "b3", "line": 10, "answer": "else", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week1-variables-04",
+    "title": "Boolean Check",
+    "week": 1,
+    "topic": "variables",
+    "description": "A program that uses a boolean to track whether a light is on or off.",
+    "code": [
+      { "line": 1, "text": "public class LightSwitch {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    ", "after": " isOn = true;" },
+      { "line": 4, "blankId": "b2", "before": "    ", "after": " (isOn) {" },
+      { "line": 5, "text": "      System.out.println(\"The light is on.\");" },
+      { "line": 6, "text": "    } else {" },
+      { "line": 7, "blankId": "b3", "before": "      System.out.", "after": "(\"The light is off.\");" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "boolean", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "if", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week1-conditions-03",
+    "title": "Even or Odd",
+    "week": 1,
+    "topic": "conditions",
+    "description": "A program that checks whether a number is even or odd using the modulo operator.",
+    "code": [
+      { "line": 1, "text": "public class EvenOdd {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "blankId": "b1", "before": "    ", "after": " number = 7;" },
+      { "line": 4, "blankId": "b2", "before": "    if (number ", "after": " 2 == 0) {" },
+      { "line": 5, "text": "      System.out.println(number + \" is even.\");" },
+      { "line": 6, "blankId": "b3", "before": "    } ", "after": " {" },
+      { "line": 7, "text": "      System.out.println(number + \" is odd.\");" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 3, "answer": "int", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "%", "altAnswers": [] },
+      { "id": "b3", "line": 6, "answer": "else", "altAnswers": [] }
+    ]
   }
 ]

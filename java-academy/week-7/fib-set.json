@@ -1,0 +1,232 @@
+[
+  {
+    "id": "week7-interfaces-01",
+    "title": "Drawable Interface",
+    "week": 7,
+    "topic": "interfaces",
+    "description": "A Square class that implements the Drawable interface and its draw method.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public ", "after": " Drawable {" },
+      { "line": 2, "text": "  void draw();" },
+      { "line": 3, "text": "}" },
+      { "line": 4, "text": "" },
+      { "line": 5, "blankId": "b2", "before": "public class Square ", "after": " Drawable {" },
+      { "line": 6, "text": "  @Override" },
+      { "line": 7, "blankId": "b3", "before": "  public ", "after": " draw() {" },
+      { "line": 8, "text": "    System.out.println(\"Drawing a square\");" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "interface", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "implements", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "void", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-generics-01",
+    "title": "Generic Box",
+    "week": 7,
+    "topic": "generics",
+    "description": "A generic Box class that can hold any type of item and return it.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public class Box", "after": " {" },
+      { "line": 2, "text": "  private T item;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "blankId": "b2", "before": "  public ", "after": " set(T item) {" },
+      { "line": 5, "text": "    this.item = item;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b3", "before": "  public ", "after": " get() {" },
+      { "line": 9, "text": "    return item;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "<T>", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "void", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "T", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-streams-01",
+    "title": "Stream Filter",
+    "week": 7,
+    "topic": "streams",
+    "description": "A program that uses a stream to filter and print numbers greater than 3 from a list.",
+    "code": [
+      { "line": 1, "text": "import java.util.List;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class StreamFilter {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "blankId": "b1", "before": "    List<Integer> nums = List.", "after": "(1, 2, 3, 4, 5);" },
+      { "line": 6, "blankId": "b2", "before": "    nums.", "after": "()" },
+      { "line": 7, "blankId": "b3", "before": "      .", "after": "(n -> n > 3)" },
+      { "line": 8, "text": "      .forEach(System.out::println);" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "of", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "stream", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "filter", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-interfaces-02",
+    "title": "Comparable Sort",
+    "week": 7,
+    "topic": "interfaces",
+    "description": "A Student class that implements Comparable to sort by GPA.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public class Student ", "after": " Comparable<Student> {" },
+      { "line": 2, "text": "  String name;" },
+      { "line": 3, "text": "  double gpa;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "  public Student(String name, double gpa) {" },
+      { "line": 6, "text": "    this.name = name;" },
+      { "line": 7, "text": "    this.gpa = gpa;" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "  @Override" },
+      { "line": 11, "blankId": "b2", "before": "  public ", "after": " compareTo(Student other) {" },
+      { "line": 12, "blankId": "b3", "before": "    return Double.", "after": "(this.gpa, other.gpa);" },
+      { "line": 13, "text": "  }" },
+      { "line": 14, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "implements", "altAnswers": [] },
+      { "id": "b2", "line": 11, "answer": "int", "altAnswers": [] },
+      { "id": "b3", "line": 12, "answer": "compare", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-interfaces-03",
+    "title": "Multiple Interfaces",
+    "week": 7,
+    "topic": "interfaces",
+    "description": "A Robot class that implements both Walkable and Talkable interfaces.",
+    "code": [
+      { "line": 1, "text": "public interface Walkable {" },
+      { "line": 2, "text": "  void walk();" },
+      { "line": 3, "text": "}" },
+      { "line": 4, "blankId": "b1", "before": "public ", "after": " Talkable {" },
+      { "line": 5, "text": "  void talk();" },
+      { "line": 6, "text": "}" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b2", "before": "public class Robot implements Walkable, ", "after": " {" },
+      { "line": 9, "text": "  @Override" },
+      { "line": 10, "text": "  public void walk() { System.out.println(\"Walking\"); }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "blankId": "b3", "before": "  ", "after": "" },
+      { "line": 13, "text": "  public void talk() { System.out.println(\"Talking\"); }" },
+      { "line": 14, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "interface", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "Talkable", "altAnswers": [] },
+      { "id": "b3", "line": 12, "answer": "@Override", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-generics-02",
+    "title": "Generic Pair",
+    "week": 7,
+    "topic": "generics",
+    "description": "A generic Pair class that holds two values of different types.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public class Pair", "after": " {" },
+      { "line": 2, "text": "  private A first;" },
+      { "line": 3, "text": "  private B second;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "  public Pair(A first, B second) {" },
+      { "line": 6, "text": "    this.first = first;" },
+      { "line": 7, "text": "    this.second = second;" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "blankId": "b2", "before": "  public ", "after": " getFirst() { return first; }" },
+      { "line": 11, "blankId": "b3", "before": "  public ", "after": " getSecond() { return second; }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "<A, B>", "altAnswers": ["<A,B>"] },
+      { "id": "b2", "line": 10, "answer": "A", "altAnswers": [] },
+      { "id": "b3", "line": 11, "answer": "B", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-streams-02",
+    "title": "Stream Map",
+    "week": 7,
+    "topic": "streams",
+    "description": "A program that uses stream map to convert a list of names to uppercase.",
+    "code": [
+      { "line": 1, "text": "import java.util.List;" },
+      { "line": 2, "text": "import java.util.stream.Collectors;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "public class StreamMap {" },
+      { "line": 5, "text": "  public static void main(String[] args) {" },
+      { "line": 6, "text": "    List<String> names = List.of(\"alice\", \"bob\", \"carol\");" },
+      { "line": 7, "blankId": "b1", "before": "    List<String> upper = names.", "after": "()" },
+      { "line": 8, "blankId": "b2", "before": "      .", "after": "(s -> s.toUpperCase())" },
+      { "line": 9, "blankId": "b3", "before": "      .collect(Collectors.", "after": "());" },
+      { "line": 10, "text": "    System.out.println(upper);" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 7, "answer": "stream", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "map", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "toList", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-lambdas-01",
+    "title": "Lambda Comparator",
+    "week": 7,
+    "topic": "lambdas",
+    "description": "A program that sorts a list of strings by length using a lambda expression.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "import java.util.Collections;" },
+      { "line": 3, "text": "import java.util.List;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "public class LambdaSort {" },
+      { "line": 6, "text": "  public static void main(String[] args) {" },
+      { "line": 7, "blankId": "b1", "before": "    List<String> words = new ", "after": "<>(List.of(\"cat\", \"elephant\", \"go\"));" },
+      { "line": 8, "blankId": "b2", "before": "    Collections.", "after": "(words, (a, b) -> a.length() - b.length());" },
+      { "line": 9, "blankId": "b3", "before": "    words.", "after": "(w -> System.out.println(w));" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 7, "answer": "ArrayList", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "sort", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "forEach", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week7-streams-03",
+    "title": "Stream Reduce",
+    "week": 7,
+    "topic": "streams",
+    "description": "A program that uses stream reduce to sum a list of integers.",
+    "code": [
+      { "line": 1, "text": "import java.util.List;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class StreamReduce {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    List<Integer> nums = List.of(10, 20, 30, 40);" },
+      { "line": 6, "blankId": "b1", "before": "    int total = nums.", "after": "()" },
+      { "line": 7, "blankId": "b2", "before": "      .", "after": "(0, (a, b) -> a + b);" },
+      { "line": 8, "blankId": "b3", "before": "    System.out.", "after": "(\"Total: \" + total);" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 6, "answer": "stream", "altAnswers": [] },
+      { "id": "b2", "line": 7, "answer": "reduce", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "println", "altAnswers": [] }
+    ]
+  }
+]

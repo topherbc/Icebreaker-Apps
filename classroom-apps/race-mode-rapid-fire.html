@@ -526,6 +526,7 @@ label {
   align-items: center;
   justify-content: center;
   margin: 40px 0;
+  color: var(--near-black);
 }
 .landing-btn {
   width: 100%;
@@ -652,7 +653,7 @@ label {
 .quiz-list-item:hover { background: var(--surface2); }
 .quiz-list-item.active {
   border-color: var(--amber);
-  background: #fff8ee;
+  background: var(--surface-light);
 }
 .quiz-list-item .quiz-title {
   font-weight: 600;
@@ -745,7 +746,7 @@ label {
 .question-item:hover { background: var(--surface); }
 .question-item.active {
   border-color: var(--amber);
-  background: #fff8ee;
+  background: var(--surface-light);
 }
 .question-item .q-num {
   font-weight: 700;
@@ -1525,6 +1526,8 @@ label {
   padding: 20px 16px;
   border-radius: 0;
   border: 3px solid transparent;
+  outline: 1px solid rgba(0,0,0,0.15);
+  outline-offset: 0;
   cursor: pointer;
   font-size: 17px;
   font-weight: 600;
@@ -1535,10 +1538,10 @@ label {
   text-align: center;
   flex-direction: column;
 }
-.student-shape-btn.shape-triangle { background: var(--shape-triangle); }
-.student-shape-btn.shape-circle   { background: var(--shape-circle); }
-.student-shape-btn.shape-square   { background: var(--shape-square); }
-.student-shape-btn.shape-diamond  { background: var(--shape-diamond); }
+.student-shape-btn.shape-triangle { background: var(--shape-triangle) !important; }
+.student-shape-btn.shape-circle   { background: var(--shape-circle)   !important; }
+.student-shape-btn.shape-square   { background: var(--shape-square)   !important; }
+.student-shape-btn.shape-diamond  { background: var(--shape-diamond)  !important; }
 .student-shape-btn:active { transform: scale(0.96); }
 .student-shape-btn.selected {
   border-color: #fff;
@@ -1645,6 +1648,13 @@ label {
   font-size: 24px;
   color: var(--near-black);
 }
+.student-between .student-score-card {
+  background: var(--near-black);
+  color: var(--text-on-dark-dim);
+}
+.student-between .student-score-card strong {
+  color: var(--amber);
+}
 .student-between .lb-row {
   margin-bottom: 4px;
   border-radius: var(--radius-sm);
@@ -1710,6 +1720,9 @@ label {
 [data-theme="dark"] #view-landing {
   background: var(--bg);
 }
+[data-theme="dark"] .landing-shapes {
+  color: var(--amber);
+}
 [data-theme="dark"] .landing-eyebrow {
   color: rgba(245,166,35,0.4);
 }
@@ -1742,6 +1755,13 @@ label {
 /* Student between dark mode */
 [data-theme="dark"] .student-between p {
   color: var(--text-on-dark-mid);
+}
+[data-theme="dark"] .student-between .student-score-card {
+  background: var(--surface2);
+  color: var(--text-on-dark-dim);
+}
+[data-theme="dark"] .student-between .student-score-card strong {
+  color: var(--amber);
 }
 /* Score card on dark student feedback */
 [data-theme="dark"] .student-score-card {
@@ -1784,6 +1804,20 @@ label {
 [data-theme="dark"] .modal h2 {
   color: var(--amber);
 }
+[data-theme="dark"] .modal input,
+[data-theme="dark"] .modal textarea,
+[data-theme="dark"] .modal select {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border);
+}
+[data-theme="dark"] .modal label {
+  color: var(--text-mid);
+}
+[data-theme="dark"] .modal-actions .btn-secondary {
+  color: var(--text-on-dark-mid);
+  border-color: rgba(255,255,255,0.2);
+}
 [data-theme="dark"] .question-editor input,
 [data-theme="dark"] .question-editor textarea,
 [data-theme="dark"] .question-editor select {
@@ -1793,6 +1827,23 @@ label {
 }
 [data-theme="dark"] .builder-editor-empty {
   color: var(--text-dim);
+}
+[data-theme="dark"] .quiz-list-item.active,
+[data-theme="dark"] .question-item.active {
+  background: var(--surface2);
+  border-color: var(--amber);
+}
+[data-theme="dark"] .builder-wrap .btn-secondary,
+[data-theme="dark"] .quiz-header .btn-secondary {
+  color: var(--text-on-dark-mid);
+  border-color: rgba(255,255,255,0.2);
+  background: transparent;
+}
+[data-theme="dark"] .builder-wrap .btn-secondary:hover:not(:disabled),
+[data-theme="dark"] .quiz-header .btn-secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.35);
+  color: var(--text-on-dark);
 }
 
 /* =========================================================
@@ -1873,10 +1924,10 @@ label {
     <div class="landing-logo">RAPID<br>FIRE</div>
   </div>
   <div class="landing-shapes" aria-hidden="true">
-    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="#1a1a2e"/></svg>
-    <svg width="56" height="56" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#c53030"/></svg>
-    <svg width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="#1a1a2e"/></svg>
-    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="#1a1a2e"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="currentColor"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="currentColor"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="currentColor"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="currentColor"/></svg>
   </div>
   <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
     <button class="landing-btn landing-btn-primary" onclick="navigateTo('host')" aria-label="Host a game">

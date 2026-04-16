@@ -527,6 +527,10 @@ label {
   justify-content: center;
   margin: 40px 0;
 }
+.ls-tri { color: var(--shape-triangle); }
+.ls-cir { color: var(--shape-circle); }
+.ls-sq  { color: var(--shape-square); }
+.ls-dia { color: var(--shape-diamond); }
 .landing-btn {
   width: 100%;
   max-width: 320px;
@@ -1725,10 +1729,6 @@ label {
 [data-theme="dark"] #view-landing {
   background: var(--bg);
 }
-/* Near-black shapes become amber on dark bg; coral circle stays coral */
-[data-theme="dark"] .landing-shapes svg:not(:nth-child(2)) {
-  filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(5deg);
-}
 [data-theme="dark"] .landing-eyebrow {
   color: rgba(245,166,35,0.4);
 }
@@ -1930,10 +1930,10 @@ label {
     <div class="landing-logo">RAPID<br>FIRE</div>
   </div>
   <div class="landing-shapes" aria-hidden="true">
-    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="#1a1a2e"/></svg>
-    <svg width="56" height="56" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#c53030"/></svg>
-    <svg width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="#1a1a2e"/></svg>
-    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="#1a1a2e"/></svg>
+    <svg class="ls-tri" width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="currentColor"/></svg>
+    <svg class="ls-cir" width="56" height="56" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="currentColor"/></svg>
+    <svg class="ls-sq" width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="currentColor"/></svg>
+    <svg class="ls-dia" width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="currentColor"/></svg>
   </div>
   <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
     <button class="landing-btn landing-btn-primary" onclick="navigateTo('host')" aria-label="Host a game">

@@ -600,6 +600,21 @@ label {
   position: sticky;
   top: 0;
   z-index: 100;
+  overflow: hidden;
+  isolation: isolate;
+}
+.host-topbar::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background:
+    repeating-conic-gradient(
+      rgba(245,166,35,0.09) 0% 25%,
+      transparent 0% 50%
+    ) 0 0 / 14px 14px;
+  transform: rotate(5deg);
+  z-index: -1;
+  pointer-events: none;
 }
 .topbar-brand {
   display: flex;
@@ -1012,11 +1027,12 @@ label {
 .live-question-screen {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 56px);
+  height: calc(100vh - 56px);
   padding: 24px;
   background: var(--near-black);
   color: #ffffff;
   position: relative;
+  overflow-y: auto;
 }
 .live-q-bg {
   position: absolute;
@@ -1573,12 +1589,13 @@ label {
   flex-direction: column;
   gap: 16px;
   background: var(--amber);
-  min-height: 100vh;
+  height: 100vh;
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
   position: relative;
+  overflow-y: auto;
 }
 .student-q-bg {
   position: absolute;
@@ -2157,9 +2174,6 @@ label {
       <button class="host-tab active" data-tab="builder" onclick="switchHostTab('builder')" aria-label="Quiz Builder tab">Builder</button>
       <button class="host-tab" data-tab="live" onclick="switchHostTab('live')" aria-label="Live Game tab">Live Game</button>
     </div>
-    <div class="flex gap-sm">
-      <button class="btn-ghost" onclick="toggleTheme()" aria-label="Toggle theme">&#9680;</button>
-    </div>
   </div>
 
   <!-- BUILDER -->
@@ -2180,7 +2194,7 @@ label {
           <input type="text" id="quiz-title-input" placeholder="Quiz title..." aria-label="Quiz title" onchange="onQuizTitleChange(this.value)">
           <button class="btn-secondary" onclick="openQuizSettings()" style="font-size:14px; padding:8px 16px;">Settings</button>
           <button class="btn-secondary" onclick="exportCurrentQuiz()" style="font-size:14px; padding:8px 16px;">Export</button>
-          <button class="btn-danger" onclick="deleteCurrentQuiz()" style="font-size:14px; padding:8px 16px;">&#128465; Delete</button>
+          <button class="btn-danger" onclick="deleteCurrentQuiz()" style="font-size:14px; padding:8px 16px;">Delete</button>
           <button class="btn-primary" onclick="launchGame()" style="font-size:14px; padding:8px 20px; background:var(--amber); color:var(--near-black);">&#9654; Play</button>
         </div>
         <div class="quiz-body">

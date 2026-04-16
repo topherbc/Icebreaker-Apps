@@ -628,39 +628,36 @@ label {
 }
 
 /* ---- QUIZ BUILDER ---- */
-.builder-wrap input,
-.builder-wrap textarea,
-.builder-wrap select {
-  background: #ffffff;
-  color: var(--near-black);
-  border-color: rgba(26,26,46,0.2);
-}
-.builder-wrap input:focus,
-.builder-wrap textarea:focus,
-.builder-wrap select:focus {
-  background: #ffffff;
-}
-/* Modal inputs also need light bg in light mode */
-.modal input,
-.modal textarea,
-.modal select {
-  background: #ffffff;
-  color: var(--near-black);
-  border-color: rgba(26,26,46,0.2);
-}
-
+/* Override CSS vars so every builder child gets light-mode-friendly values */
 .builder-wrap {
+  --bg: #faf6f0;
+  --surface: #ffffff;
+  --surface2: #f5f0e8;
+  --surface-light: #fff8ee;
+  --border: rgba(26,26,46,0.12);
+  --text: #1a1a2e;
+  --text-mid: rgba(26,26,46,0.65);
+  --text-dim: rgba(26,26,46,0.4);
   display: flex;
   height: calc(100vh - 56px);
-  background: var(--surface-light);
+  background: var(--bg);
+}
+/* Modal also needs light vars */
+.modal {
+  --surface: #ffffff;
+  --surface2: #f5f0e8;
+  --border: rgba(26,26,46,0.12);
+  --text: #1a1a2e;
+  --text-mid: rgba(26,26,46,0.65);
+  --text-dim: rgba(26,26,46,0.4);
 }
 
 /* Left sidebar */
 .builder-sidebar {
   width: 300px;
   min-width: 260px;
-  background: #ffffff;
-  border-right: 1px solid rgba(26,26,46,0.12);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -687,19 +684,19 @@ label {
   margin-bottom: 4px;
   transition: background 0.15s;
 }
-.quiz-list-item:hover { background: #f5f0e8; }
+.quiz-list-item:hover { background: var(--surface2); }
 .quiz-list-item.active {
   border-color: var(--amber);
-  background: #fff8ee;
+  background: var(--surface-light);
 }
 .quiz-list-item .quiz-title {
   font-weight: 600;
   font-size: 15px;
-  color: var(--near-black);
+  color: var(--text);
 }
 .quiz-list-item .quiz-meta {
   font-size: 13px;
-  color: rgba(26,26,46,0.5);
+  color: var(--text-dim);
   margin-top: 2px;
 }
 
@@ -715,19 +712,19 @@ label {
   align-items: center;
   justify-content: center;
   flex: 1;
-  color: rgba(26,26,46,0.4);
+  color: var(--text-dim);
   font-size: 18px;
 }
 
-/* Quiz header bar */
+/* Quiz header bar -- intentionally dark */
 .quiz-header {
   padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  background: var(--surface);
+  background: var(--near-black);
 }
 .quiz-header input {
   font-size: 20px;
@@ -741,7 +738,7 @@ label {
   min-width: 200px;
 }
 .quiz-header input:focus {
-  background: var(--surface2);
+  background: rgba(255,255,255,0.08);
   border-radius: var(--radius-sm);
 }
 
@@ -754,8 +751,8 @@ label {
 .question-list-panel {
   width: 240px;
   min-width: 200px;
-  border-right: 1px solid rgba(26,26,46,0.12);
-  background: #faf6f0;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
   display: flex;
   flex-direction: column;
 }
@@ -776,15 +773,15 @@ label {
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
-  color: var(--near-black);
+  color: var(--text);
   border: 2px solid transparent;
   margin-bottom: 4px;
   user-select: none;
 }
-.question-item:hover { background: #f0e8dc; }
+.question-item:hover { background: var(--surface2); }
 .question-item.active {
   border-color: var(--amber);
-  background: #fff8ee;
+  background: var(--surface-light);
 }
 .question-item .q-num {
   font-weight: 700;
@@ -811,13 +808,13 @@ label {
   min-width: 28px;
   border-radius: 4px;
   background: transparent;
-  color: rgba(26,26,46,0.4);
+  color: var(--text-dim);
   border: none;
   cursor: pointer;
 }
 .question-item .q-actions button:hover {
-  background: rgba(26,26,46,0.08);
-  color: var(--near-black);
+  background: var(--surface2);
+  color: var(--text);
 }
 
 /* Question editor panel */
@@ -842,7 +839,7 @@ label {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: #f5f0e8;
+  background: var(--surface2);
   border-radius: var(--radius-sm);
   margin-bottom: 8px;
   border: 2px solid transparent;
@@ -869,10 +866,10 @@ label {
   border-radius: 4px;
   min-height: 36px;
   min-width: 36px;
-  border: 1px solid rgba(26,26,46,0.2);
-  background: #ffffff;
+  border: 1px solid var(--border);
+  background: var(--surface);
   cursor: pointer;
-  color: rgba(26,26,46,0.65);
+  color: var(--text-mid);
   font-weight: 600;
 }
 .answer-correct-toggle.is-correct {
@@ -893,8 +890,8 @@ label {
   padding: 24px;
 }
 .modal {
-  background: #ffffff;
-  color: var(--near-black);
+  background: var(--surface);
+  color: var(--text);
   border-radius: var(--radius-lg);
   padding: 32px;
   max-width: 560px;
@@ -907,7 +904,7 @@ label {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 24px;
   margin-bottom: 24px;
-  color: var(--near-black);
+  color: var(--text);
 }
 .modal .field-group { margin-bottom: 16px; }
 .modal-actions {
@@ -1824,93 +1821,33 @@ label {
 /* =========================================================
    DARK MODE: BUILDER (Bug B)
    ========================================================= */
-[data-theme="dark"] .builder-sidebar {
-  background: var(--surface);
-  border-right-color: var(--border);
-}
-[data-theme="dark"] .question-list-panel {
-  background: var(--surface);
-  border-right-color: var(--border);
-}
+/* Re-scope builder vars for dark mode */
 [data-theme="dark"] .builder-wrap {
-  background: var(--bg);
-}
-[data-theme="dark"] .quiz-list-item .quiz-title {
-  color: var(--text);
-}
-[data-theme="dark"] .quiz-list-item .quiz-meta {
-  color: var(--text-dim);
-}
-[data-theme="dark"] .quiz-list-item:hover {
-  background: var(--surface2);
-}
-[data-theme="dark"] .quiz-list-item.active,
-[data-theme="dark"] .question-item.active {
-  background: var(--surface2);
-  border-color: var(--amber);
-}
-[data-theme="dark"] .question-item {
-  color: var(--text);
-}
-[data-theme="dark"] .question-item:hover {
-  background: var(--surface2);
-}
-[data-theme="dark"] .question-item .q-actions button {
-  color: var(--text-dim);
-}
-[data-theme="dark"] .question-item .q-actions button:hover {
-  background: rgba(255,255,255,0.08);
-  color: var(--text);
-}
-[data-theme="dark"] .answer-editor-row {
-  background: var(--surface2);
-}
-[data-theme="dark"] .answer-correct-toggle {
-  background: var(--surface2);
-  color: var(--text-mid);
-  border-color: var(--border);
-}
-[data-theme="dark"] .quiz-header {
-  background: var(--surface);
-  border-bottom-color: var(--border);
-}
-[data-theme="dark"] .quiz-header input {
-  color: var(--amber);
-}
-[data-theme="dark"] .quiz-header input:focus {
-  background: var(--surface2);
-}
-[data-theme="dark"] .builder-editor-empty {
-  color: var(--text-dim);
-}
-[data-theme="dark"] .builder-wrap input,
-[data-theme="dark"] .builder-wrap textarea,
-[data-theme="dark"] .builder-wrap select {
-  background: var(--surface2);
-  color: var(--text);
-  border-color: var(--border);
+  --bg: #0d0d1a;
+  --surface: #1a1a2e;
+  --surface2: #252535;
+  --surface-light: #252535;
+  --border: rgba(245,166,35,0.15);
+  --text: #f5a623;
+  --text-mid: rgba(245,166,35,0.7);
+  --text-dim: rgba(245,166,35,0.35);
 }
 [data-theme="dark"] .modal {
-  background: var(--surface);
-  color: var(--text);
+  --surface: #1a1a2e;
+  --surface2: #252535;
+  --border: rgba(245,166,35,0.15);
+  --text: #f5a623;
+  --text-mid: rgba(245,166,35,0.7);
+  --text-dim: rgba(245,166,35,0.35);
 }
 [data-theme="dark"] .modal h2 {
   color: var(--amber);
 }
-[data-theme="dark"] .modal input,
-[data-theme="dark"] .modal textarea,
-[data-theme="dark"] .modal select {
-  background: var(--surface2);
-  color: var(--text);
-  border-color: var(--border);
+/* Quiz header stays dark in both modes */
+[data-theme="dark"] .quiz-header {
+  background: var(--near-black);
 }
-[data-theme="dark"] .modal label {
-  color: var(--text-mid);
-}
-[data-theme="dark"] .modal-actions .btn-secondary {
-  color: var(--text-on-dark-mid);
-  border-color: rgba(255,255,255,0.2);
-}
+/* Builder secondary buttons need light text on dark bg in dark mode */
 [data-theme="dark"] .builder-sidebar .btn-secondary,
 [data-theme="dark"] .question-list-panel .btn-secondary,
 [data-theme="dark"] .question-editor .btn-secondary {
@@ -1924,6 +1861,10 @@ label {
   background: rgba(255,255,255,0.08);
   border-color: rgba(255,255,255,0.35);
   color: var(--text-on-dark);
+}
+[data-theme="dark"] .modal-actions .btn-secondary {
+  color: var(--text-on-dark-mid);
+  border-color: rgba(255,255,255,0.2);
 }
 
 /* =========================================================

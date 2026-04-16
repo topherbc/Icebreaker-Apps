@@ -74,14 +74,14 @@
   --success: #0a5940;
   --success-bg: #f0fdf4;
 
-  /* Answer shape colors */
-  --shape-triangle: #c53030;
-  --shape-circle: #1a4d9e;
-  --shape-square: #7a5100;
+  /* Answer shape colors: Black, Red, Blue, Green */
+  --shape-triangle: #1a1a2e;
+  --shape-circle: #c53030;
+  --shape-square: #1a4d9e;
   --shape-diamond: #0a5940;
-  --shape-triangle-bg: #fceaea;
-  --shape-circle-bg: #e8effd;
-  --shape-square-bg: #fef3dc;
+  --shape-triangle-bg: #e8e8ec;
+  --shape-circle-bg: #fceaea;
+  --shape-square-bg: #e8effd;
   --shape-diamond-bg: #e6f7f2;
 
   /* Podium */
@@ -114,9 +114,10 @@
   --accent: #f5a623;
   --shadow: 0 2px 8px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
-  --shape-triangle: #e05252;
-  --shape-circle: #3b6fd4;
-  --shape-square: #c27d0e;
+  /* Dark mode shape colors: Black->lighter, Red, Blue, Green */
+  --shape-triangle: #3a3a5e;
+  --shape-circle: #e05252;
+  --shape-square: #3b6fd4;
   --shape-diamond: #1a8a6a;
 }
 
@@ -134,9 +135,9 @@
   --text-on-dark-mid: #eeeeee;
   --text-on-dark-dim: #cccccc;
   --near-black-dim: rgba(0,0,0,0.8);
-  --shape-triangle: #8b0000;
-  --shape-circle: #00008b;
-  --shape-square: #4a3000;
+  --shape-triangle: #000000;
+  --shape-circle: #8b0000;
+  --shape-square: #00008b;
   --shape-diamond: #004d2e;
 }
 [data-theme="dark"][data-high-contrast="true"] {
@@ -596,12 +597,22 @@ label {
   top: 0;
   z-index: 100;
 }
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .host-topbar h1 {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: var(--amber);
   letter-spacing: -0.02em;
+}
+.topbar-shapes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .host-tabs {
   display: flex;
@@ -1048,7 +1059,7 @@ label {
   transition: stroke-dashoffset 1s linear, stroke 0.3s;
 }
 .timer-ring .ring-fg.critical {
-  stroke: var(--shape-triangle);
+  stroke: var(--error);
 }
 .timer-ring .timer-text {
   position: absolute;
@@ -1547,7 +1558,7 @@ label {
   font-weight: 700;
   color: var(--near-black);
 }
-.student-timer.critical { color: var(--shape-triangle); }
+.student-timer.critical { color: var(--error); }
 
 .student-shapes-grid {
   display: grid;
@@ -1618,13 +1629,13 @@ label {
   transition: background 0.2s;
 }
 .student-feedback.result-correct::before  { background: var(--amber); }
-.student-feedback.result-incorrect::before { background: var(--shape-triangle); }
+.student-feedback.result-incorrect::before { background: var(--error); }
 .feedback-icon {
   font-size: 64px;
   line-height: 1;
 }
 .result-correct  .feedback-icon { color: var(--amber); }
-.result-incorrect .feedback-icon { color: var(--shape-triangle); }
+.result-incorrect .feedback-icon { color: var(--error); }
 .feedback-text {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 28px;
@@ -1965,7 +1976,15 @@ label {
      ============================================================ -->
 <div id="view-host">
   <div class="host-topbar">
-    <h1 class="display-font">Race Mode: Rapid Fire</h1>
+    <div class="topbar-brand">
+      <h1 class="display-font">Race Mode: Rapid Fire</h1>
+      <div class="topbar-shapes" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="#888899"/></svg>
+        <svg width="18" height="18" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#e05252"/></svg>
+        <svg width="18" height="18" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="#4a8af5"/></svg>
+        <svg width="18" height="18" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="#2aaa8a"/></svg>
+      </div>
+    </div>
     <div class="host-tabs">
       <button class="host-tab active" data-tab="builder" onclick="switchHostTab('builder')" aria-label="Quiz Builder tab">Builder</button>
       <button class="host-tab" data-tab="live" onclick="switchHostTab('live')" aria-label="Live Game tab">Live Game</button>

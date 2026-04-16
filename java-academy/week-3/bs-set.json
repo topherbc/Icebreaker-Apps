@@ -1,0 +1,1021 @@
+[
+  {
+    "id": "week3-arrays-01",
+    "title": "Grade Analyzer",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program finds the highest grade, lowest grade, and class average from an array of test scores.",
+    "code": [
+      {
+        "line": 1,
+        "text": "public class GradeAnalyzer {"
+      },
+      {
+        "line": 2,
+        "text": "  public static void main(String[] args) {"
+      },
+      {
+        "line": 3,
+        "text": "    int[] grades = {88, 72, 95, 63, 81, 90, 77};"
+      },
+      {
+        "line": 4,
+        "text": "    int max = 0;"
+      },
+      {
+        "line": 5,
+        "text": "    int min = grades[0];"
+      },
+      {
+        "line": 6,
+        "text": "    int sum = 0;"
+      },
+      {
+        "line": 7,
+        "text": "    for (int i = 0; i <= grades.length; i++) {",
+        "bugId": "b1"
+      },
+      {
+        "line": 8,
+        "text": "      sum = sum + grades[i];"
+      },
+      {
+        "line": 9,
+        "text": "      if (grades[i] > max) {"
+      },
+      {
+        "line": 10,
+        "text": "        max = grades[i];"
+      },
+      {
+        "line": 11,
+        "text": "      }"
+      },
+      {
+        "line": 12,
+        "text": "      if (grades[i] > min) {",
+        "bugId": "b2"
+      },
+      {
+        "line": 13,
+        "text": "        min = grades[i];"
+      },
+      {
+        "line": 14,
+        "text": "      }"
+      },
+      {
+        "line": 15,
+        "text": "    }"
+      },
+      {
+        "line": 16,
+        "text": "    int average = sum / grades.length + 1;",
+        "bugId": "b3"
+      },
+      {
+        "line": 17,
+        "text": "    System.out.println(\"Highest: \" + max);"
+      },
+      {
+        "line": 18,
+        "text": "    System.out.println(\"Lowest: \" + min);"
+      },
+      {
+        "line": 19,
+        "text": "    System.out.println(\"Average: \" + average);"
+      },
+      {
+        "line": 20,
+        "text": "  }"
+      },
+      {
+        "line": 21,
+        "text": "}"
+      }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    for (int i = 0; i < grades.length; i++) {",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException."
+      },
+      {
+        "id": "b2",
+        "line": 12,
+        "fix": "      if (grades[i] < min) {",
+        "altFixes": [],
+        "clue": "The 'Lowest' output shows 95, which is actually the highest score in the array."
+      },
+      {
+        "id": "b3",
+        "line": 16,
+        "fix": "    int average = sum / grades.length;",
+        "altFixes": [],
+        "clue": "The average is reporting 81 instead of 80."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-02",
+    "title": "Reverse Printer",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program prints the elements of an array in reverse order.",
+    "code": [
+      { "line": 1, "text": "public class ReversePrinter {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String[] words = {\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"};" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "    System.out.println(\"Reversed:\");" },
+      { "line": 6, "text": "    int i = words.length;", "bugId": "b1" },
+      { "line": 7, "text": "    while (i >= 0) {" },
+      { "line": 8, "text": "      System.out.println(i);", "bugId": "b2" },
+      { "line": 9, "text": "      i++;", "bugId": "b3" },
+      { "line": 10, "text": "    }" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 6,
+        "fix": "    int i = words.length - 1;",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException on the first iteration."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "      System.out.println(words[i]);",
+        "altFixes": [],
+        "clue": "The output shows numbers like 4, 3, 2, 1, 0 instead of the actual words."
+      },
+      {
+        "id": "b3",
+        "line": 9,
+        "fix": "      i--;",
+        "altFixes": [],
+        "clue": "The loop never terminates and the program hangs forever."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-03",
+    "title": "Element Search",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program searches for a target value in an array and reports whether it was found.",
+    "code": [
+      { "line": 1, "text": "public class ElementSearch {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] numbers = {10, 25, 30, 47, 55, 62};" },
+      { "line": 4, "text": "    int target = 10;" },
+      { "line": 5, "text": "    boolean found = false;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    for (int i = 1; i < numbers.length; i++) {", "bugId": "b1" },
+      { "line": 8, "text": "      if (numbers[i] = target) {", "bugId": "b2" },
+      { "line": 9, "text": "        found = true;" },
+      { "line": 10, "text": "        System.out.println(\"Found \" + i + \" at index \" + i);", "bugId": "b3" },
+      { "line": 11, "text": "      }" },
+      { "line": 12, "text": "    }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "    if (!found) {" },
+      { "line": 15, "text": "      System.out.println(target + \" was not found.\");" },
+      { "line": 16, "text": "    }" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    for (int i = 0; i < numbers.length; i++) {",
+        "altFixes": [],
+        "clue": "Searching for 10 says it was not found, even though 10 is the first element in the array."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "      if (numbers[i] == target) {",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'incompatible types: int cannot be converted to boolean'."
+      },
+      {
+        "id": "b3",
+        "line": 10,
+        "fix": "        System.out.println(\"Found \" + target + \" at index \" + i);",
+        "altFixes": [
+          "        System.out.println(\"Found \" + numbers[i] + \" at index \" + i);"
+        ],
+        "clue": "When searching for 30, the output says 'Found 2 at index 2' instead of 'Found 30 at index 2'."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-04",
+    "title": "Name Roster",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "This program builds a class roster using an ArrayList, removes a student by name, and counts names starting with A.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class NameRoster {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    ArrayList<String> roster = new ArrayList<String>();" },
+      { "line": 6, "text": "    roster.add(\"Alice\");" },
+      { "line": 7, "text": "    roster.add(\"Bob\");" },
+      { "line": 8, "text": "    roster.add(\"Ava\");" },
+      { "line": 9, "text": "    roster.add(\"Charlie\");" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    roster.remove(0);", "bugId": "b1" },
+      { "line": 12, "text": "    System.out.println(\"Removed Bob\");" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "    int aCount = 0;" },
+      { "line": 15, "text": "    for (int i = 0; i < roster.size(); i++) {" },
+      { "line": 16, "text": "      if (roster.get(i).startsWith(\"a\")) {", "bugId": "b2" },
+      { "line": 17, "text": "        aCount++;" },
+      { "line": 18, "text": "      }" },
+      { "line": 19, "text": "    }" },
+      { "line": 20, "text": "    System.out.println(\"Roster size: \" + roster.size());" },
+      { "line": 21, "text": "    System.out.println(\"Names starting with A: \" + roster.size());", "bugId": "b3" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 11,
+        "fix": "    roster.remove(\"Bob\");",
+        "altFixes": [],
+        "clue": "After 'Removed Bob,' Alice is gone from the roster but Bob is still there."
+      },
+      {
+        "id": "b2",
+        "line": 16,
+        "fix": "      if (roster.get(i).startsWith(\"A\")) {",
+        "altFixes": [],
+        "clue": "The count of names starting with A shows 0, even though Alice and Ava both start with A."
+      },
+      {
+        "id": "b3",
+        "line": 21,
+        "fix": "    System.out.println(\"Names starting with A: \" + aCount);",
+        "altFixes": [],
+        "clue": "The A-name count always shows 3, which is the total roster size instead of the filtered count."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-05",
+    "title": "Number Cruncher",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "This program stores test scores in an ArrayList, computes the total, and prints the count and average.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class NumberCruncher {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    ArrayList<Integer> scores = new ArrayList<Integer>();" },
+      { "line": 6, "text": "    scores.add(85);" },
+      { "line": 7, "text": "    scores.add(92);" },
+      { "line": 8, "text": "    scores.add(78);" },
+      { "line": 9, "text": "    scores.add(95);" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    int total = 0;" },
+      { "line": 12, "text": "    for (int i = 0; i <= scores.size(); i++) {", "bugId": "b1" },
+      { "line": 13, "text": "      total = scores.get(i);", "bugId": "b2" },
+      { "line": 14, "text": "    }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "    System.out.println(\"Count: \" + scores.size());" },
+      { "line": 17, "text": "    System.out.println(\"Total: \" + total);" },
+      { "line": 18, "text": "    System.out.println(\"Average: \" + total / scores.size);", "bugId": "b3" },
+      { "line": 19, "text": "  }" },
+      { "line": 20, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 12,
+        "fix": "    for (int i = 0; i < scores.size(); i++) {",
+        "altFixes": [],
+        "clue": "The program crashes with an IndexOutOfBoundsException."
+      },
+      {
+        "id": "b2",
+        "line": 13,
+        "fix": "      total += scores.get(i);",
+        "altFixes": [
+          "      total = total + scores.get(i);"
+        ],
+        "clue": "The total shows 95 instead of 350, as if only the last score was counted."
+      },
+      {
+        "id": "b3",
+        "line": 18,
+        "fix": "    System.out.println(\"Average: \" + total / scores.size());",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'size' cannot be resolved or is not a field."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-06",
+    "title": "Contact Book",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "This program stores phone contacts in a HashMap and looks up numbers by name.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class ContactBook {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    HashMap<String, String> contacts = new HashMap<String, String>();" },
+      { "line": 6, "text": "    contacts.put(\"Alice\", \"555-1234\");" },
+      { "line": 7, "text": "    contacts.put(\"Bob\", \"555-5678\");" },
+      { "line": 8, "text": "    contacts.put(\"Alice\", \"555-9999\");", "bugId": "b1" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    System.out.println(\"Contacts: \" + contacts.size());" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "    String number = contacts.get(\"bob\");", "bugId": "b2" },
+      { "line": 13, "text": "    System.out.println(\"Bob's number: \" + number);" },
+      { "line": 14, "text": "" },
+      { "line": 15, "text": "    boolean hasAlice = contacts.containsValue(\"Alice\");", "bugId": "b3" },
+      { "line": 16, "text": "    System.out.println(\"Has Alice: \" + hasAlice);" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    contacts.putIfAbsent(\"Alice\", \"555-9999\");",
+        "altFixes": [
+          "    contacts.put(\"Charlie\", \"555-9999\");"
+        ],
+        "clue": "Alice's phone number shows 555-9999 instead of her original number 555-1234."
+      },
+      {
+        "id": "b2",
+        "line": 12,
+        "fix": "    String number = contacts.get(\"Bob\");",
+        "altFixes": [],
+        "clue": "Bob's number prints 'null' even though Bob was added to the contacts."
+      },
+      {
+        "id": "b3",
+        "line": 15,
+        "fix": "    boolean hasAlice = contacts.containsKey(\"Alice\");",
+        "altFixes": [],
+        "clue": "The check for Alice returns false even though Alice is in the contacts."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-07",
+    "title": "Swap Ends",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program swaps the first and last elements of an array, then prints the result.",
+    "code": [
+      { "line": 1, "text": "public class SwapEnds {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] nums = {10, 20, 30, 40, 50};" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "    int temp = nums[0];" },
+      { "line": 6, "text": "    nums[0] = nums[nums.length];", "bugId": "b1" },
+      { "line": 7, "text": "    nums[nums.length - 1] = nums[0];", "bugId": "b2" },
+      { "line": 8, "text": "" },
+      { "line": 9, "text": "    System.out.println(\"Swapped array:\");" },
+      { "line": 10, "text": "    for (int i = 0; i < nums.length(); i++) {", "bugId": "b3" },
+      { "line": 11, "text": "      System.out.print(nums[i] + \" \");" },
+      { "line": 12, "text": "    }" },
+      { "line": 13, "text": "  }" },
+      { "line": 14, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 6,
+        "fix": "    nums[0] = nums[nums.length - 1];",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException at the swap line."
+      },
+      {
+        "id": "b2",
+        "line": 7,
+        "fix": "    nums[nums.length - 1] = temp;",
+        "altFixes": [],
+        "clue": "After the swap, both the first and last elements show 50 instead of the first becoming 50 and the last becoming 10."
+      },
+      {
+        "id": "b3",
+        "line": 10,
+        "fix": "    for (int i = 0; i < nums.length; i++) {",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'length()' cannot be invoked on an int array."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-08",
+    "title": "Even Counter",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program counts how many even numbers are in an array and prints their positions.",
+    "code": [
+      { "line": 1, "text": "public class EvenCounter {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] data = {3, 8, 15, 22, 7, 10, 13};" },
+      { "line": 4, "text": "    int count = 0;" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "    for (int i = 1; i <= data.length; i++) {", "bugId": "b1" },
+      { "line": 7, "text": "      if (data[i] % 2 == 1) {", "bugId": "b2" },
+      { "line": 8, "text": "        System.out.println(\"Even at index \" + i + \": \" + data[i]);" },
+      { "line": 9, "text": "        count++;" },
+      { "line": 10, "text": "      }" },
+      { "line": 11, "text": "    }" },
+      { "line": 12, "text": "    System.out.println(\"Total even numbers: \" + data.length);", "bugId": "b3" },
+      { "line": 13, "text": "  }" },
+      { "line": 14, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 6,
+        "fix": "    for (int i = 0; i < data.length; i++) {",
+        "altFixes": [],
+        "clue": "The program skips the first element and crashes with an ArrayIndexOutOfBoundsException on the last iteration."
+      },
+      {
+        "id": "b2",
+        "line": 7,
+        "fix": "      if (data[i] % 2 == 0) {",
+        "altFixes": [],
+        "clue": "The program prints the odd numbers (3, 15, 7, 13) instead of the even numbers (8, 22, 10)."
+      },
+      {
+        "id": "b3",
+        "line": 12,
+        "fix": "    System.out.println(\"Total even numbers: \" + count);",
+        "altFixes": [],
+        "clue": "The total always shows 7, which is the array size, not the count of even numbers."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-09",
+    "title": "Array Copier",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program copies the contents of one array into a new array and prints both to verify they match.",
+    "code": [
+      { "line": 1, "text": "public class ArrayCopier {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] original = {5, 10, 15, 20, 25};" },
+      { "line": 4, "text": "    int[] copy = new int[original.length];" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "    for (int i = 0; i < original.length; i++) {" },
+      { "line": 7, "text": "      copy[i] = original[0];", "bugId": "b1" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    System.out.println(\"Original:\");" },
+      { "line": 11, "text": "    for (int i = 0; i < original.length; i++) {" },
+      { "line": 12, "text": "      System.out.print(original[i] + \" \");" },
+      { "line": 13, "text": "    }" },
+      { "line": 14, "text": "    System.out.println();" },
+      { "line": 15, "text": "    System.out.println(\"Copy:\");" },
+      { "line": 16, "text": "    for (int i = 0; i <= copy.length; i++) {", "bugId": "b2" },
+      { "line": 17, "text": "      System.out.print(original[i] + \" \");", "bugId": "b3" },
+      { "line": 18, "text": "    }" },
+      { "line": 19, "text": "  }" },
+      { "line": 20, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "      copy[i] = original[i];",
+        "altFixes": [],
+        "clue": "Every element in the copy array is 5. It copied the first element into every position."
+      },
+      {
+        "id": "b2",
+        "line": 16,
+        "fix": "    for (int i = 0; i < copy.length; i++) {",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException when printing the copy."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "      System.out.print(copy[i] + \" \");",
+        "altFixes": [],
+        "clue": "The 'Copy' section prints the original array values instead of the copied array values."
+      }
+    ]
+  },
+  {
+    "id": "week3-arrays-10",
+    "title": "Running Total",
+    "week": 3,
+    "topic": "arrays",
+    "description": "This program builds a running total array where each position holds the sum of all previous elements plus itself.",
+    "code": [
+      { "line": 1, "text": "public class RunningTotal {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] sales = {100, 200, 150, 300};" },
+      { "line": 4, "text": "    int[] totals = new int[sales.length];" },
+      { "line": 5, "text": "    totals[0] = sales[0];" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    for (int i = 0; i < sales.length; i++) {", "bugId": "b1" },
+      { "line": 8, "text": "      totals[i] = totals[i - 1] + sales[i];" },
+      { "line": 9, "text": "    }" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    System.out.println(\"Daily sales and running totals:\");" },
+      { "line": 12, "text": "    for (int i = 0; i < sales.length; i++) {" },
+      { "line": 13, "text": "      System.out.println(\"Day \" + i + \": sold \" + sales[i] + \", total = \" + totals[i]);", "bugId": "b2" },
+      { "line": 14, "text": "    }" },
+      { "line": 15, "text": "    System.out.println(\"Grand total: \" + totals[totals.length]);", "bugId": "b3" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    for (int i = 1; i < sales.length; i++) {",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException because it tries to access totals[-1] on the first iteration."
+      },
+      {
+        "id": "b2",
+        "line": 13,
+        "fix": "      System.out.println(\"Day \" + (i + 1) + \": sold \" + sales[i] + \", total = \" + totals[i]);",
+        "altFixes": [],
+        "clue": "The days print as Day 0, Day 1, Day 2, Day 3 instead of Day 1, Day 2, Day 3, Day 4."
+      },
+      {
+        "id": "b3",
+        "line": 15,
+        "fix": "    System.out.println(\"Grand total: \" + totals[totals.length - 1]);",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException when printing the grand total."
+      }
+    ]
+  },
+  {
+    "id": "week3-arraylist-11",
+    "title": "Grocery List",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "This program manages a grocery list by adding items, removing a purchased item, and checking if an item is on the list.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class GroceryList {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    ArrayList<String> list = new ArrayList<String>();" },
+      { "line": 6, "text": "    list.add(\"Milk\");" },
+      { "line": 7, "text": "    list.add(\"Eggs\");" },
+      { "line": 8, "text": "    list.add(\"Bread\");" },
+      { "line": 9, "text": "    list.add(\"Butter\");" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    list.remove(1);", "bugId": "b1" },
+      { "line": 12, "text": "    System.out.println(\"Bought Milk. Remaining items:\");" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "    for (int i = 0; i < list.size(); i++) {" },
+      { "line": 15, "text": "      System.out.println(\"- \" + list.get(i));" },
+      { "line": 16, "text": "    }" },
+      { "line": 17, "text": "" },
+      { "line": 18, "text": "    String lookFor = \"Bread\";" },
+      { "line": 19, "text": "    if (list.get(2) == lookFor) {", "bugId": "b2" },
+      { "line": 20, "text": "      System.out.println(lookFor + \" is on the list.\");" },
+      { "line": 21, "text": "    }" },
+      { "line": 22, "text": "    System.out.println(\"Items left: \" + list.size);", "bugId": "b3" },
+      { "line": 23, "text": "  }" },
+      { "line": 24, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 11,
+        "fix": "    list.remove(\"Milk\");",
+        "altFixes": [
+          "    list.remove(0);"
+        ],
+        "clue": "After buying Milk, the list shows Milk, Bread, and Butter. Eggs was removed instead of Milk."
+      },
+      {
+        "id": "b2",
+        "line": 19,
+        "fix": "    if (list.get(2).equals(lookFor)) {",
+        "altFixes": [],
+        "clue": "The program never prints 'Bread is on the list' even though Bread is still in the list."
+      },
+      {
+        "id": "b3",
+        "line": 22,
+        "fix": "    System.out.println(\"Items left: \" + list.size());",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'size' cannot be resolved or is not a field."
+      }
+    ]
+  },
+  {
+    "id": "week3-arraylist-12",
+    "title": "Duplicate Remover",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "This program removes duplicate colors from an ArrayList and prints the unique colors that remain.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class DuplicateRemover {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    ArrayList<String> colors = new ArrayList<String>();" },
+      { "line": 6, "text": "    colors.add(\"Red\");" },
+      { "line": 7, "text": "    colors.add(\"Blue\");" },
+      { "line": 8, "text": "    colors.add(\"Red\");" },
+      { "line": 9, "text": "    colors.add(\"Green\");" },
+      { "line": 10, "text": "    colors.add(\"Blue\");" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "    ArrayList<String> unique = new ArrayList<String>();" },
+      { "line": 13, "text": "    for (int i = 0; i < colors.size(); i++) {" },
+      { "line": 14, "text": "      if (!unique.contains(colors.get(i))) {" },
+      { "line": 15, "text": "        unique.add(colors.get(1));", "bugId": "b1" },
+      { "line": 16, "text": "      }" },
+      { "line": 17, "text": "    }" },
+      { "line": 18, "text": "" },
+      { "line": 19, "text": "    System.out.println(\"Original count: \" + colors.size());" },
+      { "line": 20, "text": "    System.out.println(\"Unique count: \" + unique.size());" },
+      { "line": 21, "text": "    for (int i = 0; i <= unique.size(); i++) {", "bugId": "b2" },
+      { "line": 22, "text": "      System.out.println(unique.get(i));" },
+      { "line": 23, "text": "    }" },
+      { "line": 24, "text": "    System.out.println(\"Has Red: \" + unique.contains(\"red\"));", "bugId": "b3" },
+      { "line": 25, "text": "  }" },
+      { "line": 26, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 15,
+        "fix": "        unique.add(colors.get(i));",
+        "altFixes": [],
+        "clue": "The unique list only contains 'Blue' repeated once. It always grabs index 1 instead of the current item."
+      },
+      {
+        "id": "b2",
+        "line": 21,
+        "fix": "    for (int i = 0; i < unique.size(); i++) {",
+        "altFixes": [],
+        "clue": "The program crashes with an IndexOutOfBoundsException when printing the unique colors."
+      },
+      {
+        "id": "b3",
+        "line": 24,
+        "fix": "    System.out.println(\"Has Red: \" + unique.contains(\"Red\"));",
+        "altFixes": [],
+        "clue": "The check for Red returns false even though Red is in the unique list. The lowercase 'red' does not match 'Red'."
+      }
+    ]
+  },
+  {
+    "id": "week3-arraylist-13",
+    "title": "Task Manager",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "This program manages a to-do list by inserting a high-priority task at the front and removing completed tasks.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class TaskManager {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    ArrayList<String> tasks = new ArrayList<String>();" },
+      { "line": 6, "text": "    tasks.add(\"Write essay\");" },
+      { "line": 7, "text": "    tasks.add(\"Study for quiz\");" },
+      { "line": 8, "text": "    tasks.add(\"Read chapter 5\");" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    tasks.add(\"URGENT: Submit homework\");", "bugId": "b1" },
+      { "line": 11, "text": "    System.out.println(\"Priority task added to front.\");" },
+      { "line": 12, "text": "" },
+      { "line": 13, "text": "    tasks.remove(\"Study for quiz\");" },
+      { "line": 14, "text": "    System.out.println(\"Completed: Study for quiz\");" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "    System.out.println(\"Remaining tasks:\");" },
+      { "line": 17, "text": "    for (int i = 0; i < tasks.size(); i++) {" },
+      { "line": 18, "text": "      System.out.println((i + 1) + \". \" + tasks.get(i + 1));", "bugId": "b2" },
+      { "line": 19, "text": "    }" },
+      { "line": 20, "text": "    String first = tasks.get(0);" },
+      { "line": 21, "text": "    if (first == \"URGENT: Submit homework\") {", "bugId": "b3" },
+      { "line": 22, "text": "      System.out.println(\"Next task is urgent!\");" },
+      { "line": 23, "text": "    }" },
+      { "line": 24, "text": "  }" },
+      { "line": 25, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 10,
+        "fix": "    tasks.add(0, \"URGENT: Submit homework\");",
+        "altFixes": [],
+        "clue": "The urgent task appears at the end of the list instead of at the front."
+      },
+      {
+        "id": "b2",
+        "line": 18,
+        "fix": "      System.out.println((i + 1) + \". \" + tasks.get(i));",
+        "altFixes": [],
+        "clue": "The program crashes with an IndexOutOfBoundsException. It skips the first task and goes one past the end."
+      },
+      {
+        "id": "b3",
+        "line": 21,
+        "fix": "    if (first.equals(\"URGENT: Submit homework\")) {",
+        "altFixes": [],
+        "clue": "The program never prints 'Next task is urgent!' even when the urgent task is first in the list."
+      }
+    ]
+  },
+  {
+    "id": "week3-arraylist-14",
+    "title": "Word Filter",
+    "week": 3,
+    "topic": "ArrayList",
+    "description": "This program filters out short words from a list, keeping only words with 5 or more characters.",
+    "code": [
+      { "line": 1, "text": "import java.util.ArrayList;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class WordFilter {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    ArrayList<String> words = new ArrayList<String>();" },
+      { "line": 6, "text": "    words.add(\"hello\");" },
+      { "line": 7, "text": "    words.add(\"hi\");" },
+      { "line": 8, "text": "    words.add(\"world\");" },
+      { "line": 9, "text": "    words.add(\"ok\");" },
+      { "line": 10, "text": "    words.add(\"java\");" },
+      { "line": 11, "text": "    words.add(\"programming\");" },
+      { "line": 12, "text": "" },
+      { "line": 13, "text": "    for (int i = 0; i < words.size(); i++) {" },
+      { "line": 14, "text": "      if (words.get(i).length() < 5) {" },
+      { "line": 15, "text": "        words.remove(i);", "bugId": "b1" },
+      { "line": 16, "text": "      }" },
+      { "line": 17, "text": "    }" },
+      { "line": 18, "text": "" },
+      { "line": 19, "text": "    System.out.println(\"Long words:\");" },
+      { "line": 20, "text": "    for (int i = 0; i < words.size(); i++) {" },
+      { "line": 21, "text": "      System.out.println(words.get(i).length);", "bugId": "b2" },
+      { "line": 22, "text": "    }" },
+      { "line": 23, "text": "    System.out.println(\"Count: \" + words.size());" },
+      { "line": 24, "text": "    boolean hasHello = words.contains(\"Hello\");", "bugId": "b3" },
+      { "line": 25, "text": "    System.out.println(\"Has hello: \" + hasHello);" },
+      { "line": 26, "text": "  }" },
+      { "line": 27, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 15,
+        "fix": "        words.remove(i--);",
+        "altFixes": [],
+        "clue": "Some short words like 'ok' are still in the list. When a word is removed, the next word shifts down and gets skipped."
+      },
+      {
+        "id": "b2",
+        "line": 21,
+        "fix": "      System.out.println(words.get(i));",
+        "altFixes": [],
+        "clue": "The program won't compile. The error says 'length' cannot be resolved for type String. It is printing the length field instead of the word itself."
+      },
+      {
+        "id": "b3",
+        "line": 24,
+        "fix": "    boolean hasHello = words.contains(\"hello\");",
+        "altFixes": [],
+        "clue": "The check returns false even though 'hello' is in the list. The capital H does not match the lowercase entry."
+      }
+    ]
+  },
+  {
+    "id": "week3-hashmap-15",
+    "title": "Student Grades",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "This program stores student grades in a HashMap and prints each student's letter grade.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class StudentGrades {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    HashMap<String, Integer> grades = new HashMap<String, Integer>();" },
+      { "line": 6, "text": "    grades.put(\"Alice\", 92);" },
+      { "line": 7, "text": "    grades.put(\"Bob\", 85);" },
+      { "line": 8, "text": "    grades.put(\"Charlie\", 78);" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    int aliceGrade = grades.get(\"alice\");", "bugId": "b1" },
+      { "line": 11, "text": "    System.out.println(\"Alice's grade: \" + aliceGrade);" },
+      { "line": 12, "text": "" },
+      { "line": 13, "text": "    if (grades.containsValue(\"Bob\")) {", "bugId": "b2" },
+      { "line": 14, "text": "      System.out.println(\"Bob is enrolled.\");" },
+      { "line": 15, "text": "    }" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "    grades.put(\"Alice\", 97);", "bugId": "b3" },
+      { "line": 18, "text": "    System.out.println(\"Added Alice's extra credit score.\");" },
+      { "line": 19, "text": "    System.out.println(\"Alice now has: \" + grades.get(\"Alice\"));" },
+      { "line": 20, "text": "  }" },
+      { "line": 21, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 10,
+        "fix": "    int aliceGrade = grades.get(\"Alice\");",
+        "altFixes": [],
+        "clue": "The program crashes with a NullPointerException. The key 'alice' with a lowercase a does not match 'Alice'."
+      },
+      {
+        "id": "b2",
+        "line": 13,
+        "fix": "    if (grades.containsKey(\"Bob\")) {",
+        "altFixes": [],
+        "clue": "The program never prints 'Bob is enrolled' even though Bob was added to the map. It is checking values instead of keys."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "    grades.putIfAbsent(\"Alice\", 97);",
+        "altFixes": [],
+        "clue": "Alice's original grade of 92 was replaced with 97 instead of keeping her first score."
+      }
+    ]
+  },
+  {
+    "id": "week3-hashmap-16",
+    "title": "Inventory Tracker",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "This program tracks product inventory counts in a HashMap and checks stock levels.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class InventoryTracker {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    HashMap<String, Integer> stock = new HashMap<String, Integer>();" },
+      { "line": 6, "text": "    stock.put(\"Apples\", 50);" },
+      { "line": 7, "text": "    stock.put(\"Bananas\", 30);" },
+      { "line": 8, "text": "    stock.put(\"Oranges\", 45);" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    System.out.println(\"Apple stock: \" + stock.get(\"apples\"));", "bugId": "b1" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "    int grapes = stock.get(\"Grapes\");", "bugId": "b2" },
+      { "line": 13, "text": "    System.out.println(\"Grape stock: \" + grapes);" },
+      { "line": 14, "text": "" },
+      { "line": 15, "text": "    System.out.println(\"All products:\");" },
+      { "line": 16, "text": "    for (String key : stock.keySet()) {" },
+      { "line": 17, "text": "      System.out.println(key + \": \" + stock.containsKey(key));", "bugId": "b3" },
+      { "line": 18, "text": "    }" },
+      { "line": 19, "text": "  }" },
+      { "line": 20, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 10,
+        "fix": "    System.out.println(\"Apple stock: \" + stock.get(\"Apples\"));",
+        "altFixes": [],
+        "clue": "Apple stock prints 'null' even though Apples was added. The lowercase 'apples' does not match the key 'Apples'."
+      },
+      {
+        "id": "b2",
+        "line": 12,
+        "fix": "    Integer grapes = stock.getOrDefault(\"Grapes\", 0);",
+        "altFixes": [],
+        "clue": "The program crashes with a NullPointerException. 'Grapes' was never added, so get() returns null and it cannot unbox to int."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "      System.out.println(key + \": \" + stock.get(key));",
+        "altFixes": [],
+        "clue": "The inventory list prints 'Apples: true' and 'Bananas: true' instead of the actual stock counts."
+      }
+    ]
+  },
+  {
+    "id": "week3-hashmap-17",
+    "title": "Vote Counter",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "This program counts votes for class president candidates using a HashMap and announces the winner.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class VoteCounter {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    HashMap<String, Integer> votes = new HashMap<String, Integer>();" },
+      { "line": 6, "text": "    String[] ballots = {\"Alice\", \"Bob\", \"Alice\", \"Alice\", \"Bob\"};" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "    for (int i = 0; i < ballots.length; i++) {" },
+      { "line": 9, "text": "      String name = ballots[i];" },
+      { "line": 10, "text": "      if (votes.containsKey(name)) {" },
+      { "line": 11, "text": "        votes.put(name, votes.get(name) + 1);" },
+      { "line": 12, "text": "      } else {" },
+      { "line": 13, "text": "        votes.put(name, 0);", "bugId": "b1" },
+      { "line": 14, "text": "      }" },
+      { "line": 15, "text": "    }" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "    System.out.println(\"Results:\");" },
+      { "line": 18, "text": "    for (String name : votes.values()) {", "bugId": "b2" },
+      { "line": 19, "text": "      System.out.println(name + \": \" + votes.get(name));" },
+      { "line": 20, "text": "    }" },
+      { "line": 21, "text": "" },
+      { "line": 22, "text": "    System.out.println(\"Alice votes: \" + votes.get(\"alice\"));", "bugId": "b3" },
+      { "line": 23, "text": "  }" },
+      { "line": 24, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 13,
+        "fix": "        votes.put(name, 1);",
+        "altFixes": [],
+        "clue": "The vote counts are off by one. Alice shows 2 votes instead of 3, and Bob shows 1 instead of 2."
+      },
+      {
+        "id": "b2",
+        "line": 18,
+        "fix": "    for (String name : votes.keySet()) {",
+        "altFixes": [],
+        "clue": "The program won't compile. It tries to assign Integer values to a String variable because values() returns the vote counts, not the names."
+      },
+      {
+        "id": "b3",
+        "line": 22,
+        "fix": "    System.out.println(\"Alice votes: \" + votes.get(\"Alice\"));",
+        "altFixes": [],
+        "clue": "Alice's vote count prints 'null' even though Alice has votes. The lowercase 'alice' does not match the key."
+      }
+    ]
+  },
+  {
+    "id": "week3-hashmap-18",
+    "title": "Menu Pricer",
+    "week": 3,
+    "topic": "HashMap",
+    "description": "This program stores menu item prices in a HashMap and calculates the total cost of an order.",
+    "code": [
+      { "line": 1, "text": "import java.util.HashMap;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class MenuPricer {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    HashMap<String, Double> menu = new HashMap<String, Double>();" },
+      { "line": 6, "text": "    menu.put(\"Burger\", 8.99);" },
+      { "line": 7, "text": "    menu.put(\"Fries\", 3.49);" },
+      { "line": 8, "text": "    menu.put(\"Soda\", 1.99);" },
+      { "line": 9, "text": "    menu.put(\"Burger\", 9.99);", "bugId": "b1" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    String[] order = {\"Burger\", \"Fries\", \"Soda\"};" },
+      { "line": 12, "text": "    double total = 0;" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "    for (int i = 0; i < order.length; i++) {" },
+      { "line": 15, "text": "      double price = menu.get(order[i]);" },
+      { "line": 16, "text": "      System.out.println(order[i] + \": $\" + price);" },
+      { "line": 17, "text": "      total = price;", "bugId": "b2" },
+      { "line": 18, "text": "    }" },
+      { "line": 19, "text": "" },
+      { "line": 20, "text": "    System.out.println(\"Order total: $\" + total);" },
+      { "line": 21, "text": "    System.out.println(\"Has Pizza: \" + menu.containsValue(\"Pizza\"));", "bugId": "b3" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 9,
+        "fix": "    menu.putIfAbsent(\"Burger\", 9.99);",
+        "altFixes": [],
+        "clue": "The Burger price shows $9.99 instead of the original $8.99. The second put overwrote the first price."
+      },
+      {
+        "id": "b2",
+        "line": 17,
+        "fix": "      total += price;",
+        "altFixes": [
+          "      total = total + price;"
+        ],
+        "clue": "The order total shows $1.99, which is just the price of the last item. It replaces the total each time instead of adding."
+      },
+      {
+        "id": "b3",
+        "line": 21,
+        "fix": "    System.out.println(\"Has Pizza: \" + menu.containsKey(\"Pizza\"));",
+        "altFixes": [],
+        "clue": "The check for Pizza returns false, which is correct, but it is searching the values (prices) instead of the keys (item names). It would fail to find real items too."
+      }
+    ]
+  }
+]

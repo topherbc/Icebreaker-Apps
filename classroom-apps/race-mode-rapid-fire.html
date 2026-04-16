@@ -2363,6 +2363,7 @@ label {
         <div>Final Rank<strong id="final-rank">--</strong></div>
       </div>
       <div id="student-final-lb" style="width:100%; max-width:400px;"></div>
+      <button class="btn-primary" onclick="leaveGame()" style="margin-top:16px;">Leave Game</button>
     </div>
   </div>
 </div>
@@ -3754,7 +3755,7 @@ function revealAnswer() {
 
 function computeRankings() {
   var arr = Object.values(hostState.players).map(function(p) {
-    return { name: p.name, score: p.score, id: p.id, streak: p.streak };
+    return { name: p.name, score: p.score, id: p.id, streak: p.streak, emoji: p.emoji || '' };
   });
   arr.sort(function(a, b) { return b.score - a.score; });
   arr.forEach(function(p, i) { p.rank = i + 1; });
@@ -3949,8 +3950,17 @@ function playAgain() {
   document.getElementById('lock-room-btn').textContent = 'Lock Room';
   renderLobbyPlayers();
 
-  // Re-setup channels for new room code
-  setupHostChannels(hostState.roomCode);
+  // Re-setup channels for new room code (verify connection is active)
+  if (hostState.ablyClient && hostState.ablyClient.connection.state === 'connected') {
+    setupHostChannels(hostState.roomCode);
+  } else if (hostState.ablyClient) {
+    hostState.ablyClient.connection.once('connected', function() {
+      setupHostChannels(hostState.roomCode);
+    });
+    if (hostState.ablyClient.connection.state !== 'connecting') {
+      hostState.ablyClient.connect();
+    }
+  }
 }
 
 function backToBuilder() {
@@ -4155,7 +4165,23 @@ function initStudentAbly(onReady) {
   });
 }
 
+// Register visibility handler once (outside setupStudentChannels to avoid stacking)
+var _visibilityHandlerRegistered = false;
+function registerVisibilityHandler() {
+  if (_visibilityHandlerRegistered) return;
+  _visibilityHandlerRegistered = true;
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible' && studentState.ablyClient) {
+      var connState = studentState.ablyClient.connection.state;
+      if (connState === 'disconnected' || connState === 'suspended') {
+        studentState.ablyClient.connect();
+      }
+    }
+  });
+}
+
 function setupStudentChannels(code) {
+  registerVisibilityHandler();
   studentState.gameChannel = studentState.ablyClient.channels.get('rmrf-game-' + code);
   studentState.presenceChannel = studentState.ablyClient.channels.get('rmrf-presence-' + code);
   studentState.answersChannel = studentState.ablyClient.channels.get('rmrf-answers-' + code);
@@ -4190,12 +4216,33 @@ function setupStudentChannels(code) {
   });
 
   // Track player count in waiting room
-  studentState.presenceChannel.presence.subscribe(function() {
+  studentState.presenceChannel.presence.subscribe('enter', function() {
     studentState.presenceChannel.presence.get().then(function(members) {
       var count = members.filter(function(m) { return !m.data || m.data.role !== 'host'; }).length;
       var el = document.getElementById('student-player-count');
       if (el) el.textContent = count + ' players in the lobby';
     });
+  });
+
+  // Detect host leaving (presence leave)
+  studentState.presenceChannel.presence.subscribe('leave', function(msg) {
+    var data = msg.data || {};
+    if (data.role === 'host') {
+      // Host has disconnected
+      clearInterval(studentState.timerInterval);
+      showStudentScreen('podium');
+      document.getElementById('student-final-msg').textContent = 'Host disconnected';
+      document.getElementById('final-score').textContent = studentState.score;
+      document.getElementById('final-rank').textContent = studentState.rank ? '#' + studentState.rank : '--';
+      document.getElementById('student-final-lb').innerHTML = '<p style="text-align:center; color:var(--amber); margin-top:12px;">The host has left the game.</p>';
+    } else {
+      // Another player left; update count
+      studentState.presenceChannel.presence.get().then(function(members) {
+        var count = members.filter(function(m) { return !m.data || m.data.role !== 'host'; }).length;
+        var el = document.getElementById('student-player-count');
+        if (el) el.textContent = count + ' players in the lobby';
+      });
+    }
   });
 }
 
@@ -4215,16 +4262,6 @@ function subscribeToStudentEvents() {
         name: studentState.name,
         emoji: studentState.emoji
       }).catch(function() {});
-    }
-  });
-
-  // Handle visibility change (phone sleep/wake)
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible' && studentState.ablyClient) {
-      var connState = studentState.ablyClient.connection.state;
-      if (connState === 'disconnected' || connState === 'suspended') {
-        studentState.ablyClient.connect();
-      }
     }
   });
 
@@ -4609,6 +4646,28 @@ function showStudentFinalResults(data) {
 }
 
 // ================================================================
+//  STUDENT LEAVE / CLEANUP
+// ================================================================
+function leaveGame() {
+  cleanupStudentAbly();
+  window.location.href = window.location.pathname + '?view=join';
+}
+
+function cleanupStudentAbly() {
+  clearInterval(studentState.timerInterval);
+  if (studentState.presenceChannel) {
+    try { studentState.presenceChannel.presence.leave(); } catch(e) {}
+  }
+  if (studentState.ablyClient) {
+    try { studentState.ablyClient.close(); } catch(e) {}
+    studentState.ablyClient = null;
+  }
+  studentState.gameChannel = null;
+  studentState.presenceChannel = null;
+  studentState.answersChannel = null;
+}
+
+// ================================================================
 //  UTILITY FUNCTIONS
 // ================================================================
 function escHtml(str) {
@@ -4649,6 +4708,25 @@ function shuffleArray(arr) {
 // ================================================================
 //  INIT
 // ================================================================
+
+// Graceful cleanup on tab close/navigate away
+window.addEventListener('beforeunload', function() {
+  // Host cleanup
+  if (hostState.presenceChannel) {
+    try { hostState.presenceChannel.presence.leave(); } catch(e) {}
+  }
+  if (hostState.ablyClient) {
+    try { hostState.ablyClient.close(); } catch(e) {}
+  }
+  // Student cleanup
+  if (studentState.presenceChannel) {
+    try { studentState.presenceChannel.presence.leave(); } catch(e) {}
+  }
+  if (studentState.ablyClient) {
+    try { studentState.ablyClient.close(); } catch(e) {}
+  }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
   restoreA11y();
   initRouter();

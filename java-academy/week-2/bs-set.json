@@ -397,5 +397,610 @@
         "clue": "The perimeter of a 4x6 rectangle shows 14.0 instead of 20.0."
       }
     ]
+  },
+  {
+    "id": "week2-loops-07",
+    "title": "Countdown Timer",
+    "week": 2,
+    "topic": "loops",
+    "description": "This program counts down from 10 to 1 and then prints a launch message.",
+    "code": [
+      { "line": 1, "text": "public class Countdown {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int start = 10;" },
+      { "line": 4, "text": "    int i = start;" },
+      { "line": 5, "text": "    while (i >= 0) {", "bugId": "b1" },
+      { "line": 6, "text": "      System.out.println(i);" },
+      { "line": 7, "text": "      i++;", "bugId": "b2" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "text": "    System.out.print(\"Liftoff!\");", "bugId": "b3" },
+      { "line": 10, "text": "    System.out.println(\" We launched from \" + start + \".\");" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    while (i >= 1) {",
+        "altFixes": [
+          "    while (i > 0) {"
+        ],
+        "clue": "The countdown prints 0 before the loop ends, but it should stop at 1."
+      },
+      {
+        "id": "b2",
+        "line": 7,
+        "fix": "      i--;",
+        "altFixes": [],
+        "clue": "The program hangs and never finishes; the numbers keep going up instead of down."
+      },
+      {
+        "id": "b3",
+        "line": 9,
+        "fix": "    System.out.println(\"Liftoff!\");",
+        "altFixes": [],
+        "clue": "The output reads 'Liftoff! We launched from 10.' all on one line instead of two."
+      }
+    ]
+  },
+  {
+    "id": "week2-loops-08",
+    "title": "Factorial Calculator",
+    "week": 2,
+    "topic": "loops",
+    "description": "This program calculates the factorial of 6 using a for loop and prints the result.",
+    "code": [
+      { "line": 1, "text": "public class Factorial {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int n = 6;" },
+      { "line": 4, "text": "    int result = 0;", "bugId": "b1" },
+      { "line": 5, "text": "    for (int i = 1; i < n; i++) {", "bugId": "b2" },
+      { "line": 6, "text": "      result = result + i;", "bugId": "b3" },
+      { "line": 7, "text": "    }" },
+      { "line": 8, "text": "    System.out.println(n + \"! = \" + result);" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 4,
+        "fix": "    int result = 1;",
+        "altFixes": [],
+        "clue": "The result is always 0 no matter what number you choose."
+      },
+      {
+        "id": "b2",
+        "line": 5,
+        "fix": "    for (int i = 1; i <= n; i++) {",
+        "altFixes": [],
+        "clue": "The factorial of 6 shows 120 instead of 720; the number 6 itself is not being multiplied in."
+      },
+      {
+        "id": "b3",
+        "line": 6,
+        "fix": "      result = result * i;",
+        "altFixes": [
+          "      result *= i;"
+        ],
+        "clue": "The program prints 15 (which is 1+2+3+4+5) instead of a factorial product."
+      }
+    ]
+  },
+  {
+    "id": "week2-loops-09",
+    "title": "Average Finder",
+    "week": 2,
+    "topic": "loops",
+    "description": "This program computes the average of five test scores stored in an array.",
+    "code": [
+      { "line": 1, "text": "public class AverageFinder {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int[] scores = {85, 92, 78, 90, 88};" },
+      { "line": 4, "text": "    int total = 0;" },
+      { "line": 5, "text": "    for (int i = 0; i <= scores.length; i++) {", "bugId": "b1" },
+      { "line": 6, "text": "      total = scores[i];", "bugId": "b2" },
+      { "line": 7, "text": "    }" },
+      { "line": 8, "text": "    int average = total / 4;", "bugId": "b3" },
+      { "line": 9, "text": "    System.out.println(\"Average score: \" + average);" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    for (int i = 0; i < scores.length; i++) {",
+        "altFixes": [],
+        "clue": "The program crashes with an ArrayIndexOutOfBoundsException at runtime."
+      },
+      {
+        "id": "b2",
+        "line": 6,
+        "fix": "      total += scores[i];",
+        "altFixes": [
+          "      total = total + scores[i];"
+        ],
+        "clue": "The total only holds the last score (88) instead of the sum of all five scores."
+      },
+      {
+        "id": "b3",
+        "line": 8,
+        "fix": "    int average = total / scores.length;",
+        "altFixes": [
+          "    int average = total / 5;"
+        ],
+        "clue": "The average divides by 4 but there are 5 scores in the array."
+      }
+    ]
+  },
+  {
+    "id": "week2-loops-10",
+    "title": "Number Guesser",
+    "week": 2,
+    "topic": "loops",
+    "description": "This program uses a while loop to count up from 1 until it finds a secret number, then reports how many attempts it took.",
+    "code": [
+      { "line": 1, "text": "public class NumberGuesser {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int secret = 7;" },
+      { "line": 4, "text": "    int guess = 1;" },
+      { "line": 5, "text": "    int attempts = 1;", "bugId": "b1" },
+      { "line": 6, "text": "    while (guess < secret) {", "bugId": "b2" },
+      { "line": 7, "text": "      System.out.println(\"Tried: \" + guess);" },
+      { "line": 8, "text": "      guess++;" },
+      { "line": 9, "text": "    }" },
+      { "line": 10, "text": "    System.out.println(\"Found it: \" + guess);" },
+      { "line": 11, "text": "    System.out.println(\"Took \" + attempts + \" guesses.\");", "bugId": "b3" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    int attempts = 0;",
+        "altFixes": [],
+        "clue": "The attempt count is off by one; it says 1 guess even before any guessing starts."
+      },
+      {
+        "id": "b2",
+        "line": 6,
+        "fix": "    while (guess != secret) {",
+        "altFixes": [],
+        "clue": "If secret were changed to a value less than 1, the loop would be skipped entirely."
+      },
+      {
+        "id": "b3",
+        "line": 11,
+        "fix": "    System.out.println(\"Took \" + guess + \" guesses.\");",
+        "altFixes": [],
+        "clue": "The program always says 'Took 1 guesses' because the attempts variable never changes."
+      }
+    ]
+  },
+  {
+    "id": "week2-classes-11",
+    "title": "Student Record",
+    "week": 2,
+    "topic": "classes",
+    "description": "This Student class stores a name and GPA, and reports whether the student made the honor roll.",
+    "code": [
+      { "line": 1, "text": "public class Student {" },
+      { "line": 2, "text": "  String name;" },
+      { "line": 3, "text": "  double gpa;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "  public Student(String name, double gpa) {" },
+      { "line": 6, "text": "    this.name = name;" },
+      { "line": 7, "text": "    gpa = gpa;", "bugId": "b1" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "  public boolean isHonorRoll() {" },
+      { "line": 11, "text": "    return gpa > 3.5;", "bugId": "b2" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "  public String toString() {" },
+      { "line": 15, "text": "    return gpa + \" (GPA: \" + gpa + \")\";", "bugId": "b3" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "" },
+      { "line": 18, "text": "  public static void main(String[] args) {" },
+      { "line": 19, "text": "    Student s = new Student(\"Alice\", 3.8);" },
+      { "line": 20, "text": "    System.out.println(s);" },
+      { "line": 21, "text": "    System.out.println(\"Honor roll: \" + s.isHonorRoll());" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    this.gpa = gpa;",
+        "altFixes": [],
+        "clue": "The GPA field stays at 0.0 because the parameter shadows the field without this."
+      },
+      {
+        "id": "b2",
+        "line": 11,
+        "fix": "    return gpa >= 3.5;",
+        "altFixes": [],
+        "clue": "A student with exactly a 3.5 GPA is not making the honor roll, but 3.5 should qualify."
+      },
+      {
+        "id": "b3",
+        "line": 15,
+        "fix": "    return name + \" (GPA: \" + gpa + \")\";",
+        "altFixes": [],
+        "clue": "The toString prints '3.8 (GPA: 3.8)' instead of 'Alice (GPA: 3.8)'."
+      }
+    ]
+  },
+  {
+    "id": "week2-classes-12",
+    "title": "Bank Account",
+    "week": 2,
+    "topic": "classes",
+    "description": "This BankAccount class tracks an owner and balance, and supports deposits and withdrawals.",
+    "code": [
+      { "line": 1, "text": "public class BankAccount {" },
+      { "line": 2, "text": "  String owner;" },
+      { "line": 3, "text": "  double balance;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "  public BankAccount(String owner, double balance) {" },
+      { "line": 6, "text": "    owner = owner;", "bugId": "b1" },
+      { "line": 7, "text": "    this.balance = balance;" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "  public void deposit(double amount) {" },
+      { "line": 11, "text": "    balance -= amount;", "bugId": "b2" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "  public void withdraw(double amount) {" },
+      { "line": 15, "text": "    balance -= amount;" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "" },
+      { "line": 18, "text": "  public static void main(String[] args) {" },
+      { "line": 19, "text": "    BankAccount acct = new BankAccount(\"Mia\", 100.0);" },
+      { "line": 20, "text": "    acct.deposit(50.0);" },
+      { "line": 21, "text": "    System.out.println(acct.owner + \": $\" + acct.owner);", "bugId": "b3" },
+      { "line": 22, "text": "  }" },
+      { "line": 23, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 6,
+        "fix": "    this.owner = owner;",
+        "altFixes": [],
+        "clue": "Printing the account owner shows 'null' instead of 'Mia'."
+      },
+      {
+        "id": "b2",
+        "line": 11,
+        "fix": "    balance += amount;",
+        "altFixes": [],
+        "clue": "After depositing $50, the balance goes down to $50 instead of up to $150."
+      },
+      {
+        "id": "b3",
+        "line": 21,
+        "fix": "    System.out.println(acct.owner + \": $\" + acct.balance);",
+        "altFixes": [],
+        "clue": "The output shows 'Mia: $Mia' instead of showing the dollar amount."
+      }
+    ]
+  },
+  {
+    "id": "week2-classes-13",
+    "title": "Book Tracker",
+    "week": 2,
+    "topic": "classes",
+    "description": "This Book class stores a title, author, and page count, and reports if the book is long.",
+    "code": [
+      { "line": 1, "text": "public class Book {" },
+      { "line": 2, "text": "  String title;" },
+      { "line": 3, "text": "  String author;" },
+      { "line": 4, "text": "  int pages;" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "  public Book(String title, String author, int pages) {" },
+      { "line": 7, "text": "    this.title = title;" },
+      { "line": 8, "text": "    this.author = title;", "bugId": "b1" },
+      { "line": 9, "text": "    this.pages = pages;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public boolean isLong() {" },
+      { "line": 13, "text": "    return pages < 300;", "bugId": "b2" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "  public String toString() {" },
+      { "line": 17, "text": "    return title + \" by \" + title;", "bugId": "b3" },
+      { "line": 18, "text": "  }" },
+      { "line": 19, "text": "" },
+      { "line": 20, "text": "  public static void main(String[] args) {" },
+      { "line": 21, "text": "    Book b = new Book(\"Dune\", \"Frank Herbert\", 412);" },
+      { "line": 22, "text": "    System.out.println(b);" },
+      { "line": 23, "text": "    System.out.println(\"Long book: \" + b.isLong());" },
+      { "line": 24, "text": "  }" },
+      { "line": 25, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    this.author = author;",
+        "altFixes": [],
+        "clue": "The author field stores 'Dune' instead of 'Frank Herbert'."
+      },
+      {
+        "id": "b2",
+        "line": 13,
+        "fix": "    return pages > 300;",
+        "altFixes": [
+          "    return pages >= 300;"
+        ],
+        "clue": "A 412-page book is reported as not long, but a 200-page book is reported as long."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "    return title + \" by \" + author;",
+        "altFixes": [],
+        "clue": "Printing the book shows 'Dune by Dune' instead of 'Dune by Frank Herbert'."
+      }
+    ]
+  },
+  {
+    "id": "week2-classes-14",
+    "title": "Temperature Converter",
+    "week": 2,
+    "topic": "classes",
+    "description": "This Temperature class stores a Fahrenheit value and converts it to Celsius, and checks if water is freezing.",
+    "code": [
+      { "line": 1, "text": "public class Temperature {" },
+      { "line": 2, "text": "  double fahrenheit;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public Temperature(double fahrenheit) {" },
+      { "line": 5, "text": "    fahrenheit = fahrenheit;", "bugId": "b1" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "  public double toCelsius() {" },
+      { "line": 9, "text": "    return fahrenheit - 32 * 5 / 9;", "bugId": "b2" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public boolean isFreezing() {" },
+      { "line": 13, "text": "    return fahrenheit > 32;", "bugId": "b3" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "  public static void main(String[] args) {" },
+      { "line": 17, "text": "    Temperature t = new Temperature(212.0);" },
+      { "line": 18, "text": "    System.out.println(\"Celsius: \" + t.toCelsius());" },
+      { "line": 19, "text": "    System.out.println(\"Freezing: \" + t.isFreezing());" },
+      { "line": 20, "text": "  }" },
+      { "line": 21, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    this.fahrenheit = fahrenheit;",
+        "altFixes": [],
+        "clue": "The fahrenheit field stays at 0.0 because the parameter shadows the field."
+      },
+      {
+        "id": "b2",
+        "line": 9,
+        "fix": "    return (fahrenheit - 32) * 5 / 9;",
+        "altFixes": [],
+        "clue": "The Celsius result is wrong because 32 * 5 / 9 is computed first due to operator precedence."
+      },
+      {
+        "id": "b3",
+        "line": 13,
+        "fix": "    return fahrenheit <= 32;",
+        "altFixes": [
+          "    return fahrenheit < 32;"
+        ],
+        "clue": "A temperature of 20F is reported as not freezing, but anything at or below 32F should be freezing."
+      }
+    ]
+  },
+  {
+    "id": "week2-methods-15",
+    "title": "Circle Area",
+    "week": 2,
+    "topic": "methods",
+    "description": "This program uses a static method to compute the area of a circle given its radius.",
+    "code": [
+      { "line": 1, "text": "public class CircleArea {" },
+      { "line": 2, "text": "  public static double computeArea(double radius) {" },
+      { "line": 3, "text": "    double area = 3.14 * radius * 2;", "bugId": "b1" },
+      { "line": 4, "text": "    System.out.println(area);", "bugId": "b2" },
+      { "line": 5, "text": "  }" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "  public static void main(String[] args) {" },
+      { "line": 8, "text": "    double r1 = computeArea(5.0);" },
+      { "line": 9, "text": "    System.out.println(\"Area with radius 5: \" + r1);" },
+      { "line": 10, "text": "    double r2 = computeArea(3);" },
+      { "line": 11, "text": "    System.out.print(\"Area with radius 3: \" + r2);", "bugId": "b3" },
+      { "line": 12, "text": "    System.out.println(\" sq units\");" },
+      { "line": 13, "text": "  }" },
+      { "line": 14, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 3,
+        "fix": "    double area = 3.14 * radius * radius;",
+        "altFixes": [],
+        "clue": "The area of a circle with radius 5 shows 31.4 instead of 78.5."
+      },
+      {
+        "id": "b2",
+        "line": 4,
+        "fix": "    return area;",
+        "altFixes": [],
+        "clue": "The code does not compile because the method declares a double return type but never returns a value."
+      },
+      {
+        "id": "b3",
+        "line": 11,
+        "fix": "    System.out.println(\"Area with radius 3: \" + r2);",
+        "altFixes": [],
+        "clue": "The second result and 'sq units' print on the same line instead of the result on its own line."
+      }
+    ]
+  },
+  {
+    "id": "week2-methods-16",
+    "title": "Grade Checker",
+    "week": 2,
+    "topic": "methods",
+    "description": "This program uses a static method to convert a numeric score into a letter grade.",
+    "code": [
+      { "line": 1, "text": "public class GradeChecker {" },
+      { "line": 2, "text": "  public static String getGrade(int score) {" },
+      { "line": 3, "text": "    if (score >= 90) {" },
+      { "line": 4, "text": "      return \"A\";" },
+      { "line": 5, "text": "    } else if (score >= 80) {" },
+      { "line": 6, "text": "      return \"B\";" },
+      { "line": 7, "text": "    } else if (score >= 60) {", "bugId": "b1" },
+      { "line": 8, "text": "      return \"C\";" },
+      { "line": 9, "text": "    } else {" },
+      { "line": 10, "text": "      return \"C\";", "bugId": "b2" },
+      { "line": 11, "text": "    }" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "  public static void main(String[] args) {" },
+      { "line": 15, "text": "    System.out.println(\"Score 95: \" + getGrade(95));" },
+      { "line": 16, "text": "    System.out.println(\"Score 85: \" + getGrade(85));" },
+      { "line": 17, "text": "    System.out.println(\"Score 45: \" + getGrade(55));", "bugId": "b3" },
+      { "line": 18, "text": "  }" },
+      { "line": 19, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    } else if (score >= 70) {",
+        "altFixes": [],
+        "clue": "A score of 65 gets a C, but it should be a D. The C cutoff should be 70."
+      },
+      {
+        "id": "b2",
+        "line": 10,
+        "fix": "      return \"F\";",
+        "altFixes": [],
+        "clue": "A score of 40 returns 'C' instead of 'F'."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "    System.out.println(\"Score 55: \" + getGrade(55));",
+        "altFixes": [],
+        "clue": "The label says 'Score 45' but the method is called with 55."
+      }
+    ]
+  },
+  {
+    "id": "week2-methods-17",
+    "title": "Tip Calculator",
+    "week": 2,
+    "topic": "methods",
+    "description": "This program uses static methods to calculate the tip and total for a restaurant bill.",
+    "code": [
+      { "line": 1, "text": "public class TipCalculator {" },
+      { "line": 2, "text": "  public static double calcTip(double bill, double tipPercent) {" },
+      { "line": 3, "text": "    return bill + tipPercent;", "bugId": "b1" },
+      { "line": 4, "text": "  }" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "  public static double calcTotal(double bill, double tipPercent) {" },
+      { "line": 7, "text": "    double tip = calcTip(bill, tipPercent);" },
+      { "line": 8, "text": "    return tip;", "bugId": "b2" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "  public static void main(String[] args) {" },
+      { "line": 12, "text": "    double bill = 50.0;" },
+      { "line": 13, "text": "    double tipRate = 0.20;" },
+      { "line": 14, "text": "    double tip = calcTip(bill, tipRate);" },
+      { "line": 15, "text": "    double total = calcTotal(tipRate, bill);", "bugId": "b3" },
+      { "line": 16, "text": "    System.out.println(\"Tip: $\" + tip);" },
+      { "line": 17, "text": "    System.out.println(\"Total: $\" + total);" },
+      { "line": 18, "text": "  }" },
+      { "line": 19, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 3,
+        "fix": "    return bill * tipPercent;",
+        "altFixes": [],
+        "clue": "The tip on a $50 bill at 20% shows $50.20 instead of $10.00."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "    return bill + tip;",
+        "altFixes": [],
+        "clue": "The total equals just the tip amount instead of the bill plus the tip."
+      },
+      {
+        "id": "b3",
+        "line": 15,
+        "fix": "    double total = calcTotal(bill, tipRate);",
+        "altFixes": [],
+        "clue": "The arguments are in the wrong order; calcTotal receives 0.20 as the bill and 50.0 as the tip rate."
+      }
+    ]
+  },
+  {
+    "id": "week2-methods-18",
+    "title": "Max Finder",
+    "week": 2,
+    "topic": "methods",
+    "description": "This program uses static methods to find the maximum of two numbers and the maximum of three numbers.",
+    "code": [
+      { "line": 1, "text": "public class MaxFinder {" },
+      { "line": 2, "text": "  public static int max(int a, int b) {" },
+      { "line": 3, "text": "    if (a > b) {" },
+      { "line": 4, "text": "      return b;", "bugId": "b1" },
+      { "line": 5, "text": "    }" },
+      { "line": 6, "text": "    return b;" },
+      { "line": 7, "text": "  }" },
+      { "line": 8, "text": "" },
+      { "line": 9, "text": "  public static int max3(int a, int b, int c) {" },
+      { "line": 10, "text": "    int biggest = max(a, b);" },
+      { "line": 11, "text": "    return max(biggest, b);", "bugId": "b2" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "  public static void main(String[] args) {" },
+      { "line": 15, "text": "    System.out.println(\"Max of 3, 7: \" + max(3, 7));" },
+      { "line": 16, "text": "    System.out.println(\"Max of 5, 2, 9: \" + max3(5, 2, 9));" },
+      { "line": 17, "text": "    System.out.println(\"Max of 4, 8: \" + max(8, 4));", "bugId": "b3" },
+      { "line": 18, "text": "  }" },
+      { "line": 19, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 4,
+        "fix": "      return a;",
+        "altFixes": [],
+        "clue": "Calling max(7, 3) returns 3 instead of 7; it returns the smaller number when a is bigger."
+      },
+      {
+        "id": "b2",
+        "line": 11,
+        "fix": "    return max(biggest, c);",
+        "altFixes": [],
+        "clue": "Calling max3(5, 2, 9) returns 5 instead of 9; the third argument is never compared."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "    System.out.println(\"Max of 4, 8: \" + max(4, 8));",
+        "altFixes": [],
+        "clue": "The label says 'Max of 4, 8' but the arguments are passed as (8, 4) in the wrong order."
+      }
+    ]
   }
 ]

@@ -74,15 +74,19 @@
   --success: #0a5940;
   --success-bg: #f0fdf4;
 
-  /* Answer shape colors: Black, Red, Blue, Green */
-  --shape-triangle: #1a1a2e;
+  /* Answer shape colors: Purple, Red, Blue, Green, Orange, Teal */
+  --shape-triangle: #7b2d8e;
   --shape-circle: #c53030;
   --shape-square: #1a4d9e;
   --shape-diamond: #0a5940;
-  --shape-triangle-bg: #e8e8ec;
+  --shape-star: #d97706;
+  --shape-hexagon: #0d7377;
+  --shape-triangle-bg: #f3e8f6;
   --shape-circle-bg: #fceaea;
   --shape-square-bg: #e8effd;
   --shape-diamond-bg: #e6f7f2;
+  --shape-star-bg: #fef3c7;
+  --shape-hexagon-bg: #e0f2f1;
 
   /* Podium */
   --gold: #f5a623;
@@ -114,11 +118,13 @@
   --accent: #f5a623;
   --shadow: 0 2px 8px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
-  /* Dark mode shape colors: Black->lighter, Red, Blue, Green */
-  --shape-triangle: #3a3a5e;
+  /* Dark mode shape colors: Purple, Red, Blue, Green, Orange, Teal */
+  --shape-triangle: #a855f7;
   --shape-circle: #e05252;
-  --shape-square: #3b6fd4;
-  --shape-diamond: #1a8a6a;
+  --shape-square: #3b82f6;
+  --shape-diamond: #22c55e;
+  --shape-star: #f59e0b;
+  --shape-hexagon: #14b8a6;
 }
 
 /* High contrast */
@@ -135,10 +141,12 @@
   --text-on-dark-mid: #eeeeee;
   --text-on-dark-dim: #cccccc;
   --near-black-dim: rgba(0,0,0,0.8);
-  --shape-triangle: #000000;
+  --shape-triangle: #5b1070;
   --shape-circle: #8b0000;
   --shape-square: #00008b;
   --shape-diamond: #004d2e;
+  --shape-star: #b45309;
+  --shape-hexagon: #065f5b;
 }
 [data-theme="dark"][data-high-contrast="true"] {
   --bg: #000000;
@@ -541,10 +549,6 @@ label {
   justify-content: center;
   margin: 40px 0;
 }
-.ls-tri { color: var(--shape-triangle); }
-.ls-cir { color: var(--shape-circle); }
-.ls-sq  { color: var(--shape-square); }
-.ls-dia { color: var(--shape-diamond); }
 .landing-btn {
   width: 100%;
   max-width: 320px;
@@ -988,7 +992,7 @@ label {
 .player-tile .kick-btn {
   background: transparent;
   border: none;
-  color: var(--text-dim);
+  color: rgba(245,166,35,0.5);
   cursor: pointer;
   padding: 2px 6px;
   font-size: 14px;
@@ -996,7 +1000,7 @@ label {
   min-height: 28px;
   min-width: 28px;
 }
-.player-tile .kick-btn:hover { color: var(--error); background: var(--error-bg); }
+.player-tile .kick-btn:hover { color: #ff6b6b; background: rgba(255,107,107,0.15); }
 .player-count {
   font-size: 20px;
   font-weight: 600;
@@ -1012,12 +1016,27 @@ label {
   padding: 24px;
   background: var(--near-black);
   color: #ffffff;
+  position: relative;
+}
+.live-q-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+.live-question-screen > *:not(.live-q-bg) {
+  position: relative;
+  z-index: 1;
 }
 .live-q-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  gap: 16px;
 }
 .live-q-progress {
   font-size: 16px;
@@ -1034,12 +1053,12 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 8px 0 16px;
+  margin: 0;
 }
 .timer-ring {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
 }
 .timer-ring svg {
   width: 100%;
@@ -1076,7 +1095,7 @@ label {
 /* Question body */
 .live-q-body {
   text-align: center;
-  padding: 16px 24px;
+  padding: 8px 24px;
   flex-shrink: 0;
 }
 .live-q-text {
@@ -1103,11 +1122,27 @@ label {
   line-height: 1.6;
   overflow-x: auto;
 }
+.live-q-media-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.live-q-media-row .live-q-code {
+  flex: 1;
+  min-width: 300px;
+  max-width: 600px;
+  margin: 0;
+}
+.live-q-media-row .live-q-image {
+  margin: 0;
+}
 .live-q-image {
   display: block;
-  max-width: 500px;
-  max-height: 250px;
-  margin: 0 auto 16px;
+  max-width: 400px;
+  max-height: 220px;
   border-radius: var(--radius-sm);
   object-fit: contain;
 }
@@ -1122,6 +1157,14 @@ label {
   margin: 0 auto;
   width: 100%;
   align-content: center;
+}
+.shapes-grid.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.shapes-grid.cols-3 .shape-btn {
+  min-height: 90px;
+  padding: 16px;
+  font-size: 17px;
 }
 .shape-btn {
   display: flex;
@@ -1165,6 +1208,8 @@ label {
 .shape-circle { background: var(--shape-circle); }
 .shape-square { background: var(--shape-square); }
 .shape-diamond { background: var(--shape-diamond); }
+.shape-star { background: var(--shape-star); }
+.shape-hexagon { background: var(--shape-hexagon); }
 
 /* Shape states for reveal */
 .shape-btn.correct-shape {
@@ -1531,6 +1576,20 @@ label {
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  position: relative;
+}
+.student-q-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+.student-question > *:not(.student-q-bg) {
+  position: relative;
+  z-index: 1;
 }
 .student-q-text {
   font-family: 'Space Grotesk', sans-serif;
@@ -1551,6 +1610,14 @@ label {
   line-height: 1.6;
   overflow-x: auto;
 }
+.student-q-image {
+  display: block;
+  max-width: 100%;
+  max-height: 160px;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
+}
 .student-timer {
   text-align: center;
   font-family: 'Space Grotesk', sans-serif;
@@ -1566,6 +1633,14 @@ label {
   gap: 0;
   flex: 1;
   align-content: center;
+}
+.student-shapes-grid.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.student-shapes-grid.cols-3 .student-shape-btn {
+  min-height: 60px;
+  padding: 14px 10px;
+  font-size: 14px;
 }
 .student-shape-btn {
   display: flex;
@@ -1591,6 +1666,8 @@ label {
 .student-shape-btn.shape-circle   { background: var(--shape-circle)   !important; }
 .student-shape-btn.shape-square   { background: var(--shape-square)   !important; }
 .student-shape-btn.shape-diamond  { background: var(--shape-diamond)  !important; }
+.student-shape-btn.shape-star     { background: var(--shape-star)     !important; }
+.student-shape-btn.shape-hexagon  { background: var(--shape-hexagon)  !important; }
 /* Shape icons inside answer buttons must always be white */
 .student-shape-btn svg,
 .shape-btn svg {
@@ -1922,6 +1999,79 @@ label {
   content: ' Dark';
 }
 
+/* Loading screen */
+.student-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: var(--near-black);
+  min-height: 100vh;
+}
+.loading-shapes {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.loading-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(36px, 8vw, 56px);
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: -0.04em;
+}
+.loading-sub {
+  font-size: 16px;
+  color: var(--text-on-dark-mid);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes loadingBounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-12px) scale(1.15); }
+  }
+  .loading-shape {
+    animation: loadingBounce 1s ease-in-out infinite;
+  }
+  .loading-shape.ls-2 { animation-delay: 0.15s; }
+  .loading-shape.ls-3 { animation-delay: 0.3s; }
+  .loading-shape.ls-4 { animation-delay: 0.45s; }
+}
+
+/* Emoji picker */
+.emoji-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.emoji-pick {
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: rgba(26,26,46,0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.emoji-pick:hover { border-color: var(--near-black-dim); transform: scale(1.1); }
+.emoji-pick.selected {
+  border-color: var(--near-black);
+  background: var(--near-black);
+  box-shadow: 0 0 0 2px var(--amber);
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .builder-wrap { flex-direction: column; }
@@ -1942,6 +2092,22 @@ label {
   .student-shape-btn { padding: 16px 12px; font-size: 15px; }
   .landing-logo { font-size: clamp(48px, 12vw, 72px); }
   .room-code-display { font-size: 36px; }
+  /* Phone: student question view */
+  .student-question { padding: 12px; gap: 10px; }
+  .student-q-text { font-size: 18px; }
+  .student-q-image { max-height: 120px; }
+  .student-timer { font-size: 24px; }
+  .student-shape-btn { min-height: 60px; padding: 12px 10px; font-size: 14px; border-radius: 4px; }
+  .student-shape-btn svg { width: 24px; height: 24px; }
+  /* Phone: join screen buttons closer to content */
+  .join-screen { padding: 24px 16px; gap: 14px; justify-content: center; }
+  .join-screen h1 { font-size: clamp(32px, 10vw, 48px); }
+  .join-form { gap: 12px; }
+  /* Phone: landing shapes */
+  .landing-shapes svg { width: 40px; height: 40px; }
+  .landing-shapes { gap: 16px; margin: 24px 0; }
+  /* Phone: emoji picker */
+  .emoji-pick { width: 38px; height: 38px; font-size: 20px; min-width: 38px; min-height: 38px; }
 }
 </style>
 </head>
@@ -1956,10 +2122,10 @@ label {
     <div class="landing-logo">RAPID<br>FIRE</div>
   </div>
   <div class="landing-shapes" aria-hidden="true">
-    <svg class="ls-tri" width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="currentColor"/></svg>
-    <svg class="ls-cir" width="56" height="56" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="currentColor"/></svg>
-    <svg class="ls-sq" width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="currentColor"/></svg>
-    <svg class="ls-dia" width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="currentColor"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="var(--shape-triangle)"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="var(--shape-circle)"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="var(--shape-square)"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="var(--shape-diamond)"/></svg>
   </div>
   <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
     <button class="landing-btn landing-btn-primary" onclick="navigateTo('host')" aria-label="Host a game">
@@ -1979,10 +2145,10 @@ label {
     <div class="topbar-brand">
       <h1 class="display-font">Race Mode: Rapid Fire</h1>
       <div class="topbar-shapes" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="#888899"/></svg>
-        <svg width="18" height="18" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#e05252"/></svg>
-        <svg width="18" height="18" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="#4a8af5"/></svg>
-        <svg width="18" height="18" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="#2aaa8a"/></svg>
+        <svg width="18" height="18" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="var(--shape-triangle)"/></svg>
+        <svg width="18" height="18" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="var(--shape-circle)"/></svg>
+        <svg width="18" height="18" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="var(--shape-square)"/></svg>
+        <svg width="18" height="18" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="var(--shape-diamond)"/></svg>
       </div>
     </div>
     <div class="host-tabs">
@@ -2012,7 +2178,7 @@ label {
           <input type="text" id="quiz-title-input" placeholder="Quiz title..." aria-label="Quiz title" onchange="onQuizTitleChange(this.value)">
           <button class="btn-secondary" onclick="openQuizSettings()" style="font-size:14px; padding:8px 16px;">Settings</button>
           <button class="btn-secondary" onclick="exportCurrentQuiz()" style="font-size:14px; padding:8px 16px;">Export</button>
-          <button class="btn-danger" onclick="deleteCurrentQuiz()" style="font-size:14px; padding:8px 16px;">Delete</button>
+          <button class="btn-danger" onclick="deleteCurrentQuiz()" style="font-size:14px; padding:8px 16px;">&#128465; Delete</button>
           <button class="btn-primary" onclick="launchGame()" style="font-size:14px; padding:8px 20px;">&#9654; Play</button>
         </div>
         <div class="quiz-body">
@@ -2038,7 +2204,9 @@ label {
       <h2 class="display-font" style="font-size:28px; color:var(--text-mid);">Game Lobby</h2>
       <div class="room-code-display" id="room-code-display" aria-label="Room code">------</div>
       <div class="lobby-info">
-        <p>Students join at: <code id="join-url"></code></p>
+        <p>Students join at: <code id="join-url" style="cursor:pointer;" onclick="copyJoinUrl()" title="Click to copy"></code>
+        <button class="btn-ghost" onclick="copyJoinUrl()" style="font-size:12px; padding:4px 8px; min-height:32px; min-width:32px; color:var(--near-black);" aria-label="Copy join URL">&#128203; Copy</button></p>
+        <div id="copy-feedback" style="font-size:13px; font-weight:600; color:var(--near-black); min-height:20px;"></div>
       </div>
       <div class="player-count" aria-live="polite">
         <span id="player-count-num">0</span> players joined
@@ -2055,22 +2223,24 @@ label {
     <div id="live-question" class="live-question-screen hidden" style="display:none;">
       <div class="live-q-header">
         <span class="live-q-progress" id="live-q-progress">Question 1 / 10</span>
-        <span class="live-q-answered" id="live-q-answered" aria-live="polite">0 / 0 answered</span>
-      </div>
-      <div class="timer-ring-wrap">
-        <div class="timer-ring" role="timer" aria-label="Time remaining" id="timer-ring">
-          <svg viewBox="0 0 100 100">
-            <circle class="ring-bg" cx="50" cy="50" r="44"/>
-            <circle class="ring-fg" id="timer-ring-fg" cx="50" cy="50" r="44"
-              stroke-dasharray="276.46" stroke-dashoffset="0"/>
-          </svg>
-          <div class="timer-text" id="timer-text">30</div>
+        <div class="timer-ring-wrap">
+          <div class="timer-ring" role="timer" aria-label="Time remaining" id="timer-ring">
+            <svg viewBox="0 0 100 100">
+              <circle class="ring-bg" cx="50" cy="50" r="44"/>
+              <circle class="ring-fg" id="timer-ring-fg" cx="50" cy="50" r="44"
+                stroke-dasharray="276.46" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-text" id="timer-text">30</div>
+          </div>
         </div>
+        <span class="live-q-answered" id="live-q-answered" aria-live="polite">0 / 0 answered</span>
       </div>
       <div class="live-q-body">
         <div class="live-q-text" id="live-q-text"></div>
-        <div class="live-q-code hidden" id="live-q-code"><pre><code id="live-q-code-el"></code></pre></div>
-        <img class="live-q-image hidden" id="live-q-image" alt="Question image">
+        <div class="live-q-media-row">
+          <div class="live-q-code hidden" id="live-q-code"><pre><code id="live-q-code-el"></code></pre></div>
+          <img class="live-q-image hidden" id="live-q-image" alt="Question image">
+        </div>
       </div>
       <div class="shapes-grid" id="live-shapes-grid" role="group" aria-label="Answer options"></div>
       <div class="answer-tally" id="answer-tally" aria-hidden="true"></div>
@@ -2123,9 +2293,25 @@ label {
           <label for="join-name-input">Your Name</label>
           <input type="text" id="join-name-input" class="name-input" maxlength="20" placeholder="Enter your name" aria-label="Your display name" autocomplete="off">
         </div>
+        <div>
+          <label>Pick Your Avatar</label>
+          <div id="emoji-picker" class="emoji-picker" role="radiogroup" aria-label="Choose an avatar emoji"></div>
+        </div>
         <div class="join-error" id="join-error" aria-live="polite"></div>
         <button class="btn-primary" onclick="studentJoin()" id="join-btn" style="width:100%; font-size:18px;">Join</button>
       </div>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="student-loading" class="student-loading hidden" style="display:none;">
+      <div class="loading-shapes" aria-hidden="true">
+        <svg class="loading-shape ls-1" width="40" height="40" viewBox="0 0 32 32"><polygon points="16,4 28,28 4,28" fill="var(--shape-triangle)"/></svg>
+        <svg class="loading-shape ls-2" width="40" height="40" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="var(--shape-circle)"/></svg>
+        <svg class="loading-shape ls-3" width="40" height="40" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="var(--shape-square)"/></svg>
+        <svg class="loading-shape ls-4" width="40" height="40" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="var(--shape-diamond)"/></svg>
+      </div>
+      <div class="loading-title display-font">RAPID FIRE</div>
+      <div class="loading-sub">Connecting to the race...</div>
     </div>
 
     <!-- Waiting room -->
@@ -2142,6 +2328,7 @@ label {
       <div class="student-timer" id="student-timer" role="timer" aria-label="Time remaining">30</div>
       <div class="student-q-text" id="student-q-text"></div>
       <div class="student-q-code hidden" id="student-q-code"><pre><code id="student-q-code-el"></code></pre></div>
+      <img class="student-q-image hidden" id="student-q-image" alt="Question image">
       <div class="student-shapes-grid" id="student-shapes-grid" role="group" aria-label="Answer options"></div>
     </div>
 
@@ -2195,6 +2382,7 @@ label {
       <span class="toggle-track"></span>
     </label>
   </div>
+  <!-- Reduce motion: commented out for now, can add back later
   <div class="a11y-row">
     <span>Reduce motion</span>
     <label class="toggle">
@@ -2202,6 +2390,7 @@ label {
       <span class="toggle-track"></span>
     </label>
   </div>
+  -->
   <div class="a11y-row">
     <span>High contrast</span>
     <label class="toggle">
@@ -2255,9 +2444,9 @@ function uuid() {
 // ================================================================
 //  SHAPE HELPERS
 // ================================================================
-const SHAPES = ['triangle','circle','square','diamond'];
-const SHAPE_LABELS = { triangle:'Triangle', circle:'Circle', square:'Square', diamond:'Diamond' };
-const SHAPE_CLASSES = { triangle:'shape-triangle', circle:'shape-circle', square:'shape-square', diamond:'shape-diamond' };
+const SHAPES = ['triangle','circle','square','diamond','star','hexagon'];
+const SHAPE_LABELS = { triangle:'Triangle', circle:'Circle', square:'Square', diamond:'Diamond', star:'Star', hexagon:'Hexagon' };
+const SHAPE_CLASSES = { triangle:'shape-triangle', circle:'shape-circle', square:'shape-square', diamond:'shape-diamond', star:'shape-star', hexagon:'shape-hexagon' };
 
 function shapeSVG(shape, size) {
   size = size || 32;
@@ -2266,7 +2455,9 @@ function shapeSVG(shape, size) {
     triangle: '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><polygon points="16,4 28,28 4,28" fill="currentColor"/></svg>',
     circle: '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="currentColor"/></svg>',
     square: '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="currentColor"/></svg>',
-    diamond: '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="currentColor"/></svg>'
+    diamond: '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="currentColor"/></svg>',
+    star: '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><polygon points="16,2 20.5,11.5 31,12.5 23,20 25.5,30 16,25 6.5,30 9,20 1,12.5 11.5,11.5" fill="currentColor"/></svg>',
+    hexagon: '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="currentColor"/></svg>'
   };
   return svgs[shape] || '';
 }
@@ -2411,7 +2602,8 @@ function toggleA11yPanel() {
     btn.setAttribute('aria-expanded', 'true');
     // Restore toggle states
     document.getElementById('a11y-dyslexia').checked = document.documentElement.hasAttribute('data-dyslexia');
-    document.getElementById('a11y-motion').checked = document.body.hasAttribute('data-reduced-motion') || document.documentElement.hasAttribute('data-reduced-motion');
+    var motionEl = document.getElementById('a11y-motion');
+    if (motionEl) motionEl.checked = document.body.hasAttribute('data-reduced-motion') || document.documentElement.hasAttribute('data-reduced-motion');
     document.getElementById('a11y-contrast').checked = document.documentElement.hasAttribute('data-high-contrast');
     updateThemeLabel();
   }
@@ -2582,7 +2774,8 @@ function createNewQuiz() {
       leaderboardMode: 'every',
       leaderboardEveryN: 1,
       shuffleQuestions: false,
-      shuffleAnswers: false
+      shuffleAnswers: false,
+      scoringEnabled: true
     },
     questions: []
   };
@@ -2650,7 +2843,7 @@ function renderQuestionList() {
       '<span class="q-text">' + escHtml(preview) + '</span>' +
       '<span class="q-actions">' +
         '<button onclick="event.stopPropagation();duplicateQuestion('+i+')" title="Duplicate" aria-label="Duplicate question '+(i+1)+'">&#9851;</button>' +
-        '<button onclick="event.stopPropagation();deleteQuestion('+i+')" title="Delete" aria-label="Delete question '+(i+1)+'">&#10005;</button>' +
+        '<button onclick="event.stopPropagation();deleteQuestion('+i+')" title="Delete" aria-label="Delete question '+(i+1)+'" style="color:var(--error);">&#128465;</button>' +
       '</span>' +
       '</div>';
   }).join('');
@@ -2795,6 +2988,12 @@ function renderQuestionEditor() {
   html += '<input type="text" value="' + escAttr(q.body.imageUrl || '') + '" onchange="onQFieldChange(\'imageUrl\',this.value)" placeholder="https://..." aria-label="Image URL">';
   html += '</div>';
 
+  // Background image URL
+  html += '<div class="field-group">';
+  html += '<label>Background Image URL (optional)</label>';
+  html += '<input type="text" value="' + escAttr(q.background || '') + '" onchange="onQFieldChange(\'background\',this.value)" placeholder="https://... (behind answers)" aria-label="Background image URL">';
+  html += '</div>';
+
   // Answers
   html += '<div class="field-group">';
   html += '<label>Answers</label>';
@@ -2803,7 +3002,7 @@ function renderQuestionEditor() {
   } else {
     html += buildMCAnswers(q);
     html += '<button class="btn-secondary" onclick="addAnswerOption()" style="margin-top:8px; font-size:13px; padding:6px 14px;"' +
-      (q.answers.length >= 4 ? ' disabled' : '') + '>+ Add Option</button>';
+      (q.answers.length >= 6 ? ' disabled' : '') + '>+ Add Option</button>';
   }
   html += '</div>';
 
@@ -2891,6 +3090,7 @@ function onQFieldChange(field, val) {
     case 'code': q.body.code = val; break;
     case 'codeLang': q.body.codeLanguage = val; break;
     case 'imageUrl': q.body.imageUrl = val || null; break;
+    case 'background': q.background = val || null; break;
     case 'timer': q.timer = Math.max(5, Math.min(120, val)); break;
     case 'points': q.points = Math.max(0, val); break;
     case 'pointsMode': q.pointsMode = val; break;
@@ -2939,7 +3139,7 @@ function onAnswerCorrectToggle(idx) {
 function addAnswerOption() {
   var quiz = getActiveQuiz();
   var q = quiz && quiz.questions[hostState.activeQuestionIdx];
-  if (!q || q.answers.length >= 4) return;
+  if (!q || q.answers.length >= 6) return;
   q.answers.push({
     id: uuid(), text: '', code: null, codeLanguage: null,
     isCorrect: false, shape: SHAPES[q.answers.length]
@@ -3001,6 +3201,10 @@ function openQuizSettings() {
   html += '<div class="field-group flex items-center gap-sm">';
   html += '<label style="margin:0;">Shuffle Answers</label>';
   html += '<label class="toggle"><input type="checkbox" id="qs-shuf-a"'+(s.shuffleAnswers?' checked':'')+'><span class="toggle-track"></span></label></div>';
+  html += '<div class="field-group flex items-center gap-sm">';
+  html += '<label style="margin:0;">Scoring &amp; Podium</label>';
+  html += '<label class="toggle"><input type="checkbox" id="qs-scoring"'+(s.scoringEnabled !== false ?' checked':'')+'><span class="toggle-track"></span></label>';
+  html += '<span style="font-size:12px; color:var(--text-dim); margin-left:8px;">Off = low-stakes study mode (no points, no podium)</span></div>';
   html += '<div class="modal-actions">';
   html += '<button class="btn-secondary" onclick="closeModal()">Cancel</button>';
   html += '<button class="btn-primary" onclick="saveQuizSettings()">Save</button>';
@@ -3027,6 +3231,7 @@ function saveQuizSettings() {
   quiz.settings.leaderboardEveryN = +document.getElementById('qs-lb-n').value || 1;
   quiz.settings.shuffleQuestions = document.getElementById('qs-shuf-q').checked;
   quiz.settings.shuffleAnswers = document.getElementById('qs-shuf-a').checked;
+  quiz.settings.scoringEnabled = document.getElementById('qs-scoring').checked;
   quiz.updatedAt = new Date().toISOString();
   saveQuizzes(hostState.quizzes);
   closeModal();
@@ -3118,6 +3323,7 @@ function setupHostChannels(code) {
     hostState.players[msg.clientId] = {
       id: msg.clientId,
       name: data.name || 'Anonymous',
+      emoji: data.emoji || '',
       score: 0,
       streak: 0,
       answers: []
@@ -3170,7 +3376,8 @@ function launchGame() {
   showLiveScreen('lobby');
 
   document.getElementById('room-code-display').textContent = hostState.roomCode;
-  document.getElementById('join-url').textContent = window.location.host + window.location.pathname + '?view=join';
+  var joinUrl = window.location.host + window.location.pathname + '?view=join&code=' + hostState.roomCode;
+  document.getElementById('join-url').textContent = joinUrl;
   document.getElementById('start-game-btn').disabled = true;
   document.getElementById('lock-room-btn').textContent = 'Lock Room';
   renderLobbyPlayers();
@@ -3185,6 +3392,7 @@ function renderLobbyPlayers() {
   var names = Object.values(hostState.players);
   grid.innerHTML = names.map(function(p) {
     return '<div class="player-tile" role="listitem">' +
+      (p.emoji ? '<span style="font-size:20px;">' + p.emoji + '</span>' : '') +
       '<span>' + escHtml(p.name) + '</span>' +
       '<button class="kick-btn" onclick="kickPlayer(\''+p.id+'\')" aria-label="Kick '+escAttr(p.name)+'">&#10005;</button>' +
       '</div>';
@@ -3252,6 +3460,17 @@ function showQuestion(idx) {
   document.getElementById('paused-overlay').style.display = 'none';
   document.getElementById('explanation-container').classList.add('hidden');
 
+  // Background image
+  var liveScreen = document.getElementById('live-question');
+  var existingBg = liveScreen.querySelector('.live-q-bg');
+  if (existingBg) existingBg.remove();
+  if (q.background) {
+    var bgDiv = document.createElement('div');
+    bgDiv.className = 'live-q-bg';
+    bgDiv.style.backgroundImage = 'url(' + q.background + ')';
+    liveScreen.insertBefore(bgDiv, liveScreen.firstChild);
+  }
+
   // Update header
   document.getElementById('live-q-progress').textContent = 'Question ' + (idx+1) + ' / ' + quiz.questions.length;
   updateAnsweredCount();
@@ -3308,6 +3527,7 @@ function showQuestion(idx) {
 
 function renderHostShapes(q, isReveal) {
   var grid = document.getElementById('live-shapes-grid');
+  grid.className = 'shapes-grid' + (q.answers.length > 4 ? ' cols-3' : '');
   grid.innerHTML = q.answers.map(function(a, i) {
     var shape = a.shape || SHAPES[i];
     var cls = SHAPE_CLASSES[shape];
@@ -3466,6 +3686,7 @@ function revealAnswer() {
   var correctIds = q.answers.filter(function(a) { return a.isCorrect; }).map(function(a) { return a.id; });
 
   // Score players
+  var scoringOn = hostState.liveQuiz.settings.scoringEnabled !== false;
   Object.values(hostState.players).forEach(function(player) {
     var ans = player.answers[hostState.currentQuestionIndex];
     if (!ans) {
@@ -3481,14 +3702,17 @@ function revealAnswer() {
       isCorrect = ans.answerIds.length === 1 && correctIds.indexOf(ans.answerIds[0]) >= 0;
     }
     if (isCorrect) {
-      var basePoints = q.points || 1000;
-      if (q.pointsMode === 'double') basePoints *= 2;
-      if (q.pointsMode === 'none') basePoints = 0;
-      var speedMult = 1;
-      if (q.speedBonus) {
-        speedMult = Math.max(0.5, Math.min(1, ans.timeRemaining / q.timer));
+      var earned = 0;
+      if (scoringOn) {
+        var basePoints = q.points || 1000;
+        if (q.pointsMode === 'double') basePoints *= 2;
+        if (q.pointsMode === 'none') basePoints = 0;
+        var speedMult = 1;
+        if (q.speedBonus) {
+          speedMult = Math.max(0.5, Math.min(1, ans.timeRemaining / q.timer));
+        }
+        earned = Math.round(basePoints * speedMult);
       }
-      var earned = Math.round(basePoints * speedMult);
       player.score += earned;
       player.streak++;
       ans.earned = earned;
@@ -3523,7 +3747,8 @@ function revealAnswer() {
     correctAnswerIds: correctIds,
     explanation: q.explanation || '',
     tally: hostState.answerTally,
-    rankings: ranked.slice(0, 10)
+    rankings: ranked.slice(0, 10),
+    scoringEnabled: scoringOn
   });
 }
 
@@ -3543,6 +3768,17 @@ function advanceQuestion() {
   var quiz = hostState.liveQuiz;
   var nextIdx = hostState.currentQuestionIndex + 1;
   var isLastQuestion = nextIdx >= quiz.questions.length;
+  var scoringOn = quiz.settings.scoringEnabled !== false;
+
+  if (!scoringOn) {
+    // No scoring mode: skip leaderboard/podium, just go to next question or end
+    if (isLastQuestion) {
+      showStudyModeEnd();
+    } else {
+      showQuestion(nextIdx);
+    }
+    return;
+  }
 
   // Determine if we should show leaderboard
   var showLB = false;
@@ -3604,30 +3840,65 @@ function showPodium() {
 
   var ranked = computeRankings();
   var top3 = ranked.slice(0, 3);
-  playPodiumFanfare();
 
   var wrap = document.getElementById('podium-wrap');
   // Order: 2nd, 1st, 3rd
   var order = [top3[1], top3[0], top3[2]];
   var classes = ['podium-2', 'podium-1', 'podium-3'];
   var rankLabels = ['2nd', '1st', '3rd'];
+  // Reveal order: 3rd, 2nd, 1st (indices 2, 0, 1 in the display order)
+  var revealOrder = [2, 0, 1];
 
   wrap.innerHTML = order.map(function(p, i) {
     if (!p) return '';
-    return '<div class="podium-block ' + classes[i] + '" aria-label="' + rankLabels[i] + ' place: ' + escAttr(p.name) + ', ' + p.score + ' points">' +
+    return '<div class="podium-block ' + classes[i] + '" style="opacity:0; transform:translateY(100%);" ' +
+      'aria-label="' + rankLabels[i] + ' place: ' + escAttr(p.name) + ', ' + p.score + ' points">' +
+      (p.emoji ? '<span style="font-size:32px; margin-bottom:4px;">' + p.emoji + '</span>' : '') +
       '<span class="podium-rank">' + rankLabels[i] + '</span>' +
       '<span class="podium-name">' + escHtml(p.name) + '</span>' +
       '<span class="podium-score">' + p.score + ' pts</span>' +
       '</div>';
   }).join('');
 
-  // Confetti
-  spawnConfetti();
+  // Stagger reveal: 3rd, then 2nd, then 1st
+  var blocks = wrap.children;
+  revealOrder.forEach(function(blockIdx, step) {
+    if (!blocks[blockIdx]) return;
+    setTimeout(function() {
+      blocks[blockIdx].style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+      blocks[blockIdx].style.opacity = '1';
+      blocks[blockIdx].style.transform = 'translateY(0)';
+      // Rising sound
+      playTone(350 + step * 200, 0.3, 'sine', 0.12);
+    }, step * 800);
+  });
+
+  // Confetti + fanfare after all 3 revealed
+  setTimeout(function() {
+    playPodiumFanfare();
+    spawnConfetti();
+  }, revealOrder.length * 800);
 
   // Broadcast
   hostState.gameChannel.publish('game:end', {
     rankings: ranked,
     podium: top3
+  });
+}
+
+function showStudyModeEnd() {
+  hostState.gameStatus = 'podium';
+  showLiveScreen('podium');
+  var wrap = document.getElementById('podium-wrap');
+  wrap.innerHTML = '<div style="text-align:center; padding:40px;">' +
+    '<div style="font-size:48px; margin-bottom:16px;">&#128218;</div>' +
+    '<h2 style="font-family:\'Space Grotesk\',sans-serif; font-size:36px; color:var(--amber); margin-bottom:12px;">Study Complete!</h2>' +
+    '<p style="color:var(--text-on-dark-mid); font-size:18px;">Great practice session, everyone.</p>' +
+    '</div>';
+  hostState.gameChannel.publish('game:end', {
+    rankings: computeRankings(),
+    podium: [],
+    studyMode: true
   });
 }
 
@@ -3672,6 +3943,8 @@ function playAgain() {
 
   showLiveScreen('lobby');
   document.getElementById('room-code-display').textContent = hostState.roomCode;
+  var joinUrl = window.location.host + window.location.pathname + '?view=join&code=' + hostState.roomCode;
+  document.getElementById('join-url').textContent = joinUrl;
   document.getElementById('start-game-btn').disabled = true;
   document.getElementById('lock-room-btn').textContent = 'Lock Room';
   renderLobbyPlayers();
@@ -3752,9 +4025,19 @@ function leaderboardNext() {
 // ================================================================
 //  STUDENT STATE
 // ================================================================
+// School-appropriate emojis for student avatars
+var STUDENT_EMOJIS = [
+  '\u{1F680}','\u{2B50}','\u{1F525}','\u{26A1}','\u{1F3AF}','\u{1F3C6}',
+  '\u{1F40B}','\u{1F98A}','\u{1F43B}','\u{1F43C}','\u{1F436}','\u{1F431}',
+  '\u{1F985}','\u{1F427}','\u{1F989}','\u{1F996}',
+  '\u{1F333}','\u{1F335}','\u{1F30D}','\u{1F30B}',
+  '\u{1F3B8}','\u{1F3A8}','\u{1F3B2}','\u{1F9E9}'
+];
+
 var studentState = {
   clientId: null,
   name: '',
+  emoji: '',
   roomCode: '',
   score: 0,
   streak: 0,
@@ -3776,11 +4059,28 @@ var studentState = {
 //  STUDENT INIT
 // ================================================================
 function initStudent() {
+  // Pre-fill code from URL param
+  var params = new URLSearchParams(window.location.search);
+  var codeParam = params.get('code');
+  if (codeParam && /^\d{6}$/.test(codeParam)) {
+    document.getElementById('join-code-input').value = codeParam;
+  }
+
   // Restore last name
   var lastName = localStorage.getItem('rmrf:lastStudentName');
   if (lastName) {
     document.getElementById('join-name-input').value = lastName;
   }
+
+  // Render emoji picker
+  var emojiGrid = document.getElementById('emoji-picker');
+  var lastEmoji = localStorage.getItem('rmrf:lastEmoji') || '';
+  studentState.emoji = lastEmoji || STUDENT_EMOJIS[0];
+  emojiGrid.innerHTML = STUDENT_EMOJIS.map(function(e) {
+    return '<button type="button" class="emoji-pick' + (e === studentState.emoji ? ' selected' : '') + '" ' +
+      'onclick="selectEmoji(this,\'' + e + '\')" role="radio" aria-checked="' + (e === studentState.emoji) + '" ' +
+      'aria-label="' + e + '">' + e + '</button>';
+  }).join('');
 
   // Enter key submits join form
   ['join-code-input', 'join-name-input'].forEach(function(id) {
@@ -3788,6 +4088,16 @@ function initStudent() {
       if (e.key === 'Enter') { e.preventDefault(); studentJoin(); }
     });
   });
+}
+
+function selectEmoji(btn, emoji) {
+  studentState.emoji = emoji;
+  document.querySelectorAll('.emoji-pick').forEach(function(b) {
+    b.classList.remove('selected');
+    b.setAttribute('aria-checked', 'false');
+  });
+  btn.classList.add('selected');
+  btn.setAttribute('aria-checked', 'true');
 }
 
 function studentJoin() {
@@ -3819,6 +4129,7 @@ function studentJoin() {
   studentState.streak = 0;
 
   localStorage.setItem('rmrf:lastStudentName', name);
+  localStorage.setItem('rmrf:lastEmoji', studentState.emoji);
 
   initStudentAbly(function() {
     setupStudentChannels(code);
@@ -3865,9 +4176,12 @@ function setupStudentChannels(code) {
       return;
     }
 
-    return studentState.presenceChannel.presence.enter({ name: studentState.name }).then(function() {
-      showStudentScreen('waiting');
-      document.getElementById('waiting-name-display').textContent = studentState.name.toUpperCase();
+    return studentState.presenceChannel.presence.enter({ name: studentState.name, emoji: studentState.emoji }).then(function() {
+      showStudentScreen('loading');
+      setTimeout(function() {
+        showStudentScreen('waiting');
+        document.getElementById('waiting-name-display').textContent = studentState.name.toUpperCase();
+      }, 1500);
       subscribeToStudentEvents();
     });
   }).catch(function() {
@@ -3889,7 +4203,29 @@ function subscribeToStudentEvents() {
   var ch = studentState.gameChannel;
 
   ch.subscribe('game:start', function(msg) {
-    // Game starting -- stay on waiting until first question
+    // Game starting; stay on waiting until first question
+  });
+
+  // Reconnection handler: if Ably reconnects, re-enter presence
+  // so the host sees us, and request current game state
+  studentState.ablyClient.connection.on('connected', function() {
+    if (studentState.currentQuestionIndex >= 0) {
+      // Re-enter presence so host knows we're back
+      studentState.presenceChannel.presence.enter({
+        name: studentState.name,
+        emoji: studentState.emoji
+      }).catch(function() {});
+    }
+  });
+
+  // Handle visibility change (phone sleep/wake)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible' && studentState.ablyClient) {
+      var connState = studentState.ablyClient.connection.state;
+      if (connState === 'disconnected' || connState === 'suspended') {
+        studentState.ablyClient.connect();
+      }
+    }
   });
 
   ch.subscribe('question:start', function(msg) {
@@ -3939,7 +4275,7 @@ function subscribeToStudentEvents() {
 //  STUDENT SCREENS
 // ================================================================
 function showStudentScreen(screen) {
-  ['student-join','student-waiting','student-question','student-feedback','student-between','student-podium'].forEach(function(id) {
+  ['student-join','student-loading','student-waiting','student-question','student-feedback','student-between','student-podium'].forEach(function(id) {
     var el = document.getElementById(id);
     el.style.display = 'none';
     el.classList.add('hidden');
@@ -3958,6 +4294,17 @@ function showStudentQuestion(q) {
   var oldWrap = document.getElementById('multi-submit-wrap');
   if (oldWrap) oldWrap.remove();
 
+  // Background image
+  var sqScreen = document.getElementById('student-question');
+  var existingBg = sqScreen.querySelector('.student-q-bg');
+  if (existingBg) existingBg.remove();
+  if (q.background) {
+    var bgDiv = document.createElement('div');
+    bgDiv.className = 'student-q-bg';
+    bgDiv.style.backgroundImage = 'url(' + q.background + ')';
+    sqScreen.insertBefore(bgDiv, sqScreen.firstChild);
+  }
+
   document.getElementById('student-q-text').textContent = q.body.text;
 
   // Code
@@ -3972,9 +4319,20 @@ function showStudentQuestion(q) {
     codeWrap.classList.add('hidden');
   }
 
+  // Image
+  var sImgEl = document.getElementById('student-q-image');
+  if (q.body.imageUrl) {
+    sImgEl.src = q.body.imageUrl;
+    sImgEl.classList.remove('hidden');
+  } else {
+    sImgEl.classList.add('hidden');
+    sImgEl.removeAttribute('src');
+  }
+
   // Shape buttons
   var grid = document.getElementById('student-shapes-grid');
   var isMulti = q.type === 'multi-select';
+  grid.className = 'student-shapes-grid' + (q.answers.length > 4 ? ' cols-3' : '');
   grid.innerHTML = q.answers.map(function(a, i) {
     var shape = a.shape || SHAPES[i];
     var cls = SHAPE_CLASSES[shape];
@@ -4152,9 +4510,13 @@ function showStudentFeedback(data) {
   var feedbackEl = document.getElementById('student-feedback');
   feedbackEl.classList.remove('result-correct', 'result-incorrect');
   feedbackEl.classList.add(isCorrect ? 'result-correct' : 'result-incorrect');
-  document.getElementById('fb-points').textContent = isCorrect ? '+' + earned + ' points' : '';
-  document.getElementById('fb-score').textContent = studentState.score;
-  document.getElementById('fb-rank').textContent = studentState.rank ? '#' + studentState.rank : '--';
+  var scoringOn = data.scoringEnabled !== false;
+  document.getElementById('fb-points').textContent = (isCorrect && scoringOn) ? '+' + earned + ' points' : '';
+  document.getElementById('fb-score-card').style.display = scoringOn ? '' : 'none';
+  if (scoringOn) {
+    document.getElementById('fb-score').textContent = studentState.score;
+    document.getElementById('fb-rank').textContent = studentState.rank ? '#' + studentState.rank : '--';
+  }
 
   var streakEl = document.getElementById('fb-streak');
   if (studentState.streak >= 2) {
@@ -4266,6 +4628,14 @@ function csvEsc(str) {
     return '"' + str.replace(/"/g, '""') + '"';
   }
   return str;
+}
+
+function copyJoinUrl() {
+  var joinUrl = window.location.origin + window.location.pathname + '?view=join&code=' + hostState.roomCode;
+  navigator.clipboard.writeText(joinUrl).then(function() {
+    var fb = document.getElementById('copy-feedback');
+    if (fb) { fb.textContent = 'Copied!'; setTimeout(function() { fb.textContent = ''; }, 2000); }
+  });
 }
 
 function shuffleArray(arr) {

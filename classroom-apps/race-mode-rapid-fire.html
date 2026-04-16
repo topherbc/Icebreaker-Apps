@@ -1360,6 +1360,7 @@ label {
   align-items: flex-end;
   gap: 16px;
   height: 360px;
+  position: relative;
 }
 .podium-block {
   display: flex;
@@ -1370,6 +1371,7 @@ label {
   border-radius: var(--radius) var(--radius) 0 0;
   padding: 24px 16px 20px;
   text-align: center;
+  overflow: hidden;
 }
 .podium-block .podium-rank {
   font-family: 'Space Grotesk', sans-serif;
@@ -2151,7 +2153,7 @@ label {
         <svg width="18" height="18" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="var(--shape-diamond)"/></svg>
       </div>
     </div>
-    <div class="host-tabs">
+    <div class="host-tabs" style="display:none;">
       <button class="host-tab active" data-tab="builder" onclick="switchHostTab('builder')" aria-label="Quiz Builder tab">Builder</button>
       <button class="host-tab" data-tab="live" onclick="switchHostTab('live')" aria-label="Live Game tab">Live Game</button>
     </div>
@@ -2179,7 +2181,7 @@ label {
           <button class="btn-secondary" onclick="openQuizSettings()" style="font-size:14px; padding:8px 16px;">Settings</button>
           <button class="btn-secondary" onclick="exportCurrentQuiz()" style="font-size:14px; padding:8px 16px;">Export</button>
           <button class="btn-danger" onclick="deleteCurrentQuiz()" style="font-size:14px; padding:8px 16px;">&#128465; Delete</button>
-          <button class="btn-primary" onclick="launchGame()" style="font-size:14px; padding:8px 20px;">&#9654; Play</button>
+          <button class="btn-primary" onclick="launchGame()" style="font-size:14px; padding:8px 20px; background:var(--amber); color:var(--near-black);">&#9654; Play</button>
         </div>
         <div class="quiz-body">
           <div class="question-list-panel">
@@ -2205,7 +2207,7 @@ label {
       <div class="room-code-display" id="room-code-display" aria-label="Room code">------</div>
       <div class="lobby-info">
         <p>Students join at: <code id="join-url" style="cursor:pointer;" onclick="copyJoinUrl()" title="Click to copy"></code>
-        <button class="btn-ghost" onclick="copyJoinUrl()" style="font-size:12px; padding:4px 8px; min-height:32px; min-width:32px; color:var(--near-black);" aria-label="Copy join URL">&#128203; Copy</button></p>
+        <button class="btn-ghost" onclick="copyJoinUrl()" style="font-size:12px; padding:4px 8px; min-height:32px; min-width:32px; color:var(--near-black); display:inline-flex; align-items:center; gap:4px;" aria-label="Copy join URL"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></p>
         <div id="copy-feedback" style="font-size:13px; font-weight:600; color:var(--near-black); min-height:20px;"></div>
       </div>
       <div class="player-count" aria-live="polite">
@@ -2239,7 +2241,7 @@ label {
         <div class="live-q-text" id="live-q-text"></div>
         <div class="live-q-media-row">
           <div class="live-q-code hidden" id="live-q-code"><pre><code id="live-q-code-el"></code></pre></div>
-          <img class="live-q-image hidden" id="live-q-image" alt="Question image">
+          <img class="live-q-image hidden" id="live-q-image" alt="Question image" style="display:none;">
         </div>
       </div>
       <div class="shapes-grid" id="live-shapes-grid" role="group" aria-label="Answer options"></div>
@@ -2269,7 +2271,6 @@ label {
       <div id="confetti-container" aria-hidden="true"></div>
       <div class="flex gap-md" style="margin-top:16px; flex-wrap:wrap; justify-content:center;">
         <button class="btn-primary" onclick="playAgain()">Play Again</button>
-        <button class="btn-secondary" onclick="exportResults()">Download CSV</button>
         <button class="btn-secondary" onclick="backToBuilder()">Back to Builder</button>
       </div>
     </div>
@@ -2328,7 +2329,7 @@ label {
       <div class="student-timer" id="student-timer" role="timer" aria-label="Time remaining">30</div>
       <div class="student-q-text" id="student-q-text"></div>
       <div class="student-q-code hidden" id="student-q-code"><pre><code id="student-q-code-el"></code></pre></div>
-      <img class="student-q-image hidden" id="student-q-image" alt="Question image">
+      <img class="student-q-image hidden" id="student-q-image" alt="Question image" style="display:none;">
       <div class="student-shapes-grid" id="student-shapes-grid" role="group" aria-label="Answer options"></div>
     </div>
 
@@ -2356,7 +2357,8 @@ label {
     </div>
 
     <!-- Student podium -->
-    <div id="student-podium" class="student-podium hidden" style="display:none;">
+    <div id="student-podium" class="student-podium hidden" style="display:none; position:relative;">
+      <div id="student-confetti-container" aria-hidden="true" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden;"></div>
       <h2 id="student-final-msg">Game Over!</h2>
       <div class="student-score-card">
         <div>Final Score<strong id="final-score">0</strong></div>
@@ -2844,7 +2846,7 @@ function renderQuestionList() {
       '<span class="q-text">' + escHtml(preview) + '</span>' +
       '<span class="q-actions">' +
         '<button onclick="event.stopPropagation();duplicateQuestion('+i+')" title="Duplicate" aria-label="Duplicate question '+(i+1)+'">&#9851;</button>' +
-        '<button onclick="event.stopPropagation();deleteQuestion('+i+')" title="Delete" aria-label="Delete question '+(i+1)+'" style="color:var(--error);">&#128465;</button>' +
+        '<button onclick="event.stopPropagation();deleteQuestion('+i+')" title="Delete" aria-label="Delete question '+(i+1)+'" style="color:var(--error);">&times;</button>' +
       '</span>' +
       '</div>';
   }).join('');
@@ -3038,13 +3040,14 @@ function renderQuestionEditor() {
 function buildMCAnswers(q) {
   return q.answers.map(function(a, i) {
     var shape = SHAPES[i] || SHAPES[0];
-    return '<div class="answer-editor-row' + (a.isCorrect ? ' correct' : '') + '">' +
-      '<span class="shape-badge" aria-hidden="true">' + shapeSVG(shape) + '</span>' +
+    var shapeColor = 'var(--shape-' + shape + ')';
+    return '<div class="answer-editor-row' + (a.isCorrect ? ' correct' : '') + '" style="border-left:4px solid ' + shapeColor + ';">' +
+      '<span class="shape-badge" style="color:' + shapeColor + ';" aria-hidden="true">' + shapeSVG(shape) + '</span>' +
       '<input type="text" value="' + escAttr(a.text) + '" onchange="onAnswerChange('+i+',\'text\',this.value)" placeholder="Answer '+(i+1)+'" aria-label="'+SHAPE_LABELS[shape]+' answer text">' +
       '<button class="answer-correct-toggle' + (a.isCorrect ? ' is-correct' : '') + '" onclick="onAnswerCorrectToggle('+i+')" aria-label="Mark as correct">' +
         (a.isCorrect ? '&#10003; Correct' : 'Mark correct') +
       '</button>' +
-      (q.answers.length > 2 ? '<button class="btn-ghost" onclick="removeAnswerOption('+i+')" style="padding:4px 8px; min-width:32px; min-height:32px;" aria-label="Remove answer">&times;</button>' : '') +
+      (q.answers.length > 2 ? '<button class="btn-ghost" onclick="removeAnswerOption('+i+')" style="padding:4px 8px; min-width:32px; min-height:32px; color:var(--error);" aria-label="Remove answer" title="Delete option"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>' : '') +
       '</div>';
   }).join('');
 }
@@ -3495,9 +3498,12 @@ function showQuestion(idx) {
   var imgEl = document.getElementById('live-q-image');
   if (q.body.imageUrl) {
     imgEl.src = q.body.imageUrl;
+    imgEl.style.display = '';
     imgEl.classList.remove('hidden');
   } else {
+    imgEl.style.display = 'none';
     imgEl.classList.add('hidden');
+    imgEl.removeAttribute('src');
   }
 
   // Shape buttons
@@ -3850,9 +3856,10 @@ function showPodium() {
   // Reveal order: 3rd, 2nd, 1st (indices 2, 0, 1 in the display order)
   var revealOrder = [2, 0, 1];
 
+  var targetHeights = { 'podium-1': 280, 'podium-2': 220, 'podium-3': 170 };
   wrap.innerHTML = order.map(function(p, i) {
     if (!p) return '';
-    return '<div class="podium-block ' + classes[i] + '" style="opacity:0; transform:translateY(100%);" ' +
+    return '<div class="podium-block ' + classes[i] + '" style="height:0; opacity:0; padding:0 16px;" ' +
       'aria-label="' + rankLabels[i] + ' place: ' + escAttr(p.name) + ', ' + p.score + ' points">' +
       (p.emoji ? '<span style="font-size:32px; margin-bottom:4px;">' + p.emoji + '</span>' : '') +
       '<span class="podium-rank">' + rankLabels[i] + '</span>' +
@@ -3861,14 +3868,18 @@ function showPodium() {
       '</div>';
   }).join('');
 
-  // Stagger reveal: 3rd, then 2nd, then 1st
+  // Stagger reveal: 3rd, then 2nd, then 1st -- bars grow upward
   var blocks = wrap.children;
   revealOrder.forEach(function(blockIdx, step) {
     if (!blocks[blockIdx]) return;
+    var block = blocks[blockIdx];
+    var cls = classes[blockIdx];
+    var h = targetHeights[cls] || 170;
     setTimeout(function() {
-      blocks[blockIdx].style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-      blocks[blockIdx].style.opacity = '1';
-      blocks[blockIdx].style.transform = 'translateY(0)';
+      block.style.transition = 'height 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease-out, padding 0.4s ease-out';
+      block.style.height = h + 'px';
+      block.style.opacity = '1';
+      block.style.padding = '24px 16px 20px';
       // Rising sound
       playTone(350 + step * 200, 0.3, 'sine', 0.12);
     }, step * 800);
@@ -3912,6 +3923,25 @@ function spawnConfetti() {
     var piece = document.createElement('div');
     piece.className = 'confetti-piece';
     piece.style.left = (Math.random() * 100) + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.animation = 'confettiFall ' + (2 + Math.random() * 3) + 's linear ' + (Math.random() * 1.5) + 's forwards';
+    container.appendChild(piece);
+  }
+  setTimeout(function() { container.innerHTML = ''; }, 6000);
+}
+
+function spawnStudentConfetti() {
+  if (document.body.hasAttribute('data-reduced-motion') || document.documentElement.hasAttribute('data-reduced-motion')) return;
+  var container = document.getElementById('student-confetti-container');
+  if (!container) return;
+  container.innerHTML = '';
+  var colors = ['#e05252','#276ef1','#f5a623','#2aaa8a','#a855f7','#ec4899'];
+  for (var i = 0; i < 50; i++) {
+    var piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = (Math.random() * 100) + '%';
     piece.style.background = colors[Math.floor(Math.random() * colors.length)];
     piece.style.width = (6 + Math.random() * 8) + 'px';
     piece.style.height = (6 + Math.random() * 8) + 'px';
@@ -4037,11 +4067,10 @@ function leaderboardNext() {
 // ================================================================
 // School-appropriate emojis for student avatars
 var STUDENT_EMOJIS = [
-  '\u{1F680}','\u{2B50}','\u{1F525}','\u{26A1}','\u{1F3AF}','\u{1F3C6}',
-  '\u{1F40B}','\u{1F98A}','\u{1F43B}','\u{1F43C}','\u{1F436}','\u{1F431}',
-  '\u{1F985}','\u{1F427}','\u{1F989}','\u{1F996}',
-  '\u{1F333}','\u{1F335}','\u{1F30D}','\u{1F30B}',
-  '\u{1F3B8}','\u{1F3A8}','\u{1F3B2}','\u{1F9E9}'
+  '\u{1F436}','\u{1F431}','\u{1F43B}','\u{1F43C}','\u{1F428}','\u{1F42F}',
+  '\u{1F981}','\u{1F98A}','\u{1F43A}','\u{1F984}','\u{1F422}','\u{1F40B}',
+  '\u{1F42C}','\u{1F985}','\u{1F427}','\u{1F989}','\u{1F98B}','\u{1F41D}',
+  '\u{1F99A}','\u{1F9A9}','\u{1F994}','\u{1F996}','\u{1F40D}','\u{1F419}'
 ];
 
 var studentState = {
@@ -4360,8 +4389,10 @@ function showStudentQuestion(q) {
   var sImgEl = document.getElementById('student-q-image');
   if (q.body.imageUrl) {
     sImgEl.src = q.body.imageUrl;
+    sImgEl.style.display = '';
     sImgEl.classList.remove('hidden');
   } else {
+    sImgEl.style.display = 'none';
     sImgEl.classList.add('hidden');
     sImgEl.removeAttribute('src');
   }
@@ -4626,6 +4657,7 @@ function showStudentFinalResults(data) {
   if (studentState.rank <= 3) {
     msg.textContent = 'You made the podium!';
     playPodiumFanfare();
+    spawnStudentConfetti();
   } else {
     msg.textContent = 'Game Over!';
   }

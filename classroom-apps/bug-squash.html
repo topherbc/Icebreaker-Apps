@@ -1136,6 +1136,7 @@
     });
 
     checkFeedback.classList.remove('visible', 'success', 'incomplete');
+    btnCheck.hidden = true;
 
     renderCode();
 
@@ -1239,6 +1240,7 @@
         }
       }
       renderCode();
+      updateCheckButton();
     };
 
     input.addEventListener('blur', finish);
@@ -1267,6 +1269,18 @@
     cards[idx].classList.remove('highlight');
     void cards[idx].offsetWidth;
     cards[idx].classList.add(state);
+  }
+
+  // ── Show/hide Check Fixes button ──
+  function updateCheckButton() {
+    if (!currentProblem) { btnCheck.hidden = true; return; }
+    // All solved → hide
+    if (fixedBugs.size === currentProblem.bugs.length) { btnCheck.hidden = true; return; }
+    // Show only if there are pending edits on unfixed bug lines
+    const hasPending = currentProblem.code.some((line, idx) =>
+      line.bugId && !fixedBugs.has(line.bugId) && editedLines[idx] !== undefined
+    );
+    btnCheck.hidden = !hasPending;
   }
 
   // ── Check fixes ──
@@ -1307,6 +1321,7 @@
       completedSet.add(currentProblem.id); saveCompleted();
       checkFeedback.textContent = 'All ' + currentProblem.bugs.length + ' bugs fixed! Nice work.';
       checkFeedback.classList.add('visible', 'success');
+      btnCheck.hidden = true;
     } else {
       const remaining = currentProblem.bugs.length - fixedBugs.size;
       checkFeedback.textContent = remaining + ' bug' + (remaining > 1 ? 's' : '') + ' still need fixing.';

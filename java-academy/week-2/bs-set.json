@@ -678,7 +678,9 @@
         "id": "b2",
         "line": 11,
         "fix": "    balance += amount;",
-        "altFixes": [],
+        "altFixes": [
+          "    balance = balance + amount;"
+        ],
         "clue": "After depositing $50, the balance goes down to $50 instead of up to $150."
       },
       {
@@ -830,8 +832,11 @@
       {
         "id": "b1",
         "line": 3,
-        "fix": "    double area = 3.14 * radius * radius;",
-        "altFixes": [],
+        "fix": "    double area = Math.PI * radius * radius;",
+        "altFixes": [
+          "    double area = 3.14 * radius * radius;",
+          "    double area = Math.PI * Math.pow(radius, 2);"
+        ],
         "clue": "The area of a circle with radius 5 shows 31.4 instead of 78.5."
       },
       {

@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Identify Code Parts</title>
+<meta name="description" content="Identify and label syntactic chunks of Java code by selecting regions and assigning labels.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231A1714'/><rect x='4' y='7' width='10' height='3' rx='1.5' fill='%23D6EEFF'/><rect x='16' y='7' width='12' height='3' rx='1.5' fill='%23FFE0CC'/><rect x='4' y='13' width='14' height='3' rx='1.5' fill='%23D4F4E0'/><rect x='20' y='13' width='8' height='3' rx='1.5' fill='%23FFF0C0'/><rect x='4' y='19' width='8' height='3' rx='1.5' fill='%23F0D9FF'/><rect x='14' y='19' width='14' height='3' rx='1.5' fill='%23D8F0F8'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:wght@500&display=swap" rel="stylesheet">
+<script>
+(function(){
+  var t = localStorage.getItem('icp-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-page:    #F7F5F0;
+  --bg-surface: #FFFFFF;
+  --bg-inset:   #EDEAE3;
+  --bg-stripe:  #F2EFE8;
+  --text-primary:   #1A1714;
+  --text-secondary: #4A453E;
+  --text-muted:     #857F77;
+  --border-light:  rgba(26,23,20,0.10);
+  --border-medium: rgba(26,23,20,0.20);
+  --border-strong: rgba(26,23,20,0.38);
+  --focus-color: #0057B8;
+  --code-bg: #EDEAE3;
+  --code-text: #1A1714;
+  --code-line-num: #857F77;
+
+  --font-body: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --font-mono: 'Source Code Pro', 'Courier New', monospace;
+  --r-sm:4px; --r-md:8px; --r-lg:14px;
+  --sp-sm:8px; --sp-md:16px; --sp-lg:24px; --sp-xl:40px;
+}
+
+[data-theme="dark"] {
+  --bg-page:    #1A1714;
+  --bg-surface: #2A2620;
+  --bg-inset:   #33302A;
+  --bg-stripe:  #2E2B25;
+  --text-primary:   #F0EDE8;
+  --text-secondary: #C0BAB0;
+  --text-muted:     #8A847C;
+  --border-light:  rgba(240,237,232,0.10);
+  --border-medium: rgba(240,237,232,0.20);
+  --border-strong: rgba(240,237,232,0.38);
+  --focus-color: #5CA8FF;
+  --code-bg: #111111;
+  --code-text: #F0EDE8;
+  --code-line-num: #6A645C;
+}
+
+html { font-size: 18px; }
+body { font-family:var(--font-body); background:var(--bg-page); color:var(--text-primary); line-height:1.7; min-height:100vh; padding:var(--sp-lg); }
+
+.skip-link { position:absolute;top:-999px;left:0;background:var(--focus-color);color:#fff;padding:10px 20px;font-size:1rem;font-weight:700;z-index:9999;border-radius:0 0 var(--r-md) 0;text-decoration:none; }
+.skip-link:focus { top:0; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+.page-wrap { max-width:1400px;margin:0 auto; }
+
+/* Header */
+.site-header { margin-bottom:var(--sp-xl);padding-bottom:var(--sp-lg);border-bottom:2px solid var(--border-light); }
+.site-header h1 { font-size:1.9rem;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin-bottom:4px; }
+.site-header .tagline { font-size:0.9rem;color:var(--text-secondary); }
+
+/* Set bar */
+.set-bar { background:var(--bg-surface);border:1.5px solid var(--border-light);border-radius:var(--r-lg);padding:var(--sp-md) var(--sp-lg);margin-bottom:var(--sp-xl);display:flex;align-items:center;gap:var(--sp-md);flex-wrap:wrap; }
+.set-bar label { font-weight:700;font-size:0.9rem;color:var(--text-secondary);white-space:nowrap; }
+.set-bar select { flex:1;min-width:200px; }
+.set-meta { font-size:0.85rem;color:var(--text-muted); }
+
+select { font-family:var(--font-body);font-size:1rem;color:var(--text-primary);background:var(--bg-inset);border:2px solid var(--border-medium);border-radius:var(--r-md);padding:10px 14px;width:100%;line-height:1.5;transition:border-color 0.15s; }
+select:hover { border-color:var(--border-strong); }
+select:focus-visible, button:focus-visible { outline:3px solid var(--focus-color);outline-offset:3px;border-color:var(--focus-color); }
+
+.section-label { font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:var(--sp-sm); }
+.card { background:var(--bg-surface);border:1.5px solid var(--border-light);border-radius:var(--r-lg);padding:var(--sp-lg);margin-bottom:var(--sp-lg); }
+
+/* Two-panel layout */
+#exercise-area { display:flex;align-items:flex-start;gap:0; }
+.panel-left { width:380px;min-width:180px;flex-shrink:0; }
+.panel-left .card { margin-bottom:0; }
+.panel-divider {
+  width:8px;flex-shrink:0;align-self:stretch;cursor:col-resize;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 6px;border-radius:4px;transition:background 0.15s;background:transparent;
+}
+.panel-divider::after {
+  content:'';display:block;width:3px;height:40px;
+  background:var(--border-medium);border-radius:2px;transition:background 0.15s;
+}
+.panel-divider:hover::after,.panel-divider.dragging::after { background:var(--focus-color); }
+.panel-right { flex:1;min-width:280px;overflow:hidden; }
+.panel-right-placeholder {
+  display:flex;align-items:center;justify-content:center;
+  min-height:300px;color:var(--text-muted);font-size:0.95rem;
+  border:2px dashed var(--border-light);border-radius:var(--r-lg);
+  text-align:center;padding:var(--sp-xl);
+}
+
+/* Exercise list */
+.exercise-list { display:flex;flex-direction:column;gap:var(--sp-sm); }
+.exercise-option {
+  display:flex;align-items:flex-start;gap:var(--sp-md);
+  background:var(--bg-surface);border:2px solid var(--border-light);border-radius:var(--r-md);
+  padding:var(--sp-md);cursor:pointer;transition:border-color 0.15s,background 0.15s;
+  text-align:left;font-family:var(--font-body);font-size:1rem;line-height:1.6;
+  color:var(--text-primary);width:100%;min-height:48px;
+}
+.exercise-option:hover { border-color:var(--border-strong);background:var(--bg-stripe); }
+.exercise-option.selected { border-color:var(--focus-color);background:#EEF5FF; }
+[data-theme="dark"] .exercise-option.selected { background:rgba(92,168,255,0.12); }
+.exercise-option:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+.exercise-num { font-size:0.8rem;font-weight:700;color:var(--text-muted);min-width:22px;padding-top:2px; }
+.exercise-info { flex:1; }
+.exercise-title { font-weight:700;font-size:1rem;line-height:1.4;display:block; }
+.exercise-desc { font-size:0.85rem;color:var(--text-secondary);display:block;margin-top:2px;line-height:1.5; }
+.exercise-option.ex-collapsed { display:none; }
+.btn-expand-exercises {
+  display:none;width:100%;margin-top:var(--sp-sm);
+  background:none;border:1.5px dashed var(--border-medium);border-radius:var(--r-md);
+  font-family:var(--font-body);font-size:0.85rem;font-weight:700;color:var(--text-muted);
+  padding:8px var(--sp-md);cursor:pointer;text-align:left;transition:all 0.12s;
+}
+.btn-expand-exercises:hover { border-color:var(--border-strong);color:var(--text-secondary);background:var(--bg-stripe); }
+
+/* Code display */
+.code-card { background:var(--code-bg);border-radius:var(--r-lg);overflow:hidden;border:1.5px solid var(--border-light); }
+.code-header { padding:var(--sp-md) var(--sp-lg);border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between; }
+.code-title { font-size:0.85rem;font-weight:700;color:var(--text-secondary); }
+.code-body { padding:var(--sp-lg) var(--sp-lg) var(--sp-lg) 0;overflow-x:auto; }
+.code-line { display:flex;align-items:baseline;min-height:2.4em;line-height:2.4;font-family:var(--font-mono);font-size:0.88rem; }
+.line-num { color:var(--code-line-num);min-width:3em;text-align:right;padding-right:1.2em;user-select:none;flex-shrink:0;font-size:0.82rem; }
+.line-content { flex:1;color:var(--code-text);white-space:pre; }
+
+/* Code tokens -- clickable */
+.code-token {
+  display:inline;padding:3px 2px;border-radius:3px;cursor:pointer;
+  transition:background 0.1s;position:relative;white-space:pre-wrap;
+  text-decoration:underline dotted rgba(0,87,184,0.35);text-underline-offset:4px;
+}
+.code-token:hover:not(.tagged) { background:rgba(90,168,255,0.15);text-decoration:none; }
+.code-token.pending {
+  background:rgba(0,87,184,0.25);outline:2px solid var(--focus-color);border-radius:3px;
+  text-decoration:none;
+}
+[data-theme="dark"] .code-token.pending { background:rgba(92,168,255,0.3);outline-color:var(--focus-color); }
+.code-token:focus-visible { outline:2px solid var(--focus-color);outline-offset:2px; }
+
+/* Tagged token -- PSA style */
+.code-token.tagged {
+  padding:3px 4px 5px;border-radius:4px;font-weight:700;cursor:pointer;
+  text-decoration:none;
+  /* background, border-bottom, color set via JS */
+}
+.code-token.tagged:hover { filter:brightness(0.92); }
+
+/* Whitespace segments */
+.seg-ws { display:inline;white-space:pre; }
+
+/* Tag panel -- label bank */
+.tag-panel {
+  border:2px solid var(--focus-color);border-radius:var(--r-lg);
+  background:#EEF5FF;padding:var(--sp-md) var(--sp-lg);
+  box-shadow:0 4px 16px rgba(0,0,0,0.10);margin-top:var(--sp-md);
+}
+[data-theme="dark"] .tag-panel { background:rgba(92,168,255,0.08); }
+.tag-panel-title { font-weight:700;font-size:0.9rem;color:#003880;margin-bottom:var(--sp-sm); }
+[data-theme="dark"] .tag-panel-title { color:var(--focus-color); }
+.selected-phrase-display {
+  font-family:var(--font-mono);background:#fff;border:2px solid var(--focus-color);
+  border-radius:var(--r-sm);padding:4px 12px;font-size:1rem;color:#003880;
+  display:inline-block;max-width:100%;word-break:break-word;flex-shrink:0;
+}
+[data-theme="dark"] .selected-phrase-display { background:var(--bg-inset);color:var(--focus-color); }
+.phrase-and-labels { display:flex;align-items:flex-start;gap:var(--sp-md);flex-wrap:wrap;margin-bottom:var(--sp-md); }
+.panel-instruction { font-size:1rem;font-weight:700;color:#003880;margin-bottom:var(--sp-sm); }
+[data-theme="dark"] .panel-instruction { color:var(--focus-color); }
+
+/* Label grid -- matches PSA */
+.label-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-sm);margin-bottom:var(--sp-md); }
+.label-grid > :last-child:nth-child(odd) { grid-column:1/-1;justify-self:center;width:calc(50% - var(--sp-sm)/2); }
+.label-btn {
+  display:flex;align-items:center;gap:var(--sp-sm);
+  padding:9px 13px;border-radius:var(--r-md);border:2px solid;
+  background:var(--bg-surface);font-family:var(--font-body);
+  font-size:0.85rem;font-weight:700;cursor:pointer;
+  transition:all 0.12s;text-align:left;line-height:1.2;
+  position:relative;min-height:48px;
+}
+.label-btn:hover { transform:translateY(-1px); }
+.label-btn .label-shape { width:13px;height:13px;flex-shrink:0;border-radius:50%; }
+.label-btn .label-text { flex:1; }
+.label-btn .label-name { display:block;font-weight:700;font-size:0.85rem; }
+.label-btn .label-desc { display:block;font-size:0.68rem;font-weight:400;color:var(--text-secondary);line-height:1.3;margin-top:2px; }
+
+/* Tags list -- "Your tags so far" */
+.tags-section { margin-top:var(--sp-lg); }
+.tags-list { list-style:none;display:flex;flex-direction:column;gap:var(--sp-sm); }
+.tag-item {
+  display:flex;align-items:center;gap:var(--sp-sm);
+  background:var(--bg-surface);border:1.5px solid var(--border-light);
+  border-radius:var(--r-md);padding:8px var(--sp-md);font-size:0.85rem;
+  transition:border-color 0.12s,background 0.12s;
+}
+.tag-item:hover { border-color:var(--focus-color);background:#EEF5FF; }
+[data-theme="dark"] .tag-item:hover { background:rgba(92,168,255,0.08); }
+.tag-badge {
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:20px;border:2px solid;
+  font-weight:700;font-size:0.72rem;white-space:nowrap;
+}
+.tag-shape { width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0; }
+.tag-phrase { font-family:var(--font-mono);font-size:0.85rem;color:var(--text-primary);flex:1;margin-left:var(--sp-sm); }
+.btn-remove {
+  background:transparent;color:#9B1C1C;border:1.5px solid #9B1C1C;border-radius:var(--r-sm);
+  font-family:var(--font-body);font-size:0.78rem;font-weight:700;padding:3px 8px;cursor:pointer;flex-shrink:0;
+}
+.btn-remove:hover { background:#FEE2E2; }
+
+/* Buttons */
+.btn { display:inline-flex;align-items:center;gap:6px;font-family:var(--font-body);font-size:1rem;font-weight:700;padding:11px 22px;border-radius:var(--r-md);border:2px solid transparent;cursor:pointer;transition:all 0.15s;line-height:1; }
+.btn-primary { background:#1A1714;color:#fff;border-color:#1A1714; }
+[data-theme="dark"] .btn-primary { background:#F0EDE8;color:#1A1714;border-color:#F0EDE8; }
+.btn-primary:hover { background:#333028;border-color:#333028; }
+[data-theme="dark"] .btn-primary:hover { background:#D0CDC8;border-color:#D0CDC8; }
+.btn-primary:disabled { background:#AAAAAA;border-color:#AAAAAA;cursor:not-allowed;color:#fff; }
+[data-theme="dark"] .btn-primary:disabled { background:#555;border-color:#555;color:#999; }
+.btn-ghost { background:transparent;color:var(--text-secondary);border-color:var(--border-medium); }
+.btn-ghost:hover { background:var(--bg-inset);color:var(--text-primary); }
+.btn-row { display:flex;gap:var(--sp-sm);flex-wrap:wrap;align-items:center; }
+.status-msg { font-size:0.88rem;color:var(--text-muted);margin-left:var(--sp-sm); }
+
+/* Score */
+.score-banner { padding:var(--sp-md) var(--sp-lg);border-radius:var(--r-md);font-weight:700;font-size:1.1rem;text-align:center;margin-top:var(--sp-md); }
+.score-banner.perfect { background:#D4F4E0;color:#004D26;border:2px solid #007A3D; }
+.score-banner.good { background:#FFF0C0;color:#6B4500;border:2px solid #9A6500; }
+.score-banner.needs-work { background:#FFE0E0;color:#880000;border:2px solid #BB0000; }
+[data-theme="dark"] .score-banner.perfect { background:rgba(0,122,61,0.25);color:#6BE0CE;border-color:#007A3D; }
+[data-theme="dark"] .score-banner.good { background:rgba(154,101,0,0.25);color:#F5C842;border-color:#9A6500; }
+[data-theme="dark"] .score-banner.needs-work { background:rgba(187,0,0,0.2);color:#FFB0B0;border-color:#BB0000; }
+
+/* Feedback items */
+.feedback-item {
+  display:flex;gap:var(--sp-sm);align-items:flex-start;
+  background:var(--bg-surface);border:1.5px solid var(--border-light);
+  border-radius:var(--r-md);padding:10px var(--sp-md);margin-bottom:var(--sp-sm);
+  font-size:0.85rem;
+}
+.feedback-icon { font-size:1rem;flex-shrink:0;margin-top:1px; }
+.feedback-body { flex:1; }
+.feedback-label-name { font-weight:700; }
+.feedback-phrase { font-family:var(--font-mono);font-size:0.82rem;color:var(--text-secondary);margin-top:2px; }
+
+/* How to Play */
+.btn-how-to-play {
+  background:none;border:1.5px solid var(--border-medium);border-radius:var(--r-md);
+  font-family:var(--font-body);font-size:0.82rem;font-weight:700;color:var(--text-secondary);
+  padding:7px 14px;cursor:pointer;transition:all 0.12s;white-space:nowrap;flex-shrink:0;line-height:1;
+}
+.btn-how-to-play:hover { background:var(--bg-inset);border-color:var(--border-strong);color:var(--text-primary); }
+.btn-how-to-play:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+.btn-theme {
+  background:none;border:1.5px solid var(--border-medium);border-radius:var(--r-md);
+  font-family:var(--font-body);font-size:0.82rem;font-weight:700;color:var(--text-secondary);
+  padding:7px 14px;cursor:pointer;transition:all 0.12s;white-space:nowrap;flex-shrink:0;line-height:1;
+}
+.btn-theme:hover { background:var(--bg-inset);border-color:var(--border-strong);color:var(--text-primary); }
+.btn-theme:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+
+.modal-overlay {
+  position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.45);
+  display:flex;align-items:center;justify-content:center;padding:var(--sp-lg);
+}
+.modal-box {
+  background:var(--bg-surface);border-radius:var(--r-lg);padding:var(--sp-xl);
+  max-width:560px;width:100%;max-height:82vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.22);
+}
+.modal-title { font-size:1.3rem;font-weight:700;letter-spacing:-0.01em;margin:0; }
+.modal-close { background:none;border:1.5px solid var(--border-medium);cursor:pointer;font-size:0.9rem;padding:5px 10px;color:var(--text-muted);border-radius:var(--r-sm);font-family:var(--font-body);line-height:1; }
+.modal-close:hover { background:var(--bg-inset);color:var(--text-primary);border-color:var(--border-strong); }
+.modal-close:focus-visible { outline:3px solid var(--focus-color);outline-offset:2px; }
+.modal-steps { list-style:none;display:flex;flex-direction:column;gap:var(--sp-md);margin-top:var(--sp-lg); }
+.modal-step { display:flex;gap:var(--sp-md);align-items:flex-start;font-size:0.95rem;line-height:1.6; }
+.modal-step-num { background:var(--text-primary);color:var(--bg-surface);border-radius:50%;width:24px;height:24px;min-width:24px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;margin-top:2px; }
+
+.no-set-msg { text-align:center;color:var(--text-muted);padding:var(--sp-xl);font-size:0.95rem; }
+.site-footer { margin-top:var(--sp-xl);padding-top:var(--sp-lg);border-top:1.5px solid var(--border-light);font-size:0.8rem;color:var(--text-muted); }
+
+.instruction-hint {
+  font-size:0.85rem;color:var(--text-secondary);
+  background:var(--bg-surface);border:1.5px solid var(--border-light);
+  border-radius:var(--r-md);padding:10px var(--sp-md);
+  display:flex;align-items:flex-start;gap:var(--sp-sm);margin-bottom:var(--sp-md);
+}
+
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none!important;animation:none!important; } }
+@media (max-width:700px) {
+  html { font-size:16px; }
+  body { padding:var(--sp-md); }
+  #exercise-area { flex-direction:column; }
+  .panel-left { width:100% !important; }
+  .panel-divider { display:none; }
+  .panel-right { min-width:0;width:100%; }
+  .label-grid { grid-template-columns:1fr 1fr; }
+}
+@media print { .btn-row,.btn,.tag-panel { display:none!important; } }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div aria-live="polite" aria-atomic="true" class="sr-only" id="live-polite"></div>
+
+<div class="page-wrap">
+  <header class="site-header" role="banner">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-md);">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" style="flex-shrink:0;margin-bottom:5px;">
+            <rect width="32" height="32" rx="6" fill="#1A1714"/>
+            <rect x="4" y="7" width="10" height="3" rx="1.5" fill="#D6EEFF"/>
+            <rect x="16" y="7" width="12" height="3" rx="1.5" fill="#FFE0CC"/>
+            <rect x="4" y="13" width="14" height="3" rx="1.5" fill="#D4F4E0"/>
+            <rect x="20" y="13" width="8" height="3" rx="1.5" fill="#FFF0C0"/>
+            <rect x="4" y="19" width="8" height="3" rx="1.5" fill="#F0D9FF"/>
+            <rect x="14" y="19" width="14" height="3" rx="1.5" fill="#D8F0F8"/>
+          </svg>
+          <h1>Identify Code Parts</h1>
+        </div>
+        <p class="tagline">Select code regions and label what each part does.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:var(--sp-sm);">
+        <button id="how-to-play-btn" class="btn-how-to-play" type="button">How to Play</button>
+        <button id="theme-toggle" class="btn-theme" type="button" aria-label="Toggle light/dark mode">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="set-bar" role="region" aria-label="Week selection">
+      <label for="week-select">Week</label>
+      <select id="week-select" aria-describedby="week-desc">
+        <option value="">-- Choose a week --</option>
+      </select>
+      <span class="set-meta" id="week-desc" aria-live="polite"></span>
+    </div>
+
+    <div id="no-set-msg" class="card no-set-msg">
+      <div>Select a week above to begin.</div>
+      <div style="margin-top:var(--sp-sm);font-size:0.85rem;">
+        New here? <button type="button" id="htp-inline-btn" style="background:none;border:none;font-family:var(--font-body);font-size:0.85rem;font-weight:700;color:var(--focus-color);cursor:pointer;padding:0;text-decoration:underline;">How to Play</button> walks you through the exercise.
+      </div>
+    </div>
+
+    <div id="exercise-area" style="display:none;align-items:flex-start;">
+      <!-- Left panel: exercise list -->
+      <div class="panel-left">
+        <section class="card" aria-labelledby="exercise-heading">
+          <h2 id="exercise-heading" class="section-label">Choose an exercise</h2>
+          <div class="exercise-list" id="exercise-list" role="list"></div>
+          <button id="exercise-expand-btn" class="btn-expand-exercises" type="button" aria-expanded="false">&#9654; Choose a different exercise</button>
+        </section>
+      </div>
+
+      <div class="panel-divider" role="separator" aria-label="Resize panels" tabindex="0" title="Drag to resize"></div>
+
+      <!-- Right panel: game -->
+      <div class="panel-right">
+        <div id="right-placeholder" class="panel-right-placeholder">Select an exercise from the list to begin.</div>
+
+        <section id="game-section" style="display:none;" aria-label="CSI exercise">
+
+          <div class="instruction-hint" id="instruction-hint">
+            <span aria-hidden="true" style="font-size:1rem;flex-shrink:0;margin-top:1px;">&#128161;</span>
+            <span>Click any token in the code to select it. Click another token on the same line to extend your selection. Then pick a label to tag it.</span>
+          </div>
+
+          <!-- Code display -->
+          <div class="code-card">
+            <div class="code-header"><span class="code-title" id="exercise-title-display"></span></div>
+            <div class="code-body" id="code-body" role="group" aria-label="Java code. Click tokens to select, then label them."></div>
+          </div>
+
+          <!-- Tag panel (appears when selection exists) -->
+          <div id="tag-panel" class="tag-panel" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-sm);">
+              <p class="tag-panel-title" id="tag-panel-title">What is this?</p>
+              <button class="btn-ghost" id="cancel-select-btn" type="button" style="padding:5px 10px;font-size:0.82rem;">Cancel</button>
+            </div>
+            <div class="phrase-and-labels">
+              <div class="selected-phrase-display" id="phrase-display"></div>
+            </div>
+            <p class="panel-instruction">Select the label that describes this chunk</p>
+            <div class="label-grid" id="label-grid" role="group" aria-label="Label options"></div>
+          </div>
+
+          <!-- Your tags -->
+          <section id="tags-section" class="tags-section" style="display:none;" aria-labelledby="tags-heading">
+            <h2 id="tags-heading" class="section-label">Your tags so far</h2>
+            <ul class="tags-list" id="tags-list" aria-label="Tags you have added"></ul>
+          </section>
+
+          <!-- Submit -->
+          <div class="btn-row" style="margin-top:var(--sp-lg);">
+            <button class="btn btn-primary" id="check-btn" type="button" disabled>Check my work</button>
+            <button class="btn btn-ghost" id="reset-btn" type="button">Start over</button>
+            <span class="status-msg" id="status-msg" aria-live="polite">Add at least one tag to continue</span>
+          </div>
+
+          <!-- Feedback -->
+          <div id="feedback-section" style="display:none;margin-top:var(--sp-lg);">
+            <div id="score-banner" class="score-banner"></div>
+            <div id="feedback-items" style="margin-top:var(--sp-md);"></div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">Identify Code Parts</footer>
+</div>
+
+<!-- How to Play modal -->
+<div id="htp-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="htp-title">
+  <div class="modal-overlay">
+    <div class="modal-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-md);">
+        <h2 class="modal-title" id="htp-title">How to Play</h2>
+        <button class="modal-close" id="htp-close" type="button" aria-label="Close">Esc</button>
+      </div>
+      <ol class="modal-steps">
+        <li class="modal-step"><span class="modal-step-num">1</span><span>Read the Java code. Every token is clickable.</span></li>
+        <li class="modal-step"><span class="modal-step-num">2</span><span>Click a token to select it. Click a second token on the same line to extend your selection into a range.</span></li>
+        <li class="modal-step"><span class="modal-step-num">3</span><span>Pick a label that describes what the selected code does -- data type, variable name, operator, etc.</span></li>
+        <li class="modal-step"><span class="modal-step-num">4</span><span>Your tag appears in the list below. You can tag the same code multiple ways -- for example, <code>int</code> is a "data type" and <code>int score</code> together is a "variable declaration".</span></li>
+        <li class="modal-step"><span class="modal-step-num">5</span><span>When you have tagged everything you can find, click <strong>Check my work</strong> to see how you did.</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ── Master label definitions ───────────────────────────────────── */
+var ALL_LABELS = {
+  'keyword':              { desc:'A reserved word Java already knows -- you cannot use it as a name' },
+  'data type':            { desc:'Declares what kind of value a variable holds -- int, String, boolean, etc.' },
+  'variable name':        { desc:'The name you give to a value you want to store or refer to' },
+  'operator':             { desc:'A symbol that performs an action -- math, comparison, or assignment' },
+  'method name':          { desc:'The name of an action being defined or called' },
+  'literal value':        { desc:'A fixed value written directly in the code -- 42, "hello", true' },
+  'argument':             { desc:'A value passed into a method when calling it' },
+  'parentheses':          { desc:'( ) -- used after method names, in conditions, and for grouping' },
+  'curly brace':          { desc:'{ } -- marks the opening or closing of a block of code' },
+  'square bracket':       { desc:'[ ] -- used with arrays to declare or access a position' },
+  'statement end':        { desc:'; -- marks the end of a complete instruction' },
+  'variable declaration': { desc:'A type and name together, declaring a new variable' },
+  'array declaration':    { desc:'A type, brackets, and name together, declaring an array' },
+  'method call':          { desc:'A method being invoked with its parentheses and arguments' },
+  'condition':            { desc:'An expression inside an if that evaluates to true or false' }
+};
+
+/* ── Color palette (from PSA) ───────────────────────────────────── */
+var PALETTE = [
+  { bg:'#D6EEFF', bdr:'#0057B8', txt:'#003880' },
+  { bg:'#D4F4E0', bdr:'#007A3D', txt:'#004D26' },
+  { bg:'#FFF0C0', bdr:'#9A6500', txt:'#6B4500' },
+  { bg:'#FFE0CC', bdr:'#C04F00', txt:'#8C3700' },
+  { bg:'#F0D9FF', bdr:'#6B00CC', txt:'#4A0099' },
+  { bg:'#FFE8F0', bdr:'#B8005A', txt:'#800040' },
+  { bg:'#D8F0F8', bdr:'#007799', txt:'#004D66' },
+  { bg:'#F8F0D8', bdr:'#887700', txt:'#554C00' },
+  { bg:'#E8E0FF', bdr:'#4040CC', txt:'#282880' },
+  { bg:'#E0F0E0', bdr:'#3A7A3A', txt:'#245024' },
+  { bg:'#FFEEDD', bdr:'#CC6600', txt:'#8C4400' },
+  { bg:'#FFE0E0', bdr:'#BB0000', txt:'#880000' }
+];
+
+function labelColor(labelName) {
+  if (!currentExercise) return PALETTE[0];
+  var idx = currentExercise.labels.indexOf(labelName);
+  if (idx < 0) idx = 0;
+  return PALETTE[idx % PALETTE.length];
+}
+
+/* ── DOM refs ───────────────────────────────────────────────────── */
+var $ = function(id){ return document.getElementById(id); };
+var $weekSelect    = $('week-select');
+var $weekDesc      = $('week-desc');
+var $noSetMsg      = $('no-set-msg');
+var $exArea        = $('exercise-area');
+var $exList        = $('exercise-list');
+var $exExpandBtn   = $('exercise-expand-btn');
+var $rightPlaceholder = $('right-placeholder');
+var $gameSection   = $('game-section');
+var $codeBody      = $('code-body');
+var $exTitle       = $('exercise-title-display');
+var $tagPanel      = $('tag-panel');
+var $phraseDisplay = $('phrase-display');
+var $labelGrid     = $('label-grid');
+var $cancelBtn     = $('cancel-select-btn');
+var $tagsSection   = $('tags-section');
+var $tagsList      = $('tags-list');
+var $checkBtn      = $('check-btn');
+var $resetBtn      = $('reset-btn');
+var $statusMsg     = $('status-msg');
+var $feedbackSec   = $('feedback-section');
+var $scoreBanner   = $('score-banner');
+var $feedbackItems = $('feedback-items');
+var $hint          = $('instruction-hint');
+var $livePolite    = $('live-polite');
+var $htpModal      = $('htp-modal');
+var $htpBtn        = $('how-to-play-btn');
+var $htpInline     = $('htp-inline-btn');
+var $htpClose      = $('htp-close');
+var $themeToggle   = $('theme-toggle');
+
+/* ── State ──────────────────────────────────────────────────────── */
+var manifest = null;
+var currentExercise = null;
+var selectionAnchor = null; // {line, tokenIdx}
+var selectionEnd = null;    // {line, tokenIdx}
+var tags = [];              // [{line, start, end, label}]
+var submitted = false;
+// tokenElements[lineNumber] = [el, el, ...] (clickable tokens only)
+var tokenElements = {};
+
+/* ── Helpers ────────────────────────────────────────────────────── */
+function announce(msg) {
+  $livePolite.textContent = '';
+  requestAnimationFrame(function(){ $livePolite.textContent = msg; });
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function getSelectionRange() {
+  if (!selectionAnchor) return null;
+  var end = selectionEnd || selectionAnchor;
+  if (selectionAnchor.line !== end.line) return null;
+  var s = Math.min(selectionAnchor.tokenIdx, end.tokenIdx);
+  var e = Math.max(selectionAnchor.tokenIdx, end.tokenIdx);
+  return { line: selectionAnchor.line, start: s, end: e };
+}
+
+function getTokenText(line, start, end) {
+  var els = tokenElements[line];
+  if (!els) return '';
+  var parts = [];
+  for (var i = start; i <= end && i < els.length; i++) {
+    if (i > start) parts.push(' ');
+    parts.push(els[i].textContent);
+  }
+  return parts.join('');
+}
+
+/* Build striped border for multiple labels on overlapping ranges */
+function buildStripedBorder(colors) {
+  if (colors.length === 1) return colors[0];
+  var w = Math.round(100 / colors.length);
+  var stops = colors.map(function(c, i){
+    var from = i * w;
+    var to = i === colors.length - 1 ? 100 : (i + 1) * w;
+    return c + ' ' + from + '% ' + to + '%';
+  });
+  return 'linear-gradient(to right, ' + stops.join(', ') + ')';
+}
+
+/* ── Theme ──────────────────────────────────────────────────────── */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('icp-theme', t);
+  $themeToggle.textContent = t === 'dark' ? 'Light' : 'Dark';
+}
+$themeToggle.addEventListener('click', function(){
+  var cur = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+});
+(function(){
+  var t = document.documentElement.getAttribute('data-theme') || 'light';
+  $themeToggle.textContent = t === 'dark' ? 'Light' : 'Dark';
+})();
+
+/* ── How to Play ────────────────────────────────────────────────── */
+function openHtp() { $htpModal.style.display = ''; $htpClose.focus(); }
+function closeHtp() { $htpModal.style.display = 'none'; $htpBtn.focus(); }
+$htpBtn.addEventListener('click', openHtp);
+$htpInline.addEventListener('click', openHtp);
+$htpClose.addEventListener('click', closeHtp);
+$htpModal.querySelector('.modal-overlay').addEventListener('click', function(e){
+  if (e.target === this) closeHtp();
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') {
+    if ($htpModal.style.display !== 'none') { closeHtp(); return; }
+    if (selectionAnchor && !submitted) clearSelection();
+  }
+});
+
+/* ── Drag handle ────────────────────────────────────────────────── */
+(function(){
+  var div = document.querySelector('.panel-divider');
+  var pl = document.querySelector('.panel-left');
+  var dragging = false, startX = 0, startW = 0;
+  div.addEventListener('mousedown', function(e){
+    e.preventDefault(); dragging = true; startX = e.clientX; startW = pl.offsetWidth;
+    div.classList.add('dragging'); document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', function(e){
+    if (!dragging) return;
+    var w = startW + (e.clientX - startX);
+    pl.style.width = Math.max(180, Math.min(600, w)) + 'px';
+  });
+  document.addEventListener('mouseup', function(){
+    if (!dragging) return; dragging = false;
+    div.classList.remove('dragging'); document.body.style.cursor = ''; document.body.style.userSelect = '';
+  });
+})();
+
+/* ── Load manifest ──────────────────────────────────────────────── */
+fetch('csi-problems/index.json')
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    manifest = data;
+    data.weeks.forEach(function(w){
+      var opt = document.createElement('option');
+      opt.value = w.week;
+      opt.textContent = 'Week ' + w.week + ': ' + w.title;
+      $weekSelect.appendChild(opt);
+    });
+  })
+  .catch(function(err){
+    console.error('Failed to load manifest:', err);
+    $noSetMsg.querySelector('div').textContent = 'Failed to load exercises.';
+  });
+
+/* ── Week selection ─────────────────────────────────────────────── */
+$weekSelect.addEventListener('change', function(){
+  var weekNum = parseInt(this.value, 10);
+  if (!weekNum || !manifest) {
+    $noSetMsg.style.display = ''; $exArea.style.display = 'none'; $weekDesc.textContent = '';
+    return;
+  }
+  var week = manifest.weeks.find(function(w){ return w.week === weekNum; });
+  if (!week) return;
+  $noSetMsg.style.display = 'none';
+  $exArea.style.display = 'flex';
+  $rightPlaceholder.style.display = '';
+  $gameSection.style.display = 'none';
+  $weekDesc.textContent = week.exercises.length + ' exercises';
+  currentExercise = null;
+  buildExerciseList(week);
+});
+
+function buildExerciseList(week) {
+  $exList.innerHTML = '';
+  $exExpandBtn.style.display = 'none';
+  week.exercises.forEach(function(exId, i){
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'exercise-option';
+    btn.setAttribute('role', 'listitem'); btn.setAttribute('tabindex', '0');
+    btn.dataset.exerciseId = exId;
+    btn.innerHTML = '<span class="exercise-num">' + (i+1) + '</span><span class="exercise-info"><span class="exercise-title">Loading...</span></span>';
+    btn.addEventListener('click', function(){ selectExercise(exId, btn); });
+    $exList.appendChild(btn);
+    fetch('csi-problems/' + exId + '.json')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        btn.querySelector('.exercise-title').textContent = data.title;
+        var desc = document.createElement('span');
+        desc.className = 'exercise-desc'; desc.textContent = data.description;
+        btn.querySelector('.exercise-info').appendChild(desc);
+      })
+      .catch(function(){ btn.querySelector('.exercise-title').textContent = exId; });
+  });
+}
+
+/* ── Collapse exercise list ─────────────────────────────────────── */
+function collapseExerciseList(selectedBtn) {
+  var btns = $exList.querySelectorAll('.exercise-option');
+  var hasOthers = false;
+  btns.forEach(function(b){ if (b !== selectedBtn) { b.classList.add('ex-collapsed'); hasOthers = true; } });
+  if (hasOthers) { $exExpandBtn.style.display = ''; $exExpandBtn.setAttribute('aria-expanded', 'false'); }
+}
+$exExpandBtn.addEventListener('click', function(){
+  var expanded = this.getAttribute('aria-expanded') === 'true';
+  if (expanded) {
+    collapseExerciseList($exList.querySelector('.exercise-option.selected'));
+  } else {
+    $exList.querySelectorAll('.exercise-option').forEach(function(b){ b.classList.remove('ex-collapsed'); });
+    this.setAttribute('aria-expanded', 'true');
+    this.textContent = '\u25BE Collapse list';
+  }
+});
+
+/* ── Select exercise ────────────────────────────────────────────── */
+function selectExercise(exId, btnEl) {
+  $exList.querySelectorAll('.exercise-option').forEach(function(c){ c.classList.remove('selected'); });
+  if (btnEl) btnEl.classList.add('selected');
+  collapseExerciseList(btnEl);
+
+  fetch('csi-problems/' + exId + '.json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      currentExercise = data;
+      selectionAnchor = null; selectionEnd = null;
+      tags = []; submitted = false;
+      $feedbackSec.style.display = 'none';
+      $rightPlaceholder.style.display = 'none';
+      $gameSection.style.display = '';
+      $exTitle.textContent = data.title;
+      $hint.style.display = '';
+      $tagPanel.style.display = 'none';
+      renderCode(data);
+      renderLabelGrid(data.labels);
+      renderTags();
+      updateStatus();
+      announce('Exercise loaded: ' + data.title);
+    })
+    .catch(function(err){ console.error(err); announce('Failed to load exercise.'); });
+}
+
+/* ── Render code ────────────────────────────────────────────────── */
+function renderCode(ex) {
+  $codeBody.innerHTML = '';
+  tokenElements = {};
+
+  ex.code.forEach(function(line){
+    var lineDiv = document.createElement('div');
+    lineDiv.className = 'code-line';
+    var numSpan = document.createElement('span');
+    numSpan.className = 'line-num'; numSpan.textContent = line.lineNumber;
+    numSpan.setAttribute('aria-hidden', 'true');
+    lineDiv.appendChild(numSpan);
+
+    var contentSpan = document.createElement('span');
+    contentSpan.className = 'line-content';
+    var clickableIdx = 0;
+    tokenElements[line.lineNumber] = [];
+
+    line.segments.forEach(function(seg){
+      if (seg.ws) {
+        var ws = document.createElement('span');
+        ws.className = 'seg-ws'; ws.textContent = seg.text;
+        contentSpan.appendChild(ws);
+      } else {
+        var tok = document.createElement('span');
+        tok.className = 'code-token';
+        tok.textContent = seg.text;
+        tok.dataset.line = line.lineNumber;
+        tok.dataset.tokenIdx = clickableIdx;
+        tok.setAttribute('tabindex', '0');
+        tok.setAttribute('role', 'button');
+        tok.setAttribute('aria-label', 'Code: ' + seg.text);
+        (function(ln, ti){
+          tok.addEventListener('click', function(){ onTokenClick(ln, ti); });
+          tok.addEventListener('keydown', function(e){
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTokenClick(ln, ti); }
+          });
+        })(line.lineNumber, clickableIdx);
+        tokenElements[line.lineNumber].push(tok);
+        contentSpan.appendChild(tok);
+        clickableIdx++;
+      }
+    });
+    lineDiv.appendChild(contentSpan);
+    $codeBody.appendChild(lineDiv);
+  });
+}
+
+/* ── Render label grid ──────────────────────────────────────────── */
+function renderLabelGrid(labels) {
+  $labelGrid.innerHTML = '';
+  labels.forEach(function(name, idx){
+    var def = ALL_LABELS[name] || { desc: '' };
+    var c = PALETTE[idx % PALETTE.length];
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'label-btn';
+    btn.style.borderColor = c.bdr;
+    btn.dataset.labelName = name;
+    btn.innerHTML =
+      '<span class="label-shape" style="background:' + c.bg + ';border:2px solid ' + c.bdr + ';"></span>' +
+      '<span class="label-text"><span class="label-name">' + esc(name) + '</span>' +
+      '<span class="label-desc">' + esc(def.desc) + '</span></span>';
+    btn.addEventListener('click', function(){ onLabelClick(name); });
+    $labelGrid.appendChild(btn);
+  });
+}
+
+/* ── Token click ────────────────────────────────────────────────── */
+function onTokenClick(line, tokenIdx) {
+  if (submitted) return;
+
+  if (!selectionAnchor) {
+    // Start new selection
+    selectionAnchor = { line: line, tokenIdx: tokenIdx };
+    selectionEnd = null;
+  } else if (selectionAnchor.line !== line) {
+    // Different line: restart selection
+    selectionAnchor = { line: line, tokenIdx: tokenIdx };
+    selectionEnd = null;
+  } else if (!selectionEnd && selectionAnchor.tokenIdx === tokenIdx) {
+    // Clicked same token again with no range: deselect
+    selectionAnchor = null; selectionEnd = null;
+  } else {
+    // Same line: set/update end
+    selectionEnd = { line: line, tokenIdx: tokenIdx };
+  }
+
+  updateSelectionVisuals();
+}
+
+function updateSelectionVisuals() {
+  // Clear all pending states
+  $codeBody.querySelectorAll('.code-token.pending').forEach(function(el){
+    el.classList.remove('pending');
+  });
+
+  var range = getSelectionRange();
+  if (range) {
+    var els = tokenElements[range.line];
+    if (els) {
+      for (var i = range.start; i <= range.end && i < els.length; i++) {
+        els[i].classList.add('pending');
+      }
+    }
+    // Show tag panel
+    $tagPanel.style.display = '';
+    $phraseDisplay.textContent = getTokenText(range.line, range.start, range.end);
+    announce('Selected: ' + getTokenText(range.line, range.start, range.end));
+  } else {
+    $tagPanel.style.display = 'none';
+  }
+}
+
+function clearSelection() {
+  selectionAnchor = null; selectionEnd = null;
+  updateSelectionVisuals();
+}
+
+$cancelBtn.addEventListener('click', clearSelection);
+
+/* ── Label click ────────────────────────────────────────────────── */
+function onLabelClick(labelName) {
+  if (submitted) return;
+  var range = getSelectionRange();
+  if (!range) return;
+
+  // Check for duplicate tag
+  var isDupe = tags.some(function(t){
+    return t.line === range.line && t.start === range.start && t.end === range.end && t.label === labelName;
+  });
+  if (isDupe) {
+    announce('Already tagged as ' + labelName);
+    return;
+  }
+
+  tags.push({ line: range.line, start: range.start, end: range.end, label: labelName });
+  clearSelection();
+  applyAllTagStyles();
+  renderTags();
+  updateStatus();
+  announce('Tagged as ' + labelName);
+}
+
+/* ── Apply tag styles to code tokens ────────────────────────────── */
+function applyAllTagStyles() {
+  // Reset all tokens to default
+  Object.keys(tokenElements).forEach(function(lineNum){
+    tokenElements[lineNum].forEach(function(el){
+      el.classList.remove('tagged');
+      el.style.background = '';
+      el.style.borderBottom = '';
+      el.style.borderImage = '';
+      el.style.color = '';
+      el.style.fontWeight = '';
+    });
+  });
+
+  if (tags.length === 0) return;
+
+  // For each token, find all tags that cover it
+  Object.keys(tokenElements).forEach(function(lineNum){
+    var ln = parseInt(lineNum, 10);
+    tokenElements[ln].forEach(function(el, idx){
+      var coveringTags = tags.filter(function(t){
+        return t.line === ln && idx >= t.start && idx <= t.end;
+      });
+      if (coveringTags.length === 0) return;
+
+      el.classList.add('tagged');
+      // Use first tag's color for background
+      var firstC = labelColor(coveringTags[0].label);
+      el.style.background = firstC.bg;
+      el.style.color = firstC.txt;
+      el.style.fontWeight = '700';
+
+      // Striped border for all covering tags
+      var borderColors = coveringTags.map(function(t){ return labelColor(t.label).bdr; });
+      if (borderColors.length === 1) {
+        el.style.borderBottom = '4px solid ' + borderColors[0];
+        el.style.borderImage = '';
+      } else {
+        el.style.borderBottom = '4px solid transparent';
+        el.style.borderImage = buildStripedBorder(borderColors) + ' 1';
+      }
+    });
+  });
+}
+
+/* ── Render tags list ───────────────────────────────────────────── */
+function renderTags() {
+  $tagsList.innerHTML = '';
+  if (tags.length === 0) {
+    $tagsSection.style.display = 'none';
+    return;
+  }
+  $tagsSection.style.display = '';
+
+  tags.forEach(function(tag, idx){
+    var c = labelColor(tag.label);
+    var li = document.createElement('li');
+    li.className = 'tag-item';
+
+    li.innerHTML =
+      '<span class="tag-badge" style="border-color:' + c.bdr + ';color:' + c.txt + ';background:' + c.bg + ';">' +
+        '<span class="tag-shape" style="background:' + c.bdr + ';"></span>' +
+        esc(tag.label) +
+      '</span>' +
+      '<span class="tag-phrase">' + esc(getTokenText(tag.line, tag.start, tag.end)) + '</span>';
+
+    if (!submitted) {
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button'; removeBtn.className = 'btn-remove';
+      removeBtn.textContent = 'Remove';
+      removeBtn.setAttribute('aria-label', 'Remove tag: ' + tag.label);
+      (function(i){
+        removeBtn.addEventListener('click', function(e){
+          e.stopPropagation();
+          tags.splice(i, 1);
+          applyAllTagStyles(); renderTags(); updateStatus();
+          announce('Tag removed.');
+        });
+      })(idx);
+      li.appendChild(removeBtn);
+    }
+
+    // Hover to highlight range in code
+    (function(t){
+      li.addEventListener('mouseenter', function(){
+        var els = tokenElements[t.line];
+        if (!els) return;
+        for (var i = t.start; i <= t.end && i < els.length; i++) {
+          els[i].style.outline = '2px solid ' + labelColor(t.label).bdr;
+          els[i].style.outlineOffset = '2px';
+        }
+      });
+      li.addEventListener('mouseleave', function(){
+        var els = tokenElements[t.line];
+        if (!els) return;
+        for (var i = t.start; i <= t.end && i < els.length; i++) {
+          els[i].style.outline = '';
+          els[i].style.outlineOffset = '';
+        }
+      });
+    })(tag);
+
+    $tagsList.appendChild(li);
+  });
+}
+
+/* ── Status ─────────────────────────────────────────────────────── */
+function updateStatus() {
+  $checkBtn.disabled = tags.length === 0;
+  $statusMsg.textContent = tags.length === 0
+    ? 'Add at least one tag to continue'
+    : tags.length + ' tag' + (tags.length === 1 ? '' : 's') + ' added';
+}
+
+/* ── Check (submit) ─────────────────────────────────────────────── */
+$checkBtn.addEventListener('click', function(){
+  if (submitted || !currentExercise) return;
+  submitted = true;
+  $checkBtn.disabled = true;
+  $hint.style.display = 'none';
+  $tagPanel.style.display = 'none';
+  clearSelection();
+
+  // Remove clickability from tokens
+  $codeBody.querySelectorAll('.code-token').forEach(function(el){
+    el.style.cursor = 'default'; el.removeAttribute('tabindex');
+    el.style.textDecoration = 'none';
+  });
+
+  var expected = currentExercise.expected;
+  var matched = [];
+  var missed = [];
+
+  expected.forEach(function(exp){
+    var found = tags.some(function(t){
+      return t.line === exp.line && t.start === exp.start && t.end === exp.end && t.label === exp.label;
+    });
+    if (found) matched.push(exp); else missed.push(exp);
+  });
+
+  var total = expected.length;
+  var correct = matched.length;
+  var pct = Math.round((correct / total) * 100);
+  var cls = pct === 100 ? 'perfect' : pct >= 60 ? 'good' : 'needs-work';
+  var icon = pct === 100 ? '\u2713' : pct >= 60 ? '\u25CB' : '\u2717';
+
+  $feedbackSec.style.display = '';
+  $scoreBanner.className = 'score-banner ' + cls;
+  $scoreBanner.textContent = icon + ' ' + correct + ' of ' + total + ' expected labels found (' + pct + '%)';
+
+  // Feedback items
+  $feedbackItems.innerHTML = '';
+
+  matched.forEach(function(exp){
+    var div = document.createElement('div');
+    div.className = 'feedback-item';
+    div.innerHTML =
+      '<span class="feedback-icon" aria-hidden="true">\u2713</span>' +
+      '<span class="feedback-body">' +
+        '<span class="feedback-label-name" style="color:#004D26;">' + esc(exp.label) + '</span>' +
+        '<span class="feedback-phrase">' + esc(getTokenText(exp.line, exp.start, exp.end)) + '</span>' +
+      '</span>';
+    $feedbackItems.appendChild(div);
+  });
+
+  missed.forEach(function(exp){
+    var div = document.createElement('div');
+    div.className = 'feedback-item';
+    div.innerHTML =
+      '<span class="feedback-icon" aria-hidden="true">\u2717</span>' +
+      '<span class="feedback-body">' +
+        '<span class="feedback-label-name" style="color:#880000;">Missed: ' + esc(exp.label) + '</span>' +
+        '<span class="feedback-phrase">' + esc(getTokenText(exp.line, exp.start, exp.end)) + '</span>' +
+      '</span>';
+    $feedbackItems.appendChild(div);
+
+    // Highlight missed ranges in code
+    var c = labelColor(exp.label);
+    var els = tokenElements[exp.line];
+    if (els) {
+      for (var i = exp.start; i <= exp.end && i < els.length; i++) {
+        if (!els[i].classList.contains('tagged')) {
+          els[i].classList.add('tagged');
+          els[i].style.background = 'rgba(187,0,0,0.12)';
+          els[i].style.borderBottom = '3px dashed #BB0000';
+          els[i].style.color = '';
+        }
+      }
+    }
+  });
+
+  renderTags(); // Re-render without remove buttons
+  announce(correct + ' of ' + total + ' expected labels found.');
+});
+
+/* ── Reset ──────────────────────────────────────────────────────── */
+$resetBtn.addEventListener('click', function(){
+  if (!currentExercise) return;
+  selectionAnchor = null; selectionEnd = null;
+  tags = []; submitted = false;
+  $feedbackSec.style.display = 'none';
+  $hint.style.display = '';
+  $tagPanel.style.display = 'none';
+  renderCode(currentExercise);
+  renderTags();
+  updateStatus();
+  announce('Exercise reset.');
+});
+
+})();
+</script>
+</body>
+</html>

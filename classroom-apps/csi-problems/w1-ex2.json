@@ -1,0 +1,27 @@
+{
+  "id": "w1-ex2",
+  "week": 1,
+  "title": "Calling a Method",
+  "description": "A print statement calling System.out.println.",
+  "labels": ["method name", "literal value", "argument", "parentheses", "statement end", "method call"],
+  "code": [
+    {
+      "lineNumber": 1,
+      "segments": [
+        { "text": "System.out.println" },
+        { "text": "(" },
+        { "text": "\"Hello\"" },
+        { "text": ")" },
+        { "text": ";" }
+      ]
+    }
+  ],
+  "expected": [
+    { "line": 1, "start": 0, "end": 0, "label": "method name" },
+    { "line": 1, "start": 1, "end": 1, "label": "parentheses" },
+    { "line": 1, "start": 2, "end": 2, "label": "argument" },
+    { "line": 1, "start": 3, "end": 3, "label": "parentheses" },
+    { "line": 1, "start": 4, "end": 4, "label": "statement end" },
+    { "line": 1, "start": 0, "end": 3, "label": "method call" }
+  ]
+}

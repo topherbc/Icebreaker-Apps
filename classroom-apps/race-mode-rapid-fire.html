@@ -2066,14 +2066,14 @@ label {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 20px;
   background: var(--near-black);
   min-height: 100vh;
 }
 .loading-shapes {
   display: flex;
   gap: 16px;
-  align-items: center;
+  align-items: flex-end;
 }
 .loading-title {
   font-family: 'Space Grotesk', sans-serif;
@@ -2081,24 +2081,28 @@ label {
   font-weight: 700;
   color: var(--amber);
   letter-spacing: -0.04em;
+  line-height: 1;
 }
 .loading-sub {
-  font-size: 16px;
-  color: var(--text-on-dark-mid);
-  letter-spacing: 0.1em;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(245,166,35,0.35);
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  font-weight: 600;
+}
+.loading-shape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 @media (prefers-reduced-motion: no-preference) {
   @keyframes loadingBounce {
     0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-12px) scale(1.15); }
+    50% { transform: translateY(-14px) scale(1.15); }
   }
-  .loading-shape {
-    animation: loadingBounce 1s ease-in-out infinite;
-  }
+  .loading-shape { animation: loadingBounce 1s ease-in-out infinite; }
   .loading-shape.ls-2 { animation-delay: 0.15s; }
-  .loading-shape.ls-3 { animation-delay: 0.3s; }
+  .loading-shape.ls-3 { animation-delay: 0.30s; }
   .loading-shape.ls-4 { animation-delay: 0.45s; }
 }
 

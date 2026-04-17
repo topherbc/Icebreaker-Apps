@@ -3879,7 +3879,9 @@ function computeRankings() {
     return { name: p.name, score: p.score, id: p.id, streak: p.streak, emoji: p.emoji || '' };
   });
   arr.sort(function(a, b) { return b.score - a.score; });
-  arr.forEach(function(p, i) { p.rank = i + 1; });
+  arr.forEach(function(p, i) {
+    p.rank = (i > 0 && arr[i - 1].score === p.score) ? arr[i - 1].rank : i + 1;
+  });
   return arr;
 }
 

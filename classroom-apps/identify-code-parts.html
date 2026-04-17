@@ -631,61 +631,72 @@ document.addEventListener('keydown', function(e){
   });
 })();
 
-/* ── Load manifest ──────────────────────────────────────────────── */
-fetch('csi-problems/index.json')
+/* ── Load set tree ──────────────────────────────────────────────── */
+var currentSetData = null; // array of exercises for selected week
+
+fetch('icp-content/icp-set-tree.json')
   .then(function(r){ return r.json(); })
-  .then(function(data){
-    manifest = data;
-    data.weeks.forEach(function(w){
+  .then(function(tree){
+    // Probe all paths in parallel -- drop any 404s
+    return Promise.all(tree.map(function(entry){
+      return fetch(entry.path, { method: 'HEAD' })
+        .then(function(r){ return r.ok ? entry : null; })
+        .catch(function(){ return null; });
+    }));
+  })
+  .then(function(entries){
+    entries.forEach(function(entry){
+      if (!entry) return;
       var opt = document.createElement('option');
-      opt.value = w.week;
-      opt.textContent = 'Week ' + w.week + ': ' + w.title;
+      opt.value = entry.id;
+      opt.dataset.path = entry.path;
+      opt.textContent = entry.title;
       $weekSelect.appendChild(opt);
     });
   })
   .catch(function(err){
-    console.error('Failed to load manifest:', err);
+    console.error('Failed to load set tree:', err);
     $noSetMsg.querySelector('div').textContent = 'Failed to load exercises.';
   });
 
 /* ── Week selection ─────────────────────────────────────────────── */
 $weekSelect.addEventListener('change', function(){
-  var weekNum = parseInt(this.value, 10);
-  if (!weekNum || !manifest) {
+  var opt = $weekSelect.options[$weekSelect.selectedIndex];
+  if (!opt || !opt.dataset.path) {
     $noSetMsg.style.display = ''; $exArea.style.display = 'none'; $weekDesc.textContent = '';
     return;
   }
-  var week = manifest.weeks.find(function(w){ return w.week === weekNum; });
-  if (!week) return;
-  $noSetMsg.style.display = 'none';
-  $exArea.style.display = 'flex';
-  $rightPlaceholder.style.display = '';
-  $gameSection.style.display = 'none';
-  $weekDesc.textContent = week.exercises.length + ' exercises';
-  currentExercise = null;
-  buildExerciseList(week);
+  fetch(opt.dataset.path)
+    .then(function(r){ return r.json(); })
+    .then(function(exercises){
+      currentSetData = exercises;
+      $noSetMsg.style.display = 'none';
+      $exArea.style.display = 'flex';
+      $rightPlaceholder.style.display = '';
+      $gameSection.style.display = 'none';
+      $weekDesc.textContent = exercises.length + ' exercises';
+      currentExercise = null;
+      buildExerciseList(exercises);
+    })
+    .catch(function(err){ console.error(err); });
 });
 
-function buildExerciseList(week) {
+function buildExerciseList(exercises) {
   $exList.innerHTML = '';
   $exExpandBtn.style.display = 'none';
-  week.exercises.forEach(function(exId, i){
+  exercises.forEach(function(ex, i){
     var btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'exercise-option';
     btn.setAttribute('role', 'listitem'); btn.setAttribute('tabindex', '0');
-    btn.dataset.exerciseId = exId;
-    btn.innerHTML = '<span class="exercise-num">' + (i+1) + '</span><span class="exercise-info"><span class="exercise-title">Loading...</span></span>';
-    btn.addEventListener('click', function(){ selectExercise(exId, btn); });
+    btn.dataset.exerciseIdx = i;
+    btn.innerHTML =
+      '<span class="exercise-num">' + (i+1) + '</span>' +
+      '<span class="exercise-info">' +
+        '<span class="exercise-title">' + esc(ex.title) + '</span>' +
+        '<span class="exercise-desc">' + esc(ex.description) + '</span>' +
+      '</span>';
+    btn.addEventListener('click', function(){ selectExercise(i, btn); });
     $exList.appendChild(btn);
-    fetch('csi-problems/' + exId + '.json')
-      .then(function(r){ return r.json(); })
-      .then(function(data){
-        btn.querySelector('.exercise-title').textContent = data.title;
-        var desc = document.createElement('span');
-        desc.className = 'exercise-desc'; desc.textContent = data.description;
-        btn.querySelector('.exercise-info').appendChild(desc);
-      })
-      .catch(function(){ btn.querySelector('.exercise-title').textContent = exId; });
   });
 }
 
@@ -708,30 +719,27 @@ $exExpandBtn.addEventListener('click', function(){
 });
 
 /* ── Select exercise ────────────────────────────────────────────── */
-function selectExercise(exId, btnEl) {
+function selectExercise(idx, btnEl) {
+  if (!currentSetData || !currentSetData[idx]) return;
   $exList.querySelectorAll('.exercise-option').forEach(function(c){ c.classList.remove('selected'); });
   if (btnEl) btnEl.classList.add('selected');
   collapseExerciseList(btnEl);
 
-  fetch('csi-problems/' + exId + '.json')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      currentExercise = data;
-      selectionAnchor = null; selectionEnd = null;
-      tags = []; submitted = false;
-      $feedbackSec.style.display = 'none';
-      $rightPlaceholder.style.display = 'none';
-      $gameSection.style.display = '';
-      $exTitle.textContent = data.title;
-      $hint.style.display = '';
-      $tagPanel.style.display = 'none';
-      renderCode(data);
-      renderLabelGrid(data.labels);
-      renderTags();
-      updateStatus();
-      announce('Exercise loaded: ' + data.title);
-    })
-    .catch(function(err){ console.error(err); announce('Failed to load exercise.'); });
+  var data = currentSetData[idx];
+  currentExercise = data;
+  selectionAnchor = null; selectionEnd = null;
+  tags = []; submitted = false;
+  $feedbackSec.style.display = 'none';
+  $rightPlaceholder.style.display = 'none';
+  $gameSection.style.display = '';
+  $exTitle.textContent = data.title;
+  $hint.style.display = '';
+  $tagPanel.style.display = 'none';
+  renderCode(data);
+  renderLabelGrid(data.labels);
+  renderTags();
+  updateStatus();
+  announce('Exercise loaded: ' + data.title);
 }
 
 /* ── Render code ────────────────────────────────────────────────── */

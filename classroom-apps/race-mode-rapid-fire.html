@@ -4918,10 +4918,11 @@ window.addEventListener('beforeunload', function() {
     return '';
   }
 
-  var overlay = document.getElementById('checker-overlay');
+  var overlay = null;
   var cells = [];
 
   function buildGrid() {
+    if (!overlay) overlay = document.getElementById('checker-overlay');
     overlay.innerHTML = '';
     cells = [];
     overlay.style.gridTemplateColumns = 'repeat('+COLS+', 1fr)';

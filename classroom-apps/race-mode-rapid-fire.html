@@ -544,7 +544,7 @@ label {
 }
 .landing-rule-block {
   width: 100%;
-  max-width: 480px;
+  max-width: 600px;
   text-align: center;
 }
 .landing-rule {
@@ -561,7 +561,7 @@ label {
 }
 .landing-btn {
   width: 100%;
-  max-width: 480px;
+  max-width: 600px;
   height: 64px;
   border-radius: 4px;
   font-family: 'Space Grotesk', sans-serif;
@@ -570,7 +570,6 @@ label {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   cursor: pointer;
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2148,7 +2147,7 @@ label {
   .shape-btn { padding: 16px; font-size: 16px; min-height: 80px; }
   .podium-wrap { gap: 8px; }
   .podium-block { width: 100px; }
-  .landing-btn { max-width: 280px; height: 56px; }
+  .landing-btn { max-width: 100%; height: 56px; }
   .landing-logo { font-size: clamp(56px, 12vw, 96px); }
 }
 @media (max-width: 480px) {
@@ -2228,7 +2227,7 @@ label {
     <svg width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="var(--shape-square)"/></svg>
     <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="var(--shape-diamond)"/></svg>
   </div>
-  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:480px;">
+  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:600px;">
     <button class="landing-btn landing-btn-primary" onclick="navigateTo('host')" aria-label="Host a game">
       Host a Game
     </button>

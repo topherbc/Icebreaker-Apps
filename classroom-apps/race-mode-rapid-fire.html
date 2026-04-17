@@ -561,6 +561,15 @@ label {
   justify-content: center;
   margin: 36px 0;
 }
+.landing-shapes svg {
+  transition: transform 0.35s ease;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .landing-shapes svg:hover {
+    transform: translateY(-14px) scale(1.12);
+  }
+}
 .landing-btn {
   width: 100%;
   max-width: 600px;

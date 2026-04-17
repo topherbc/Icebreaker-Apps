@@ -311,16 +311,16 @@ button:disabled {
   background: rgba(26,26,46,0.06);
   border-color: rgba(26,26,46,0.4);
 }
-/* Secondary on dark quiz header bar */
+/* Secondary on quiz header bar */
 .quiz-header .btn-secondary {
-  color: rgba(255,255,255,0.7);
-  border-color: rgba(255,255,255,0.2);
+  color: var(--text-mid);
+  border-color: var(--border);
   background: transparent;
 }
 .quiz-header .btn-secondary:hover:not(:disabled) {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.35);
-  color: #ffffff;
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(26,26,46,0.3);
+  color: var(--text);
 }
 .btn-danger {
   background: var(--error);
@@ -752,12 +752,12 @@ label {
 /* Quiz header bar -- intentionally dark */
 .quiz-header {
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  background: var(--near-black);
+  background: var(--surface2);
 }
 .quiz-header input {
   font-size: 20px;
@@ -765,13 +765,13 @@ label {
   font-family: 'Space Grotesk', sans-serif;
   border: none;
   background: transparent;
-  color: var(--amber);
+  color: var(--text);
   padding: 4px 8px;
   flex: 1;
   min-width: 200px;
 }
 .quiz-header input:focus {
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.05);
   border-radius: var(--radius-sm);
 }
 
@@ -1953,9 +1953,25 @@ label {
 [data-theme="dark"] .modal h2 {
   color: var(--amber);
 }
-/* Quiz header stays dark in both modes */
+/* Quiz header in dark mode */
 [data-theme="dark"] .quiz-header {
   background: var(--near-black);
+  border-bottom-color: rgba(245,166,35,0.15);
+}
+[data-theme="dark"] .quiz-header input {
+  color: var(--amber);
+}
+[data-theme="dark"] .quiz-header input:focus {
+  background: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .quiz-header .btn-secondary {
+  color: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.2);
+}
+[data-theme="dark"] .quiz-header .btn-secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.35);
+  color: #ffffff;
 }
 /* Builder secondary buttons need light text on dark bg in dark mode */
 [data-theme="dark"] .builder-sidebar .btn-secondary,

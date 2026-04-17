@@ -600,24 +600,6 @@ label {
   position: sticky;
   top: 0;
   z-index: 100;
-  overflow: hidden;
-  isolation: isolate;
-}
-.host-topbar::before {
-  content: '';
-  position: absolute;
-  right: -51px;
-  top: -35px;
-  width: 351px;
-  height: 160px;
-  background:
-    repeating-conic-gradient(
-      rgba(245,166,35,0.25) 0% 25%,
-      transparent 0% 50%
-    ) 0 0 / 14px 14px;
-  transform: rotate(14deg);
-  z-index: -1;
-  pointer-events: none;
 }
 .topbar-brand {
   display: flex;

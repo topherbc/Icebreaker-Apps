@@ -4877,15 +4877,27 @@ function csvEsc(str) {
 }
 
 function shortenUrl(longUrl, callback) {
-  var endpoint = 'https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl);
-  fetch(endpoint).then(function(res) {
-    if (!res.ok) throw new Error('is.gd error');
-    return res.text();
-  }).then(function(shortUrl) {
-    callback(shortUrl.trim());
-  }).catch(function() {
+  var cbName = '_isgd_' + Math.random().toString(36).slice(2);
+  var timeout = setTimeout(function() {
+    cleanup();
     callback(longUrl);
-  });
+  }, 5000);
+  function cleanup() {
+    clearTimeout(timeout);
+    delete window[cbName];
+    var s = document.getElementById(cbName);
+    if (s) s.remove();
+  }
+  window[cbName] = function(resp) {
+    cleanup();
+    if (resp && resp.shorturl) { callback(resp.shorturl); }
+    else { callback(longUrl); }
+  };
+  var script = document.createElement('script');
+  script.id = cbName;
+  script.src = 'https://is.gd/create.php?format=json&callback=' + cbName + '&url=' + encodeURIComponent(longUrl);
+  script.onerror = function() { cleanup(); callback(longUrl); };
+  document.body.appendChild(script);
 }
 
 function setJoinUrl(roomCode) {

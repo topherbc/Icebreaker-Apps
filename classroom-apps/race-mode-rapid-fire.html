@@ -504,13 +504,6 @@ label {
   outline-offset: 2px;
 }
 
-/* Sound toggle */
-.sound-toggle {
-  position: fixed;
-  bottom: 16px;
-  left: 16px;
-  z-index: 1000;
-}
 
 /* =========================================================
    LANDING PAGE
@@ -563,7 +556,6 @@ label {
 }
 .landing-shapes svg {
   transition: transform 0.35s ease;
-  cursor: pointer;
 }
 @media (prefers-reduced-motion: no-preference) {
   .landing-shapes svg:hover {
@@ -2514,15 +2506,18 @@ label {
     </label>
   </div>
   <div class="a11y-row">
+    <span>Sound effects</span>
+    <label class="toggle">
+      <input type="checkbox" id="a11y-sound" checked onchange="toggleSound(this.checked)" aria-label="Toggle sound effects">
+      <span class="toggle-track"></span>
+    </label>
+  </div>
+  <div class="a11y-row">
     <span>Theme</span>
     <button class="btn-secondary" onclick="toggleTheme()" style="padding:6px 14px; min-height:36px; font-size:14px;" id="theme-toggle-label">Light</button>
   </div>
 </div>
 
-<!-- Sound toggle -->
-<button class="a11y-toggle-btn sound-toggle" id="sound-toggle-btn" onclick="toggleSound()" aria-label="Toggle sound effects">
-  <span id="sound-icon" aria-hidden="true">&#128264;</span>
-</button>
 
 <!-- ============================================================
      SCRIPTS
@@ -2631,7 +2626,7 @@ function debouncedSave() {
 //  SOUND ENGINE (Web Audio API)
 // ================================================================
 var audioCtx = null;
-var soundEnabled = false;
+var soundEnabled = true;
 
 function getAudioCtx() {
   if (!audioCtx) {
@@ -2640,13 +2635,9 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-function toggleSound() {
-  soundEnabled = !soundEnabled;
+function toggleSound(on) {
+  soundEnabled = on;
   if (soundEnabled && !audioCtx) getAudioCtx();
-  var icon = document.getElementById('sound-icon');
-  icon.innerHTML = soundEnabled ? '&#128266;' : '&#128264;';
-  document.getElementById('sound-toggle-btn').setAttribute('aria-label',
-    soundEnabled ? 'Sound on -- click to mute' : 'Sound off -- click to unmute');
 }
 
 function playTone(freq, duration, type, vol) {
@@ -2722,6 +2713,7 @@ function toggleA11yPanel() {
     var motionEl = document.getElementById('a11y-motion');
     if (motionEl) motionEl.checked = document.body.hasAttribute('data-reduced-motion') || document.documentElement.hasAttribute('data-reduced-motion');
     document.getElementById('a11y-contrast').checked = document.documentElement.hasAttribute('data-high-contrast');
+    document.getElementById('a11y-sound').checked = soundEnabled;
     updateThemeLabel();
   }
 }

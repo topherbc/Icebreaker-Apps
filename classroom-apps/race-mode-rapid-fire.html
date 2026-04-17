@@ -1353,6 +1353,7 @@ label {
   text-align: center;
   color: var(--amber);
 }
+.lb-emoji { font-size: 22px; line-height: 1; }
 .lb-name { flex: 1; font-weight: 600; color: #ffffff; }
 .lb-score { font-weight: 700; color: rgba(255,255,255,0.7); }
 .lb-delta {
@@ -3526,7 +3527,7 @@ function toggleLockRoom() {
 // ================================================================
 //  HOST LIVE GAME - FLOW
 // ================================================================
-function showLiveScreen(screen) {
+function showLiveScreen(screen, onVisible) {
   var doSwitch = function() {
     ['live-lobby','live-question','live-leaderboard','live-podium'].forEach(function(id) {
       var el = document.getElementById(id);
@@ -3538,6 +3539,7 @@ function showLiveScreen(screen) {
       el.style.display = '';
       el.classList.remove('hidden');
     }
+    if (onVisible) onVisible();
   };
   // Only animate major transitions, not reveals mid-question
   if (screen === 'lobby' || screen === 'leaderboard' || screen === 'podium') {
@@ -3920,58 +3922,34 @@ function advanceQuestion() {
 
 function showLeaderboard(isFinal) {
   hostState.gameStatus = 'leaderboard';
-  showLiveScreen('leaderboard');
 
   var ranked = computeRankings();
   var list = document.getElementById('leaderboard-list');
   var topN = ranked.slice(0, 10);
   var ROW_H = 58; // row height including gap
-  playLeaderboardSweep();
 
   // Build a lookup of previous rank index by player id
   var prevIndexById = {};
   hostState.previousRankings.forEach(function(p, i) { prevIndexById[p.id] = i; });
-
   var hasPrevious = hostState.previousRankings.length > 0;
 
   // Set container height so it holds space for absolutely-positioned rows
   list.style.height = (topN.length * ROW_H) + 'px';
 
+  // Render rows at their OLD positions (hidden), including emoji
   list.innerHTML = topN.map(function(p, i) {
     var ans = hostState.players[p.id] && hostState.players[p.id].answers[hostState.currentQuestionIndex];
     var delta = ans ? (ans.earned || 0) : 0;
-    // Start at old position if we have one, otherwise start at current position
+    var emoji = p.emoji ? '<span class="lb-emoji">' + escHtml(p.emoji) + '</span>' : '';
     var startIdx = hasPrevious && prevIndexById[p.id] !== undefined ? prevIndexById[p.id] : i;
     return '<div class="lb-row" role="listitem" data-player-id="' + p.id + '" style="top:' + (startIdx * ROW_H) + 'px">' +
       '<span class="lb-rank">' + p.rank + '</span>' +
+      emoji +
       '<span class="lb-name">' + escHtml(p.name) + '</span>' +
       '<span class="lb-delta">+' + delta + '</span>' +
       '<span class="lb-score">' + p.score + '</span>' +
       '</div>';
   }).join('');
-
-  // Staggered fade-in, then animate to new positions
-  var rows = list.querySelectorAll('.lb-row');
-  rows.forEach(function(row, i) {
-    setTimeout(function() {
-      row.classList.add('lb-visible');
-    }, i * 80);
-  });
-
-  // After fade-in completes, slide rows to their new ranked positions
-  var fadeInDone = topN.length * 80 + 100;
-  if (hasPrevious) {
-    setTimeout(function() {
-      rows.forEach(function(row, i) {
-        row.style.top = (i * ROW_H) + 'px';
-      });
-    }, fadeInDone);
-  } else {
-    // First leaderboard: rows already at correct positions, no slide needed
-  }
-
-  // Save current rankings for next time
-  hostState.previousRankings = topN.map(function(p) { return { id: p.id }; });
 
   var btn = document.getElementById('lb-next-btn');
   if (isFinal) {
@@ -3981,6 +3959,33 @@ function showLeaderboard(isFinal) {
     btn.textContent = 'Next Question';
     btn.onclick = function() { showQuestion(hostState.currentQuestionIndex + 1); };
   }
+
+  // Show the screen (triggers checker wipe), then animate AFTER it's visible
+  showLiveScreen('leaderboard', function onVisible() {
+    playLeaderboardSweep();
+
+    var rows = list.querySelectorAll('.lb-row');
+
+    // Staggered fade-in
+    rows.forEach(function(row, i) {
+      setTimeout(function() {
+        row.classList.add('lb-visible');
+      }, i * 80);
+    });
+
+    // After fade-in, slide rows to their new ranked positions
+    var fadeInDone = topN.length * 80 + 400;
+    if (hasPrevious) {
+      setTimeout(function() {
+        rows.forEach(function(row, i) {
+          row.style.top = (i * ROW_H) + 'px';
+        });
+      }, fadeInDone);
+    }
+
+    // Save current rankings for next time
+    hostState.previousRankings = topN.map(function(p) { return { id: p.id }; });
+  });
 
   // Broadcast
   hostState.gameChannel.publish('leaderboard:show', { rankings: ranked.slice(0, 20) });

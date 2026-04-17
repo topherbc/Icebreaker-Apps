@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦸</text></svg>">
+<title>Hero Debrief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Surfaces */
+    --bg-deep: #eef0f6;
+    --bg-card: #ffffff;
+    --bg-card2: #e4e8f4;
+    --bg-station: #e8ebf5;
+
+    /* Accents */
+    --red: #b91c2e;
+    --red-dim: #fce8ea;
+    --blue: #1a4fb5;
+    --blue-bright: #1a4fb5;
+    --gold: #92650a;
+    --gold-dim: #fdf0cb;
+    --green: #155e2f;
+    --green-dim: #d1fae5;
+
+    /* Text */
+    --text: #111827;
+    --muted: #4b5563;
+    --subtle: #576070;  /* was #6b7280 -- 4.30:1 FAIL on #eef0f6 -> ~5.8:1 */
+    --on-color: #ffffff;
+
+    /* Borders */
+    --border: #d1d5e0;
+    --border-bright: #9ca3b8;
+
+    /* Alias: code blocks use color:var(--white) for light text on dark bg */
+    --white: var(--on-color);
+
+    --mono: 'JetBrains Mono', monospace;
+    --font-display: 'Anton', 'Barlow Condensed', sans-serif;
+    --font-condensed: 'Barlow Condensed', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-card: 'Crimson Pro', serif;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.09);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-size: 18px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ===== LOAD SCREEN ===== */
+  #loadScreen {
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(29,95,212,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(204,31,52,0.06) 0%, transparent 50%),
+      var(--bg-deep);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .load-bg-lines {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(29,95,212,0.05) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(29,95,212,0.05) 60px);
+  }
+
+  .load-inner {
+    position: relative;
+    text-align: center;
+    max-width: 560px;
+    padding: 48px 40px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid var(--border-bright);
+    border-top: 3px solid var(--red);
+    box-shadow: var(--shadow-card), 0 0 60px rgba(204,31,52,0.06);
+  }
+
+  .load-badge {
+    display: inline-block;
+    background: var(--red);
+    color: var(--white);
+    font-family: var(--font-condensed);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    margin-bottom: 20px;
+  }
+
+  .load-title {
+    font-family: var(--font-display);
+    font-size: 72px;
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .load-title span { color: var(--gold); }
+
+  .load-subtitle {
+    font-family: var(--font-condensed);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+
+  .load-form label {
+    display: block;
+    font-family: var(--font-condensed);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-align: left;
+  }
+
+  .load-form input[type="number"] {
+    width: 100%;
+    background: var(--bg-station);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    padding: 12px;
+    outline: none;
+    margin-bottom: 24px;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .load-form input[type="number"]::-webkit-inner-spin-button,
+  .load-form input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .load-form input[type="number"]:focus { border-color: var(--blue); }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    background: var(--red);
+    color: var(--white);
+    font-family: var(--font-condensed);
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    padding: 16px 24px;
+    cursor: pointer;
+    min-height: 56px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { background: #9b1526; }
+  .btn-primary:active { transform: scale(0.99); }
+
+  /* ===== STATION SCREEN ===== */
+  #stationScreen {
+    background:
+      radial-gradient(ellipse at 70% 80%, rgba(29,95,212,0.05) 0%, transparent 60%),
+      var(--bg-deep);
+  }
+
+  .station-header {
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .station-header-left { display: flex; align-items: center; gap: 16px; }
+
+  .station-logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+  .station-logo span { color: var(--gold); }
+
+  .station-tagline {
+    font-family: var(--font-condensed);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .station-completion {
+    font-family: var(--font-condensed);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .station-completion strong { color: var(--gold); font-size: 20px; }
+
+  .station-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 40px;
+    align-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .division-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border-bright);
+    padding: 28px 32px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .division-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04), transparent);
+  }
+  .division-card:not(.cleared):hover {
+    background: var(--bg-card2);
+    border-color: var(--blue);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(29,95,212,0.10);
+  }
+  .division-card.cleared {
+    opacity: 0.6;
+    cursor: default;
+    border-left-color: var(--green);
+  }
+  .division-card.in-progress { border-left-color: var(--gold); }
+
+  .division-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-condensed);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border: 1px solid;
+    margin-bottom: 14px;
+  }
+  .division-status.not-started { color: var(--muted); border-color: var(--border-bright); }
+  .division-status.in-progress { color: #6b4a07; border-color: #e8c97a; background: rgba(146,101,10,0.08); }
+  .division-status.cleared { color: var(--green); border-color: var(--green-dim); background: rgba(22,101,52,0.06); }
+
+  .division-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .division-topic {
+    font-family: var(--font-condensed);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .division-count {
+    position: absolute;
+    bottom: 20px; right: 24px;
+    font-family: var(--font-condensed);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--subtle);
+  }
+
+  #questionScreen {
+    background: var(--bg-deep);
+  }
+
+  .q-header {
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .q-back {
+    background: none;
+    border: 1px solid var(--border-bright);
+    color: var(--muted);
+    font-family: var(--font-condensed);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    cursor: pointer;
+    min-height: 48px;
+    transition: color 0.15s, border-color 0.15s;
+    display: none;
+  }
+  .q-back:hover { color: var(--text); border-color: var(--text); }
+
+  .q-division-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .q-progress-text {
+    font-family: var(--font-condensed);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .q-progress-text strong { color: var(--text); }
+
+  .q-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 40px;
+  }
+
+  .q-agent-tag {
+    font-family: var(--font-condensed);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .q-agent-tag::before, .q-agent-tag::after {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 40px;
+    background: var(--border-bright);
+  }
+
+  .q-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--blue);
+    max-width: 820px;
+    width: 100%;
+    padding: 36px 40px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .q-format-label {
+    font-family: var(--font-condensed);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue-bright);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .q-format-label::after {
+    content: '';
+    display: block;
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .q-text {
+    font-family: var(--font-card);
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .code-block {
+    background: #1e2640;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue-bright);
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.7;
+    color: #c9d8f0;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .code-block .kw { color: #7dd3fc; }
+  .code-block .str { color: #86efac; }
+  .code-block .cm { color: #8090b0; }  /* was #4a5a7a -- 2.14:1 FAIL on dark code bg -> ~4.7:1 */
+  .code-block .cl { color: #fde68a; }
+  .code-block .num { color: #f9a8d4; }
+
+  /* Multiple choice / code trace */
+  .mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .mc-btn {
+    background: var(--bg-station);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-condensed);
+    font-size: 17px;
+    font-weight: 600;
+    padding: 14px 18px;
+    cursor: default;
+    min-height: 56px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+    line-height: 1.3;
+  }
+  .mc-btn .opt-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    background: var(--border);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    font-family: var(--font-condensed);
+    flex-shrink: 0;
+  }
+
+  .mc-btn.correct-reveal {
+    border-color: var(--green);
+    background: rgba(22,101,52,0.07);
+  }
+  .mc-btn.correct-reveal .opt-letter {
+    background: var(--green);
+    color: #ffffff;
+  }
+  .mc-btn.correct-reveal::after {
+    content: 'CORRECT';
+    font-family: var(--font-condensed);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* Fill in the blank */
+  .fitb-code {
+    background: #1e2640;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.7;
+    color: #c9d8f0;
+    margin-bottom: 20px;
+  }
+
+  .fitb-input {
+    background: #2a3350;
+    border: none;
+    border-bottom: 2px solid var(--gold);
+    color: #f5c842;
+    font-family: var(--mono);
+    font-size: 15px;
+    width: auto;
+    min-width: 120px;
+    padding: 2px 4px;
+    outline: none;
+    text-align: center;
+    display: inline-block;
+    vertical-align: baseline;
+    transition: border-color 0.15s;
+  }
+  .fitb-input:focus { border-color: var(--blue-bright); }
+  .fitb-input.revealed { background: rgba(22,101,52,0.12); border-color: var(--green); color: #68d498; }  /* was var(--green) #155e2f -- ~1.5:1 FAIL on dark code bg -> #68d498 ~6.9:1 */
+
+  .fitb-answer-line {
+    display: none;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--green);
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(22,101,52,0.07);
+    border: 1px solid var(--green-dim);
+  }
+  .fitb-answer-line strong { font-family: var(--font-condensed); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 8px; color: var(--green); }
+
+  /* Drag and drop */
+  .dnd-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .dnd-items-col, .dnd-targets-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .dnd-col-label {
+    font-family: var(--font-condensed);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dnd-item {
+    background: var(--bg-station);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    transition: background 0.1s, border-color 0.1s, opacity 0.1s;
+  }
+  .dnd-item:hover { background: var(--bg-card2); border-color: var(--blue-bright); }
+  .dnd-item.dragging { opacity: 0.4; cursor: grabbing; }
+  .dnd-item.placed { opacity: 0.3; pointer-events: none; }
+  .dnd-item .drag-handle { color: var(--muted); font-size: 16px; line-height: 1; }
+
+  .dnd-target {
+    background: var(--bg-deep);
+    border: 1px dashed var(--border-bright);
+    color: var(--muted);
+    font-family: var(--font-card);
+    font-size: 16px;
+    padding: 10px 14px;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: border-color 0.1s, background 0.1s;
+  }
+  .dnd-target.drag-over { border-color: var(--blue-bright); background: rgba(29,95,212,0.05); }
+  .dnd-target.matched {
+    background: rgba(22,101,52,0.06);
+    border: 1px solid var(--green-dim);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--green-dim);
+    color: var(--green);
+    font-family: var(--font-condensed);
+    font-size: 13px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--green);
+  }
+
+  .dnd-answer-block {
+    display: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    padding: 10px 14px;
+    background: rgba(22,101,52,0.07);
+    border: 1px solid var(--green-dim);
+    margin-bottom: 12px;
+  }
+
+  /* Reveal / Next buttons */
+  .q-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    justify-content: flex-end;
+  }
+
+  .btn-reveal {
+    background: var(--red);
+    color: var(--white);
+    font-family: var(--font-condensed);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    padding: 14px 36px;
+    cursor: pointer;
+    min-height: 52px;
+    transition: background 0.15s;
+  }
+  .btn-reveal:hover { background: #9b1526; }
+
+  .btn-next {
+    background: var(--blue);
+    color: var(--white);
+    font-family: var(--font-condensed);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    padding: 14px 36px;
+    cursor: pointer;
+    min-height: 52px;
+    display: none;
+    transition: background 0.15s;
+  }
+  .btn-next:hover { background: #153d91; }
+
+  .btn-complete {
+    background: var(--gold);
+    color: #ffffff;
+    font-family: var(--font-condensed);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    padding: 14px 36px;
+    cursor: pointer;
+    min-height: 52px;
+    display: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-complete:hover { background: #6b4a07; color: #ffffff; }
+
+  /* ===== COMPLETION SCREEN ===== */
+  #completionScreen {
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(176,125,0,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(29,95,212,0.06) 0%, transparent 50%),
+      var(--bg-deep);
+  }
+
+  .complete-inner {
+    text-align: center;
+    max-width: 600px;
+    padding: 56px 48px;
+    background: rgba(255,255,255,0.97);
+    border: 1px solid var(--border-bright);
+    border-top: 3px solid var(--gold);
+    box-shadow: var(--shadow-card), 0 0 80px rgba(176,125,0,0.08);
+    position: relative;
+  }
+
+  .complete-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    line-height: 1;
+  }
+
+  .complete-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .complete-sub {
+    font-family: var(--font-condensed);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .complete-msg {
+    font-family: var(--font-card);
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .btn-reset {
+    background: var(--blue);
+    color: var(--white);
+    font-family: var(--font-condensed);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    padding: 16px 40px;
+    cursor: pointer;
+    min-height: 56px;
+    transition: background 0.15s;
+  }
+  .btn-reset:hover { background: #153d91; }
+
+  /* UTIL */
+  .hidden { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+</style>
+</head>
+<body>
+
+<!-- ============================
+     LOAD SCREEN
+============================= -->
+<div id="loadScreen" class="screen active" role="main" aria-label="Hero Debrief Setup">
+  <div class="load-bg-lines" aria-hidden="true"></div>
+  <div class="load-inner">
+    <div class="load-badge">Hero HQ // End of Week Debrief</div>
+    <div class="load-title">Hero<br><span>Debrief</span></div>
+    <div class="load-subtitle">End of Week Division Review</div>
+    <div class="load-form">
+      <label for="agentCount">How many agents today?</label>
+      <input type="number" id="agentCount" value="25" min="6" max="30" aria-label="Number of agents, between 6 and 30">
+      <button class="btn-primary" onclick="beginDebrief()" aria-label="Begin Debrief">Begin Debrief</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     STATION SCREEN
+============================= -->
+<div id="stationScreen" class="screen" role="main" aria-label="Division Selection">
+  <header class="station-header">
+    <div class="station-header-left">
+      <div>
+        <div class="station-logo">Hero <span>HQ</span></div>
+        <div class="station-tagline">Mission Debrief // Select a Division</div>
+      </div>
+    </div>
+    <div class="station-completion">
+      Divisions Cleared: <strong id="clearedCount">0</strong> / 4
+    </div>
+  </header>
+  <div class="station-grid" id="stationGrid" role="list" aria-label="Four divisions"></div>
+</div>
+
+<!-- ============================
+     QUESTION SCREEN
+============================= -->
+<div id="questionScreen" class="screen" role="main" aria-label="Agent Question">
+  <header class="q-header">
+    <button class="q-back" id="qBackBtn" onclick="backToStations()" aria-label="Return to station select (only if division not started)">Back to Divisions</button>
+    <div class="q-division-name" id="qDivisionName">The Dispatch Log</div>
+    <div class="q-progress-text">Agent <strong id="qAgentNum">1</strong> of <strong id="qAgentTotal">5</strong></div>
+  </header>
+  <div class="q-main">
+    <div class="q-agent-tag" id="qAgentTag" aria-label="Current agent number">Agent 1</div>
+    <div class="q-card" id="qCard" role="region" aria-label="Question card">
+      <!-- Populated by JS -->
+    </div>
+    <div class="q-actions" aria-live="polite">
+      <button class="btn-reveal" id="btnReveal" onclick="revealAnswer()" aria-label="Reveal answer">Reveal Answer</button>
+      <button class="btn-next" id="btnNext" onclick="nextAgent()" aria-label="Next agent">Next Agent</button>
+      <button class="btn-complete" id="btnComplete" onclick="completeStation()" aria-label="Division cleared">Division Cleared</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     COMPLETION SCREEN
+============================= -->
+<div id="completionScreen" class="screen" role="main" aria-label="Debrief Complete">
+  <div class="complete-inner">
+    <div class="complete-icon" aria-hidden="true">&#9733;</div>
+    <div class="complete-title">Debrief<br>Complete</div>
+    <div class="complete-sub">All Divisions Cleared</div>
+    <p class="complete-msg">All agents cleared. Hero HQ stands ready. Dismissed until next mission.</p>
+    <button class="btn-reset" onclick="resetEverything()" aria-label="Start a new debrief">Start New Debrief</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// QUESTION BANK
+// ============================================================
+const DIVISIONS = [
+  {
+    id: 'dispatch',
+    name: 'The Dispatch Log',
+    topic: 'BufferedReader, BufferedWriter, FileWriter -- reading and writing files line by line',
+    questions: [
+      {
+        format: 'mc',
+        text: 'Which class is used to read a file line by line in Java?',
+        options: ['FileReader', 'BufferedReader', 'Scanner', 'FileInputStream'],
+        correct: 1,
+      },
+      {
+        format: 'fitb',
+        text: 'Complete the line that wraps a FileReader in a BufferedReader:',
+        codePre: '<span class="kw">BufferedReader</span> dispatchReader = <span class="kw">new</span> ',
+        blank: 'BufferedReader(new FileReader(incidentFile))',
+        blankWidth: '340px',
+        codePost: ';',
+        answerLabel: 'Full expression',
+      },
+      {
+        format: 'trace',
+        text: 'What does this code print if missionLog.txt contains one line: "All clear at sector 7"?',
+        code:
+`<span class="kw">BufferedReader</span> reader = <span class="kw">new</span> <span class="cl">BufferedReader</span>(<span class="kw">new</span> <span class="cl">FileReader</span>(<span class="str">"missionLog.txt"</span>));
+<span class="cl">String</span> line = reader.readLine();
+<span class="cl">System</span>.out.println(line);
+reader.close();`,
+        options: ['null', 'All clear at sector 7', 'missionLog.txt', 'IOException'],
+        correct: 1,
+      },
+      {
+        format: 'fitb',
+        text: 'Complete the method call that writes a line of text using a BufferedWriter named reportWriter:',
+        codePre: 'reportWriter.',
+        blank: 'write("Threat neutralized.");',
+        blankWidth: '280px',
+        codePost: '',
+        answerLabel: 'Method call',
+      },
+      {
+        format: 'dnd',
+        text: 'Match each method or class to its purpose.',
+        pairs: [
+          { item: 'readLine()', target: 'Reads one line from a file, returns null at end' },
+          { item: 'newLine()', target: 'Writes a line separator to the output file' },
+          { item: 'close()', target: 'Releases the file resource when done' },
+          { item: 'FileWriter', target: 'Creates a character stream for writing to a file' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'alert',
+    name: 'The Alert System',
+    topic: 'Exceptions, throws keyword, try/catch, IOException',
+    questions: [
+      {
+        format: 'mc',
+        text: 'Where does the throws keyword appear in a Java method?',
+        options: [
+          'Before the return type',
+          'After the method name and parameters',
+          'Inside the method body',
+          'After the return statement',
+        ],
+        correct: 1,
+      },
+      {
+        format: 'fitb',
+        text: 'Complete the method signature so it properly declares that it may throw an IOException:',
+        codePre: '<span class="kw">public void</span> fileAlertReport(<span class="cl">String</span> path) ',
+        blank: 'throws IOException',
+        blankWidth: '200px',
+        codePost: ' {',
+        answerLabel: 'Keyword and type',
+      },
+      {
+        format: 'trace',
+        text: 'What is printed when this code runs?',
+        code:
+`<span class="kw">try</span> {
+    <span class="cl">System</span>.out.println(<span class="str">"Reading alert log..."</span>);
+    <span class="kw">throw new</span> <span class="cl">IOException</span>(<span class="str">"File not found"</span>);
+} <span class="kw">catch</span> (<span class="cl">IOException</span> e) {
+    <span class="cl">System</span>.out.println(<span class="str">"Alert: "</span> + e.getMessage());
+}`,
+        options: [
+          'Reading alert log...',
+          'Alert: File not found',
+          'Reading alert log...\nAlert: File not found',
+          'IOException: File not found',
+        ],
+        correct: 2,
+        optionDisplay: ['Reading alert log...', 'Alert: File not found', 'Reading alert log...\nAlert: File not found', 'IOException: File not found'],
+      },
+      {
+        format: 'mc',
+        text: 'What does IOException represent in Java?',
+        options: [
+          'A problem with the program\'s logic',
+          'An error that occurs during input or output operations',
+          'A type of variable used for file paths',
+          'A method for opening files',
+        ],
+        correct: 1,
+      },
+      {
+        format: 'dnd',
+        text: 'Match each keyword or type to its role in exception handling.',
+        pairs: [
+          { item: 'try', target: 'Wraps code that might throw an exception' },
+          { item: 'catch', target: 'Handles the exception if one is thrown' },
+          { item: 'throws', target: 'Declares that a method may produce an exception' },
+          { item: 'IOException', target: 'Exception type for failed input/output operations' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'registry',
+    name: 'The Villain Registry',
+    topic: 'HashMap -- declaration, put, get, containsKey, iteration',
+    questions: [
+      {
+        format: 'fitb',
+        text: 'Declare a HashMap that maps villain names to their threat level (an integer):',
+        codePre: '<span class="cl">HashMap</span>',
+        blank: '<String, Integer>',
+        blankWidth: '180px',
+        codePost: ' villainRegistry = <span class="kw">new</span> <span class="cl">HashMap</span>&lt;&gt;();',
+        answerLabel: 'Type parameters',
+      },
+      {
+        format: 'mc',
+        text: 'Which HashMap method checks whether a specific villain name already exists as a key?',
+        options: ['hasKey()', 'containsKey()', 'exists()', 'getKey()'],
+        correct: 1,
+      },
+      {
+        format: 'trace',
+        text: 'What does this code print?',
+        code:
+`<span class="cl">HashMap</span>&lt;<span class="cl">String</span>, <span class="cl">Integer</span>&gt; registry = <span class="kw">new</span> <span class="cl">HashMap</span>&lt;&gt;();
+registry.put(<span class="str">"Shadowstrike"</span>, <span class="num">9</span>);
+registry.put(<span class="str">"Vexor"</span>, <span class="num">7</span>);
+<span class="cl">System</span>.out.println(registry.get(<span class="str">"Vexor"</span>));`,
+        options: ['Shadowstrike', '9', '7', 'null'],
+        correct: 2,
+      },
+      {
+        format: 'dnd',
+        text: 'Match each HashMap method to what it does.',
+        pairs: [
+          { item: 'put(k, v)', target: 'Adds or updates a key-value pair' },
+          { item: 'get(k)', target: 'Returns the value for the given key' },
+          { item: 'containsKey(k)', target: 'Returns true if the key exists in the map' },
+          { item: 'entrySet()', target: 'Returns all key-value pairs for iteration' },
+        ],
+      },
+      {
+        format: 'mc',
+        text: 'You need to look up a hero\'s power rating by name and there are hundreds of heroes. Which collection is the better choice?',
+        options: [
+          'ArrayList -- faster for lookups by position',
+          'HashMap -- faster for lookups by key',
+          'ArrayList -- it supports key-value pairs',
+          'HashMap -- it automatically sorts entries',
+        ],
+        correct: 1,
+      },
+    ],
+  },
+  {
+    id: 'roster',
+    name: 'The Mission Roster',
+    topic: 'ArrayList -- declaration, add, get, size, remove, enhanced for loop',
+    questions: [
+      {
+        format: 'fitb',
+        text: 'Declare an ArrayList that holds hero names (Strings):',
+        codePre: '<span class="cl">ArrayList</span>&lt;<span class="cl">String</span>&gt; missionRoster = <span class="kw">new</span> ',
+        blank: 'ArrayList<>()',
+        blankWidth: '160px',
+        codePost: ';',
+        answerLabel: 'Constructor call',
+      },
+      {
+        format: 'trace',
+        text: 'What does this code print?',
+        code:
+`<span class="cl">ArrayList</span>&lt;<span class="cl">String</span>&gt; roster = <span class="kw">new</span> <span class="cl">ArrayList</span>&lt;&gt;();
+roster.add(<span class="str">"Ironclad"</span>);
+roster.add(<span class="str">"Blaze"</span>);
+roster.add(<span class="str">"Phantom"</span>);
+<span class="cl">System</span>.out.println(roster.get(<span class="num">1</span>) + <span class="str">" / "</span> + roster.size());`,
+        options: ['Ironclad / 3', 'Blaze / 3', 'Blaze / 2', 'Ironclad / 2'],
+        correct: 1,
+      },
+      {
+        format: 'mc',
+        text: 'Which method removes the hero at index 0 from the mission roster?',
+        options: ['roster.delete(0)', 'roster.remove(0)', 'roster.clear(0)', 'roster.drop(0)'],
+        correct: 1,
+      },
+      {
+        format: 'dnd',
+        text: 'Match each ArrayList method to its description.',
+        pairs: [
+          { item: 'add(item)', target: 'Appends an item to the end of the list' },
+          { item: 'get(index)', target: 'Returns the item at the given position' },
+          { item: 'size()', target: 'Returns the number of items in the list' },
+          { item: 'remove(index)', target: 'Removes the item at the given position' },
+        ],
+      },
+      {
+        format: 'mc',
+        text: 'Which of the following correctly iterates over every hero in an ArrayList called activeHeroes?',
+        options: [
+          'for (int i : activeHeroes) { System.out.println(i); }',
+          'for (String hero : activeHeroes) { System.out.println(hero); }',
+          'for (activeHeroes.each hero) { System.out.println(hero); }',
+          'for (String hero = activeHeroes) { System.out.println(hero); }',
+        ],
+        correct: 1,
+      },
+    ],
+  },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let studentCount = 25;
+let assignments = []; // [{studentIndex, divisionId, questionIndex}]
+let divisionState = {}; // {divisionId: {status, currentCard, cards:[{studentIndex, q}]}}
+let currentDivisionId = null;
+
+// ============================================================
+// SCREEN HELPERS
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============================================================
+// FISHER-YATES SHUFFLE
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+// BEGIN DEBRIEF
+// ============================================================
+function beginDebrief() {
+  const input = document.getElementById('agentCount');
+  let val = parseInt(input.value, 10);
+  if (isNaN(val)) val = 25;
+  val = Math.max(6, Math.min(30, val));
+  studentCount = val;
+  input.value = val;
+  buildAssignments();
+  buildStationScreen();
+  showScreen('stationScreen');
+}
+
+document.getElementById('agentCount').addEventListener('blur', function() {
+  let val = parseInt(this.value, 10);
+  if (isNaN(val)) val = 25;
+  this.value = Math.max(6, Math.min(30, val));
+});
+
+// ============================================================
+// ASSIGNMENT BUILDER
+// ============================================================
+function buildAssignments() {
+  // Determine total question slots = min(studentCount, 20)
+  const total = Math.min(studentCount, 20);
+  const perStation = Math.floor(total / 4); // always 5 when total=20
+
+  // Shuffle student indices
+  const studentIndices = shuffle([...Array(studentCount).keys()]);
+
+  divisionState = {};
+  assignments = [];
+
+  DIVISIONS.forEach((div, di) => {
+    const shuffledQs = shuffle([...Array(5).keys()]); // question indices 0-4
+    const qSlice = shuffledQs.slice(0, perStation);
+
+    // Assign students to this station's question slots
+    const cards = qSlice.map((qIdx, cardPos) => {
+      const studentIdx = studentIndices[(di * perStation) + cardPos];
+      return { studentIndex: studentIdx, qIndex: qIdx };
+    });
+
+    // If studentCount > 20, some students need a 2nd question
+    // Round 2: fill remaining students evenly, max 1 extra per student
+    const assignedStudents = new Set(cards.map(c => c.studentIndex));
+    const remainingStudents = studentIndices.filter(s => !assignedStudents.has(s));
+
+    // Additional cards needed per station beyond perStation:
+    // total extra = studentCount - total distributed in round 1
+    // We handle per-division: if there are more students than questions, we add round2 cards
+    // Each station can have at most perStation+1 extra students (1 per question slot repeated)
+
+    divisionState[div.id] = {
+      status: 'not-started',
+      currentCard: 0,
+      cards,
+    };
+  });
+
+  // Round 2: distribute remaining unassigned students
+  // Collect all remaining (those who didn't get any assignment)
+  const allAssigned = new Set();
+  Object.values(divisionState).forEach(ds => ds.cards.forEach(c => allAssigned.add(c.studentIndex)));
+  const unassigned = shuffle(studentIndices.filter(s => !allAssigned.has(s)));
+
+  if (unassigned.length > 0) {
+    // Distribute round 2 across stations evenly, cycling
+    let divCycle = 0;
+    const divIds = DIVISIONS.map(d => d.id);
+    unassigned.forEach(sIdx => {
+      const dId = divIds[divCycle % 4];
+      const ds = divisionState[dId];
+      // Pick a random question from that station (may repeat)
+      const qIndices = shuffle([...Array(5).keys()]);
+      ds.cards.push({ studentIndex: sIdx, qIndex: qIndices[0], isRound2: true });
+      divCycle++;
+    });
+  }
+}
+
+// ============================================================
+// STATION SCREEN
+// ============================================================
+function buildStationScreen() {
+  const grid = document.getElementById('stationGrid');
+  grid.innerHTML = '';
+  updateClearedCount();
+
+  DIVISIONS.forEach(div => {
+    const ds = divisionState[div.id];
+    const card = document.createElement('div');
+    card.className = 'division-card' + (ds.status === 'cleared' ? ' cleared' : ds.status === 'in-progress' ? ' in-progress' : '');
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('tabindex', ds.status === 'cleared' ? '-1' : '0');
+    card.setAttribute('aria-label', div.name + ' division, status: ' + ds.status);
+    if (ds.status !== 'cleared') {
+      card.addEventListener('click', () => enterStation(div.id));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') enterStation(div.id); });
+    }
+
+    const statusLabels = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'cleared': 'Cleared' };
+    const statusIcons = { 'not-started': '&#9711;', 'in-progress': '&#9654;', 'cleared': '&#10003;' };
+
+    card.innerHTML = `
+      <div class="division-status ${ds.status}" aria-hidden="true">
+        <span>${statusIcons[ds.status]}</span>
+        <span>${statusLabels[ds.status]}</span>
+      </div>
+      <div class="division-name">${div.name}</div>
+      <div class="division-topic">${div.topic}</div>
+      <div class="division-count">${ds.cards.length} agent${ds.cards.length !== 1 ? 's' : ''}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function updateClearedCount() {
+  const count = Object.values(divisionState).filter(ds => ds.status === 'cleared').length;
+  document.getElementById('clearedCount').textContent = count;
+}
+
+// ============================================================
+// ENTER A STATION
+// ============================================================
+function enterStation(divId) {
+  currentDivisionId = divId;
+  const ds = divisionState[divId];
+  if (ds.status === 'cleared') return;
+  if (ds.status === 'not-started') ds.status = 'in-progress';
+
+  showScreen('questionScreen');
+  renderCard();
+}
+
+function backToStations() {
+  currentDivisionId = null;
+  buildStationScreen();
+  showScreen('stationScreen');
+}
+
+// ============================================================
+// CARD RENDERER
+// ============================================================
+function renderCard() {
+  const divId = currentDivisionId;
+  const ds = divisionState[divId];
+  const div = DIVISIONS.find(d => d.id === divId);
+  const cardData = ds.cards[ds.currentCard];
+  const q = div.questions[cardData.qIndex];
+  const cardNum = ds.currentCard + 1;
+  const cardTotal = ds.cards.length;
+  const isLast = cardNum === cardTotal;
+
+  document.getElementById('qDivisionName').textContent = div.name;
+  document.getElementById('qAgentNum').textContent = cardNum;
+  document.getElementById('qAgentTotal').textContent = cardTotal;
+  document.getElementById('qAgentTag').textContent = `Agent ${cardData.studentIndex + 1}`;
+
+  // Back button only visible before any card in this station has been answered
+  const backBtn = document.getElementById('qBackBtn');
+  backBtn.style.display = ds.status === 'in-progress' && ds.currentCard === 0 ? 'block' : 'none';
+
+  // Reset action buttons
+  document.getElementById('btnReveal').style.display = 'block';
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('btnComplete').style.display = 'none';
+
+  // Render question
+  const card = document.getElementById('qCard');
+  card.innerHTML = '';
+
+  const formatLabels = { mc: 'Multiple Choice', fitb: 'Fill in the Blank', trace: 'Code Trace', dnd: 'Matching' };
+  const fmtLabel = document.createElement('div');
+  fmtLabel.className = 'q-format-label';
+  fmtLabel.textContent = formatLabels[q.format] || q.format;
+  card.appendChild(fmtLabel);
+
+  const qText = document.createElement('div');
+  qText.className = 'q-text';
+  qText.textContent = q.text;
+  card.appendChild(qText);
+
+  if (q.format === 'mc' || q.format === 'trace') {
+    renderMC(card, q);
+  } else if (q.format === 'fitb') {
+    renderFITB(card, q);
+  } else if (q.format === 'dnd') {
+    renderDND(card, q);
+  }
+
+  if (isLast) {
+    document.getElementById('btnComplete').setAttribute('data-is-last', 'true');
+  } else {
+    document.getElementById('btnComplete').removeAttribute('data-is-last');
+  }
+}
+
+// ============================================================
+// MULTIPLE CHOICE / CODE TRACE
+// ============================================================
+function renderMC(card, q) {
+  if (q.code) {
+    const cb = document.createElement('div');
+    cb.className = 'code-block';
+    cb.innerHTML = q.code;
+    card.appendChild(cb);
+  }
+
+  const opts = document.createElement('div');
+  opts.className = 'mc-options';
+  opts.id = 'mcOptions';
+  const letters = ['A', 'B', 'C', 'D'];
+
+  (q.optionDisplay || q.options).forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'mc-btn';
+    btn.setAttribute('role', 'option');
+    btn.setAttribute('aria-selected', 'false');
+    btn.setAttribute('data-index', i);
+    // Handle newlines in option display
+    const displayText = opt.replace(/\n/g, ' / ');
+    btn.innerHTML = `<span class="opt-letter" aria-hidden="true">${letters[i]}</span><span>${displayText}</span>`;
+    opts.appendChild(btn);
+  });
+
+  card.appendChild(opts);
+}
+
+// ============================================================
+// FILL IN THE BLANK
+// ============================================================
+function renderFITB(card, q) {
+  const codeEl = document.createElement('div');
+  codeEl.className = 'fitb-code';
+  codeEl.id = 'fitbCode';
+
+  const pre = document.createElement('span');
+  pre.innerHTML = q.codePre;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'fitb-input';
+  input.id = 'fitbInput';
+  input.style.width = q.blankWidth || '160px';
+  input.setAttribute('aria-label', 'Fill in the blank');
+
+  const post = document.createElement('span');
+  post.innerHTML = q.codePost;
+
+  codeEl.appendChild(pre);
+  codeEl.appendChild(input);
+  codeEl.appendChild(post);
+  card.appendChild(codeEl);
+
+  const answerLine = document.createElement('div');
+  answerLine.className = 'fitb-answer-line';
+  answerLine.id = 'fitbAnswer';
+  answerLine.innerHTML = `<strong>Answer:</strong> ${q.blank}`;
+  card.appendChild(answerLine);
+}
+
+// ============================================================
+// DRAG AND DROP
+// ============================================================
+function renderDND(card, q) {
+  // Shuffle displayed items
+  const itemOrder = shuffle([...Array(q.pairs.length).keys()]);
+  const targetOrder = [...Array(q.pairs.length).keys()]; // targets stay in original order
+
+  const container = document.createElement('div');
+  container.className = 'dnd-container';
+
+  const itemsCol = document.createElement('div');
+  itemsCol.className = 'dnd-items-col';
+  const itemLabel = document.createElement('div');
+  itemLabel.className = 'dnd-col-label';
+  itemLabel.textContent = 'Methods / Keywords';
+  itemsCol.appendChild(itemLabel);
+
+  const targetsCol = document.createElement('div');
+  targetsCol.className = 'dnd-targets-col';
+  const tgtLabel = document.createElement('div');
+  tgtLabel.className = 'dnd-col-label';
+  tgtLabel.textContent = 'Descriptions';
+  targetsCol.appendChild(tgtLabel);
+
+  // Items
+  itemOrder.forEach(pairIdx => {
+    const item = document.createElement('div');
+    item.className = 'dnd-item';
+    item.draggable = true;
+    item.setAttribute('data-pair', pairIdx);
+    item.innerHTML = `<span class="drag-handle" aria-hidden="true">⠿</span><span>${q.pairs[pairIdx].item}</span>`;
+    item.setAttribute('aria-label', `Drag: ${q.pairs[pairIdx].item}`);
+
+    item.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', pairIdx);
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => item.classList.remove('dragging'));
+    itemsCol.appendChild(item);
+  });
+
+  // Targets
+  targetOrder.forEach(pairIdx => {
+    const target = document.createElement('div');
+    target.className = 'dnd-target';
+    target.setAttribute('data-pair', pairIdx);
+    target.setAttribute('aria-label', `Drop zone for: ${q.pairs[pairIdx].target}`);
+    target.innerHTML = `<span>${q.pairs[pairIdx].target}</span>`;
+
+    target.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      target.classList.add('drag-over');
+    });
+    target.addEventListener('dragleave', () => target.classList.remove('drag-over'));
+    target.addEventListener('drop', (e) => {
+      e.preventDefault();
+      target.classList.remove('drag-over');
+      if (target.classList.contains('matched')) return; // already matched
+      const droppedPairIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      const targetPairIdx = parseInt(target.getAttribute('data-pair'), 10);
+      if (droppedPairIdx === targetPairIdx) {
+        // Correct match
+        target.classList.add('matched');
+        target.innerHTML = `
+          <span class="placed-item">${q.pairs[droppedPairIdx].item}</span>
+          <span class="match-badge">&#10003; Match</span>
+          <span style="flex:1;font-family:var(--font-card);font-size:16px;color:var(--muted)">${q.pairs[droppedPairIdx].target}</span>
+        `;
+        // Mark source item as placed
+        document.querySelectorAll('.dnd-item').forEach(it => {
+          if (parseInt(it.getAttribute('data-pair'), 10) === droppedPairIdx) {
+            it.classList.add('placed');
+          }
+        });
+      }
+      // If wrong, nothing happens (item just bounces back)
+    });
+    targetsCol.appendChild(target);
+  });
+
+  container.appendChild(itemsCol);
+  container.appendChild(targetsCol);
+  card.appendChild(container);
+
+  // Answer block (hidden until reveal)
+  const ansBlock = document.createElement('div');
+  ansBlock.className = 'dnd-answer-block';
+  ansBlock.id = 'dndAnswer';
+  ansBlock.innerHTML = q.pairs.map(p => `<div>${p.item} -- ${p.target}</div>`).join('');
+  card.appendChild(ansBlock);
+}
+
+// ============================================================
+// REVEAL ANSWER
+// ============================================================
+function revealAnswer() {
+  const divId = currentDivisionId;
+  const ds = divisionState[divId];
+  const div = DIVISIONS.find(d => d.id === divId);
+  const q = div.questions[ds.cards[ds.currentCard].qIndex];
+  const isLast = ds.currentCard === ds.cards.length - 1;
+
+  document.getElementById('btnReveal').style.display = 'none';
+  document.getElementById('qBackBtn').style.display = 'none';
+
+  if (q.format === 'mc' || q.format === 'trace') {
+    const opts = document.getElementById('mcOptions');
+    if (opts) {
+      opts.querySelectorAll('.mc-btn').forEach(btn => {
+        if (parseInt(btn.getAttribute('data-index'), 10) === q.correct) {
+          btn.classList.add('correct-reveal');
+          btn.setAttribute('aria-selected', 'true');
+        }
+      });
+    }
+  } else if (q.format === 'fitb') {
+    const input = document.getElementById('fitbInput');
+    if (input) {
+      input.value = q.blank;
+      input.classList.add('revealed');
+      input.readOnly = true;
+    }
+    const ansLine = document.getElementById('fitbAnswer');
+    if (ansLine) ansLine.style.display = 'block';
+  } else if (q.format === 'dnd') {
+    const ansBlock = document.getElementById('dndAnswer');
+    if (ansBlock) ansBlock.style.display = 'block';
+    // Lock all targets and fill unmatched ones
+    document.querySelectorAll('.dnd-target').forEach(target => {
+      if (!target.classList.contains('matched')) {
+        const pairIdx = parseInt(target.getAttribute('data-pair'), 10);
+        target.classList.add('matched');
+        target.innerHTML = `
+          <span class="placed-item">${q.pairs[pairIdx].item}</span>
+          <span class="match-badge">&#10003; Answer</span>
+          <span style="flex:1;font-family:var(--font-card);font-size:16px;color:var(--muted)">${q.pairs[pairIdx].target}</span>
+        `;
+      }
+    });
+  }
+
+  if (isLast) {
+    document.getElementById('btnComplete').style.display = 'block';
+  } else {
+    document.getElementById('btnNext').style.display = 'block';
+  }
+}
+
+// ============================================================
+// NEXT AGENT
+// ============================================================
+function nextAgent() {
+  const ds = divisionState[currentDivisionId];
+  ds.currentCard++;
+  renderCard();
+}
+
+// ============================================================
+// COMPLETE STATION
+// ============================================================
+function completeStation() {
+  const ds = divisionState[currentDivisionId];
+  ds.status = 'cleared';
+  currentDivisionId = null;
+
+  buildStationScreen();
+  showScreen('stationScreen');
+
+  const allCleared = Object.values(divisionState).every(ds => ds.status === 'cleared');
+  if (allCleared) {
+    setTimeout(() => showScreen('completionScreen'), 400);
+  }
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetEverything() {
+  document.getElementById('agentCount').value = 25;
+  divisionState = {};
+  assignments = [];
+  currentDivisionId = null;
+  showScreen('loadScreen');
+}
+</script>
+</body>
+</html>

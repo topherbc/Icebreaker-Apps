@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<title>Hero Intake -- Dispatch Wheel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;600;700;900&family=DM+Sans:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:       #f0f4fc;
+    --surface:  #ffffff;
+    --border:   #d0d8e8;
+    --red:      #e8293a;
+    --gold:     #7a6008;  /* was #a8880f -- 3.09:1 fail on light bg -> ~5.5:1; white text on gold button now passes */
+    --blue:     #1f5fa6;
+    --muted:    #5a6a88;
+    --text:     #0d1117;
+    --fun1:     #c9a227;
+    --fun2:     #e8bf45;
+    --tech1:    #1f5fa6;
+    --tech2:    #2d7dd2;
+    --done-col: #c8d3e8;
+    --font-display:   'Anton', sans-serif;
+    --font-condensed: 'Barlow Condensed', sans-serif;
+    --font-body:      'DM Sans', sans-serif;
+    --font-card:      'Crimson Pro', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ══ SCREENS ══ */
+  .screen { display: none; }
+  .screen.active { display: flex; }
+
+  /* ══════════ LOAD SCREEN ══════════ */
+  #loadScreen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+
+  .hq-emblem { width: 90px; height: 90px; margin-bottom: 28px; }
+  .hq-emblem svg { width: 100%; height: 100%; }
+
+  .load-badge {
+    font-family: var(--font-condensed);
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px;
+  }
+
+  .load-title {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 7vw, 84px);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text); text-align: center;
+    line-height: 0.95; margin-bottom: 8px;
+  }
+
+  .load-subtitle {
+    font-family: var(--font-condensed);
+    font-size: 18px; font-weight: 400;
+    color: var(--muted); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 44px;
+  }
+
+  .load-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--red);
+    padding: 32px 40px;
+    width: 100%; max-width: 400px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  .load-form::before {
+    content: 'FORM HD-002';
+    position: absolute; top: -13px; right: 20px;
+    font-family: var(--font-condensed); font-size: 11px;
+    font-weight: 700; letter-spacing: 0.2em;
+    color: var(--red); background: var(--bg); padding: 0 8px;
+  }
+
+  .form-label {
+    font-family: var(--font-condensed); font-size: 13px;
+    font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted);
+    display: block; margin-bottom: 10px;
+  }
+
+  .form-input {
+    width: 100%; background: var(--bg);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--blue);
+    color: var(--text);
+    font-family: var(--font-condensed); font-size: 28px;
+    font-weight: 700; padding: 12px 16px;
+    text-align: center; outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  .form-input::-webkit-inner-spin-button,
+  .form-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .form-input:focus { border-bottom-color: var(--gold); }
+
+  .form-hint {
+    font-size: 13px; color: var(--muted);
+    text-align: center; margin-top: 8px;
+  }
+
+  .btn-begin {
+    display: block; width: 100%; margin-top: 24px;
+    padding: 18px 24px; background: var(--red);
+    border: none; color: #fff;
+    font-family: var(--font-display); font-size: 22px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; min-height: 58px;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .btn-begin:hover { background: #c51f2e; }
+  .btn-begin:active { transform: scale(0.98); }
+
+  /* ══════════ WHEEL SCREEN ══════════ */
+  #wheelScreen {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .wheel-header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 0 40px; height: 64px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    flex-shrink: 0;
+  }
+
+  .wheel-header-left { display: flex; align-items: center; gap: 14px; }
+
+  .header-emblem { width: 32px; height: 32px; }
+
+  .header-title {
+    font-family: var(--font-display); font-size: 20px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  .header-divider {
+    width: 1px; height: 24px; background: var(--border);
+  }
+
+  .header-sub {
+    font-family: var(--font-condensed); font-size: 12px;
+    font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  .cards-remaining {
+    font-family: var(--font-condensed); font-size: 14px;
+    font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--gold);
+    background: rgba(168,136,15,0.1);
+    border: 1px solid rgba(168,136,15,0.3);
+    padding: 5px 14px;
+  }
+
+  /* ── wheel stage ── */
+  .wheel-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    padding: 40px;
+  }
+
+  /* ── the wheel itself ── */
+  .wheel-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* pointer -- fixed on the right, points left into the wheel */
+  .wheel-pointer {
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent;
+    border-right: 28px solid #e8293a;
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+
+  #wheelCanvas {
+    display: block;
+    border-radius: 50%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* center hub */
+  .wheel-hub {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px; height: 52px;
+    background: var(--surface);
+    border: 4px solid var(--border);
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* ── spin controls ── */
+  .spin-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    min-width: 220px;
+  }
+
+  .spin-status {
+    font-family: var(--font-condensed);
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); text-align: center;
+    min-height: 22px;
+  }
+
+  .btn-spin {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: var(--red);
+    border: none;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 6px 32px rgba(232,41,58,0.35), 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .btn-spin:hover:not(:disabled) {
+    background: #c51f2e;
+    box-shadow: 0 8px 40px rgba(232,41,58,0.45), 0 2px 8px rgba(0,0,0,0.15);
+    transform: scale(1.04);
+  }
+
+  .btn-spin:active:not(:disabled) { transform: scale(0.97); }
+
+  .btn-spin:disabled {
+    background: #b0b8cc;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .spin-legend {
+    display: flex; gap: 20px;
+  }
+
+  .legend-item {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--font-condensed); font-size: 13px;
+    font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-dot.fun  { background: var(--fun1); }
+  .legend-dot.tech { background: var(--tech1); }
+  .legend-dot.done { background: var(--done-col); }
+
+  /* ══════════ CARD OVERLAY ══════════ */
+  #cardOverlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(15,30,53,0.55);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 0;
+  }
+
+  #cardOverlay.open { display: flex; }
+
+  .card-sheet {
+    background: var(--surface);
+    width: 100%; max-width: 860px;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: 0 -8px 48px rgba(0,0,0,0.18);
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    padding: 0;
+    position: relative;
+  }
+
+  #cardOverlay.open .card-sheet {
+    transform: translateY(0);
+  }
+
+  .card-sheet-stripe {
+    height: 8px; width: 100%;
+  }
+
+  .card-sheet-stripe.fun  { background: linear-gradient(90deg, #a8880f, #c9a227); }
+  .card-sheet-stripe.tech { background: linear-gradient(90deg, #143f6e, #1f5fa6); }
+
+  .card-sheet-inner { padding: 36px 52px 44px; }
+
+  .card-sheet-type-row {
+    display: flex; align-items: center;
+    gap: 10px; margin-bottom: 20px;
+  }
+
+  .card-sheet-type-icon { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .card-sheet-type-label {
+    font-family: var(--font-condensed); font-size: 12px;
+    font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+  }
+
+  .card-sheet-type-label.fun  { color: var(--gold); }
+  .card-sheet-type-label.tech { color: var(--blue); }
+
+  .card-sheet-question {
+    font-family: var(--font-card);
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.55; color: var(--text);
+    margin-bottom: 0;
+  }
+
+  .card-sheet-slot {
+    margin-top: 28px; padding-top: 24px;
+    border-top: 1px solid #e0e6f0;
+  }
+
+  .card-sheet-slot label {
+    display: block;
+    font-family: var(--font-condensed); font-size: 12px;
+    font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .card-sheet-slot input {
+    width: 100%; background: #f4f7fc;
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--blue);
+    color: var(--text);
+    font-family: var(--font-body); font-size: 20px;
+    padding: 10px 14px; outline: none;
+  }
+
+  .card-sheet-footer {
+    display: flex; align-items: center;
+    justify-content: flex-end;
+    padding: 20px 52px 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-done {
+    padding: 14px 52px;
+    background: var(--blue); border: none;
+    color: #fff;
+    font-family: var(--font-display); font-size: 20px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; min-height: 52px;
+    transition: background 0.15s;
+  }
+
+  .btn-done:hover { background: #2670b8; }
+
+  .btn-done.finale {
+    background: var(--gold);
+  }
+
+  .btn-done.finale:hover { background: #5c4806; }
+
+  /* ══════════ FINALE ══════════ */
+  #finaleScreen {
+    flex-direction: column;
+    min-height: 100vh;
+    background: #f0f4fc;
+  }
+
+  .finale-header {
+    background: var(--surface);
+    border-bottom: 3px solid var(--red);
+    padding: 28px 60px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .finale-header-left { display: flex; align-items: center; gap: 20px; }
+
+  .finale-stamp {
+    font-family: var(--font-display); font-size: 14px;
+    letter-spacing: 0.2em; color: var(--red);
+    border: 2px solid var(--red); padding: 6px 16px;
+    transform: rotate(-2deg); opacity: 0.9;
+  }
+
+  .finale-body {
+    max-width: 780px; margin: 0 auto;
+    padding: 56px 40px 80px;
+  }
+
+  .finale-file-id {
+    font-family: var(--font-condensed); font-size: 13px;
+    font-weight: 700; letter-spacing: 0.3em;
+    color: var(--red); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .finale-title {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 5vw, 60px);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    line-height: 1; color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .finale-meta {
+    display: flex; gap: 28px; flex-wrap: wrap;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #c8d3e8;
+  }
+
+  .finale-meta-item {
+    font-family: var(--font-condensed); font-size: 13px;
+    font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  .finale-meta-item span { color: var(--gold); margin-left: 6px; }
+
+  .intake-file {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    padding: 36px 40px; position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  .intake-file::before {
+    content: 'CLASSIFIED';
+    position: absolute; top: 16px; right: 20px;
+    font-family: var(--font-condensed); font-size: 11px;
+    font-weight: 700; letter-spacing: 0.25em;
+    color: var(--red); border: 1px solid var(--red);
+    padding: 3px 8px; opacity: 0.4;
+  }
+
+  .intake-file p {
+    font-family: var(--font-card); font-size: 20px;
+    line-height: 1.8; color: #1a2236; margin-bottom: 18px;
+  }
+
+  .intake-file p:last-child { margin-bottom: 0; }
+
+  .slot-highlight {
+    color: var(--gold); font-style: italic; font-weight: 600;
+  }
+
+  .btn-restart {
+    display: block; margin: 44px auto 0;
+    padding: 14px 48px; background: transparent;
+    border: 1px solid #c8d3e8; color: var(--muted);
+    font-family: var(--font-condensed); font-size: 15px;
+    font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; cursor: pointer;
+    min-height: 52px; transition: all 0.15s;
+  }
+
+  .btn-restart:hover { border-color: var(--muted); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOAD SCREEN ══════════ -->
+<div id="loadScreen" class="screen active">
+  <div class="hq-emblem">
+    <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <polygon points="50,4 96,26 96,74 50,96 4,74 4,26" fill="#e8edf8" stroke="#d0d8e8" stroke-width="2"/>
+      <polygon points="50,14 86,30 86,70 50,86 14,70 14,30" fill="none" stroke="#e8293a" stroke-width="1.5"/>
+      <polygon points="50,28 72,38 72,62 50,72 28,62 28,38" fill="#e8293a" opacity="0.1"/>
+      <text x="50" y="58" text-anchor="middle" font-family="Anton, sans-serif" font-size="26" fill="#a8880f" letter-spacing="1">HD</text>
+      <circle cx="50" cy="50" r="44" fill="none" stroke="#a8880f" stroke-width="0.5" opacity="0.4" stroke-dasharray="4 3"/>
+    </svg>
+  </div>
+  <div class="load-badge">Hero Dispatch Center</div>
+  <h1 class="load-title">Dispatch<br>Wheel</h1>
+  <p class="load-subtitle">Recruit Processing System</p>
+
+  <div class="load-form">
+    <label class="form-label" for="recruitCount">Number of recruits today</label>
+    <input class="form-input" type="number" id="recruitCount" value="25" min="6" max="30" aria-describedby="recruitHint" />
+    <p class="form-hint" id="recruitHint">Between 6 and 30 recruits</p>
+    <button class="btn-begin" onclick="beginIntake()">Begin Intake</button>
+  </div>
+</div>
+
+<!-- ══════════ WHEEL SCREEN ══════════ -->
+<div id="wheelScreen" class="screen">
+  <header class="wheel-header">
+    <div class="wheel-header-left">
+      <svg class="header-emblem" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <polygon points="18,2 34,10 34,26 18,34 2,26 2,10" fill="#e8edf8" stroke="#d0d8e8" stroke-width="1.5"/>
+        <polygon points="18,10 26,14 26,22 18,26 10,22 10,14" fill="#e8293a" opacity="0.15"/>
+        <text x="18" y="22" text-anchor="middle" font-family="Anton, sans-serif" font-size="11" fill="#a8880f">HD</text>
+      </svg>
+      <span class="header-title">Hero Dispatch</span>
+      <div class="header-divider"></div>
+      <span class="header-sub">Dispatch Wheel</span>
+    </div>
+    <div class="cards-remaining" id="cardsRemaining">25 remaining</div>
+    <button onclick="restart()" style="
+      padding:0 20px; height:36px; background:transparent;
+      border:1px solid var(--border); color:var(--muted);
+      font-family:var(--font-condensed); font-size:13px;
+      font-weight:700; letter-spacing:0.18em; text-transform:uppercase;
+      cursor:pointer; transition:all 0.15s;
+    " onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--muted)'"
+       onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">Restart</button>
+  </header>
+
+  <div class="wheel-stage">
+    <div class="wheel-wrap">
+      <div class="wheel-pointer" aria-hidden="true"></div>
+      <canvas id="wheelCanvas" width="500" height="500" aria-label="Question dispatch wheel"></canvas>
+      <div class="wheel-hub" aria-hidden="true"></div>
+    </div>
+
+    <div class="spin-controls">
+      <div class="spin-status" id="spinStatus">Ready to spin</div>
+      <button class="btn-spin" id="btnSpin" onclick="spinWheel()" aria-label="Spin the wheel">SPIN</button>
+      <div class="spin-legend">
+        <div class="legend-item"><div class="legend-dot fun"></div>Icebreaker</div>
+        <div class="legend-item"><div class="legend-dot tech"></div>Technical</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CARD OVERLAY ══════════ -->
+<div id="cardOverlay" role="dialog" aria-modal="true" aria-label="Current question">
+  <div class="card-sheet" id="cardSheet">
+    <div class="card-sheet-stripe" id="sheetStripe"></div>
+    <div class="card-sheet-inner">
+      <div class="card-sheet-type-row">
+        <svg class="card-sheet-type-icon" id="sheetTypeIcon" viewBox="0 0 22 22" fill="none" aria-hidden="true"></svg>
+        <span class="card-sheet-type-label" id="sheetTypeLabel"></span>
+      </div>
+      <p class="card-sheet-question" id="sheetQuestion"></p>
+      <div class="card-sheet-slot" id="sheetSlotRow" style="visibility:hidden;">
+        <label for="sheetSlotInput" id="sheetSlotLabel">Recruit's answer</label>
+        <input type="text" id="sheetSlotInput" placeholder="" aria-label="Recruit's answer"
+          onkeydown="if(event.key==='Enter') dismissCard();" />
+      </div>
+      <div id="sheetRevealRow" style="display:none; margin-top:28px; padding-top:24px; border-top:1px solid #e0e6f0;">
+        <button id="btnReveal" onclick="toggleReveal()" style="
+          padding:10px 28px; background:transparent;
+          border:1px solid #d0d8e8; color:#5a6a88;
+          font-family:'Barlow Condensed',sans-serif; font-size:14px;
+          font-weight:700; letter-spacing:0.18em; text-transform:uppercase;
+          cursor:pointer; transition:all 0.15s; min-height:42px;
+        ">Show Answer</button>
+        <div id="sheetAnswer" style="
+          display:none; margin-top:16px; padding:16px 20px;
+          background:#f4f7fc; border-left:3px solid #1f5fa6;
+          font-family:'Crimson Pro',serif; font-size:20px;
+          line-height:1.5; color:#0d1117;
+        "></div>
+      </div>
+    </div>
+    <div class="card-sheet-footer">
+      <button class="btn-done" id="btnDone" onclick="dismissCard()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FINALE ══════════ -->
+<div id="finaleScreen" class="screen">
+  <div class="finale-header">
+    <div class="finale-header-left">
+      <svg width="42" height="42" viewBox="0 0 42 42" fill="none" aria-hidden="true">
+        <polygon points="21,2 40,11 40,31 21,40 2,31 2,11" fill="#e8edf8" stroke="#d0d8e8" stroke-width="1.5"/>
+        <text x="21" y="27" text-anchor="middle" font-family="Anton, sans-serif" font-size="13" fill="#a8880f">HD</text>
+      </svg>
+      <div>
+        <div style="font-family:var(--font-display);font-size:20px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);">Intake Complete</div>
+        <div style="font-family:var(--font-condensed);font-size:13px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;margin-top:2px;">All recruits processed</div>
+      </div>
+    </div>
+    <div class="finale-stamp">CLEARED FOR FIELD</div>
+  </div>
+
+  <div class="finale-body">
+    <div class="finale-file-id" id="finaleFileId">INTAKE FILE --</div>
+    <h2 class="finale-title">Official Recruit<br>Dossier</h2>
+    <div class="finale-meta" id="finaleMeta"></div>
+    <div class="intake-file">
+      <div id="finaleContent"></div>
+    </div>
+    <button class="btn-restart" onclick="restart()">New Intake Session</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+
+const FUN_LABELS  = ['Origin Story','Field Profile','Psych Eval','Clearance Interview','Identity Check'];
+const TECH_LABELS = ['Systems Check','Code Clearance','Tech Screening','Data Audit','Analyst Drill'];
+
+const FUN_ICON_SVG = `<circle cx="11" cy="11" r="9" stroke="#a8880f" stroke-width="1.5" fill="none"/>
+  <polygon points="11,5 13,9 17.5,9 14,12 15.5,16.5 11,13.5 6.5,16.5 8,12 4.5,9 9,9" fill="#a8880f" opacity="0.85"/>`;
+
+const TECH_ICON_SVG = `<rect x="2" y="5" width="18" height="12" rx="1" stroke="#1f5fa6" stroke-width="1.5" fill="none"/>
+  <polyline points="6,11 9,8 12,13 15,9" stroke="#1f5fa6" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+const FUN_QS = [
+  ["Your superpower only works on Tuesdays. What is it, and do you consider this a gift or a curse?", "tuesdayPower"],
+  ["Describe your superhero origin story in one sentence. It must involve something embarrassing.", "origin"],
+  ["Name your one weakness. It cannot be kryptonite, the dark, or spicy food.", "weakness"],
+  ["What is your hero name, and why would anyone be afraid of it?", "heroName"],
+  ["Your signature move has a name. What is it, and what does it look like when it goes wrong?", "signatureMove"],
+  ["What completely ordinary skill from your non-hero life would actually save the day on a mission?", "civilianSkill"],
+  ["Your handler has to describe you to a new partner in three words. What do they say behind your back?", "threeWords"],
+  ["Where is your secret headquarters, and what is the one design feature that would make it obviously yours?", "hqLocation"],
+  ["Every hero has a code. What is yours, and what situation would actually make you break it?", "code"],
+  ["What is the most embarrassingly unheroic thing about you that your team has already noticed?", "unheroicTrait"],
+  ["The building is collapsing. You can save one non-person object. What is it and why that specifically?", "savedThing"],
+  ["Describe your villain counterpart. What did they do differently that you almost did too?", "nemesisTrait"],
+];
+
+// Grammar hints per mad-lib slot
+const SLOT_HINT = {
+  tuesdayPower:  'noun phrase',
+  origin:        'past-tense sentence',
+  weakness:      'noun or noun phrase',
+  heroName:      'proper noun',
+  signatureMove: 'noun phrase',
+  civilianSkill: 'gerund phrase',
+  threeWords:    'three adjectives',
+  hqLocation:    'noun phrase',
+  code:          'declarative sentence',
+  unheroicTrait: 'noun or gerund phrase',
+  savedThing:    'noun phrase',
+  nemesisTrait:  'adjective or noun phrase',
+};
+
+const TECH_QS = [
+  ["You want to read a mission log file line by line. What class do you wrap your FileReader in?",
+   "BufferedReader -- wrap it as: new BufferedReader(new FileReader(filename))"],
+  ["What method do you call on a BufferedReader to read one complete line at a time?",
+   "readLine() -- returns a String, or null when the file ends"],
+  ["Why does Java require a try/catch block when working with file IO?",
+   "IOException is a checked exception -- the compiler forces you to handle it explicitly"],
+  ["You have a BufferedWriter called writer. What method writes a line of text to the file?",
+   "writer.write(text) writes the text; call writer.newLine() to add a line break after it"],
+  ["What is the risk of forgetting to call close() on your BufferedWriter after writing?",
+   "The buffer may not flush -- data written to it may never actually reach the file"],
+  ["An IOException is a checked exception. What does that mean for the code that calls the method?",
+   "The caller must either catch it with try/catch or declare throws IOException on its own signature"],
+  ["What is the main difference between FileWriter and BufferedWriter?",
+   "FileWriter writes directly to disk on every call; BufferedWriter batches writes in memory for efficiency"],
+  ["What does the throws keyword on a method signature tell the caller?",
+   "It warns the caller that this method may throw that exception and they must handle it"],
+  ["You open a FileWriter but the file path does not exist. What happens?",
+   "Java creates the file automatically -- but throws an IOException if the parent directory doesn't exist"],
+  ["What does BufferedReader do that FileReader alone cannot do easily?",
+   "readLine() -- BufferedReader reads a full line at once; FileReader only reads one character at a time"],
+  ["How can you catch Exceptions?",
+   "Wrap the code in a try block and follow it with catch(ExceptionType e) { } to handle it"],
+  ["If you wrap a FileWriter in a BufferedWriter and call close() on the BufferedWriter, does the FileWriter also close?",
+   "Yes -- closing the outer BufferedWriter flushes the buffer and closes the underlying FileWriter too"],
+  ["What is the purpose of the write() method on a BufferedWriter?",
+   "It writes a String (or char) into the buffer -- you still need newLine() and close() to finish"],
+];
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+
+let cards       = [];
+let slots       = {};
+let sessionId   = '';
+let spinning    = false;
+let rotationDeg = 0;      // current CSS rotation in degrees
+let landedIndex = -1;     // index into activeCards[] of the landed slice
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function randLetter() { return String.fromCharCode(65 + Math.floor(Math.random() * 26)); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+//  BUILD DECK
+// ══════════════════════════════════════════════
+
+function buildDeck(n) {
+  let fCount, tCount;
+  if (n <= 12) {
+    fCount = Math.min(n, FUN_QS.length);
+    tCount = Math.min(n, TECH_QS.length);
+  } else {
+    const funCount  = Math.round(n * (12 / 25));
+    const techCount = n - funCount;
+    fCount = Math.min(funCount,  FUN_QS.length);
+    tCount = Math.min(techCount, TECH_QS.length);
+  }
+
+  const funPool  = shuffle(FUN_QS).slice(0, fCount);
+  const techPool = shuffle(TECH_QS).slice(0, tCount);
+
+  const FUN_PALETTE  = ['#c9a227', '#b8911f'];
+  const TECH_PALETTE = ['#1f5fa6', '#1a5090'];
+
+  let funIdx = 0, techIdx = 0;
+  const funCards = funPool.map((q, i) => ({
+    type: 'fun', question: q[0], slot: q[1], answer: null,
+    label: pick(FUN_LABELS), index: i + 1, done: false,
+    color: FUN_PALETTE[funIdx++ % 2],
+  }));
+
+  const techCards = techPool.map((q, i) => ({
+    type: 'tech', question: q[0], slot: null, answer: q[1],
+    label: pick(TECH_LABELS), index: i + 1, done: false,
+    color: TECH_PALETTE[techIdx++ % 2],
+  }));
+
+  const arr = [...funCards, ...techCards];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ══════════════════════════════════════════════
+//  ENTRY POINT
+// ══════════════════════════════════════════════
+
+document.getElementById('recruitCount').addEventListener('blur', function() {
+  let v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 6) v = 6;
+  if (v > 30) v = 30;
+  this.value = v;
+});
+
+function beginIntake() {
+  let n = parseInt(document.getElementById('recruitCount').value, 10);
+  if (isNaN(n) || n < 6) n = 6;
+  if (n > 30) n = 30;
+
+  cards       = buildDeck(n);
+  activeCards = cards.map((_, i) => i);   // all indices active at start
+  slots       = {};
+  rotationDeg = 0;
+  sessionId = `${new Date().getFullYear()}-${randLetter()}${randLetter()}${Math.floor(1000 + Math.random() * 9000)}`;
+
+  showScreen('wheelScreen');
+  updateRemaining();
+  document.getElementById('wheelCanvas').style.transform = 'rotate(0deg)';
+  drawWheel();
+}
+
+// ══════════════════════════════════════════════
+//  WHEEL DRAWING
+// ══════════════════════════════════════════════
+
+// activeCards = array of indices into cards[] that haven't been dismissed yet
+let activeCards = [];
+
+function drawWheel() {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx    = canvas.getContext('2d');
+  const cx = canvas.width  / 2;
+  const cy = canvas.height / 2;
+  const r  = cx - 4;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const n = activeCards.length;
+  if (n === 0) return;
+
+  const sliceAngle = (2 * Math.PI) / n;
+
+  // Draw slices -- slice 0 starts at angle 0 (3 o'clock, right side)
+  // The canvas element itself is CSS-rotated, so the pointer on the right
+  // always reads whichever slice sits at angle 0 after rotation settles.
+  activeCards.forEach((cardIdx, i) => {
+    const card       = cards[cardIdx];
+    const startAngle = i * sliceAngle;
+    const endAngle   = startAngle + sliceAngle;
+    const midAngle   = startAngle + sliceAngle / 2;
+
+    // Slice fill
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = card.color;
+    ctx.fill();
+
+    // Separator line
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(startAngle), cy + r * Math.sin(startAngle));
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = n > 20 ? 1 : 2;
+    ctx.stroke();
+
+    // Label -- right-aligned to rim, reads outward
+    if (sliceAngle > 0.15) {
+      ctx.save();
+      ctx.translate(cx + (r - 12) * Math.cos(midAngle), cy + (r - 12) * Math.sin(midAngle));
+      ctx.rotate(midAngle);
+      const fontSize = n > 20 ? 20 : n > 14 ? 24 : n > 8 ? 28 : 32;
+      ctx.font = `700 ${fontSize}px 'Barlow Condensed', sans-serif`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.shadowColor = 'rgba(0,0,0,0.4)';
+      ctx.shadowBlur = 3;
+      ctx.fillText(card.label.toUpperCase(), 0, 0);
+      ctx.restore();
+    }
+  });
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+// ══════════════════════════════════════════════
+//  SPIN LOGIC
+// ══════════════════════════════════════════════
+
+function updateRemaining() {
+  document.getElementById('cardsRemaining').textContent = `${activeCards.length} remaining`;
+}
+
+function spinWheel() {
+  if (activeCards.length === 0 || spinning) return;
+
+  spinning = true;
+  document.getElementById('btnSpin').disabled = true;
+  document.getElementById('spinStatus').textContent = 'Spinning...';
+
+  const n          = activeCards.length;
+  const sliceAngle = 360 / n; // degrees
+
+  // Pick a random target slice
+  const targetActiveIdx = Math.floor(Math.random() * n);
+
+  // The pointer is on the RIGHT at angle 0.
+  // Slice i occupies degrees [i*sliceAngle, (i+1)*sliceAngle].
+  // We want slice targetActiveIdx's CENTER at angle 0 after CSS rotation.
+  // Slice center in drawing coords = (targetActiveIdx + 0.5) * sliceAngle degrees.
+  // CSS rotation rotates the canvas clockwise by `rotation` degrees.
+  // After rotation, a point originally at angle A appears at angle (A + rotation).
+  // We want: (targetActiveIdx + 0.5) * sliceAngle + rotation_final = 360 * k
+  // So: rotation_final = -(targetActiveIdx + 0.5) * sliceAngle  (mod 360)
+  const targetAngle    = -((targetActiveIdx + 0.5) * sliceAngle);
+  const currentDeg     = rotationDeg % 360;
+  const targetNorm     = ((targetAngle % 360) + 360) % 360;
+  const currentNorm    = ((currentDeg % 360) + 360) % 360;
+  let   delta          = targetNorm - currentNorm;
+  if (delta <= 0) delta += 360; // always spin forward (clockwise)
+
+  const extraSpins  = (5 + Math.floor(Math.random() * 4)) * 360; // 5-8 WHOLE rotations only
+  const totalSpin   = extraSpins + delta;
+  const finalDeg    = rotationDeg + totalSpin;
+  const duration    = 4000 + Math.random() * 800;
+  const startDeg    = rotationDeg;
+  const startTime   = performance.now();
+  const canvas      = document.getElementById('wheelCanvas');
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function animate(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    rotationDeg = startDeg + totalSpin * easeOut(t);
+    canvas.style.transform = `rotate(${rotationDeg}deg)`;
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      rotationDeg = finalDeg;
+      canvas.style.transform = `rotate(${rotationDeg}deg)`;
+      spinning    = false;
+      landedIndex = targetActiveIdx;
+      document.getElementById('spinStatus').textContent = 'Landed!';
+      // Highlight the landed slice briefly before opening
+      highlightSlice(targetActiveIdx);
+      setTimeout(() => openCard(targetActiveIdx), 600);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function highlightSlice(activeIdx) {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx    = canvas.getContext('2d');
+  const cx = canvas.width  / 2;
+  const cy = canvas.height / 2;
+  const r  = cx - 4;
+  const n  = activeCards.length;
+
+  if (n === 0) return;
+
+  const sliceAngle = (2 * Math.PI) / n;
+  const startAngle = activeIdx * sliceAngle;
+  const endAngle   = startAngle + sliceAngle;
+  const card       = cards[activeCards[activeIdx]];
+
+  // Redraw just the landed slice brighter
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, r, startAngle, endAngle);
+  ctx.closePath();
+  ctx.fillStyle = card.type === 'fun' ? '#e8c840' : '#5ab4ff';
+  ctx.fill();
+
+  // Re-draw its label over the highlight
+  const midAngle = startAngle + sliceAngle / 2;
+  if (sliceAngle > 0.15) {
+    ctx.save();
+    ctx.translate(cx + (r - 12) * Math.cos(midAngle), cy + (r - 12) * Math.sin(midAngle));
+    ctx.rotate(midAngle);
+    const fontSize = n > 20 ? 20 : n > 14 ? 24 : n > 8 ? 28 : 32;
+    ctx.font = `700 ${fontSize}px 'Barlow Condensed', sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,255,255,0.98)';
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 3;
+    ctx.fillText(card.label.toUpperCase(), 0, 0);
+    ctx.restore();
+  }
+
+  // Re-draw separator for this slice
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + r * Math.cos(startAngle), cy + r * Math.sin(startAngle));
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = n > 20 ? 1 : 2;
+  ctx.stroke();
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+// ══════════════════════════════════════════════
+//  CARD OVERLAY
+// ══════════════════════════════════════════════
+
+function openCard(activeIdx) {
+  const cardIdx = activeCards[activeIdx];
+  const card    = cards[cardIdx];
+
+  document.getElementById('sheetStripe').className = `card-sheet-stripe ${card.type}`;
+
+  const icon = document.getElementById('sheetTypeIcon');
+  icon.innerHTML = card.type === 'fun' ? FUN_ICON_SVG : TECH_ICON_SVG;
+
+  const lbl = document.getElementById('sheetTypeLabel');
+  lbl.className = `card-sheet-type-label ${card.type}`;
+  lbl.textContent = card.label;
+
+  document.getElementById('sheetQuestion').textContent = card.question;
+
+  const slotRow    = document.getElementById('sheetSlotRow');
+  const slotLabel  = document.getElementById('sheetSlotLabel');
+  const slotInput  = document.getElementById('sheetSlotInput');
+  const revealRow  = document.getElementById('sheetRevealRow');
+  const revealBtn  = document.getElementById('btnReveal');
+  const answerDiv  = document.getElementById('sheetAnswer');
+
+  // Reset reveal state
+  answerDiv.style.display = 'none';
+  revealBtn.textContent = 'Show Answer';
+
+  if (card.type === 'fun' && card.slot) {
+    slotRow.style.visibility = 'visible';
+    slotLabel.textContent = "Recruit's answer";
+    slotInput.placeholder = SLOT_HINT[card.slot] || 'your answer...';
+    slotInput.value = slots[card.slot] || '';
+    revealRow.style.display = 'none';
+    setTimeout(() => slotInput.focus(), 450);
+  } else {
+    slotRow.style.visibility = 'hidden';
+    slotInput.placeholder = '';
+    slotInput.value = '';
+    revealRow.style.display = 'block';
+    answerDiv.textContent = card.answer || '';
+  }
+
+  const btnDone = document.getElementById('btnDone');
+  if (activeCards.length === 1) {
+    btnDone.textContent = 'Generate Dossier';
+    btnDone.className = 'btn-done finale';
+  } else {
+    btnDone.textContent = 'Done';
+    btnDone.className = 'btn-done';
+  }
+
+  const overlay = document.getElementById('cardOverlay');
+  overlay.classList.add('open');
+}
+
+function toggleReveal() {
+  const answerDiv = document.getElementById('sheetAnswer');
+  const btn       = document.getElementById('btnReveal');
+  const showing   = answerDiv.style.display !== 'none';
+  answerDiv.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? 'Show Answer' : 'Hide Answer';
+  btn.style.color      = showing ? '#5a6a88' : '#1f5fa6';
+  btn.style.borderColor = showing ? '#d0d8e8' : '#1f5fa6';
+}
+
+function dismissCard() {
+  const cardIdx = activeCards[landedIndex];
+  const card    = cards[cardIdx];
+
+  // Save slot answer
+  if (card.type === 'fun' && card.slot) {
+    const val = document.getElementById('sheetSlotInput').value.trim();
+    if (val) slots[card.slot] = val;
+  }
+
+  // Remove this slice from the wheel permanently
+  activeCards.splice(landedIndex, 1);
+  // Reset rotation for clean math on smaller wheel
+  rotationDeg = 0;
+
+  // Close overlay
+  const overlay = document.getElementById('cardOverlay');
+  const sheet   = document.getElementById('cardSheet');
+  sheet.style.transform = 'translateY(100%)';
+
+  setTimeout(() => {
+    overlay.classList.remove('open');
+    sheet.style.transform = '';
+
+    document.getElementById('wheelCanvas').style.transform = 'rotate(0deg)';
+    updateRemaining();
+    drawWheel();
+
+    if (activeCards.length === 0) {
+      setTimeout(showFinale, 300);
+    } else {
+      document.getElementById('btnSpin').disabled = false;
+      document.getElementById('spinStatus').textContent = 'Ready to spin';
+    }
+  }, 350);
+}
+
+// ══════════════════════════════════════════════
+//  FINALE
+// ══════════════════════════════════════════════
+
+function showFinale() {
+  document.getElementById('finaleFileId').textContent = `INTAKE FILE ${sessionId}`;
+
+  const fCount = cards.filter(c => c.type === 'fun').length;
+  const tCount = cards.filter(c => c.type === 'tech').length;
+  document.getElementById('finaleMeta').innerHTML =
+    `<div class="finale-meta-item">Recruits Processed <span>${cards.length}</span></div>
+     <div class="finale-meta-item">Origin Stories <span>${fCount}</span></div>
+     <div class="finale-meta-item">Systems Checks <span>${tCount}</span></div>`;
+
+  renderDossier();
+  showScreen('finaleScreen');
+}
+
+function s(key) {
+  if (slots[key]) return `<span class="slot-highlight">${slots[key]}</span>`;
+  return null;
+}
+
+function renderDossier() {
+  const target = document.getElementById('finaleContent');
+
+  // ── Opener (always) ──
+  const hn   = s('heroName');
+  const name = hn ? hn : 'the recruit (name pending legal review)';
+  const opener = `Intake file ${sessionId}. Following a background check, two personality assessments, a surprisingly contentious eye test, and seventeen minutes in a waiting room with only a 2019 magazine about boats, ${name} has been processed and tentatively cleared for field assignment. HQ extends a warm welcome, budget permitting.`;
+
+  // ── Candidate pool ──
+  const candidates = [];
+
+  const origParts = [];
+  const orig = s('origin');
+  if (orig) origParts.push(`Official origin statement: ${orig}. This has been flagged as "plausible" by one reviewer and "extremely plausible" by a second reviewer who did not read it.`);
+  const wk = s('weakness');
+  if (wk) origParts.push(`Documented vulnerability: ${wk}. Field teams have been informed. Two of them laughed. One asked a clarifying question that made things worse.`);
+  if (origParts.length) candidates.push(origParts.join(' '));
+
+  const cs = s('civilianSkill');
+  if (cs) candidates.push(`Civilian asset assessment flagged one transferable skill: ${cs}. The tactical team spent twenty minutes arguing about whether this was useful or just interesting. They did not reach a conclusion. The meeting ended because someone had a dentist appointment.`);
+
+  const tp = s('tuesdayPower');
+  if (tp) candidates.push(`Ability on file: ${tp}. Active Tuesdays only. The recruit was asked what they do on Wednesdays instead. They paused for a long time before answering. That pause has been logged separately.`);
+
+  const smParts = [];
+  const sm = s('signatureMove');
+  if (sm) smParts.push(`Primary combat technique: ${sm}. When asked to demonstrate, the recruit said they would rather not. This response has been entered into the record as "confident."`);
+  const tw = s('threeWords');
+  if (tw) smParts.push(`Handler description on file: ${tw}. HR notes this is technically four words if you count carefully, but has chosen not to bring this up.`);
+  if (smParts.length) candidates.push(smParts.join(' '));
+
+  const hqParts = [];
+  const hq = s('hqLocation');
+  if (hq) hqParts.push(`Proposed headquarters: ${hq}. Zoning has been contacted. Zoning has questions. Many questions. Zoning has asked that the recruit not contact them directly.`);
+  const code = s('code');
+  if (code) hqParts.push(`Personal code of conduct: ${code}. The recruit delivered this with eye contact that made the intake officer slightly uncomfortable. It has been filed under "committed."`);
+  if (hqParts.length) candidates.push(hqParts.join(' '));
+
+  const ut = s('unheroicTrait');
+  if (ut) candidates.push(`Team integration liability: ${ut}. This was disclosed voluntarily, which is either a sign of honesty or a sign that it is so obvious there was no point hiding it. Either way, squad leads have been briefed and have already started a group chat about it.`);
+
+  const st = s('savedThing');
+  if (st) candidates.push(`Emergency retrieval priority: ${st}. The Behavioral Analysis Unit reviewed this response for eleven minutes before writing the word "noted" and closing the file. They have since reopened it twice.`);
+
+  const nt = s('nemesisTrait');
+  if (nt) candidates.push(`Nemesis profile: ${nt}. Upon hearing this description, the recruit said "yeah, that tracks" and did not elaborate. This has been entered into the system as a security concern, a personality insight, and, in one analyst's words, "kind of impressive actually."`);
+
+  // ── Pick 2 at random ──
+  const chosen = shuffle([...candidates]).slice(0, 2);
+
+  // ── Closer (always) ──
+  const closer = `File sealed. Badge issued. Please do not bend the badge. The last recruit bent their badge and we have not recovered from it as an organization. Welcome to Hero Dispatch.`;
+
+  const all = [opener, ...chosen, closer];
+  target.innerHTML = all.map(p => `<p>${p}</p>`).join('');
+}
+function restart() {
+  slots = {}; cards = []; activeCards = []; rotationDeg = 0; landedIndex = -1;
+  document.getElementById('wheelCanvas').style.transform = 'rotate(0deg)';
+  document.getElementById('recruitCount').value = 25;
+  showScreen('loadScreen');
+}
+</script>
+</body>
+</html>

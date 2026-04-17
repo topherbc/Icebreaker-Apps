@@ -602,10 +602,12 @@
   const CHANNEL_NAME = `amnesty-wall-${SESSION || '0'}`;
   const CLEAR_PASS   = SESSION ? `111${SESSION}` : 'bootcamp';
   const STORAGE_KEY  = `amnesty-notes-${SESSION || '0'}`;
+  const CLEAR_TS_KEY = `amnesty-clear-ts-${SESSION || '0'}`;
   const CLIENT_ID    = Math.random().toString(36).slice(2);  // identifies this tab for sync
 
   // ── STATE ────────────────────────────────────────────────────────
   let notes = [];
+  let lastClearTs = parseInt(localStorage.getItem(CLEAR_TS_KEY) || '0', 10);
 
   // ── DOM REFS ──────────────────────────────────────────────────────
   const textarea      = document.getElementById('noteInput');
@@ -669,8 +671,9 @@
     emptyState.style.display = notes.length === 0 ? 'block' : 'none';
   }
 
-  // Returns true if the note was new (added), false if duplicate
+  // Returns true if the note was new (added), false if duplicate or stale
   function addNote(note, animate) {
+    if (note.ts && note.ts < lastClearTs) return false;
     if (notes.find(n => n.id === note.id)) return false;
     notes.push(note);
     emptyState.style.display = 'none';
@@ -692,9 +695,11 @@
       .replace(/"/g, '&quot;');
   }
 
-  function clearAllNotes() {
+  function clearAllNotes(ts) {
     notes = [];
+    lastClearTs = ts || Date.now();
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { localStorage.setItem(CLEAR_TS_KEY, String(lastClearTs)); } catch {}
     [...notesGrid.querySelectorAll('.note')].forEach(n => n.remove());
     renderNotes();
   }
@@ -738,19 +743,24 @@
     });
 
     // Board cleared → wipe everything including localStorage
-    channel.subscribe('clear', () => clearAllNotes());
+    channel.subscribe('clear', (msg) => clearAllNotes(msg.data.ts));
 
     // A peer just joined and wants existing notes — share ours after a random delay
     // (random delay prevents everyone responding at once; first responder is enough)
     channel.subscribe('sync-request', (msg) => {
-      if (msg.data.from === CLIENT_ID || notes.length === 0) return;
+      if (msg.data.from === CLIENT_ID) return;
       setTimeout(() => {
-        if (notes.length > 0) channel.publish('sync-response', { notes });
+        channel.publish('sync-response', { notes, lastClearTs });
       }, Math.random() * 600 + 100);
     });
 
     // Receive notes from a peer who answered our sync-request
     channel.subscribe('sync-response', (msg) => {
+      // If the peer has a newer clear timestamp, adopt it and wipe stale notes
+      const peerClearTs = msg.data.lastClearTs || 0;
+      if (peerClearTs > lastClearTs) {
+        clearAllNotes(peerClearTs);
+      }
       let changed = false;
       for (const note of (msg.data.notes || [])) {
         if (addNote(note, false)) changed = true;
@@ -809,8 +819,9 @@
 
   modalConfirm.addEventListener('click', () => {
     if (clearPassword.value === CLEAR_PASS) {
-      channel.publish('clear', { ts: Date.now() });
-      clearAllNotes();
+      const ts = Date.now();
+      channel.publish('clear', { ts });
+      clearAllNotes(ts);
       clearModal.classList.remove('open');
     } else {
       clearError.textContent = 'Incorrect password.';

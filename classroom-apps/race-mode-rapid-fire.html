@@ -1308,6 +1308,7 @@ label {
 .leaderboard-list {
   width: 100%;
   max-width: 600px;
+  position: relative;
 }
 .lb-row {
   display: flex;
@@ -1316,9 +1317,16 @@ label {
   padding: 14px 20px;
   background: var(--near-black);
   border-radius: var(--radius-sm);
-  margin-bottom: 6px;
   font-size: 18px;
   border: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  transition: top 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  opacity: 0;
+}
+.lb-row.lb-visible {
+  opacity: 1;
 }
 .lb-rank {
   font-family: 'Space Grotesk', sans-serif;
@@ -2719,6 +2727,7 @@ var hostState = {
   answerTally: {},     // { answerId: count }
   answeredThisRound: 0,
   timerInterval: null,
+  previousRankings: [], // stores last leaderboard order for rank-transition animation
   // Ably
   ablyClient: null,
   gameChannel: null,
@@ -3827,18 +3836,53 @@ function showLeaderboard(isFinal) {
   var ranked = computeRankings();
   var list = document.getElementById('leaderboard-list');
   var topN = ranked.slice(0, 10);
+  var ROW_H = 58; // row height including gap
   playLeaderboardSweep();
+
+  // Build a lookup of previous rank index by player id
+  var prevIndexById = {};
+  hostState.previousRankings.forEach(function(p, i) { prevIndexById[p.id] = i; });
+
+  var hasPrevious = hostState.previousRankings.length > 0;
+
+  // Set container height so it holds space for absolutely-positioned rows
+  list.style.height = (topN.length * ROW_H) + 'px';
 
   list.innerHTML = topN.map(function(p, i) {
     var ans = hostState.players[p.id] && hostState.players[p.id].answers[hostState.currentQuestionIndex];
     var delta = ans ? (ans.earned || 0) : 0;
-    return '<div class="lb-row" role="listitem" style="animation-delay:'+(i*0.1)+'s">' +
+    // Start at old position if we have one, otherwise start at current position
+    var startIdx = hasPrevious && prevIndexById[p.id] !== undefined ? prevIndexById[p.id] : i;
+    return '<div class="lb-row" role="listitem" data-player-id="' + p.id + '" style="top:' + (startIdx * ROW_H) + 'px">' +
       '<span class="lb-rank">' + p.rank + '</span>' +
       '<span class="lb-name">' + escHtml(p.name) + '</span>' +
       '<span class="lb-delta">+' + delta + '</span>' +
       '<span class="lb-score">' + p.score + '</span>' +
       '</div>';
   }).join('');
+
+  // Staggered fade-in, then animate to new positions
+  var rows = list.querySelectorAll('.lb-row');
+  rows.forEach(function(row, i) {
+    setTimeout(function() {
+      row.classList.add('lb-visible');
+    }, i * 80);
+  });
+
+  // After fade-in completes, slide rows to their new ranked positions
+  var fadeInDone = topN.length * 80 + 100;
+  if (hasPrevious) {
+    setTimeout(function() {
+      rows.forEach(function(row, i) {
+        row.style.top = (i * ROW_H) + 'px';
+      });
+    }, fadeInDone);
+  } else {
+    // First leaderboard: rows already at correct positions, no slide needed
+  }
+
+  // Save current rankings for next time
+  hostState.previousRankings = topN.map(function(p) { return { id: p.id }; });
 
   var btn = document.getElementById('lb-next-btn');
   if (isFinal) {

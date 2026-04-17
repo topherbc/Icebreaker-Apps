@@ -3487,8 +3487,7 @@ function launchGame() {
   showLiveScreen('lobby');
 
   document.getElementById('room-code-display').textContent = hostState.roomCode;
-  var joinUrl = window.location.host + window.location.pathname + '?view=join&code=' + hostState.roomCode;
-  document.getElementById('join-url').textContent = joinUrl;
+  setJoinUrl(hostState.roomCode);
   document.getElementById('start-game-btn').disabled = true;
   document.getElementById('lock-room-btn').textContent = 'Lock Room';
   renderLobbyPlayers();
@@ -4130,8 +4129,7 @@ function playAgain() {
 
   showLiveScreen('lobby');
   document.getElementById('room-code-display').textContent = hostState.roomCode;
-  var joinUrl = window.location.host + window.location.pathname + '?view=join&code=' + hostState.roomCode;
-  document.getElementById('join-url').textContent = joinUrl;
+  setJoinUrl(hostState.roomCode);
   document.getElementById('start-game-btn').disabled = true;
   document.getElementById('lock-room-btn').textContent = 'Lock Room';
   renderLobbyPlayers();
@@ -4878,9 +4876,31 @@ function csvEsc(str) {
   return str;
 }
 
+function shortenUrl(longUrl, callback) {
+  var endpoint = 'https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl);
+  fetch(endpoint).then(function(res) {
+    if (!res.ok) throw new Error('is.gd error');
+    return res.text();
+  }).then(function(shortUrl) {
+    callback(shortUrl.trim());
+  }).catch(function() {
+    callback(longUrl);
+  });
+}
+
+function setJoinUrl(roomCode) {
+  var fullUrl = window.location.origin + window.location.pathname + '?view=join&code=' + roomCode;
+  var el = document.getElementById('join-url');
+  el.textContent = fullUrl.replace(/^https?:\/\//, '');
+  shortenUrl(fullUrl, function(short) {
+    hostState.shortJoinUrl = short;
+    el.textContent = short.replace(/^https?:\/\//, '');
+  });
+}
+
 function copyJoinUrl() {
-  var joinUrl = window.location.origin + window.location.pathname + '?view=join&code=' + hostState.roomCode;
-  navigator.clipboard.writeText(joinUrl).then(function() {
+  var url = hostState.shortJoinUrl || (window.location.origin + window.location.pathname + '?view=join&code=' + hostState.roomCode);
+  navigator.clipboard.writeText(url).then(function() {
     var fb = document.getElementById('copy-feedback');
     if (fb) { fb.textContent = 'Copied!'; setTimeout(function() { fb.textContent = ''; }, 2000); }
   });

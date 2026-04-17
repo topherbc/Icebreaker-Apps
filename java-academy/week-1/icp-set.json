@@ -7,82 +7,29 @@
     "labels": [
       "data type",
       "variable name",
-      "operator",
       "literal value",
-      "statement end",
       "variable declaration"
     ],
     "code": [
       {
         "lineNumber": 1,
         "segments": [
-          {
-            "text": "int"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "score"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "="
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "42"
-          },
-          {
-            "text": ";"
-          }
+          { "text": "int" },
+          { "text": " ", "ws": true },
+          { "text": "score" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "42" },
+          { "text": ";" }
         ]
       }
     ],
     "expected": [
-      {
-        "line": 1,
-        "start": 0,
-        "end": 0,
-        "label": "data type"
-      },
-      {
-        "line": 1,
-        "start": 1,
-        "end": 1,
-        "label": "variable name"
-      },
-      {
-        "line": 1,
-        "start": 2,
-        "end": 2,
-        "label": "operator"
-      },
-      {
-        "line": 1,
-        "start": 3,
-        "end": 3,
-        "label": "literal value"
-      },
-      {
-        "line": 1,
-        "start": 4,
-        "end": 4,
-        "label": "statement end"
-      },
-      {
-        "line": 1,
-        "start": 0,
-        "end": 1,
-        "label": "variable declaration"
-      }
+      { "line": 1, "start": 0, "end": 0, "label": "data type" },
+      { "line": 1, "start": 1, "end": 1, "label": "variable name" },
+      { "line": 1, "start": 3, "end": 3, "label": "literal value" },
+      { "line": 1, "start": 0, "end": 1, "label": "variable declaration" }
     ]
   },
   {
@@ -92,71 +39,25 @@
     "description": "A print statement calling System.out.println.",
     "labels": [
       "method name",
-      "literal value",
       "argument",
-      "parentheses",
-      "statement end",
       "method call"
     ],
     "code": [
       {
         "lineNumber": 1,
         "segments": [
-          {
-            "text": "System.out.println"
-          },
-          {
-            "text": "("
-          },
-          {
-            "text": "\"Hello\""
-          },
-          {
-            "text": ")"
-          },
-          {
-            "text": ";"
-          }
+          { "text": "System.out.println" },
+          { "text": "(" },
+          { "text": "\"Hello\"" },
+          { "text": ")" },
+          { "text": ";" }
         ]
       }
     ],
     "expected": [
-      {
-        "line": 1,
-        "start": 0,
-        "end": 0,
-        "label": "method name"
-      },
-      {
-        "line": 1,
-        "start": 1,
-        "end": 1,
-        "label": "parentheses"
-      },
-      {
-        "line": 1,
-        "start": 2,
-        "end": 2,
-        "label": "argument"
-      },
-      {
-        "line": 1,
-        "start": 3,
-        "end": 3,
-        "label": "parentheses"
-      },
-      {
-        "line": 1,
-        "start": 4,
-        "end": 4,
-        "label": "statement end"
-      },
-      {
-        "line": 1,
-        "start": 0,
-        "end": 3,
-        "label": "method call"
-      }
+      { "line": 1, "start": 0, "end": 0, "label": "method name" },
+      { "line": 1, "start": 2, "end": 2, "label": "argument" },
+      { "line": 1, "start": 0, "end": 3, "label": "method call" }
     ]
   },
   {
@@ -167,99 +68,39 @@
     "labels": [
       "data type",
       "variable name",
-      "square bracket",
-      "curly brace",
       "literal value",
-      "statement end",
+      "opening brace",
+      "closing brace",
       "array declaration"
     ],
     "code": [
       {
         "lineNumber": 1,
         "segments": [
-          {
-            "text": "String"
-          },
-          {
-            "text": "[]"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "names"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "="
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "{"
-          },
-          {
-            "text": "\"Alice\""
-          },
-          {
-            "text": ", ",
-            "ws": true
-          },
-          {
-            "text": "\"Bob\""
-          },
-          {
-            "text": "}"
-          },
-          {
-            "text": ";"
-          }
+          { "text": "String" },
+          { "text": "[]" },
+          { "text": " ", "ws": true },
+          { "text": "names" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "{" },
+          { "text": "\"Alice\"" },
+          { "text": ", ", "ws": true },
+          { "text": "\"Bob\"" },
+          { "text": "}" },
+          { "text": ";" }
         ]
       }
     ],
     "expected": [
-      {
-        "line": 1,
-        "start": 0,
-        "end": 0,
-        "label": "data type"
-      },
-      {
-        "line": 1,
-        "start": 1,
-        "end": 1,
-        "label": "square bracket"
-      },
-      {
-        "line": 1,
-        "start": 2,
-        "end": 2,
-        "label": "variable name"
-      },
-      {
-        "line": 1,
-        "start": 4,
-        "end": 4,
-        "label": "curly brace"
-      },
-      {
-        "line": 1,
-        "start": 7,
-        "end": 7,
-        "label": "curly brace"
-      },
-      {
-        "line": 1,
-        "start": 0,
-        "end": 2,
-        "label": "array declaration"
-      }
+      { "line": 1, "start": 0, "end": 0, "label": "data type" },
+      { "line": 1, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 1, "start": 0, "end": 2, "label": "array declaration" },
+      { "line": 1, "start": 4, "end": 4, "label": "opening brace" },
+      { "line": 1, "start": 7, "end": 7, "label": "closing brace" },
+      { "line": 1, "start": 5, "end": 5, "label": "literal value" },
+      { "line": 1, "start": 6, "end": 6, "label": "literal value" }
     ]
   },
   {
@@ -269,132 +110,52 @@
     "description": "An if statement checking whether a score is passing.",
     "labels": [
       "keyword",
-      "variable name",
-      "operator",
-      "literal value",
-      "parentheses",
-      "curly brace",
-      "condition"
+      "condition",
+      "opening brace",
+      "closing brace",
+      "method call"
     ],
     "code": [
       {
         "lineNumber": 1,
         "segments": [
-          {
-            "text": "if"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "("
-          },
-          {
-            "text": "score"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": ">="
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "60"
-          },
-          {
-            "text": ")"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "{"
-          }
+          { "text": "if" },
+          { "text": " ", "ws": true },
+          { "text": "(" },
+          { "text": "score" },
+          { "text": " ", "ws": true },
+          { "text": ">=" },
+          { "text": " ", "ws": true },
+          { "text": "60" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
         ]
       },
       {
         "lineNumber": 2,
         "segments": [
-          {
-            "text": "    ",
-            "ws": true
-          },
-          {
-            "text": "System.out.println"
-          },
-          {
-            "text": "("
-          },
-          {
-            "text": "\"Pass\""
-          },
-          {
-            "text": ")"
-          },
-          {
-            "text": ";"
-          }
+          { "text": "    ", "ws": true },
+          { "text": "System.out.println" },
+          { "text": "(" },
+          { "text": "\"Pass\"" },
+          { "text": ")" },
+          { "text": ";" }
         ]
       },
       {
         "lineNumber": 3,
         "segments": [
-          {
-            "text": "}"
-          }
+          { "text": "}" }
         ]
       }
     ],
     "expected": [
-      {
-        "line": 1,
-        "start": 0,
-        "end": 0,
-        "label": "keyword"
-      },
-      {
-        "line": 1,
-        "start": 1,
-        "end": 1,
-        "label": "parentheses"
-      },
-      {
-        "line": 1,
-        "start": 2,
-        "end": 2,
-        "label": "variable name"
-      },
-      {
-        "line": 1,
-        "start": 3,
-        "end": 3,
-        "label": "operator"
-      },
-      {
-        "line": 1,
-        "start": 4,
-        "end": 4,
-        "label": "literal value"
-      },
-      {
-        "line": 1,
-        "start": 5,
-        "end": 5,
-        "label": "parentheses"
-      },
-      {
-        "line": 1,
-        "start": 2,
-        "end": 4,
-        "label": "condition"
-      }
+      { "line": 1, "start": 0, "end": 0, "label": "keyword" },
+      { "line": 1, "start": 2, "end": 4, "label": "condition" },
+      { "line": 1, "start": 6, "end": 6, "label": "opening brace" },
+      { "line": 3, "start": 0, "end": 0, "label": "closing brace" },
+      { "line": 2, "start": 0, "end": 3, "label": "method call" }
     ]
   },
   {
@@ -403,183 +164,70 @@
     "title": "Putting It All Together",
     "description": "A variable declaration, a conditional, and a method call.",
     "labels": [
-      "data type",
-      "variable name",
-      "operator",
+      "variable declaration",
       "literal value",
       "keyword",
-      "parentheses",
-      "curly brace",
-      "method name",
-      "argument",
-      "statement end",
-      "variable declaration",
-      "method call",
-      "condition"
+      "condition",
+      "opening brace",
+      "closing brace",
+      "method call"
     ],
     "code": [
       {
         "lineNumber": 1,
         "segments": [
-          {
-            "text": "int"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "age"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "="
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "25"
-          },
-          {
-            "text": ";"
-          }
+          { "text": "int" },
+          { "text": " ", "ws": true },
+          { "text": "age" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "25" },
+          { "text": ";" }
         ]
       },
       {
         "lineNumber": 2,
         "segments": [
-          {
-            "text": "if"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "("
-          },
-          {
-            "text": "age"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": ">="
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "18"
-          },
-          {
-            "text": ")"
-          },
-          {
-            "text": " ",
-            "ws": true
-          },
-          {
-            "text": "{"
-          }
+          { "text": "if" },
+          { "text": " ", "ws": true },
+          { "text": "(" },
+          { "text": "age" },
+          { "text": " ", "ws": true },
+          { "text": ">=" },
+          { "text": " ", "ws": true },
+          { "text": "18" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
         ]
       },
       {
         "lineNumber": 3,
         "segments": [
-          {
-            "text": "    ",
-            "ws": true
-          },
-          {
-            "text": "System.out.println"
-          },
-          {
-            "text": "("
-          },
-          {
-            "text": "\"Adult\""
-          },
-          {
-            "text": ")"
-          },
-          {
-            "text": ";"
-          }
+          { "text": "    ", "ws": true },
+          { "text": "System.out.println" },
+          { "text": "(" },
+          { "text": "\"Adult\"" },
+          { "text": ")" },
+          { "text": ";" }
         ]
       },
       {
         "lineNumber": 4,
         "segments": [
-          {
-            "text": "}"
-          }
+          { "text": "}" }
         ]
       }
     ],
     "expected": [
-      {
-        "line": 1,
-        "start": 0,
-        "end": 0,
-        "label": "data type"
-      },
-      {
-        "line": 1,
-        "start": 1,
-        "end": 1,
-        "label": "variable name"
-      },
-      {
-        "line": 1,
-        "start": 3,
-        "end": 3,
-        "label": "literal value"
-      },
-      {
-        "line": 1,
-        "start": 0,
-        "end": 1,
-        "label": "variable declaration"
-      },
-      {
-        "line": 2,
-        "start": 0,
-        "end": 0,
-        "label": "keyword"
-      },
-      {
-        "line": 2,
-        "start": 2,
-        "end": 4,
-        "label": "condition"
-      },
-      {
-        "line": 3,
-        "start": 0,
-        "end": 0,
-        "label": "method name"
-      },
-      {
-        "line": 3,
-        "start": 2,
-        "end": 2,
-        "label": "argument"
-      },
-      {
-        "line": 3,
-        "start": 0,
-        "end": 3,
-        "label": "method call"
-      }
+      { "line": 1, "start": 0, "end": 1, "label": "variable declaration" },
+      { "line": 1, "start": 3, "end": 3, "label": "literal value" },
+      { "line": 2, "start": 0, "end": 0, "label": "keyword" },
+      { "line": 2, "start": 2, "end": 4, "label": "condition" },
+      { "line": 2, "start": 6, "end": 6, "label": "opening brace" },
+      { "line": 4, "start": 0, "end": 0, "label": "closing brace" },
+      { "line": 3, "start": 0, "end": 3, "label": "method call" }
     ]
   }
 ]

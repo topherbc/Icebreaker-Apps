@@ -461,14 +461,31 @@ var ALL_LABELS = {
   'method name':          { desc:'The name of an action being defined or called' },
   'literal value':        { desc:'A fixed value written directly in the code -- 42, "hello", true' },
   'argument':             { desc:'A value passed into a method when calling it' },
-  'parentheses':          { desc:'( ) -- used after method names, in conditions, and for grouping' },
-  'curly brace':          { desc:'{ } -- marks the opening or closing of a block of code' },
-  'square bracket':       { desc:'[ ] -- used with arrays to declare or access a position' },
+  'opening parenthesis':  { desc:'( -- opens a group, condition, or argument list' },
+  'closing parenthesis':  { desc:') -- closes a group, condition, or argument list' },
+  'opening brace':        { desc:'{ -- starts a block of code' },
+  'closing brace':        { desc:'} -- ends a block of code' },
+  'opening bracket':      { desc:'[ -- starts an array index or declaration' },
+  'closing bracket':      { desc:'] -- ends an array index or declaration' },
   'statement end':        { desc:'; -- marks the end of a complete instruction' },
   'variable declaration': { desc:'A type and name together, declaring a new variable' },
   'array declaration':    { desc:'A type, brackets, and name together, declaring an array' },
   'method call':          { desc:'A method being invoked with its parentheses and arguments' },
-  'condition':            { desc:'An expression inside an if that evaluates to true or false' }
+  'condition':            { desc:'An expression inside an if that evaluates to true or false' },
+  'access modifier':      { desc:'Controls visibility -- public, private, or protected' },
+  'class name':           { desc:'The name given to a class' },
+  'return type':          { desc:'The type of value a method sends back, or void for nothing' },
+  'parameter':            { desc:'A variable declared in a method signature to receive a value' },
+  'field':                { desc:'A variable that belongs to a class, storing its data' },
+  'this reference':       { desc:'this -- refers to the current object instance' },
+  'method signature':     { desc:'The full declaration of a method -- modifiers, type, name, and parameters' },
+  'class declaration':    { desc:'The line that names and opens a new class' },
+  'constructor':          { desc:'A special method that initializes a new object' },
+  'loop keyword':         { desc:'A word that starts a loop -- for, while, do' },
+  'collection type':      { desc:'A class that holds groups of objects -- ArrayList, HashMap' },
+  'type parameter':       { desc:'The angle-bracket type that tells a collection what it stores' },
+  'exception type':       { desc:'The kind of error being caught in a catch block' },
+  'boolean expression':   { desc:'An expression that evaluates to true or false' }
 };
 
 /* ── Color palette (from PSA) ───────────────────────────────────── */
@@ -705,7 +722,7 @@ function collapseExerciseList(selectedBtn) {
   var btns = $exList.querySelectorAll('.exercise-option');
   var hasOthers = false;
   btns.forEach(function(b){ if (b !== selectedBtn) { b.classList.add('ex-collapsed'); hasOthers = true; } });
-  if (hasOthers) { $exExpandBtn.style.display = ''; $exExpandBtn.setAttribute('aria-expanded', 'false'); }
+  if (hasOthers) { $exExpandBtn.style.display = 'block'; $exExpandBtn.setAttribute('aria-expanded', 'false'); $exExpandBtn.textContent = '\u25B6 Choose a different exercise'; }
 }
 $exExpandBtn.addEventListener('click', function(){
   var expanded = this.getAttribute('aria-expanded') === 'true';

@@ -1,0 +1,369 @@
+[
+  {
+    "id": "w5-ex1",
+    "week": 5,
+    "title": "Encapsulated Field",
+    "description": "A private field paired with its public getter.",
+    "labels": [
+      "field",
+      "access modifier",
+      "return type",
+      "method name",
+      "keyword",
+      "method signature"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "private" },
+          { "text": " ", "ws": true },
+          { "text": "double" },
+          { "text": " ", "ws": true },
+          { "text": "price" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": []
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "double" },
+          { "text": " ", "ws": true },
+          { "text": "getPrice" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 4,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "return" },
+          { "text": " ", "ws": true },
+          { "text": "price" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 5,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 2, "label": "field" },
+      { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
+      { "line": 3, "start": 0, "end": 0, "label": "access modifier" },
+      { "line": 3, "start": 1, "end": 1, "label": "return type" },
+      { "line": 3, "start": 2, "end": 2, "label": "method name" },
+      { "line": 3, "start": 0, "end": 4, "label": "method signature" },
+      { "line": 4, "start": 0, "end": 0, "label": "keyword" }
+    ]
+  },
+  {
+    "id": "w5-ex2",
+    "week": 5,
+    "title": "Computed Getter",
+    "description": "A getter that calculates its value instead of returning a stored field.",
+    "labels": [
+      "return type",
+      "method name",
+      "keyword",
+      "variable name",
+      "operator",
+      "method signature"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "double" },
+          { "text": " ", "ws": true },
+          { "text": "getTotalCost" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "return" },
+          { "text": " ", "ws": true },
+          { "text": "price" },
+          { "text": " ", "ws": true },
+          { "text": "*" },
+          { "text": " ", "ws": true },
+          { "text": "quantity" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 1, "end": 1, "label": "return type" },
+      { "line": 1, "start": 2, "end": 2, "label": "method name" },
+      { "line": 1, "start": 0, "end": 4, "label": "method signature" },
+      { "line": 2, "start": 0, "end": 0, "label": "keyword" },
+      { "line": 2, "start": 1, "end": 1, "label": "variable name" },
+      { "line": 2, "start": 2, "end": 2, "label": "operator" },
+      { "line": 2, "start": 3, "end": 3, "label": "variable name" }
+    ]
+  },
+  {
+    "id": "w5-ex3",
+    "week": 5,
+    "title": "Boolean Method",
+    "description": "A method that returns true or false based on a condition.",
+    "labels": [
+      "return type",
+      "method name",
+      "method signature",
+      "keyword",
+      "boolean expression"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "boolean" },
+          { "text": " ", "ws": true },
+          { "text": "isAvailable" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "return" },
+          { "text": " ", "ws": true },
+          { "text": "stock" },
+          { "text": " ", "ws": true },
+          { "text": ">" },
+          { "text": " ", "ws": true },
+          { "text": "0" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 1, "end": 1, "label": "return type" },
+      { "line": 1, "start": 2, "end": 2, "label": "method name" },
+      { "line": 1, "start": 0, "end": 4, "label": "method signature" },
+      { "line": 2, "start": 0, "end": 0, "label": "keyword" },
+      { "line": 2, "start": 1, "end": 3, "label": "boolean expression" }
+    ]
+  },
+  {
+    "id": "w5-ex4",
+    "week": 5,
+    "title": "Static Method",
+    "description": "A method that belongs to the class itself, not to any one object.",
+    "labels": [
+      "access modifier",
+      "keyword",
+      "return type",
+      "method name",
+      "parameter",
+      "method call",
+      "method signature"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "static" },
+          { "text": " ", "ws": true },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "formatName" },
+          { "text": "(" },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "raw" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "return" },
+          { "text": " ", "ws": true },
+          { "text": "raw.toUpperCase" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
+      { "line": 1, "start": 1, "end": 1, "label": "keyword" },
+      { "line": 1, "start": 2, "end": 2, "label": "return type" },
+      { "line": 1, "start": 3, "end": 3, "label": "method name" },
+      { "line": 1, "start": 4, "end": 6, "label": "parameter" },
+      { "line": 1, "start": 0, "end": 7, "label": "method signature" },
+      { "line": 2, "start": 1, "end": 3, "label": "method call" }
+    ]
+  },
+  {
+    "id": "w5-ex5",
+    "week": 5,
+    "title": "Putting It All Together",
+    "description": "Two fields with a getter and a boolean method side by side.",
+    "labels": [
+      "field",
+      "method name",
+      "return type",
+      "method signature",
+      "boolean expression"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "private" },
+          { "text": " ", "ws": true },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "name" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "private" },
+          { "text": " ", "ws": true },
+          { "text": "double" },
+          { "text": " ", "ws": true },
+          { "text": "price" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": []
+      },
+      {
+        "lineNumber": 4,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "getName" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 5,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "return" },
+          { "text": " ", "ws": true },
+          { "text": "name" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 6,
+        "segments": [
+          { "text": "}" }
+        ]
+      },
+      {
+        "lineNumber": 7,
+        "segments": []
+      },
+      {
+        "lineNumber": 8,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "boolean" },
+          { "text": " ", "ws": true },
+          { "text": "isExpensive" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 9,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "return" },
+          { "text": " ", "ws": true },
+          { "text": "price" },
+          { "text": " ", "ws": true },
+          { "text": ">" },
+          { "text": " ", "ws": true },
+          { "text": "100" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 10,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 2, "label": "field" },
+      { "line": 2, "start": 0, "end": 2, "label": "field" },
+      { "line": 4, "start": 2, "end": 2, "label": "method name" },
+      { "line": 4, "start": 0, "end": 4, "label": "method signature" },
+      { "line": 8, "start": 1, "end": 1, "label": "return type" },
+      { "line": 8, "start": 2, "end": 2, "label": "method name" },
+      { "line": 8, "start": 0, "end": 4, "label": "method signature" },
+      { "line": 9, "start": 1, "end": 3, "label": "boolean expression" }
+    ]
+  }
+]

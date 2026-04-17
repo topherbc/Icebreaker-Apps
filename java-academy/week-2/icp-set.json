@@ -1,0 +1,289 @@
+[
+  {
+    "id": "w2-ex1",
+    "week": 2,
+    "title": "Class Declaration",
+    "description": "The opening lines that define a new class.",
+    "labels": [
+      "access modifier",
+      "keyword",
+      "class name",
+      "opening brace",
+      "closing brace",
+      "class declaration"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "class" },
+          { "text": " ", "ws": true },
+          { "text": "Dog" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": []
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
+      { "line": 1, "start": 1, "end": 1, "label": "keyword" },
+      { "line": 1, "start": 2, "end": 2, "label": "class name" },
+      { "line": 1, "start": 0, "end": 2, "label": "class declaration" },
+      { "line": 1, "start": 3, "end": 3, "label": "opening brace" },
+      { "line": 3, "start": 0, "end": 0, "label": "closing brace" }
+    ]
+  },
+  {
+    "id": "w2-ex2",
+    "week": 2,
+    "title": "Field Declarations",
+    "description": "Private instance variables that store an object's data.",
+    "labels": [
+      "access modifier",
+      "data type",
+      "variable name",
+      "field"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "private" },
+          { "text": " ", "ws": true },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "name" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "private" },
+          { "text": " ", "ws": true },
+          { "text": "int" },
+          { "text": " ", "ws": true },
+          { "text": "age" },
+          { "text": ";" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
+      { "line": 1, "start": 1, "end": 1, "label": "data type" },
+      { "line": 1, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 1, "start": 0, "end": 2, "label": "field" },
+      { "line": 2, "start": 1, "end": 1, "label": "data type" },
+      { "line": 2, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 2, "start": 0, "end": 2, "label": "field" }
+    ]
+  },
+  {
+    "id": "w2-ex3",
+    "week": 2,
+    "title": "Constructor",
+    "description": "A method that initializes a new object with values.",
+    "labels": [
+      "class name",
+      "parameter",
+      "this reference",
+      "opening brace",
+      "closing brace"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "Dog" },
+          { "text": "(" },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "name" },
+          { "text": ", ", "ws": true },
+          { "text": "int" },
+          { "text": " ", "ws": true },
+          { "text": "age" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "this.name" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "name" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "this.age" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "age" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 4,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 1, "end": 1, "label": "class name" },
+      { "line": 1, "start": 3, "end": 4, "label": "parameter" },
+      { "line": 1, "start": 5, "end": 6, "label": "parameter" },
+      { "line": 2, "start": 0, "end": 0, "label": "this reference" },
+      { "line": 3, "start": 0, "end": 0, "label": "this reference" },
+      { "line": 1, "start": 8, "end": 8, "label": "opening brace" },
+      { "line": 4, "start": 0, "end": 0, "label": "closing brace" }
+    ]
+  },
+  {
+    "id": "w2-ex4",
+    "week": 2,
+    "title": "Getter Method",
+    "description": "A method that returns a private field's value.",
+    "labels": [
+      "access modifier",
+      "return type",
+      "method name",
+      "keyword",
+      "variable name",
+      "method signature"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "public" },
+          { "text": " ", "ws": true },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "getName" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "return" },
+          { "text": " ", "ws": true },
+          { "text": "name" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
+      { "line": 1, "start": 1, "end": 1, "label": "return type" },
+      { "line": 1, "start": 2, "end": 2, "label": "method name" },
+      { "line": 1, "start": 0, "end": 4, "label": "method signature" },
+      { "line": 2, "start": 0, "end": 0, "label": "keyword" },
+      { "line": 2, "start": 1, "end": 1, "label": "variable name" }
+    ]
+  },
+  {
+    "id": "w2-ex5",
+    "week": 2,
+    "title": "For Loop",
+    "description": "A loop that counts from 0 to 4 and prints each value.",
+    "labels": [
+      "loop keyword",
+      "variable declaration",
+      "condition",
+      "method call",
+      "opening brace",
+      "closing brace"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "for" },
+          { "text": " ", "ws": true },
+          { "text": "(" },
+          { "text": "int" },
+          { "text": " ", "ws": true },
+          { "text": "i" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "0" },
+          { "text": ";" },
+          { "text": " ", "ws": true },
+          { "text": "i" },
+          { "text": " ", "ws": true },
+          { "text": "<" },
+          { "text": " ", "ws": true },
+          { "text": "5" },
+          { "text": ";" },
+          { "text": " ", "ws": true },
+          { "text": "i++" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "System.out.println" },
+          { "text": "(" },
+          { "text": "i" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "loop keyword" },
+      { "line": 1, "start": 2, "end": 3, "label": "variable declaration" },
+      { "line": 1, "start": 7, "end": 9, "label": "condition" },
+      { "line": 1, "start": 13, "end": 13, "label": "opening brace" },
+      { "line": 3, "start": 0, "end": 0, "label": "closing brace" },
+      { "line": 2, "start": 0, "end": 3, "label": "method call" }
+    ]
+  }
+]

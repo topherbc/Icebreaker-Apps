@@ -1,0 +1,283 @@
+[
+  {
+    "id": "w3-ex1",
+    "week": 3,
+    "title": "ArrayList Declaration",
+    "description": "Creating a new ArrayList that holds Strings.",
+    "labels": [
+      "collection type",
+      "type parameter",
+      "variable name",
+      "keyword",
+      "variable declaration"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "ArrayList" },
+          { "text": "<String>" },
+          { "text": " ", "ws": true },
+          { "text": "names" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "new" },
+          { "text": " ", "ws": true },
+          { "text": "ArrayList<>()" },
+          { "text": ";" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "collection type" },
+      { "line": 1, "start": 1, "end": 1, "label": "type parameter" },
+      { "line": 1, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 1, "start": 0, "end": 2, "label": "variable declaration" },
+      { "line": 1, "start": 4, "end": 4, "label": "keyword" }
+    ]
+  },
+  {
+    "id": "w3-ex2",
+    "week": 3,
+    "title": "Adding to a List",
+    "description": "Calling .add() to put items into an ArrayList.",
+    "labels": [
+      "method call",
+      "argument",
+      "literal value"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "names.add" },
+          { "text": "(" },
+          { "text": "\"Alice\"" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "names.add" },
+          { "text": "(" },
+          { "text": "\"Bob\"" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 3, "label": "method call" },
+      { "line": 1, "start": 2, "end": 2, "label": "argument" },
+      { "line": 2, "start": 0, "end": 3, "label": "method call" },
+      { "line": 2, "start": 2, "end": 2, "label": "argument" }
+    ]
+  },
+  {
+    "id": "w3-ex3",
+    "week": 3,
+    "title": "HashMap Declaration",
+    "description": "Creating a HashMap and adding a key-value pair.",
+    "labels": [
+      "collection type",
+      "type parameter",
+      "variable name",
+      "keyword",
+      "variable declaration",
+      "method call"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "HashMap" },
+          { "text": "<String, Integer>" },
+          { "text": " ", "ws": true },
+          { "text": "scores" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "new" },
+          { "text": " ", "ws": true },
+          { "text": "HashMap<>()" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "scores.put" },
+          { "text": "(" },
+          { "text": "\"Alice\"" },
+          { "text": ", ", "ws": true },
+          { "text": "95" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "collection type" },
+      { "line": 1, "start": 1, "end": 1, "label": "type parameter" },
+      { "line": 1, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 1, "start": 0, "end": 2, "label": "variable declaration" },
+      { "line": 1, "start": 4, "end": 4, "label": "keyword" },
+      { "line": 2, "start": 0, "end": 4, "label": "method call" }
+    ]
+  },
+  {
+    "id": "w3-ex4",
+    "week": 3,
+    "title": "Try-Catch Block",
+    "description": "Wrapping risky code in a try block with error handling.",
+    "labels": [
+      "keyword",
+      "variable declaration",
+      "method call",
+      "exception type",
+      "opening brace",
+      "closing brace"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "try" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "line" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "reader.readLine" },
+          { "text": "(" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "}" },
+          { "text": " ", "ws": true },
+          { "text": "catch" },
+          { "text": " ", "ws": true },
+          { "text": "(" },
+          { "text": "IOException" },
+          { "text": " ", "ws": true },
+          { "text": "e" },
+          { "text": ")" },
+          { "text": " ", "ws": true },
+          { "text": "{" }
+        ]
+      },
+      {
+        "lineNumber": 4,
+        "segments": [
+          { "text": "    ", "ws": true },
+          { "text": "System.out.println" },
+          { "text": "(" },
+          { "text": "\"Error reading file\"" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 5,
+        "segments": [
+          { "text": "}" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "keyword" },
+      { "line": 3, "start": 1, "end": 1, "label": "keyword" },
+      { "line": 2, "start": 0, "end": 1, "label": "variable declaration" },
+      { "line": 2, "start": 3, "end": 5, "label": "method call" },
+      { "line": 3, "start": 3, "end": 3, "label": "exception type" },
+      { "line": 4, "start": 0, "end": 3, "label": "method call" }
+    ]
+  },
+  {
+    "id": "w3-ex5",
+    "week": 3,
+    "title": "Parsing a Line",
+    "description": "Splitting a string and converting values from text to numbers.",
+    "labels": [
+      "variable declaration",
+      "array declaration",
+      "method call",
+      "argument",
+      "data type"
+    ],
+    "code": [
+      {
+        "lineNumber": 1,
+        "segments": [
+          { "text": "String" },
+          { "text": "[]" },
+          { "text": " ", "ws": true },
+          { "text": "parts" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "line.split" },
+          { "text": "(" },
+          { "text": "\",\"" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 2,
+        "segments": [
+          { "text": "String" },
+          { "text": " ", "ws": true },
+          { "text": "name" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "parts" },
+          { "text": "[" },
+          { "text": "0" },
+          { "text": "]" },
+          { "text": ";" }
+        ]
+      },
+      {
+        "lineNumber": 3,
+        "segments": [
+          { "text": "int" },
+          { "text": " ", "ws": true },
+          { "text": "score" },
+          { "text": " ", "ws": true },
+          { "text": "=" },
+          { "text": " ", "ws": true },
+          { "text": "Integer.parseInt" },
+          { "text": "(" },
+          { "text": "parts[1]" },
+          { "text": ")" },
+          { "text": ";" }
+        ]
+      }
+    ],
+    "expected": [
+      { "line": 1, "start": 0, "end": 2, "label": "array declaration" },
+      { "line": 1, "start": 4, "end": 7, "label": "method call" },
+      { "line": 2, "start": 0, "end": 1, "label": "variable declaration" },
+      { "line": 3, "start": 0, "end": 1, "label": "variable declaration" },
+      { "line": 3, "start": 3, "end": 6, "label": "method call" }
+    ]
+  }
+]

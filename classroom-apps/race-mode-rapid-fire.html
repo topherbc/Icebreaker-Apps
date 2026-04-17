@@ -517,12 +517,14 @@ label {
    ========================================================= */
 #view-landing {
   background: var(--amber);
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   padding: 48px 32px 40px;
+  overflow: hidden;
 }
 .landing-eyebrow {
   font-size: 13px;
@@ -2147,8 +2149,9 @@ label {
   .shape-btn { padding: 16px; font-size: 16px; min-height: 80px; }
   .podium-wrap { gap: 8px; }
   .podium-block { width: 100px; }
-  .landing-btn { max-width: 100%; height: 56px; }
+  .landing-btn { max-width: 100%; height: 52px; }
   .landing-logo { font-size: clamp(56px, 12vw, 96px); }
+  #view-landing { padding: 32px 24px 28px; }
 }
 @media (max-width: 480px) {
   .student-shapes-grid { gap: 0; }
@@ -2166,9 +2169,13 @@ label {
   .join-screen { padding: 24px 16px; gap: 14px; justify-content: center; }
   .join-screen h1 { font-size: clamp(32px, 10vw, 48px); }
   .join-form { gap: 12px; }
-  /* Phone: landing shapes */
-  .landing-shapes svg { width: 40px; height: 40px; }
-  .landing-shapes { gap: 16px; margin: 24px 0; }
+  /* Phone: landing */
+  #view-landing { padding: 24px 20px 20px; }
+  .landing-eyebrow { font-size: 11px; margin-bottom: 8px; }
+  .landing-shapes svg { width: 36px; height: 36px; }
+  .landing-shapes { gap: 14px; margin: 20px 0; }
+  .landing-btn { height: 48px; font-size: 13px; }
+  .landing-logo { line-height: 0.85; }
   /* Phone: emoji picker */
   .emoji-pick { width: 38px; height: 38px; font-size: 20px; min-width: 38px; min-height: 38px; }
 }

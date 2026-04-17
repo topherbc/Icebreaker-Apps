@@ -525,8 +525,8 @@ label {
   padding: 48px 32px 40px;
 }
 .landing-eyebrow {
-  font-size: 20px;
-  letter-spacing: 0.4em;
+  font-size: 13px;
+  letter-spacing: 0.5em;
   color: var(--near-black-dim);
   font-weight: 700;
   text-transform: uppercase;
@@ -542,20 +542,30 @@ label {
   line-height: 0.88;
   text-align: center;
 }
+.landing-rule-block {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+.landing-rule {
+  width: 100%;
+  height: 3px;
+  background: var(--near-black);
+}
 .landing-shapes {
   display: flex;
   gap: 24px;
   align-items: center;
   justify-content: center;
-  margin: 40px 0;
+  margin: 36px 0;
 }
 .landing-btn {
   width: 100%;
-  max-width: 320px;
+  max-width: 480px;
   height: 64px;
   border-radius: 4px;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -566,21 +576,27 @@ label {
   justify-content: center;
   gap: 12px;
   min-height: 48px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .landing-btn-primary {
   background: var(--near-black);
   color: var(--amber);
+  border: 3px solid var(--near-black);
 }
 .landing-btn-primary:hover {
-  background: var(--near-black-mid);
+  background: var(--amber);
+  color: var(--near-black);
+  border-color: var(--near-black);
 }
 .landing-btn-secondary {
   background: transparent;
   color: var(--near-black);
-  border: 2.5px solid var(--near-black);
+  border: 3px solid var(--near-black);
 }
 .landing-btn-secondary:hover {
-  background: rgba(26,26,46,0.08);
+  background: var(--near-black);
+  color: var(--amber);
+  border-color: var(--near-black);
 }
 
 /* =========================================================
@@ -1866,12 +1882,28 @@ label {
 [data-theme="dark"] .landing-eyebrow {
   color: rgba(245,166,35,0.4);
 }
-[data-theme="dark"] .landing-btn-secondary {
+[data-theme="dark"] .landing-rule {
+  background: var(--amber);
+}
+[data-theme="dark"] .landing-btn-primary {
+  background: var(--amber);
+  color: var(--near-black);
+  border-color: var(--amber);
+}
+[data-theme="dark"] .landing-btn-primary:hover {
+  background: transparent;
   color: var(--amber);
-  border-color: rgba(245,166,35,0.4);
+  border-color: var(--amber);
+}
+[data-theme="dark"] .landing-btn-secondary {
+  background: transparent;
+  color: var(--amber);
+  border-color: rgba(245,166,35,0.5);
 }
 [data-theme="dark"] .landing-btn-secondary:hover {
-  background: rgba(245,166,35,0.08);
+  background: var(--amber);
+  color: var(--near-black);
+  border-color: var(--amber);
 }
 /* Join screen dark mode */
 [data-theme="dark"] .join-screen label {
@@ -2137,6 +2169,39 @@ label {
   /* Phone: emoji picker */
   .emoji-pick { width: 38px; height: 38px; font-size: 20px; min-width: 38px; min-height: 38px; }
 }
+
+/* ---- CHECKERBOARD TRANSITION ---- */
+.checker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  pointer-events: none;
+  opacity: 0;
+}
+.checker-overlay.active {
+  pointer-events: all;
+  opacity: 1;
+}
+.checker-cell {
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.18s ease;
+}
+.checker-cell.lit {
+  opacity: 1;
+}
+.checker-cell svg {
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.checker-cell.lit svg {
+  opacity: 0.85;
+  transform: scale(1);
+}
 </style>
 </head>
 <body>
@@ -2147,15 +2212,19 @@ label {
 <div id="view-landing">
   <div style="text-align:center;">
     <div class="landing-eyebrow">Race Mode</div>
-    <div class="landing-logo">RAPID<br>FIRE</div>
+    <div class="landing-rule-block">
+      <div class="landing-rule"></div>
+      <div class="landing-logo">RAPID<br>FIRE</div>
+      <div class="landing-rule"></div>
+    </div>
   </div>
   <div class="landing-shapes" aria-hidden="true">
-    <svg width="75" height="75" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="var(--shape-triangle)"/></svg>
-    <svg width="75" height="75" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="var(--shape-circle)"/></svg>
-    <svg width="75" height="75" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="var(--shape-square)"/></svg>
-    <svg width="75" height="75" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="var(--shape-diamond)"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,29 3,29" fill="var(--shape-triangle)"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="var(--shape-circle)"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="var(--shape-square)"/></svg>
+    <svg width="56" height="56" viewBox="0 0 32 32"><polygon points="16,3 29,16 16,29 3,16" fill="var(--shape-diamond)"/></svg>
   </div>
-  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
+  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:480px;">
     <button class="landing-btn landing-btn-primary" onclick="navigateTo('host')" aria-label="Host a game">
       Host a Game
     </button>
@@ -2497,7 +2566,9 @@ function getView() {
 }
 
 function navigateTo(view) {
-  window.location.href = window.location.pathname + '?view=' + view;
+  runCheckerWipe(function() {
+    window.location.href = window.location.pathname + '?view=' + view;
+  });
 }
 
 function initRouter() {
@@ -3446,15 +3517,23 @@ function toggleLockRoom() {
 //  HOST LIVE GAME - FLOW
 // ================================================================
 function showLiveScreen(screen) {
-  ['live-lobby','live-question','live-leaderboard','live-podium'].forEach(function(id) {
-    var el = document.getElementById(id);
-    el.style.display = 'none';
-    el.classList.add('hidden');
-  });
-  var el = document.getElementById('live-' + screen);
-  if (el) {
-    el.style.display = '';
-    el.classList.remove('hidden');
+  var doSwitch = function() {
+    ['live-lobby','live-question','live-leaderboard','live-podium'].forEach(function(id) {
+      var el = document.getElementById(id);
+      el.style.display = 'none';
+      el.classList.add('hidden');
+    });
+    var el = document.getElementById('live-' + screen);
+    if (el) {
+      el.style.display = '';
+      el.classList.remove('hidden');
+    }
+  };
+  // Only animate major transitions, not reveals mid-question
+  if (screen === 'lobby' || screen === 'leaderboard' || screen === 'podium') {
+    runCheckerWipe(doSwitch);
+  } else {
+    doSwitch();
   }
 }
 
@@ -4818,10 +4897,101 @@ window.addEventListener('beforeunload', function() {
   }
 });
 
+// ================================================================
+//  CHECKERBOARD WIPE TRANSITION
+// ================================================================
+(function() {
+  var COLS = 7;
+  var ROWS = 6;
+  var COLORS = ['#a855f7','#e05252','#3b82f6','#1a8a6a','#c27d0e'];
+  var SHAPES = ['triangle','circle','square','diamond','triangle','circle'];
+
+  function cellSVG(shape, color) {
+    var s = 28;
+    if (shape === 'triangle') return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><polygon points="16,4 28,28 4,28" fill="'+color+'"/></svg>';
+    if (shape === 'circle')   return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="'+color+'"/></svg>';
+    if (shape === 'square')   return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="'+color+'"/></svg>';
+    if (shape === 'diamond')  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="'+color+'"/></svg>';
+    return '';
+  }
+
+  var overlay = document.getElementById('checker-overlay');
+  var cells = [];
+
+  function buildGrid() {
+    overlay.innerHTML = '';
+    cells = [];
+    overlay.style.gridTemplateColumns = 'repeat('+COLS+', 1fr)';
+    overlay.style.gridTemplateRows = 'repeat('+ROWS+', 1fr)';
+
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        var colorIdx = (r + c) % COLORS.length;
+        var shapeIdx = (r * 2 + c) % SHAPES.length;
+        var color = COLORS[colorIdx];
+        var alpha = (r + c) % 2 === 0 ? '28' : '18';
+        var cell = document.createElement('div');
+        cell.className = 'checker-cell';
+        cell.style.background = color + alpha;
+        cell.innerHTML = cellSVG(SHAPES[shapeIdx], color + 'cc');
+        overlay.appendChild(cell);
+        cells.push({ el: cell, diag: r + c });
+      }
+    }
+  }
+
+  function runCheckerWipe(callback) {
+    buildGrid();
+    overlay.classList.add('active');
+
+    var maxDiag = (ROWS - 1) + (COLS - 1);
+    var d = 0;
+
+    function wipeIn() {
+      if (d > maxDiag) {
+        // Peak coverage -- fire the callback (screen switch happens here)
+        if (callback) callback();
+        // Brief hold then wipe out
+        setTimeout(wipeOut, 120);
+        return;
+      }
+      var diag = d;
+      cells.forEach(function(x) {
+        if (x.diag === diag) x.el.classList.add('lit');
+      });
+      d++;
+      setTimeout(wipeIn, 55);
+    }
+
+    function wipeOut() {
+      var d2 = 0;
+      function step() {
+        if (d2 > maxDiag) {
+          overlay.classList.remove('active');
+          cells.forEach(function(x) { x.el.classList.remove('lit'); });
+          return;
+        }
+        var diag = d2;
+        cells.forEach(function(x) {
+          if (x.diag === diag) x.el.classList.remove('lit');
+        });
+        d2++;
+        setTimeout(step, 45);
+      }
+      step();
+    }
+
+    wipeIn();
+  }
+
+  window.runCheckerWipe = runCheckerWipe;
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
   restoreA11y();
   initRouter();
 });
 </script>
+<div class="checker-overlay" id="checker-overlay" aria-hidden="true"></div>
 </body>
 </html>

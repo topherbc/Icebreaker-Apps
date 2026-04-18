@@ -5,15 +5,15 @@
     "title": "Encapsulated Field",
     "description": "A private field paired with its public getter.",
     "labels": [
-      "field",
       "access modifier",
       "data type",
       "variable name",
       "statement end",
       "return type",
       "method name",
-      "method signature",
-      "keyword"
+      "keyword",
+      "field",
+      "method signature"
     ],
     "code": [
       {
@@ -272,8 +272,9 @@
       { "line": 1, "start": 5, "end": 6, "label": "parameter" },
       { "line": 1, "start": 0, "end": 7, "label": "method signature" },
       { "line": 2, "start": 0, "end": 0, "label": "keyword" },
-      { "line": 2, "start": 1, "end": 3, "label": "method call" },
-      { "line": 2, "start": 4, "end": 4, "label": "statement end" }
+      { "line": 2, "start": 1, "end": 1, "label": "method name" },
+      { "line": 2, "start": 4, "end": 4, "label": "statement end" },
+      { "line": 2, "start": 1, "end": 3, "label": "method call" }
     ]
   },
   {
@@ -282,17 +283,17 @@
     "title": "Putting It All Together",
     "description": "Two fields with a getter and a boolean method side by side.",
     "labels": [
-      "field",
       "access modifier",
       "data type",
       "variable name",
       "statement end",
       "return type",
       "method name",
-      "method signature",
       "keyword",
       "operator",
       "literal value",
+      "field",
+      "method signature",
       "boolean expression"
     ],
     "code": [

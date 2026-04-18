@@ -830,6 +830,14 @@ function renderLabelGrid(labels) {
 function onTokenClick(line, tokenIdx) {
   if (submitted) return;
 
+  // If clicking within the current pending selection, deselect everything
+  var range = getSelectionRange();
+  if (range && range.line === line && tokenIdx >= range.start && tokenIdx <= range.end) {
+    selectionAnchor = null; selectionEnd = null;
+    updateSelectionVisuals();
+    return;
+  }
+
   if (!selectionAnchor) {
     // Start new selection
     selectionAnchor = { line: line, tokenIdx: tokenIdx };
@@ -838,11 +846,8 @@ function onTokenClick(line, tokenIdx) {
     // Different line: restart selection
     selectionAnchor = { line: line, tokenIdx: tokenIdx };
     selectionEnd = null;
-  } else if (!selectionEnd && selectionAnchor.tokenIdx === tokenIdx) {
-    // Clicked same token again with no range: deselect
-    selectionAnchor = null; selectionEnd = null;
   } else {
-    // Same line: set/update end
+    // Same line, outside current selection: set/update end
     selectionEnd = { line: line, tokenIdx: tokenIdx };
   }
 

@@ -8,8 +8,12 @@
       "collection type",
       "type parameter",
       "variable name",
+      "operator",
       "keyword",
-      "variable declaration"
+      "constructor call",
+      "statement end",
+      "variable declaration",
+      "object creation"
     ],
     "code": [
       {
@@ -33,8 +37,12 @@
       { "line": 1, "start": 0, "end": 0, "label": "collection type" },
       { "line": 1, "start": 1, "end": 1, "label": "type parameter" },
       { "line": 1, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 1, "start": 3, "end": 3, "label": "operator" },
+      { "line": 1, "start": 4, "end": 4, "label": "keyword" },
+      { "line": 1, "start": 5, "end": 5, "label": "constructor call" },
+      { "line": 1, "start": 6, "end": 6, "label": "statement end" },
       { "line": 1, "start": 0, "end": 2, "label": "variable declaration" },
-      { "line": 1, "start": 4, "end": 4, "label": "keyword" }
+      { "line": 1, "start": 4, "end": 5, "label": "object creation" }
     ]
   },
   {
@@ -43,9 +51,11 @@
     "title": "Adding to a List",
     "description": "Calling .add() to put items into an ArrayList.",
     "labels": [
+      "method name",
+      "literal value",
+      "statement end",
       "method call",
-      "argument",
-      "literal value"
+      "argument"
     ],
     "code": [
       {
@@ -70,12 +80,16 @@
       }
     ],
     "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "method name" },
+      { "line": 1, "start": 2, "end": 2, "label": "literal value" },
+      { "line": 1, "start": 4, "end": 4, "label": "statement end" },
       { "line": 1, "start": 0, "end": 3, "label": "method call" },
       { "line": 1, "start": 2, "end": 2, "label": "argument" },
+      { "line": 2, "start": 0, "end": 0, "label": "method name" },
+      { "line": 2, "start": 2, "end": 2, "label": "literal value" },
+      { "line": 2, "start": 4, "end": 4, "label": "statement end" },
       { "line": 2, "start": 0, "end": 3, "label": "method call" },
-      { "line": 2, "start": 2, "end": 2, "label": "argument" },
-      { "line": 1, "start": 2, "end": 2, "label": "literal value" },
-      { "line": 2, "start": 2, "end": 2, "label": "literal value" }
+      { "line": 2, "start": 2, "end": 2, "label": "argument" }
     ]
   },
   {
@@ -87,9 +101,16 @@
       "collection type",
       "type parameter",
       "variable name",
+      "operator",
       "keyword",
+      "constructor call",
+      "statement end",
       "variable declaration",
-      "method call"
+      "object creation",
+      "method name",
+      "literal value",
+      "method call",
+      "argument"
     ],
     "code": [
       {
@@ -125,9 +146,19 @@
       { "line": 1, "start": 0, "end": 0, "label": "collection type" },
       { "line": 1, "start": 1, "end": 1, "label": "type parameter" },
       { "line": 1, "start": 2, "end": 2, "label": "variable name" },
-      { "line": 1, "start": 0, "end": 2, "label": "variable declaration" },
+      { "line": 1, "start": 3, "end": 3, "label": "operator" },
       { "line": 1, "start": 4, "end": 4, "label": "keyword" },
-      { "line": 2, "start": 0, "end": 4, "label": "method call" }
+      { "line": 1, "start": 5, "end": 5, "label": "constructor call" },
+      { "line": 1, "start": 6, "end": 6, "label": "statement end" },
+      { "line": 1, "start": 0, "end": 2, "label": "variable declaration" },
+      { "line": 1, "start": 4, "end": 5, "label": "object creation" },
+      { "line": 2, "start": 0, "end": 0, "label": "method name" },
+      { "line": 2, "start": 2, "end": 2, "label": "literal value" },
+      { "line": 2, "start": 3, "end": 3, "label": "literal value" },
+      { "line": 2, "start": 5, "end": 5, "label": "statement end" },
+      { "line": 2, "start": 0, "end": 4, "label": "method call" },
+      { "line": 2, "start": 2, "end": 2, "label": "argument" },
+      { "line": 2, "start": 3, "end": 3, "label": "argument" }
     ]
   },
   {
@@ -137,11 +168,18 @@
     "description": "Wrapping risky code in a try block with error handling.",
     "labels": [
       "keyword",
+      "opening brace",
+      "closing brace",
+      "data type",
+      "variable name",
+      "operator",
+      "method name",
+      "statement end",
       "variable declaration",
       "method call",
       "exception type",
-      "opening brace",
-      "closing brace"
+      "literal value",
+      "argument"
     ],
     "code": [
       {
@@ -204,14 +242,24 @@
     ],
     "expected": [
       { "line": 1, "start": 0, "end": 0, "label": "keyword" },
-      { "line": 3, "start": 1, "end": 1, "label": "keyword" },
+      { "line": 1, "start": 1, "end": 1, "label": "opening brace" },
+      { "line": 2, "start": 0, "end": 0, "label": "data type" },
+      { "line": 2, "start": 1, "end": 1, "label": "variable name" },
+      { "line": 2, "start": 2, "end": 2, "label": "operator" },
+      { "line": 2, "start": 3, "end": 3, "label": "method name" },
+      { "line": 2, "start": 6, "end": 6, "label": "statement end" },
       { "line": 2, "start": 0, "end": 1, "label": "variable declaration" },
       { "line": 2, "start": 3, "end": 5, "label": "method call" },
-      { "line": 3, "start": 3, "end": 3, "label": "exception type" },
-      { "line": 4, "start": 0, "end": 3, "label": "method call" },
-      { "line": 1, "start": 1, "end": 1, "label": "opening brace" },
-      { "line": 3, "start": 6, "end": 6, "label": "opening brace" },
       { "line": 3, "start": 0, "end": 0, "label": "closing brace" },
+      { "line": 3, "start": 1, "end": 1, "label": "keyword" },
+      { "line": 3, "start": 3, "end": 3, "label": "exception type" },
+      { "line": 3, "start": 4, "end": 4, "label": "variable name" },
+      { "line": 3, "start": 6, "end": 6, "label": "opening brace" },
+      { "line": 4, "start": 0, "end": 0, "label": "method name" },
+      { "line": 4, "start": 2, "end": 2, "label": "literal value" },
+      { "line": 4, "start": 4, "end": 4, "label": "statement end" },
+      { "line": 4, "start": 0, "end": 3, "label": "method call" },
+      { "line": 4, "start": 2, "end": 2, "label": "argument" },
       { "line": 5, "start": 0, "end": 0, "label": "closing brace" }
     ]
   },
@@ -221,11 +269,19 @@
     "title": "Parsing a Line",
     "description": "Splitting a string and converting values from text to numbers.",
     "labels": [
-      "variable declaration",
+      "data type",
+      "array marker",
+      "variable name",
+      "operator",
+      "method name",
+      "literal value",
+      "statement end",
       "array declaration",
       "method call",
       "argument",
-      "data type"
+      "variable declaration",
+      "array access",
+      "index value"
     ],
     "code": [
       {
@@ -279,16 +335,32 @@
       }
     ],
     "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "data type" },
+      { "line": 1, "start": 1, "end": 1, "label": "array marker" },
+      { "line": 1, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 1, "start": 3, "end": 3, "label": "operator" },
+      { "line": 1, "start": 4, "end": 4, "label": "method name" },
+      { "line": 1, "start": 6, "end": 6, "label": "literal value" },
+      { "line": 1, "start": 8, "end": 8, "label": "statement end" },
       { "line": 1, "start": 0, "end": 2, "label": "array declaration" },
       { "line": 1, "start": 4, "end": 7, "label": "method call" },
-      { "line": 2, "start": 0, "end": 1, "label": "variable declaration" },
-      { "line": 3, "start": 0, "end": 1, "label": "variable declaration" },
-      { "line": 3, "start": 3, "end": 6, "label": "method call" },
       { "line": 1, "start": 6, "end": 6, "label": "argument" },
-      { "line": 3, "start": 5, "end": 5, "label": "argument" },
-      { "line": 1, "start": 0, "end": 0, "label": "data type" },
       { "line": 2, "start": 0, "end": 0, "label": "data type" },
-      { "line": 3, "start": 0, "end": 0, "label": "data type" }
+      { "line": 2, "start": 1, "end": 1, "label": "variable name" },
+      { "line": 2, "start": 2, "end": 2, "label": "operator" },
+      { "line": 2, "start": 3, "end": 3, "label": "variable name" },
+      { "line": 2, "start": 5, "end": 5, "label": "index value" },
+      { "line": 2, "start": 7, "end": 7, "label": "statement end" },
+      { "line": 2, "start": 0, "end": 1, "label": "variable declaration" },
+      { "line": 2, "start": 3, "end": 6, "label": "array access" },
+      { "line": 3, "start": 0, "end": 0, "label": "data type" },
+      { "line": 3, "start": 1, "end": 1, "label": "variable name" },
+      { "line": 3, "start": 2, "end": 2, "label": "operator" },
+      { "line": 3, "start": 3, "end": 3, "label": "method name" },
+      { "line": 3, "start": 5, "end": 5, "label": "argument" },
+      { "line": 3, "start": 7, "end": 7, "label": "statement end" },
+      { "line": 3, "start": 0, "end": 1, "label": "variable declaration" },
+      { "line": 3, "start": 3, "end": 6, "label": "method call" }
     ]
   }
 ]

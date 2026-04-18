@@ -8,9 +8,9 @@
       "access modifier",
       "keyword",
       "class name",
+      "class declaration",
       "opening brace",
-      "closing brace",
-      "class declaration"
+      "closing brace"
     ],
     "code": [
       {
@@ -54,6 +54,7 @@
       "access modifier",
       "data type",
       "variable name",
+      "statement end",
       "field"
     ],
     "code": [
@@ -84,9 +85,12 @@
       { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
       { "line": 1, "start": 1, "end": 1, "label": "data type" },
       { "line": 1, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 1, "start": 3, "end": 3, "label": "statement end" },
       { "line": 1, "start": 0, "end": 2, "label": "field" },
+      { "line": 2, "start": 0, "end": 0, "label": "access modifier" },
       { "line": 2, "start": 1, "end": 1, "label": "data type" },
       { "line": 2, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 2, "start": 3, "end": 3, "label": "statement end" },
       { "line": 2, "start": 0, "end": 2, "label": "field" }
     ]
   },
@@ -96,9 +100,15 @@
     "title": "Constructor",
     "description": "A method that initializes a new object with values.",
     "labels": [
+      "access modifier",
       "class name",
+      "data type",
+      "variable name",
       "parameter",
       "this reference",
+      "operator",
+      "statement end",
+      "field assignment",
       "opening brace",
       "closing brace"
     ],
@@ -154,12 +164,25 @@
       }
     ],
     "expected": [
+      { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
       { "line": 1, "start": 1, "end": 1, "label": "class name" },
+      { "line": 1, "start": 3, "end": 3, "label": "data type" },
+      { "line": 1, "start": 4, "end": 4, "label": "variable name" },
       { "line": 1, "start": 3, "end": 4, "label": "parameter" },
+      { "line": 1, "start": 5, "end": 5, "label": "data type" },
+      { "line": 1, "start": 6, "end": 6, "label": "variable name" },
       { "line": 1, "start": 5, "end": 6, "label": "parameter" },
-      { "line": 2, "start": 0, "end": 0, "label": "this reference" },
-      { "line": 3, "start": 0, "end": 0, "label": "this reference" },
       { "line": 1, "start": 8, "end": 8, "label": "opening brace" },
+      { "line": 2, "start": 0, "end": 0, "label": "this reference" },
+      { "line": 2, "start": 1, "end": 1, "label": "operator" },
+      { "line": 2, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 2, "start": 3, "end": 3, "label": "statement end" },
+      { "line": 2, "start": 0, "end": 2, "label": "field assignment" },
+      { "line": 3, "start": 0, "end": 0, "label": "this reference" },
+      { "line": 3, "start": 1, "end": 1, "label": "operator" },
+      { "line": 3, "start": 2, "end": 2, "label": "variable name" },
+      { "line": 3, "start": 3, "end": 3, "label": "statement end" },
+      { "line": 3, "start": 0, "end": 2, "label": "field assignment" },
       { "line": 4, "start": 0, "end": 0, "label": "closing brace" }
     ]
   },
@@ -172,9 +195,12 @@
       "access modifier",
       "return type",
       "method name",
+      "method signature",
       "keyword",
       "variable name",
-      "method signature"
+      "statement end",
+      "opening brace",
+      "closing brace"
     ],
     "code": [
       {
@@ -213,8 +239,11 @@
       { "line": 1, "start": 1, "end": 1, "label": "return type" },
       { "line": 1, "start": 2, "end": 2, "label": "method name" },
       { "line": 1, "start": 0, "end": 4, "label": "method signature" },
+      { "line": 1, "start": 5, "end": 5, "label": "opening brace" },
       { "line": 2, "start": 0, "end": 0, "label": "keyword" },
-      { "line": 2, "start": 1, "end": 1, "label": "variable name" }
+      { "line": 2, "start": 1, "end": 1, "label": "variable name" },
+      { "line": 2, "start": 2, "end": 2, "label": "statement end" },
+      { "line": 3, "start": 0, "end": 0, "label": "closing brace" }
     ]
   },
   {
@@ -224,8 +253,16 @@
     "description": "A loop that counts from 0 to 4 and prints each value.",
     "labels": [
       "loop keyword",
+      "data type",
+      "variable name",
       "variable declaration",
+      "operator",
+      "literal value",
+      "statement end",
       "condition",
+      "update expression",
+      "method name",
+      "argument",
       "method call",
       "opening brace",
       "closing brace"
@@ -279,11 +316,24 @@
     ],
     "expected": [
       { "line": 1, "start": 0, "end": 0, "label": "loop keyword" },
+      { "line": 1, "start": 2, "end": 2, "label": "data type" },
+      { "line": 1, "start": 3, "end": 3, "label": "variable name" },
       { "line": 1, "start": 2, "end": 3, "label": "variable declaration" },
+      { "line": 1, "start": 4, "end": 4, "label": "operator" },
+      { "line": 1, "start": 5, "end": 5, "label": "literal value" },
+      { "line": 1, "start": 6, "end": 6, "label": "statement end" },
+      { "line": 1, "start": 7, "end": 7, "label": "variable name" },
+      { "line": 1, "start": 8, "end": 8, "label": "operator" },
+      { "line": 1, "start": 9, "end": 9, "label": "literal value" },
       { "line": 1, "start": 7, "end": 9, "label": "condition" },
+      { "line": 1, "start": 10, "end": 10, "label": "statement end" },
+      { "line": 1, "start": 11, "end": 11, "label": "update expression" },
       { "line": 1, "start": 13, "end": 13, "label": "opening brace" },
-      { "line": 3, "start": 0, "end": 0, "label": "closing brace" },
-      { "line": 2, "start": 0, "end": 3, "label": "method call" }
+      { "line": 2, "start": 0, "end": 0, "label": "method name" },
+      { "line": 2, "start": 2, "end": 2, "label": "argument" },
+      { "line": 2, "start": 0, "end": 3, "label": "method call" },
+      { "line": 2, "start": 4, "end": 4, "label": "statement end" },
+      { "line": 3, "start": 0, "end": 0, "label": "closing brace" }
     ]
   }
 ]

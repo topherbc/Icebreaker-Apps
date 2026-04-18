@@ -580,6 +580,7 @@ var selectionEnd = null;    // {line, tokenIdx}
 var tags = [];              // [{line, start, end, label}]
 var submitted = false;
 var checkRanges = [];       // populated after check for post-check review
+var lastCorrectCount = 0;
 // tokenElements[lineNumber] = [el, el, ...] (clickable tokens only)
 var tokenElements = {};
 
@@ -990,6 +991,19 @@ function applyAllTagStyles() {
 }
 
 /* ── Render tags list ───────────────────────────────────────────── */
+function findRangeForTag(tag) {
+  for (var i = 0; i < checkRanges.length; i++) {
+    var r = checkRanges[i];
+    if (r.line === tag.line && r.start === tag.start && r.end === tag.end) return r;
+  }
+  // Fallback: find any range this tag's range overlaps with
+  for (var i = 0; i < checkRanges.length; i++) {
+    var r = checkRanges[i];
+    if (r.line === tag.line && tag.start >= r.start && tag.end <= r.end) return r;
+  }
+  return null;
+}
+
 function renderTags() {
   $tagsList.innerHTML = '';
   if (tags.length === 0) {
@@ -1024,6 +1038,31 @@ function renderTags() {
         });
       })(idx);
       li.appendChild(removeBtn);
+    }
+
+    // Post-check: color tag items by correctness and make clickable for review
+    if (submitted && checkRanges.length > 0) {
+      var range = findRangeForTag(tag);
+      if (range) {
+        var studentLabels = tags.filter(function(t){
+          return t.line === range.line && t.start === range.start && t.end === range.end;
+        }).map(function(t){ return t.label; });
+        var correct = range.labels.every(function(l){ return studentLabels.indexOf(l) >= 0; });
+        var partial = !correct && range.labels.some(function(l){ return studentLabels.indexOf(l) >= 0; });
+
+        if (correct) {
+          li.style.borderColor = '#007A3D'; li.style.background = '#D4F4E0';
+        } else if (partial) {
+          li.style.borderColor = '#9A6500'; li.style.background = '#FFF0C0';
+        } else {
+          li.style.borderColor = '#BB0000'; li.style.background = '#FFE0E0';
+        }
+        li.style.cursor = 'pointer';
+        li.setAttribute('aria-label', 'Review tag for ' + getTokenText(tag.line, tag.start, tag.end));
+        (function(r, el){
+          li.addEventListener('click', function(){ showPhraseReview(r, el); });
+        })(range, li);
+      }
     }
 
     // Hover to highlight range in code
@@ -1116,6 +1155,7 @@ $checkBtn.addEventListener('click', function(){
 
   // For each range, determine correctness and color the code tokens
   var allCorrect = true;
+  var correctCount = 0;
   ranges.forEach(function(range){
     var studentLabels = tags.filter(function(t){
       return t.line === range.line && t.start === range.start && t.end === range.end;
@@ -1123,7 +1163,8 @@ $checkBtn.addEventListener('click', function(){
 
     var correct = range.labels.every(function(l){ return studentLabels.indexOf(l) >= 0; });
     var partial = !correct && range.labels.some(function(l){ return studentLabels.indexOf(l) >= 0; });
-    if (!correct) allCorrect = false;
+    if (correct) correctCount++;
+    else allCorrect = false;
 
     var cls = correct ? 'icp-correct' : (partial ? 'icp-partial' : (studentLabels.length === 0 ? 'icp-missed' : 'icp-wrong'));
     var els = tokenElements[range.line];
@@ -1139,23 +1180,29 @@ $checkBtn.addEventListener('click', function(){
     }
   });
 
+  lastCorrectCount = correctCount;
+
   // Make tokens clickable for review post-check
   $codeBody.querySelectorAll('.code-token').forEach(function(el){
     el.style.cursor = 'pointer';
   });
 
-  // Build feedback items
+  // Build feedback items (clickable)
   $feedbackItems.innerHTML = '';
   ranges.forEach(function(range){
     var phraseText = getTokenText(range.line, range.start, range.end);
-    $feedbackItems.appendChild(renderFeedbackItem(range, phraseText));
+    var item = renderFeedbackItem(range, phraseText);
+    item.style.cursor = 'pointer';
+    (function(r, el){ item.addEventListener('click', function(){ showPhraseReview(r, el); }); })(range, item);
+    $feedbackItems.appendChild(item);
   });
 
   $checkBtn.disabled = true;
   $checkBtn.textContent = allCorrect ? '\u2713 All correct!' : 'Checked';
   $resultsBtn.style.display = 'inline-flex';
+  $statusMsg.textContent = correctCount + ' of ' + ranges.length + ' tagged correctly';
 
-  renderTags(); // Re-render without remove buttons
+  renderTags(); // Re-render with post-check styling
   announce(allCorrect ? 'All correct!' : 'Checked \u2014 click code to review, or see results below.');
 });
 
@@ -1163,8 +1210,9 @@ $checkBtn.addEventListener('click', function(){
 $resultsBtn.addEventListener('click', function(){
   var fs = $feedbackSec;
   var showing = fs.style.display !== 'none';
-  fs.style.display = showing ? 'none' : '';
+  fs.style.display = showing ? 'none' : 'block';
   $resultsBtn.textContent = showing ? 'See results' : 'Hide results';
+  if (!showing) fs.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
 
 /* ── Post-check phrase review popup ────────────────────────────── */

@@ -6,9 +6,7 @@
     "description": "A private field paired with its public getter.",
     "labels": [
       "access modifier",
-      "data type",
       "variable name",
-      "statement end",
       "return type",
       "method name",
       "keyword",
@@ -64,17 +62,13 @@
     ],
     "expected": [
       { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
-      { "line": 1, "start": 1, "end": 1, "label": "data type" },
-      { "line": 1, "start": 2, "end": 2, "label": "variable name" },
-      { "line": 1, "start": 3, "end": 3, "label": "statement end" },
       { "line": 1, "start": 0, "end": 2, "label": "field" },
       { "line": 3, "start": 0, "end": 0, "label": "access modifier" },
       { "line": 3, "start": 1, "end": 1, "label": "return type" },
       { "line": 3, "start": 2, "end": 2, "label": "method name" },
       { "line": 3, "start": 0, "end": 4, "label": "method signature" },
       { "line": 4, "start": 0, "end": 0, "label": "keyword" },
-      { "line": 4, "start": 1, "end": 1, "label": "variable name" },
-      { "line": 4, "start": 2, "end": 2, "label": "statement end" }
+      { "line": 4, "start": 1, "end": 1, "label": "variable name" }
     ]
   },
   {
@@ -89,8 +83,7 @@
       "method signature",
       "keyword",
       "variable name",
-      "operator",
-      "statement end"
+      "operator"
     ],
     "code": [
       {
@@ -136,8 +129,7 @@
       { "line": 2, "start": 0, "end": 0, "label": "keyword" },
       { "line": 2, "start": 1, "end": 1, "label": "variable name" },
       { "line": 2, "start": 2, "end": 2, "label": "operator" },
-      { "line": 2, "start": 3, "end": 3, "label": "variable name" },
-      { "line": 2, "start": 4, "end": 4, "label": "statement end" }
+      { "line": 2, "start": 3, "end": 3, "label": "variable name" }
     ]
   },
   {
@@ -154,7 +146,6 @@
       "variable name",
       "operator",
       "literal value",
-      "statement end",
       "boolean expression"
     ],
     "code": [
@@ -202,7 +193,6 @@
       { "line": 2, "start": 1, "end": 1, "label": "variable name" },
       { "line": 2, "start": 2, "end": 2, "label": "operator" },
       { "line": 2, "start": 3, "end": 3, "label": "literal value" },
-      { "line": 2, "start": 4, "end": 4, "label": "statement end" },
       { "line": 2, "start": 1, "end": 3, "label": "boolean expression" }
     ]
   },
@@ -216,12 +206,10 @@
       "keyword",
       "return type",
       "method name",
-      "data type",
       "variable name",
       "parameter",
       "method signature",
-      "method call",
-      "statement end"
+      "method call"
     ],
     "code": [
       {
@@ -267,13 +255,11 @@
       { "line": 1, "start": 1, "end": 1, "label": "keyword" },
       { "line": 1, "start": 2, "end": 2, "label": "return type" },
       { "line": 1, "start": 3, "end": 3, "label": "method name" },
-      { "line": 1, "start": 5, "end": 5, "label": "data type" },
       { "line": 1, "start": 6, "end": 6, "label": "variable name" },
       { "line": 1, "start": 5, "end": 6, "label": "parameter" },
       { "line": 1, "start": 0, "end": 7, "label": "method signature" },
       { "line": 2, "start": 0, "end": 0, "label": "keyword" },
       { "line": 2, "start": 1, "end": 1, "label": "method name" },
-      { "line": 2, "start": 4, "end": 4, "label": "statement end" },
       { "line": 2, "start": 1, "end": 3, "label": "method call" }
     ]
   },
@@ -284,9 +270,7 @@
     "description": "Two fields with a getter and a boolean method side by side.",
     "labels": [
       "access modifier",
-      "data type",
       "variable name",
-      "statement end",
       "return type",
       "method name",
       "keyword",
@@ -394,14 +378,8 @@
     ],
     "expected": [
       { "line": 1, "start": 0, "end": 0, "label": "access modifier" },
-      { "line": 1, "start": 1, "end": 1, "label": "data type" },
-      { "line": 1, "start": 2, "end": 2, "label": "variable name" },
-      { "line": 1, "start": 3, "end": 3, "label": "statement end" },
       { "line": 1, "start": 0, "end": 2, "label": "field" },
       { "line": 2, "start": 0, "end": 0, "label": "access modifier" },
-      { "line": 2, "start": 1, "end": 1, "label": "data type" },
-      { "line": 2, "start": 2, "end": 2, "label": "variable name" },
-      { "line": 2, "start": 3, "end": 3, "label": "statement end" },
       { "line": 2, "start": 0, "end": 2, "label": "field" },
       { "line": 4, "start": 0, "end": 0, "label": "access modifier" },
       { "line": 4, "start": 1, "end": 1, "label": "return type" },
@@ -409,7 +387,6 @@
       { "line": 4, "start": 0, "end": 4, "label": "method signature" },
       { "line": 5, "start": 0, "end": 0, "label": "keyword" },
       { "line": 5, "start": 1, "end": 1, "label": "variable name" },
-      { "line": 5, "start": 2, "end": 2, "label": "statement end" },
       { "line": 8, "start": 0, "end": 0, "label": "access modifier" },
       { "line": 8, "start": 1, "end": 1, "label": "return type" },
       { "line": 8, "start": 2, "end": 2, "label": "method name" },
@@ -418,7 +395,6 @@
       { "line": 9, "start": 1, "end": 1, "label": "variable name" },
       { "line": 9, "start": 2, "end": 2, "label": "operator" },
       { "line": 9, "start": 3, "end": 3, "label": "literal value" },
-      { "line": 9, "start": 4, "end": 4, "label": "statement end" },
       { "line": 9, "start": 1, "end": 3, "label": "boolean expression" }
     ]
   }

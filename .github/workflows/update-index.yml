@@ -87,6 +87,9 @@ jobs:
           def natural_key(s):
               return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
+          # Cards that are WIP: show a No symbol and tooltip
+          WIP_FILES = {'classroom-apps/live-code.html'}
+
           # Build card sections
           sections = ''
           for group, files in sorted(groups.items(), key=lambda x: natural_key(x[0])):
@@ -94,7 +97,10 @@ jobs:
               cards = ''
               for f in files:
                   name = nice_name(f)
-                  cards += f'<a class="card" href="{f}">{name}</a>\n'
+                  if f in WIP_FILES:
+                      cards += f'<a class="card" href="{f}" title="WIP, Not Available for Usage, Contact Toph for more Info">\U0001F6AB {name}</a>\n'
+                  else:
+                      cards += f'<a class="card" href="{f}">{name}</a>\n'
               sections += f'<section><h2>{label}</h2><div class="cards">{cards}</div></section>\n'
 
           html = f"""<!DOCTYPE html>

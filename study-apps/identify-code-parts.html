@@ -238,26 +238,43 @@ select:focus-visible, button:focus-visible { outline:3px solid var(--focus-color
 .btn-row { display:flex;gap:var(--sp-sm);flex-wrap:wrap;align-items:center; }
 .status-msg { font-size:0.88rem;color:var(--text-muted);margin-left:var(--sp-sm); }
 
-/* Score */
-.score-banner { padding:var(--sp-md) var(--sp-lg);border-radius:var(--r-md);font-weight:700;font-size:1.1rem;text-align:center;margin-top:var(--sp-md); }
-.score-banner.perfect { background:#D4F4E0;color:#004D26;border:2px solid #007A3D; }
-.score-banner.good { background:#FFF0C0;color:#6B4500;border:2px solid #9A6500; }
-.score-banner.needs-work { background:#FFE0E0;color:#880000;border:2px solid #BB0000; }
-[data-theme="dark"] .score-banner.perfect { background:rgba(0,122,61,0.25);color:#6BE0CE;border-color:#007A3D; }
-[data-theme="dark"] .score-banner.good { background:rgba(154,101,0,0.25);color:#F5C842;border-color:#9A6500; }
-[data-theme="dark"] .score-banner.needs-work { background:rgba(187,0,0,0.2);color:#FFB0B0;border-color:#BB0000; }
-
-/* Feedback items */
+/* Feedback section */
+.feedback-section { margin-bottom:var(--sp-xl); }
 .feedback-item {
-  display:flex;gap:var(--sp-sm);align-items:flex-start;
+  display:flex;gap:var(--sp-md);align-items:flex-start;
   background:var(--bg-surface);border:1.5px solid var(--border-light);
-  border-radius:var(--r-md);padding:10px var(--sp-md);margin-bottom:var(--sp-sm);
-  font-size:0.85rem;
+  border-radius:var(--r-md);padding:var(--sp-md);margin-bottom:var(--sp-sm);
+  flex-wrap:wrap;font-size:0.85rem;
 }
-.feedback-icon { font-size:1rem;flex-shrink:0;margin-top:1px; }
-.feedback-body { flex:1; }
-.feedback-label-name { font-weight:700; }
-.feedback-phrase { font-family:var(--font-mono);font-size:0.82rem;color:var(--text-secondary);margin-top:2px; }
+.feedback-icon { font-size:1.1rem;flex-shrink:0;margin-top:3px; }
+.feedback-body { flex:1;min-width:200px; }
+.feedback-phrase {
+  font-family:var(--font-mono);font-size:0.9rem;color:var(--text-primary);
+  margin-bottom:6px;
+}
+.feedback-row {
+  display:flex;align-items:center;gap:var(--sp-sm);flex-wrap:wrap;
+  margin-bottom:4px;font-size:0.85rem;
+}
+.feedback-row-label { font-weight:700;color:var(--text-secondary);min-width:64px;flex-shrink:0; }
+
+/* Post-check phrase review popup */
+#phrase-review-popup {
+  position:fixed;z-index:1000;
+  border:2px solid var(--focus-color);border-radius:var(--r-lg);
+  background:var(--bg-surface);padding:var(--sp-md) var(--sp-lg);
+  width:480px;max-width:calc(100vw - 32px);
+  max-height:80vh;overflow-y:auto;
+  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  display:none;
+}
+#phrase-review-popup.visible { display:block; }
+
+/* Post-check token coloring */
+.code-token.icp-correct { background:#6BE0CE !important;border-bottom:4px solid #005F50 !important;color:#003D34 !important;font-weight:700; }
+.code-token.icp-partial  { background:#F5C842 !important;border-bottom:4px solid #896000 !important;color:#5A3C00 !important;font-weight:700; }
+.code-token.icp-wrong    { background:#FFB0B0 !important;border-bottom:4px solid #990000 !important;color:#660000 !important;font-weight:700; }
+.code-token.icp-missed   { background:rgba(187,0,0,0.12) !important;border-bottom:3px dashed #BB0000 !important; }
 
 /* How to Play */
 .btn-how-to-play {
@@ -411,15 +428,16 @@ select:focus-visible, button:focus-visible { outline:3px solid var(--focus-color
           <!-- Submit -->
           <div class="btn-row" style="margin-top:var(--sp-lg);">
             <button class="btn btn-primary" id="check-btn" type="button" disabled>Check my work</button>
+            <button class="btn btn-ghost" id="results-btn" type="button" style="display:none;">See results</button>
             <button class="btn btn-ghost" id="reset-btn" type="button">Start over</button>
             <span class="status-msg" id="status-msg" aria-live="polite">Add at least one tag to continue</span>
           </div>
 
           <!-- Feedback -->
-          <div id="feedback-section" style="display:none;margin-top:var(--sp-lg);">
-            <div id="score-banner" class="score-banner"></div>
-            <div id="feedback-items" style="margin-top:var(--sp-md);"></div>
-          </div>
+          <section id="feedback-section" class="feedback-section" style="display:none;margin-top:var(--sp-lg);" aria-labelledby="feedback-heading">
+            <h2 id="feedback-heading" class="section-label">How did you do?</h2>
+            <div id="feedback-items"></div>
+          </section>
 
         </section>
       </div>
@@ -446,6 +464,11 @@ select:focus-visible, button:focus-visible { outline:3px solid var(--focus-color
       </ol>
     </div>
   </div>
+</div>
+
+<!-- Phrase review popup (post-check click) -->
+<div id="phrase-review-popup" role="dialog" aria-modal="false" aria-label="Phrase result" style="display:none;">
+  <div id="phrase-review-content"></div>
 </div>
 
 <script>
@@ -511,6 +534,12 @@ function labelColor(labelName) {
   return PALETTE[idx % PALETTE.length];
 }
 
+function renderBadgeHtml(labelName) {
+  var c = labelColor(labelName);
+  return '<span class="tag-badge" style="background:' + c.bg + ';border-color:' + c.bdr + ';color:' + c.txt + ';">' +
+    '<span class="tag-shape" style="background:' + c.bdr + ';"></span>' + esc(labelName) + '</span>';
+}
+
 /* ── DOM refs ───────────────────────────────────────────────────── */
 var $ = function(id){ return document.getElementById(id); };
 var $weekSelect    = $('week-select');
@@ -533,8 +562,8 @@ var $checkBtn      = $('check-btn');
 var $resetBtn      = $('reset-btn');
 var $statusMsg     = $('status-msg');
 var $feedbackSec   = $('feedback-section');
-var $scoreBanner   = $('score-banner');
 var $feedbackItems = $('feedback-items');
+var $resultsBtn    = $('results-btn');
 var $hint          = $('instruction-hint');
 var $livePolite    = $('live-polite');
 var $htpModal      = $('htp-modal');
@@ -550,6 +579,7 @@ var selectionAnchor = null; // {line, tokenIdx}
 var selectionEnd = null;    // {line, tokenIdx}
 var tags = [];              // [{line, start, end, label}]
 var submitted = false;
+var checkRanges = [];       // populated after check for post-check review
 // tokenElements[lineNumber] = [el, el, ...] (clickable tokens only)
 var tokenElements = {};
 
@@ -624,6 +654,8 @@ $htpModal.querySelector('.modal-overlay').addEventListener('click', function(e){
 document.addEventListener('keydown', function(e){
   if (e.key === 'Escape') {
     if ($htpModal.style.display !== 'none') { closeHtp(); return; }
+    var popup = $('phrase-review-popup');
+    if (popup && popup.classList.contains('visible')) { popup.classList.remove('visible'); return; }
     if (selectionAnchor && !submitted) clearSelection();
   }
 });
@@ -745,8 +777,13 @@ function selectExercise(idx, btnEl) {
   var data = currentSetData[idx];
   currentExercise = data;
   selectionAnchor = null; selectionEnd = null;
-  tags = []; submitted = false;
+  tags = []; submitted = false; checkRanges = [];
   $feedbackSec.style.display = 'none';
+  $feedbackItems.innerHTML = '';
+  $resultsBtn.style.display = 'none';
+  $resultsBtn.textContent = 'See results';
+  $checkBtn.textContent = 'Check my work';
+  $('phrase-review-popup').classList.remove('visible');
   $rightPlaceholder.style.display = 'none';
   $gameSection.style.display = '';
   $exTitle.textContent = data.title;
@@ -1022,94 +1059,209 @@ function updateStatus() {
 }
 
 /* ── Check (submit) ─────────────────────────────────────────────── */
+function groupExpectedByRange(expected) {
+  var groups = [];
+  var map = {};
+  expected.forEach(function(exp){
+    var key = exp.line + ':' + exp.start + ':' + exp.end;
+    if (!map[key]) {
+      map[key] = { line: exp.line, start: exp.start, end: exp.end, labels: [] };
+      groups.push(map[key]);
+    }
+    map[key].labels.push(exp.label);
+  });
+  return groups;
+}
+
+function renderFeedbackItem(range, phraseText) {
+  var expectedLabels = range.labels;
+  var studentLabels = tags.filter(function(t){
+    return t.line === range.line && t.start === range.start && t.end === range.end;
+  }).map(function(t){ return t.label; });
+
+  var allFound = expectedLabels.every(function(l){ return studentLabels.indexOf(l) >= 0; });
+  var someFound = !allFound && expectedLabels.some(function(l){ return studentLabels.indexOf(l) >= 0; });
+  var notTagged = studentLabels.length === 0;
+
+  var icon = allFound ? '\u2705' : (someFound ? '\uD83D\uDFE1' : '\u274C');
+
+  var studentBadgesHtml = notTagged
+    ? '<em style="color:var(--text-muted);font-size:0.82rem">not tagged</em>'
+    : studentLabels.map(function(l){ return renderBadgeHtml(l); }).join(' ');
+
+  var expectedBadgesHtml = expectedLabels.map(function(l){ return renderBadgeHtml(l); }).join(' ');
+
+  var div = document.createElement('div');
+  div.className = 'feedback-item';
+  div.innerHTML =
+    '<span class="feedback-icon" aria-hidden="true">' + icon + '</span>' +
+    '<div class="feedback-body">' +
+      '<div class="feedback-phrase">' + esc(phraseText) + '</div>' +
+      '<div class="feedback-row"><span class="feedback-row-label">You:</span><span>' + studentBadgesHtml + '</span></div>' +
+      '<div class="feedback-row"><span class="feedback-row-label">Expected:</span><span>' + expectedBadgesHtml + '</span></div>' +
+    '</div>';
+  return div;
+}
+
 $checkBtn.addEventListener('click', function(){
   if (submitted || !currentExercise) return;
   submitted = true;
-  $checkBtn.disabled = true;
   $hint.style.display = 'none';
   $tagPanel.style.display = 'none';
   clearSelection();
 
-  // Remove clickability from tokens
-  $codeBody.querySelectorAll('.code-token').forEach(function(el){
-    el.style.cursor = 'default'; el.removeAttribute('tabindex');
-    el.style.textDecoration = 'none';
-  });
-
   var expected = currentExercise.expected;
-  var matched = [];
-  var missed = [];
+  var ranges = groupExpectedByRange(expected);
+  checkRanges = ranges;
 
-  expected.forEach(function(exp){
-    var found = tags.some(function(t){
-      return t.line === exp.line && t.start === exp.start && t.end === exp.end && t.label === exp.label;
-    });
-    if (found) matched.push(exp); else missed.push(exp);
-  });
+  // For each range, determine correctness and color the code tokens
+  var allCorrect = true;
+  ranges.forEach(function(range){
+    var studentLabels = tags.filter(function(t){
+      return t.line === range.line && t.start === range.start && t.end === range.end;
+    }).map(function(t){ return t.label; });
 
-  var total = expected.length;
-  var correct = matched.length;
-  var pct = Math.round((correct / total) * 100);
-  var cls = pct === 100 ? 'perfect' : pct >= 60 ? 'good' : 'needs-work';
-  var icon = pct === 100 ? '\u2713' : pct >= 60 ? '\u25CB' : '\u2717';
+    var correct = range.labels.every(function(l){ return studentLabels.indexOf(l) >= 0; });
+    var partial = !correct && range.labels.some(function(l){ return studentLabels.indexOf(l) >= 0; });
+    if (!correct) allCorrect = false;
 
-  $feedbackSec.style.display = '';
-  $scoreBanner.className = 'score-banner ' + cls;
-  $scoreBanner.textContent = icon + ' ' + correct + ' of ' + total + ' expected labels found (' + pct + '%)';
-
-  // Feedback items
-  $feedbackItems.innerHTML = '';
-
-  matched.forEach(function(exp){
-    var div = document.createElement('div');
-    div.className = 'feedback-item';
-    div.innerHTML =
-      '<span class="feedback-icon" aria-hidden="true">\u2713</span>' +
-      '<span class="feedback-body">' +
-        '<span class="feedback-label-name" style="color:#004D26;">' + esc(exp.label) + '</span>' +
-        '<span class="feedback-phrase">' + esc(getTokenText(exp.line, exp.start, exp.end)) + '</span>' +
-      '</span>';
-    $feedbackItems.appendChild(div);
-  });
-
-  missed.forEach(function(exp){
-    var div = document.createElement('div');
-    div.className = 'feedback-item';
-    div.innerHTML =
-      '<span class="feedback-icon" aria-hidden="true">\u2717</span>' +
-      '<span class="feedback-body">' +
-        '<span class="feedback-label-name" style="color:#880000;">Missed: ' + esc(exp.label) + '</span>' +
-        '<span class="feedback-phrase">' + esc(getTokenText(exp.line, exp.start, exp.end)) + '</span>' +
-      '</span>';
-    $feedbackItems.appendChild(div);
-
-    // Highlight missed ranges in code
-    var c = labelColor(exp.label);
-    var els = tokenElements[exp.line];
+    var cls = correct ? 'icp-correct' : (partial ? 'icp-partial' : (studentLabels.length === 0 ? 'icp-missed' : 'icp-wrong'));
+    var els = tokenElements[range.line];
     if (els) {
-      for (var i = exp.start; i <= exp.end && i < els.length; i++) {
-        if (!els[i].classList.contains('tagged')) {
-          els[i].classList.add('tagged');
-          els[i].style.background = 'rgba(187,0,0,0.12)';
-          els[i].style.borderBottom = '3px dashed #BB0000';
-          els[i].style.color = '';
-        }
+      for (var i = range.start; i <= range.end && i < els.length; i++) {
+        // Only upgrade: correct > partial > wrong > missed
+        var el = els[i];
+        if (el.classList.contains('icp-correct')) continue;
+        if (el.classList.contains('icp-partial') && cls !== 'icp-correct') continue;
+        el.classList.remove('icp-correct', 'icp-partial', 'icp-wrong', 'icp-missed');
+        el.classList.add(cls);
       }
     }
   });
 
+  // Make tokens clickable for review post-check
+  $codeBody.querySelectorAll('.code-token').forEach(function(el){
+    el.style.cursor = 'pointer';
+  });
+
+  // Build feedback items
+  $feedbackItems.innerHTML = '';
+  ranges.forEach(function(range){
+    var phraseText = getTokenText(range.line, range.start, range.end);
+    $feedbackItems.appendChild(renderFeedbackItem(range, phraseText));
+  });
+
+  $checkBtn.disabled = true;
+  $checkBtn.textContent = allCorrect ? '\u2713 All correct!' : 'Checked';
+  $resultsBtn.style.display = 'inline-flex';
+
   renderTags(); // Re-render without remove buttons
-  announce(correct + ' of ' + total + ' expected labels found.');
+  announce(allCorrect ? 'All correct!' : 'Checked \u2014 click code to review, or see results below.');
+});
+
+/* ── See results toggle ────────────────────────────────────────── */
+$resultsBtn.addEventListener('click', function(){
+  var fs = $feedbackSec;
+  var showing = fs.style.display !== 'none';
+  fs.style.display = showing ? 'none' : '';
+  $resultsBtn.textContent = showing ? 'See results' : 'Hide results';
+});
+
+/* ── Post-check phrase review popup ────────────────────────────── */
+function positionPopup(popupEl, anchorEl) {
+  var margin = 12;
+  if (!anchorEl) {
+    popupEl.style.top = '50%'; popupEl.style.left = '50%';
+    popupEl.style.transform = 'translate(-50%,-50%)'; return;
+  }
+  popupEl.style.visibility = 'hidden'; popupEl.style.display = 'block';
+  var pW = popupEl.offsetWidth; var pH = popupEl.offsetHeight;
+  popupEl.style.display = ''; popupEl.style.visibility = '';
+
+  var rect = anchorEl.getBoundingClientRect();
+  var vW = window.innerWidth; var vH = window.innerHeight;
+  var left = rect.left + rect.width / 2 - pW / 2;
+  left = Math.max(margin, Math.min(left, vW - pW - margin));
+  var top;
+  if (rect.top - pH - margin >= margin) { top = rect.top - pH - margin; }
+  else { top = Math.min(rect.bottom + margin, vH - pH - margin); }
+  popupEl.style.top = top + 'px'; popupEl.style.left = left + 'px';
+  popupEl.style.transform = '';
+}
+
+function showPhraseReview(range, anchorEl) {
+  var studentLabels = tags.filter(function(t){
+    return t.line === range.line && t.start === range.start && t.end === range.end;
+  }).map(function(t){ return t.label; });
+
+  var allFound = range.labels.every(function(l){ return studentLabels.indexOf(l) >= 0; });
+  var someFound = !allFound && range.labels.some(function(l){ return studentLabels.indexOf(l) >= 0; });
+  var notTagged = studentLabels.length === 0;
+  var icon = allFound ? '\u2705' : (someFound ? '\uD83D\uDFE1' : '\u274C');
+
+  var studentBadgesHtml = notTagged
+    ? '<em style="color:var(--text-muted);font-size:0.82rem">not tagged</em>'
+    : studentLabels.map(function(l){ return renderBadgeHtml(l); }).join(' ');
+  var expectedBadgesHtml = range.labels.map(function(l){ return renderBadgeHtml(l); }).join(' ');
+  var phraseText = getTokenText(range.line, range.start, range.end);
+
+  $('phrase-review-content').innerHTML =
+    '<div style="display:flex;align-items:flex-start;gap:var(--sp-sm);margin-bottom:var(--sp-sm);">' +
+      '<span aria-hidden="true" style="font-size:1.1rem;flex-shrink:0;">' + icon + '</span>' +
+      '<div class="feedback-phrase" style="flex:1;">' + esc(phraseText) + '</div>' +
+      '<button id="phrase-review-close" type="button" aria-label="Close" ' +
+        'style="background:none;border:none;cursor:pointer;font-size:1rem;line-height:1;padding:2px 6px;color:var(--text-muted);flex-shrink:0;">\u2715</button>' +
+    '</div>' +
+    '<div class="feedback-row"><span class="feedback-row-label">You:</span><span>' + studentBadgesHtml + '</span></div>' +
+    '<div class="feedback-row"><span class="feedback-row-label">Expected:</span><span>' + expectedBadgesHtml + '</span></div>';
+
+  var popup = $('phrase-review-popup');
+  positionPopup(popup, anchorEl);
+  popup.classList.add('visible');
+
+  document.getElementById('phrase-review-close').addEventListener('click', function(){
+    popup.classList.remove('visible');
+  });
+}
+
+/* Close review popup when clicking outside */
+document.addEventListener('mousedown', function(e){
+  var popup = $('phrase-review-popup');
+  if (!popup || !popup.classList.contains('visible')) return;
+  if (popup.contains(e.target)) return;
+  popup.classList.remove('visible');
+});
+
+/* Post-check token click: find the best-matching range and show review */
+$codeBody.addEventListener('click', function(e){
+  if (!submitted || checkRanges.length === 0) return;
+  var tok = e.target.closest('.code-token');
+  if (!tok) return;
+  var line = parseInt(tok.dataset.line, 10);
+  var idx = parseInt(tok.dataset.tokenIdx, 10);
+
+  // Find all ranges that cover this token, pick the narrowest
+  var matching = checkRanges.filter(function(r){
+    return r.line === line && idx >= r.start && idx <= r.end;
+  });
+  if (matching.length === 0) return;
+  matching.sort(function(a, b){ return (a.end - a.start) - (b.end - b.start); });
+  showPhraseReview(matching[0], tok);
 });
 
 /* ── Reset ──────────────────────────────────────────────────────── */
 $resetBtn.addEventListener('click', function(){
   if (!currentExercise) return;
   selectionAnchor = null; selectionEnd = null;
-  tags = []; submitted = false;
+  tags = []; submitted = false; checkRanges = [];
   $feedbackSec.style.display = 'none';
+  $feedbackItems.innerHTML = '';
+  $resultsBtn.style.display = 'none';
+  $resultsBtn.textContent = 'See results';
+  $checkBtn.textContent = 'Check my work';
   $hint.style.display = '';
   $tagPanel.style.display = 'none';
+  $('phrase-review-popup').classList.remove('visible');
   renderCode(currentExercise);
   renderTags();
   updateStatus();

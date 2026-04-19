@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Glitch</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a5c2e'/%3E%3Cpath d='M16 7c-2.2 0-4 1.4-4.6 3.3C10.6 10.1 9.8 10 9 10.5c-1.2.7-1.8 2.1-1.4 3.4C6.6 14.6 6 15.7 6 17c0 1.5.8 2.8 2 3.5V22a1 1 0 001 1h4v-1.5c0-.8.7-1.5 1.5-1.5h3c.8 0 1.5.7 1.5 1.5V23h4a1 1 0 001-1v-1.5c1.2-.7 2-2 2-3.5 0-1.3-.6-2.4-1.6-3.1.4-1.3-.2-2.7-1.4-3.4-.8-.5-1.6-.4-2.4-.2C18 8.4 17.1 7 16 7z' fill='white'/%3E%3Ccircle cx='13' cy='16' r='1' fill='%231a5c2e'/%3E%3Ccircle cx='19' cy='16' r='1' fill='%231a5c2e'/%3E%3Cpath d='M13 19.5c.8.7 2 1 3 1s2.2-.3 3-1' stroke='%231a5c2e' stroke-width='1.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Bricolage+Grotesque:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #c8c4bb;
+  --border-hover: #6b6560;
+  --text: #1a1814;
+  --text-muted: #4a4640;
+  --text-dim: #7a7570;
+  --accent: #1a5c2e;
+  --accent-bg: #e8f5ec;
+  --accent-border: #7dba90;
+  --tag-bg: #ede9e0;
+  --tag-text: #3a3630;
+  --reveal-bg: #1a1814;
+  --reveal-text: #ffffff;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px;
+}
+
+/* ── HEADER ── */
+.site-header {
+  padding: 24px 40px;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+}
+
+.logo {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+}
+
+.header-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.counter {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.reset-link {
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.reset-link:hover {
+  border-color: var(--border-hover);
+  background: var(--surface2);
+}
+
+/* ── MAIN ── */
+.main {
+  padding: 48px 40px 80px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.page-intro {
+  margin-bottom: 48px;
+  max-width: 600px;
+}
+
+.page-intro h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(38px, 5vw, 56px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.page-intro h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.page-intro p {
+  font-size: 18px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── CARD GRID ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s, background 0.2s;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.4s ease both;
+  min-height: 180px;
+}
+
+.card:hover:not(.is-open) {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card.is-open {
+  cursor: default;
+  border-color: var(--accent-border);
+  background: var(--surface);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tag-text);
+  background: var(--tag-bg);
+  border-radius: 6px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+}
+
+.card.is-open .card-tag {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.card-tag::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ── BLURRED STATE ── */
+.card-blur-layer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.blur-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blur-line {
+  height: 16px;
+  border-radius: 6px;
+  background: var(--surface2);
+  animation: shimmer 2s ease infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+.blur-line:nth-child(1) { width: 90%; }
+.blur-line:nth-child(2) { width: 72%; }
+.blur-line:nth-child(3) { width: 50%; }
+
+.blur-hint {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+/* ── OPEN STATE ── */
+.card-content {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.card.is-open .card-content { display: flex; }
+.card.is-open .blur-placeholder,
+.card.is-open .blur-hint,
+.card.is-open .reveal-cta { display: none; }
+
+.card-question {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+
+/* ── ANSWER SECTION ── */
+.answer-section {
+  border-top: 2px solid var(--border);
+  padding-top: 16px;
+}
+
+.answer-toggle {
+  background: var(--reveal-bg);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--reveal-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.15s;
+  width: 100%;
+}
+
+.answer-toggle:hover { opacity: 0.85; }
+.answer-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.answer-toggle-arrow {
+  font-size: 12px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.answer-toggle.revealed {
+  background: var(--accent);
+}
+
+.answer-toggle.revealed .answer-toggle-arrow {
+  transform: rotate(90deg);
+}
+
+.answer-body {
+  display: none;
+  margin-top: 14px;
+  padding: 16px 18px;
+  background: var(--accent-bg);
+  border: 2px solid var(--accent-border);
+  border-radius: 12px;
+  animation: revealIn 0.25s ease both;
+}
+
+@keyframes revealIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.answer-body.visible { display: block; }
+
+.answer-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.answer-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.why-text {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--accent-border);
+}
+
+/* ── REVEAL CTA ── */
+.reveal-cta {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: auto;
+  padding-top: 8px;
+  transition: color 0.2s;
+}
+
+.card:hover .reveal-cta {
+  color: var(--text-muted);
+}
+
+/* ── ALL DONE STATE ── */
+.all-done {
+  display: none;
+  text-align: center;
+  padding: 80px 40px;
+  color: var(--text-muted);
+}
+
+.all-done h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 36px;
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.all-done p {
+  font-size: 17px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M16 4c-2.8 0-5.2 1.6-6.4 4C8.4 7.8 7 8 5.8 8.9 4.1 9.9 3.2 11.9 3.7 13.8 2.6 14.9 2 16.4 2 18c0 2.5 1.4 4.7 3.5 5.8V26a2 2 0 002 2h5v-2.5A1.5 1.5 0 0114 24h4a1.5 1.5 0 011.5 1.5V28h5a2 2 0 002-2v-2.2c2.1-1.1 3.5-3.3 3.5-5.8 0-1.6-.6-3.1-1.7-4.2.5-1.9-.4-3.9-2.1-4.9-1.2-.9-2.6-.7-3.8-.1C22.8 5.8 19.6 4 16 4z" fill="%231a5c2e"/>
+      <circle cx="12.5" cy="17" r="1.5" fill="white"/>
+      <circle cx="19.5" cy="17" r="1.5" fill="white"/>
+      <path d="M12.5 21.5c1 .8 2.2 1.2 3.5 1.2s2.5-.4 3.5-1.2" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M16 4c0 0-1 3 0 6" stroke="%23a8d4b5" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+    </svg>
+    Brain Glitch
+  </div>
+  <div class="header-meta">
+    <span>revealed: <span class="counter" id="revealed-count">0</span> / <span id="total-count">0</span></span>
+    <button class="reset-link" id="reset-btn">reshuffle</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-intro">
+    <h1>Your brain<br>is <em>lying to you</em></h1>
+    <p>Pick any card. Answer out loud before you think about it. Then see why your brain went there.</p>
+  </div>
+
+  <div class="card-grid" id="card-grid"></div>
+  <div class="all-done" id="all-done">
+    <h2>That's all of them.</h2>
+    <p>Hit reshuffle for a fresh deck.</p>
+  </div>
+</main>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "You have a match. You walk into a room with a candle, a wood stove, and a fireplace. What do you light first?",
+    answer: "The match.",
+    why: "The question buried the answer inside itself. Your brain went straight to ranking the objects in the room and never looked back at what was already in your hand.",
+    tag: "Buried premise"
+  },
+  {
+    q: "A rooster sits on the peak of a roof. Which side does the egg roll down — left or right?",
+    answer: "Neither. Roosters don't lay eggs.",
+    why: "You got handed a physics problem and started solving it. The word 'rooster' registered, but your brain quietly filed it under 'bird' and moved on to the geometry.",
+    tag: "Category slip"
+  },
+  {
+    q: "Is it legal in the US for a man to marry his widow's sister?",
+    answer: "No — he's dead.",
+    why: "The word 'widow' tells you everything, but it comes packaged in a legal puzzle. Your brain switches into law-school mode and the obvious falls out of frame.",
+    tag: "Frame hijack"
+  },
+  {
+    q: "Before Mount Everest was discovered, what was the tallest mountain on Earth?",
+    answer: "Mount Everest. It was still there.",
+    why: "Discovery and existence feel like the same event. Your brain treats 'found' as 'created' — a deeply baked-in shortcut that rewrites geography with a timestamp.",
+    tag: "Creation illusion"
+  },
+  {
+    q: "Some months have 30 days, some have 31. How many have 28?",
+    answer: "All of them.",
+    why: "The setup primes you to sort months by length, so '28' autocompletes to February. The question never said 'only 28' — that was entirely your addition.",
+    tag: "Silent assumption"
+  },
+  {
+    q: "A plane crashes exactly on the US-Canada border. Where do the survivors get buried?",
+    answer: "You don't bury survivors.",
+    why: "Border jurisdiction is a genuinely interesting puzzle, so your brain starts solving it immediately. 'Survivors' got parsed and then completely overwritten.",
+    tag: "Urgency override"
+  },
+  {
+    q: "Johnny's mother had three children. The first was named April. The second was named May. What was the third child's name?",
+    answer: "Johnny.",
+    why: "April, May — the sequence is irresistible. Your brain completes the pattern before it finishes reading the sentence, and quietly drops the first one entirely.",
+    tag: "Pattern lock"
+  },
+  {
+    q: "You're running a race and you pass the person in second place. What place are you in now?",
+    answer: "Second place.",
+    why: "'Pass second' feels like an upgrade. But you didn't pass first — you just took second's spot. The brain hears 'move up' and rounds to first automatically.",
+    tag: "Direction bias"
+  },
+  {
+    q: "A farmer has 17 sheep. All but 9 run away. How many sheep does the farmer have left?",
+    answer: "9.",
+    why: "'All but' is a subtraction wrapper your brain skips. It sees 17 and 9 and does 17 minus 9. The phrase 'all but 9 remain' means 9 are still there — no math needed.",
+    tag: "Operator swap"
+  },
+  {
+    q: "A doctor gives you 3 pills and tells you to take one every half hour. How long until they're all gone?",
+    answer: "1 hour.",
+    why: "You take pill 1 at 0 minutes, pill 2 at 30, pill 3 at 60. Your brain adds the intervals — 3 × 30 = 90 — and ignores that the clock starts at zero, not at the first gap.",
+    tag: "Off-by-one"
+  },
+  {
+    q: "There are 3 apples in a bowl. You take away 2. How many apples do you have?",
+    answer: "2 — the ones you took.",
+    why: "The question quietly switched ownership. Your brain stayed with the bowl — 3 minus 2 equals 1 — and forgot that 'you' were the subject of the sentence the whole time.",
+    tag: "Ownership shift"
+  },
+  {
+    q: "How far can a dog run into the woods?",
+    answer: "Halfway. After that, it's running out.",
+    why: "Your brain models a dog running and estimates a plausible distance. It never paused at the geometric center, because 'into' felt open-ended.",
+    tag: "Midpoint blindness"
+  },
+  {
+    q: "Two mothers and two daughters went out to eat. Each ordered one meal. The bill covered only three meals. How?",
+    answer: "Three people: a grandmother, her daughter, and her granddaughter. The middle person is both a mother and a daughter.",
+    why: "Four labels triggered four distinct people. The overlap — that one person can hold two roles simultaneously — never surfaced because your brain assigned one label per person automatically.",
+    tag: "Overlap blindness"
+  },
+  {
+    q: "A cowboy rode into town on Friday, stayed three days, and left on Friday. How?",
+    answer: "His horse's name was Friday.",
+    why: "'Friday' got calendared the instant it appeared. Proper nouns that double as common words get filtered before they're considered as names.",
+    tag: "Word lock"
+  },
+  {
+    q: "You have two coins totaling 30 cents. One of them is not a nickel. What are the two coins?",
+    answer: "A quarter and a nickel.",
+    why: "'One of them is not a nickel' sounds like neither is. But it only rules out one — and the quarter is the one that's not a nickel. The nickel is still on the table.",
+    tag: "Partial negation"
+  },
+  {
+    q: "What occurs once in a minute, twice in a moment, but never in a thousand years?",
+    answer: "The letter M.",
+    why: "Time words sent your brain hunting for seconds, ticks, or events. The answer is purely typographic. The question used temporal framing to hide a letter-counting puzzle.",
+    tag: "Domain mismatch"
+  },
+  {
+    q: "You build a house where every wall faces south. A bear walks up to the window. What color is the bear?",
+    answer: "White — it's a polar bear. Only at the North Pole can all four walls face south.",
+    why: "The architecture puzzle consumed your full attention. The geography constraint in the first sentence already answered the second sentence, but the bear question felt like a separate bonus.",
+    tag: "Late constraint"
+  },
+  {
+    q: "You're driving a bus from Chicago. At the first stop, 4 people get off and 7 get on. At the second stop, 3 get on and 2 get off. What's the bus driver's name?",
+    answer: "Yours — the question told you in the first sentence.",
+    why: "Passenger math is a familiar pattern, so your brain switched to accountant mode. The driver disappeared from working memory the instant the numbers appeared.",
+    tag: "Self-erasure"
+  },
+  {
+    q: "What word is spelled incorrectly in every dictionary?",
+    answer: "The word 'incorrectly.'",
+    why: "Your brain goes hunting for a typo or an obscure exception a dictionary might get wrong. The answer was sitting inside the question itself the whole time.",
+    tag: "Embedded answer"
+  },
+  {
+    q: "An electric train is heading north in a crosswind blowing east. Which way does the smoke blow?",
+    answer: "There is no smoke — it's an electric train.",
+    why: "Wind direction is a solvable physics problem, so your brain starts solving it immediately. 'Electric' got processed and quietly dropped because it didn't fit the puzzle shape being expected.",
+    tag: "Dropped qualifier"
+  },
+  {
+    q: "How many times can you subtract 10 from 100?",
+    answer: "Once. After that, you're subtracting from 90.",
+    why: "Your brain runs 100 ÷ 10 = 10 on autopilot. But subtraction changes the number each time. 'Subtract 10 from 100' is only literally true the first time.",
+    tag: "Running total trap"
+  },
+  {
+    q: "A man jumped out of a window of a 20-story building and landed completely unharmed. How?",
+    answer: "He jumped from a ground-floor window.",
+    why: "'20-story building' primed height, and 'jumped out a window' confirmed it. Ground floor was ruled out before it was ever considered — but the question never said which floor he was on.",
+    tag: "Height assumption"
+  }
+];
+
+let state = [];
+let revealedCount = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// tags now come from each question
+
+function init() {
+  state = shuffle(QUESTIONS).map((q, i) => ({ ...q, id: i, open: false, answerShown: false }));
+  revealedCount = 0;
+  buildGrid();
+  updateCounter();
+}
+
+function updateCounter() {
+  document.getElementById('revealed-count').textContent = revealedCount;
+  document.getElementById('total-count').textContent = state.length;
+  const allDone = document.getElementById('all-done');
+  const grid = document.getElementById('card-grid');
+  grid.style.display = 'grid';
+  allDone.style.display = 'none';
+}
+
+function buildGrid() {
+  const grid = document.getElementById('card-grid');
+  grid.innerHTML = '';
+  state.forEach((item, idx) => {
+    const div = makeCard(item, idx);
+    div.style.animationDelay = `${Math.min(idx * 0.05, 0.6)}s`;
+    grid.appendChild(div);
+  });
+}
+
+function makeCard(item, idx) {
+  const tag = item.tag || 'Brain glitch';
+  const div = document.createElement('div');
+  div.className = `card${item.open ? ' is-open' : ''}`;
+  div.dataset.idx = idx;
+  div.innerHTML = `
+    <div class="card-tag">${tag}</div>
+    <div class="card-blur-layer">
+      <div class="blur-placeholder">
+        <div class="blur-line"></div>
+        <div class="blur-line"></div>
+        <div class="blur-line"></div>
+      </div>
+      <div class="blur-hint">click to reveal</div>
+      <div class="card-content">
+        <p class="card-question">${item.q}</p>
+        <div class="answer-section">
+          <button class="answer-toggle${item.answerShown ? ' revealed' : ''}">
+            <span class="answer-toggle-arrow">&#9654;</span>
+            ${item.answerShown ? 'Hide answer' : 'Show answer'}
+          </button>
+          <div class="answer-body${item.answerShown ? ' visible' : ''}">
+            <span class="answer-label">Answer</span>
+            <div class="answer-text">${item.answer}</div>
+            <div class="why-text">${item.why}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal-cta">click to reveal</div>
+  `;
+  if (!item.open) {
+    div.addEventListener('click', () => openCard(idx));
+  } else {
+    attachAnswerToggle(div, idx);
+  }
+  return div;
+}
+
+function openCard(idx) {
+  state[idx].open = true;
+  revealedCount++;
+  updateCounter();
+  const grid = document.getElementById('card-grid');
+  const oldDiv = grid.children[idx];
+  const newDiv = makeCard(state[idx], idx);
+  newDiv.style.animation = 'none';
+  grid.replaceChild(newDiv, oldDiv);
+}
+
+function attachAnswerToggle(div, idx) {
+  const toggle = div.querySelector('.answer-toggle');
+  const body = div.querySelector('.answer-body');
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    state[idx].answerShown = !state[idx].answerShown;
+    toggle.classList.toggle('revealed', state[idx].answerShown);
+    body.classList.toggle('visible', state[idx].answerShown);
+    toggle.childNodes.forEach(n => {
+      if (n.nodeType === 3) n.textContent = state[idx].answerShown ? ' Hide answer' : ' Show answer';
+    });
+  });
+}
+
+document.getElementById('reset-btn').addEventListener('click', init);
+
+init();
+</script>
+</body>
+</html>

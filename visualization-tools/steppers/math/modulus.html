@@ -1,0 +1,197 @@
+/*
+  Stepper module: Math / Modulus
+  Visual type: remainder-bar
+  TEMPLATE NOTE: no em dashes anywhere -- use plain hyphens or rewrite the sentence.
+*/
+STEPPER_REGISTRY.register("math/modulus", {
+
+  label: 'Modulus',
+
+  panelConfig: {
+    visual: { title: 'Remainder diagram' },
+    stack: false,
+    heap:  false,
+    custom: false,
+    editableInputs: [
+      { id: 'dividend', label: 'a', type: 'integer', defaultVal: 17, min: 0, max: 999 },
+      { id: 'divisor',  label: 'b', type: 'integer', defaultVal: 5,  min: 1, max: 99  },
+    ],
+    legend: [
+      { color:'#095e40', border:'#90d4b8', label:'Complete group' },
+      { color:'#a0540a', border:'#e8c070', label:'Remainder (left over)' },
+      { color:'#d4d1cc', border:'#b8b4ae', label:'Not yet reached' },
+    ]
+  },
+
+  // Returns updated code lines when the user edits values (scenario 0 only)
+  getCodeLines(scenIdx, params) {
+    if (scenIdx !== 0 || !params) return null;
+    return [
+      { code: [['tok-op','a = '],['tok-num', String(params.dividend)]] },
+      { code: [['tok-op','b = '],['tok-num', String(params.divisor)]] },
+      { code: [['tok-op','r = a % b']] },
+    ];
+  },
+
+  scenarios: [
+
+    // ----------------------------------------------------------------
+    // Scenario 1 -- 17 % 5
+    // Lines (0-indexed, blanks excluded from count):
+    //   0: a = 17
+    //   1: b = 5
+    //   2: r = a % b
+    // ----------------------------------------------------------------
+    {
+      label: '17 % 5',
+      lines: [
+        { code: [['tok-op','a = '],['tok-num','17']] },
+        { code: [['tok-op','b = '],['tok-num','5']] },
+        { code: [['tok-op','r = a % b']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: { type:'remainder-bar', dividend:17, divisor:5, groupsVisible:0, remainderVisible:0, showSummary:false, highlightStep:'equation' },
+          expl: { label:'The dividend', text:'<hi>a = 17</hi> is the dividend -- the number we are dividing up. We want to split it into equal groups of <hi>5</hi>.' }
+        },
+        {
+          line: 1,
+          visual: { type:'remainder-bar', dividend:17, divisor:5, groupsVisible:0, remainderVisible:0, showSummary:false, highlightStep:'groups' },
+          expl: { label:'The divisor', text:'<hi>b = 5</hi> is the divisor -- the size of each group. The question <hi>%</hi> asks: after making as many groups of 5 as possible, what is left?' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:17, divisor:5, groupsVisible:1, remainderVisible:0, showSummary:false, highlightStep:'groups' },
+          expl: { label:'First group', text:'Can we pull out one group of <hi>5</hi> from 17? Yes -- that accounts for 5, leaving 12 behind.' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:17, divisor:5, groupsVisible:2, remainderVisible:0, showSummary:false, highlightStep:'groups' },
+          expl: { label:'Second group', text:'Can we pull out another group of <hi>5</hi>? Yes -- 10 accounted for, 7 remaining.' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:17, divisor:5, groupsVisible:3, remainderVisible:0, showSummary:false, highlightStep:'groups' },
+          expl: { label:'Third group', text:'One more group of <hi>5</hi>. That is 15 accounted for, 2 remaining. Can we make a fourth group? No -- 2 is less than 5.' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:17, divisor:5, groupsVisible:3, remainderVisible:2, showSummary:false, highlightStep:'remainder' },
+          expl: { label:'The remainder', text:'We cannot make another full group. The <hi>2</hi> cells left over are the remainder. That is what <hi>%</hi> gives us.' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:17, divisor:5, groupsVisible:3, remainderVisible:2, showSummary:true, highlightStep:'equation' },
+          expl: { label:'17 % 5 = 2', text:'<hi>17 % 5 = 2</hi>. Three complete groups of 5 (= 15) plus 2 left over. The remainder is always less than the divisor -- here, less than 5.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 2 -- even/odd with 8 % 2 and 9 % 2
+    // Lines:
+    //   0: n = 8
+    //   1: r = n % 2
+    //   2: // r == 0, so n is even
+    //   (blank)
+    //   3: n = 9
+    //   4: r = n % 2
+    //   5: // r == 1, so n is odd
+    // ----------------------------------------------------------------
+    {
+      label: 'Even or odd',
+      lines: [
+        { code: [['tok-op','n = '],['tok-num','8']] },
+        { code: [['tok-op','r = n % '],['tok-num','2']] },
+        { code: [['tok-cmt','// r == 0, so n is even']] },
+        { blank: true },
+        { code: [['tok-op','n = '],['tok-num','9']] },
+        { code: [['tok-op','r = n % '],['tok-num','2']] },
+        { code: [['tok-cmt','// r == 1, so n is odd']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: { type:'remainder-bar', dividend:8, divisor:2, groupsVisible:0, remainderVisible:0, showSummary:false, highlightStep:'equation' },
+          expl: { label:'n = 8', text:'Start with <hi>n = 8</hi>. We divide by <hi>2</hi> to check if it splits into pairs with nothing left over.' }
+        },
+        {
+          line: 1,
+          visual: { type:'remainder-bar', dividend:8, divisor:2, groupsVisible:4, remainderVisible:0, showSummary:false, highlightStep:'groups' },
+          expl: { label:'Dividing into pairs', text:'<hi>8</hi> breaks into exactly <hi>4 groups of 2</hi>. Every element has a pair. There is nothing left over.' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:8, divisor:2, groupsVisible:4, remainderVisible:0, showSummary:true, highlightStep:'equation' },
+          expl: { label:'r = 0, so even', text:'<hi>8 % 2 = 0</hi>. A remainder of zero means the number divides perfectly into pairs -- it is even. The rule: <hi>n % 2 == 0</hi> is even.' }
+        },
+        {
+          line: 3,
+          visual: { type:'remainder-bar', dividend:9, divisor:2, groupsVisible:0, remainderVisible:0, showSummary:false, highlightStep:'equation' },
+          expl: { label:'n = 9', text:'Now try <hi>n = 9</hi>. Same question: do we run out of pairs, or is one left?' }
+        },
+        {
+          line: 4,
+          visual: { type:'remainder-bar', dividend:9, divisor:2, groupsVisible:4, remainderVisible:0, showSummary:false, highlightStep:'groups' },
+          expl: { label:'Four pairs...', text:'We can make 4 pairs (8 accounted for). But there is one more element sitting outside any pair.' }
+        },
+        {
+          line: 4,
+          visual: { type:'remainder-bar', dividend:9, divisor:2, groupsVisible:4, remainderVisible:1, showSummary:false, highlightStep:'remainder' },
+          expl: { label:'...and one left over', text:'That lone cell is the remainder. It cannot pair up. That is what makes 9 odd.' }
+        },
+        {
+          line: 5,
+          visual: { type:'remainder-bar', dividend:9, divisor:2, groupsVisible:4, remainderVisible:1, showSummary:true, highlightStep:'equation' },
+          expl: { label:'r = 1, so odd', text:'<hi>9 % 2 = 1</hi>. Any non-zero remainder means odd. Pattern: <hi>n % 2 == 0</hi> is even, <hi>n % 2 == 1</hi> is odd. Works for every integer.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 3 -- wrap-around index: (4 + 1) % 5
+    // Lines:
+    //   0: size = 5
+    //   1: i = 4
+    //   2: next = (i + 1) % size
+    // ----------------------------------------------------------------
+    {
+      label: 'Wrap-around',
+      lines: [
+        { code: [['tok-op','size = '],['tok-num','5']] },
+        { code: [['tok-op','i = '],['tok-num','4']] },
+        { code: [['tok-op','next = (i + '],['tok-num','1'],['tok-op',') % size']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: { type:'remainder-bar', dividend:5, divisor:5, groupsVisible:0, remainderVisible:0, showSummary:false, highlightStep:'equation' },
+          expl: { label:'size = 5', text:'We have a list with <hi>5</hi> slots. Valid indices are 0 through 4.' }
+        },
+        {
+          line: 1,
+          visual: { type:'remainder-bar', dividend:5, divisor:5, groupsVisible:0, remainderVisible:0, showSummary:false, highlightStep:'equation' },
+          expl: { label:'i = 4 (last slot)', text:'<hi>i = 4</hi> is the last valid index. Adding 1 gives 5, which is out of bounds. We need to wrap around to 0.' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:5, divisor:5, groupsVisible:0, remainderVisible:0, showSummary:false, highlightStep:'equation' },
+          expl: { label:'Evaluating i + 1', text:'<hi>i + 1 = 5</hi>. Now compute <hi>5 % 5</hi>. How many complete groups of 5 fit into 5?' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:5, divisor:5, groupsVisible:1, remainderVisible:0, showSummary:false, highlightStep:'groups' },
+          expl: { label:'Exactly one group', text:'5 fits into 5 exactly once -- one complete group with nothing left over.' }
+        },
+        {
+          line: 2,
+          visual: { type:'remainder-bar', dividend:5, divisor:5, groupsVisible:1, remainderVisible:0, showSummary:true, highlightStep:'equation' },
+          expl: { label:'next = 0', text:'<hi>5 % 5 = 0</hi>. The remainder is 0, so <hi>next</hi> wraps back to the start of the list. The cycle: 0, 1, 2, 3, 4, 0, 1, 2... never out of bounds.' }
+        },
+      ]
+    },
+
+  ]
+
+});

@@ -1,0 +1,154 @@
+/*
+  Java 17 -- Conditions
+  if, else if, else
+  No em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Line index comments mark each scenario's 0-based line numbers
+  (blank lines are not counted).
+*/
+STEPPER_REGISTRY.register("java-17/conditions", {
+  label: 'Conditions',
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: false,
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+  scenarios: [
+
+    /* ------------------------------------------------------------------ */
+    /*  1. Simple if (condition true)                                       */
+    /*                                                                      */
+    /*  0  static void main(String[] args) {                                */
+    /*  1    int score = 85;                                                */
+    /*  2    if (score >= 60) {                                             */
+    /*  3      System.out.println("You passed!");                           */
+    /*  4    }                                                              */
+    /*  5  }                                                                */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Simple if',
+      lines: [
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','main'],['tok-op','(String[] args) {']] },
+        { code: [['','  '],['tok-type','int '],['tok-op','score = '],['tok-num','85'],['tok-op',';']] },
+        { code: [['','  '],['tok-kw','if '],['tok-op','(score >= '],['tok-num','60'],['tok-op',') {']] },
+        { code: [['','    '],['tok-op','System.out.println('],['tok-str','"You passed!"'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','}']] },
+        { code: [['tok-op','}']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Program starts', text:'Java enters <hi>main()</hi> and pushes a new frame onto the call stack.'} },
+        { line:1, stack:[{name:'main()',vars:[{n:'score',v:'85',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable declared', text:'<hi>int score = 85</hi> creates a local variable and assigns it <hi>85</hi>.'} },
+        { line:2, stack:[{name:'main()',vars:[{n:'score',v:'85',fresh:false,cls:false}],active:true}],
+          expl:{label:'Condition: true', text:'Java evaluates <hi>score >= 60</hi>. Since 85 >= 60, the condition is true -- the body inside the braces will run.'} },
+        { line:3, stack:[{name:'main()',vars:[{n:'score',v:'85',fresh:false,cls:false}],active:true}],
+          expl:{label:'Inside the if block', text:'The condition was true, so execution enters the block. <hi>System.out.println("You passed!")</hi> runs.'} },
+        { line:4, stack:[{name:'main()',vars:[{n:'score',v:'85',fresh:false,cls:false}],active:true}],
+          expl:{label:'Leaving the block', text:'The closing brace is reached. The if block is done -- execution continues after it.'} },
+        { line:5, stack:[{name:'main()',vars:[{n:'score',v:'85',fresh:false,cls:false}],active:true}],
+          expl:{label:'Program ends', text:'<hi>main()</hi> reaches its closing brace. Its frame is popped and the program finishes.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  2. if / else (condition false -- takes the else branch)             */
+    /*                                                                      */
+    /*  0  static void main(String[] args) {                                */
+    /*  1    int score = 45;                                                */
+    /*  2    if (score >= 60) {                                             */
+    /*  3      System.out.println("You passed!");                           */
+    /*  4    } else {                                                       */
+    /*  5      System.out.println("Try again.");                            */
+    /*  6    }                                                              */
+    /*  7  }                                                                */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'if / else',
+      lines: [
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','main'],['tok-op','(String[] args) {']] },
+        { code: [['','  '],['tok-type','int '],['tok-op','score = '],['tok-num','45'],['tok-op',';']] },
+        { code: [['','  '],['tok-kw','if '],['tok-op','(score >= '],['tok-num','60'],['tok-op',') {']] },
+        { code: [['','    '],['tok-op','System.out.println('],['tok-str','"You passed!"'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','} '],['tok-kw','else '],['tok-op','{']] },
+        { code: [['','    '],['tok-op','System.out.println('],['tok-str','"Try again."'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','}']] },
+        { code: [['tok-op','}']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Program starts', text:'Java enters <hi>main()</hi>.'} },
+        { line:1, stack:[{name:'main()',vars:[{n:'score',v:'45',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable declared', text:'<hi>score</hi> is assigned <hi>45</hi>.'} },
+        { line:2, stack:[{name:'main()',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'Condition: false', text:'Java evaluates <hi>score >= 60</hi>. Since 45 < 60, the condition is false -- the if block is skipped entirely.'} },
+        { line:4, stack:[{name:'main()',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'else branch', text:'Because the condition was false, execution jumps to the <hi>else</hi> branch. Its body will run instead.'} },
+        { line:5, stack:[{name:'main()',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'Inside else block', text:'<hi>System.out.println("Try again.")</hi> runs. Exactly one branch always executes -- either if or else, never both.'} },
+        { line:6, stack:[{name:'main()',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'Leaving the block', text:'The closing brace is reached. The if/else is done.'} },
+        { line:7, stack:[{name:'main()',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'Program ends', text:'<hi>main()</hi> finishes.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  3. if / else if / else chain (score = 75, matches third condition)  */
+    /*                                                                      */
+    /*  0   static void main(String[] args) {                               */
+    /*  1     int score = 75;                                               */
+    /*  2     if (score >= 90) {                                            */
+    /*  3       System.out.println("A");                                    */
+    /*  4     } else if (score >= 80) {                                     */
+    /*  5       System.out.println("B");                                    */
+    /*  6     } else if (score >= 70) {                                     */
+    /*  7       System.out.println("C");                                    */
+    /*  8     } else {                                                      */
+    /*  9       System.out.println("F");                                    */
+    /*  10    }                                                             */
+    /*  11  }                                                               */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'if / else if / else',
+      lines: [
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','main'],['tok-op','(String[] args) {']] },
+        { code: [['','  '],['tok-type','int '],['tok-op','score = '],['tok-num','75'],['tok-op',';']] },
+        { code: [['','  '],['tok-kw','if '],['tok-op','(score >= '],['tok-num','90'],['tok-op',') {']] },
+        { code: [['','    '],['tok-op','System.out.println('],['tok-str','"A"'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','} '],['tok-kw','else if '],['tok-op','(score >= '],['tok-num','80'],['tok-op',') {']] },
+        { code: [['','    '],['tok-op','System.out.println('],['tok-str','"B"'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','} '],['tok-kw','else if '],['tok-op','(score >= '],['tok-num','70'],['tok-op',') {']] },
+        { code: [['','    '],['tok-op','System.out.println('],['tok-str','"C"'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','} '],['tok-kw','else '],['tok-op','{']] },
+        { code: [['','    '],['tok-op','System.out.println('],['tok-str','"F"'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','}']] },
+        { code: [['tok-op','}']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Program starts', text:'Java enters <hi>main()</hi>.'} },
+        { line:1, stack:[{name:'main()',vars:[{n:'score',v:'75',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable declared', text:'<hi>score</hi> is assigned <hi>75</hi>.'} },
+        { line:2, stack:[{name:'main()',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'First check: false', text:'Java evaluates <hi>score >= 90</hi>. 75 >= 90 is false -- skip this branch and try the next condition.'} },
+        { line:4, stack:[{name:'main()',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Second check: false', text:'Java evaluates <hi>score >= 80</hi>. 75 >= 80 is also false -- move on to the next condition.'} },
+        { line:6, stack:[{name:'main()',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Third check: true', text:'Java evaluates <hi>score >= 70</hi>. 75 >= 70 is true -- this branch matches and will run.'} },
+        { line:7, stack:[{name:'main()',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Matched branch runs', text:'<hi>System.out.println("C")</hi> executes. The remaining branches are all skipped -- only one branch ever runs in an if/else if/else chain.'} },
+        { line:10, stack:[{name:'main()',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Chain is done', text:'Execution jumps to the closing brace. The <hi>else</hi> block is never evaluated -- a match was already found.'} },
+        { line:11, stack:[{name:'main()',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Program ends', text:'<hi>main()</hi> finishes.'} },
+      ]
+    },
+
+  ]
+});

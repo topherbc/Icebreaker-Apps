@@ -1,0 +1,164 @@
+/*
+  Python 3 -- Match statements (Python 3.10+)
+  match/case, default case, menu example
+  No em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Line index comments mark each scenario's 0-based line numbers
+  (blank lines are not counted).
+*/
+STEPPER_REGISTRY.register("python-3/match", {
+  label: 'Match statements',
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: false,
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+  scenarios: [
+
+    /* ------------------------------------------------------------------ */
+    /*  1. Basic match (day = 2, matches case 2)                           */
+    /*                                                                      */
+    /*  0  day = 2                                                          */
+    /*  1  match day:                                                       */
+    /*  2      case 1:                                                      */
+    /*  3          print("Monday")                                          */
+    /*  4      case 2:                                                      */
+    /*  5          print("Tuesday")                                         */
+    /*  6      case _:                                                      */
+    /*  7          print("Other")                                           */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Basic match',
+      lines: [
+        { code: [['tok-op','day = '],['tok-num','2']] },
+        { code: [['tok-kw','match '],['tok-op','day:']] },
+        { code: [['','    '],['tok-kw','case '],['tok-num','1'],['tok-op',':']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Monday"'],['tok-op',')']] },
+        { code: [['','    '],['tok-kw','case '],['tok-num','2'],['tok-op',':']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Tuesday"'],['tok-op',')']] },
+        { code: [['','    '],['tok-kw','case '],['tok-op','_:']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Other"'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'day',v:'2',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable assigned', text:'<hi>day = 2</hi> creates a variable and assigns it <hi>2</hi>. This is the value the match will test.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'day',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'match evaluates', text:'<hi>match day</hi> evaluates the subject. <hi>day</hi> is <hi>2</hi>. Python looks for a matching case pattern.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'day',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'case 1 -- no match', text:'<hi>case 1:</hi> does not match <hi>2</hi>. Python skips this case and its body entirely.'} },
+        { line:4, stack:[{name:'<module>',vars:[{n:'day',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'case 2 -- match!', text:'<hi>case 2:</hi> matches <hi>day</hi>. Python will execute the body below this case.'} },
+        { line:5, stack:[{name:'<module>',vars:[{n:'day',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'Body executes', text:'<hi>print("Tuesday")</hi> runs. The matched case body is now executing.'} },
+        { line:5, stack:[{name:'<module>',vars:[{n:'day',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'Python match never falls through by design. The <hi>case _:</hi> body is never evaluated -- a match was already found.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  2. Default case (day = 99, no specific case matches)               */
+    /*                                                                      */
+    /*  0  day = 99                                                         */
+    /*  1  match day:                                                       */
+    /*  2      case 1:                                                      */
+    /*  3          print("Monday")                                          */
+    /*  4      case 2:                                                      */
+    /*  5          print("Tuesday")                                         */
+    /*  6      case _:                                                      */
+    /*  7          print("Other")                                           */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Default case (case _)',
+      lines: [
+        { code: [['tok-op','day = '],['tok-num','99']] },
+        { code: [['tok-kw','match '],['tok-op','day:']] },
+        { code: [['','    '],['tok-kw','case '],['tok-num','1'],['tok-op',':']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Monday"'],['tok-op',')']] },
+        { code: [['','    '],['tok-kw','case '],['tok-num','2'],['tok-op',':']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Tuesday"'],['tok-op',')']] },
+        { code: [['','    '],['tok-kw','case '],['tok-op','_:']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Other"'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'day',v:'99',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable assigned', text:'<hi>day = 99</hi> -- a value that does not match any specific case label.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'day',v:'99',fresh:false,cls:false}],active:true}],
+          expl:{label:'match evaluates', text:'<hi>match day</hi> evaluates the subject. <hi>day</hi> is <hi>99</hi>. Python begins testing cases.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'day',v:'99',fresh:false,cls:false}],active:true}],
+          expl:{label:'case 1 -- no match', text:'<hi>case 1:</hi> does not match <hi>99</hi>. Skipped.'} },
+        { line:4, stack:[{name:'<module>',vars:[{n:'day',v:'99',fresh:false,cls:false}],active:true}],
+          expl:{label:'case 2 -- no match', text:'<hi>case 2:</hi> does not match <hi>99</hi>. Skipped.'} },
+        { line:6, stack:[{name:'<module>',vars:[{n:'day',v:'99',fresh:false,cls:false}],active:true}],
+          expl:{label:'case _ -- wildcard matches', text:'<hi>case _:</hi> is the wildcard -- it matches anything that did not match an earlier case. Python enters this branch.'} },
+        { line:7, stack:[{name:'<module>',vars:[{n:'day',v:'99',fresh:false,cls:false}],active:true}],
+          expl:{label:'Default body executes', text:'<hi>print("Other")</hi> runs. The wildcard <hi>_</hi> is the Python equivalent of a default case -- it guarantees something runs when no specific pattern matches.'} },
+        { line:7, stack:[{name:'<module>',vars:[{n:'day',v:'99',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'There is nothing more to run.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  3. Menu with match                                                  */
+    /*                                                                      */
+    /*  0  print("1. New game")                                             */
+    /*  1  print("2. Load game")                                            */
+    /*  2  print("3. Quit")                                                 */
+    /*  3  choice = int(input())                                            */
+    /*  4  match choice:                                                    */
+    /*  5      case 1:                                                      */
+    /*  6          print("Starting...")                                     */
+    /*  7      case 2:                                                      */
+    /*  8          print("Loading...")                                      */
+    /*  9      case 3:                                                      */
+    /*  10         print("Goodbye!")                                        */
+    /*  11     case _:                                                      */
+    /*  12         print("Invalid choice")                                  */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Menu with match',
+      lines: [
+        { code: [['tok-meth','print'],['tok-op','('],['tok-str','"1. New game"'],['tok-op',')']] },
+        { code: [['tok-meth','print'],['tok-op','('],['tok-str','"2. Load game"'],['tok-op',')']] },
+        { code: [['tok-meth','print'],['tok-op','('],['tok-str','"3. Quit"'],['tok-op',')']] },
+        { code: [['tok-op','choice = '],['tok-meth','int'],['tok-op','('],['tok-meth','input'],['tok-op','())']] },
+        { code: [['tok-kw','match '],['tok-op','choice:']] },
+        { code: [['','    '],['tok-kw','case '],['tok-num','1'],['tok-op',':']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Starting..."'],['tok-op',')']] },
+        { code: [['','    '],['tok-kw','case '],['tok-num','2'],['tok-op',':']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Loading..."'],['tok-op',')']] },
+        { code: [['','    '],['tok-kw','case '],['tok-num','3'],['tok-op',':']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Goodbye!"'],['tok-op',')']] },
+        { code: [['','    '],['tok-kw','case '],['tok-op','_:']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-str','"Invalid choice"'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Script starts', text:'We will build a text menu driven by a match statement.'} },
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Menu prints', text:'<hi>print("1. New game")</hi> prints the first menu option.'} },
+        { line:1, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Menu continues', text:'<hi>print("2. Load game")</hi> prints the second option.'} },
+        { line:2, stack:[{name:'<module>',vars:[],active:true}],
+          expl:{label:'Menu complete', text:'<hi>print("3. Quit")</hi> prints the last option. The full menu is now visible to the user.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'choice',v:'2',fresh:true,cls:false}],active:true}],
+          expl:{label:'User picks 2', text:'<hi>int(input())</hi> waits. The user types <hi>2</hi> and presses Enter. <hi>choice</hi> is now <hi>2</hi>.'} },
+        { line:4, stack:[{name:'<module>',vars:[{n:'choice',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'match evaluates', text:'<hi>match choice</hi> evaluates to <hi>2</hi> and begins testing case patterns.'} },
+        { line:5, stack:[{name:'<module>',vars:[{n:'choice',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'case 1 -- no match', text:'<hi>case 1:</hi> does not match <hi>2</hi>. Skipped.'} },
+        { line:7, stack:[{name:'<module>',vars:[{n:'choice',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'case 2 -- match!', text:'<hi>case 2:</hi> matches <hi>choice</hi>. Python will execute its body.'} },
+        { line:8, stack:[{name:'<module>',vars:[{n:'choice',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'Body executes', text:'<hi>print("Loading...")</hi> runs. The other cases are skipped completely, including <hi>case _:</hi>.'} },
+        { line:8, stack:[{name:'<module>',vars:[{n:'choice',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'If the user had entered <hi>99</hi>, none of the numbered cases would match and <hi>case _:</hi> would run instead, printing "Invalid choice".'} },
+      ]
+    },
+
+  ]
+});

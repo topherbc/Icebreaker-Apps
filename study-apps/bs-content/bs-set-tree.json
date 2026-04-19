@@ -1,0 +1,8 @@
+[
+  { "id": "week-1", "title": "Variables & Conditions",      "path": "../java-academy/week-1/bs-set.json" },
+  { "id": "week-2", "title": "Loops & Classes",             "path": "../java-academy/week-2/bs-set.json" },
+  { "id": "week-3", "title": "Arrays & Collections",        "path": "../java-academy/week-3/bs-set.json" },
+  { "id": "week-5", "title": "Strings & OOP",               "path": "../java-academy/week-5/bs-set.json" },
+  { "id": "week-6", "title": "OOP & Inheritance",           "path": "../java-academy/week-6/bs-set.json" },
+  { "id": "week-7", "title": "Inheritance & Interfaces",    "path": "../java-academy/week-7/bs-set.json" }
+]

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amnesty Box -- What Do You Wish We Spent More Time On?</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='10' width='24' height='20' rx='2' fill='%23fef9c3' stroke='%23c4a882' stroke-width='1.5'/><circle cx='16' cy='8' r='5' fill='%23c0392b'/><line x1='16' y1='13' x2='16' y2='30' stroke='%23a02020' stroke-width='2'/><line x1='7' y1='17' x2='25' y2='17' stroke='%23c4a882' stroke-width='1' opacity='0.6'/><line x1='7' y1='21' x2='22' y2='21' stroke='%23c4a882' stroke-width='1' opacity='0.6'/><line x1='7' y1='25' x2='20' y2='25' stroke='%23c4a882' stroke-width='1' opacity='0.6'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+<style>
+  /* FOUC prevention */
+  :root { color-scheme: light; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:           #f5f0e8;
+    --bg-board:     #ede8dc;
+    --cork:         #c4a882;
+    --cork-dark:    #a8885e;
+    --ink:          #2c2418;
+    --ink-soft:     #5a4f3e;
+    --ink-faint:    #6b5f4e;  /* was #9a8c78 — darkened to pass WCAG AA 4.5:1 on --bg */
+    --note-1:       #fef9c3;
+    --note-2:       #fce7d6;
+    --note-3:       #ddf4e8;
+    --note-4:       #ddeeff;
+    --note-5:       #f3e8ff;
+    --accent:       #c0392b;
+    --accent-hover: #a93226;
+    --clear-bg:     #fdf3f2;
+    --clear-border: #e8c4c0;
+    --shadow-note:  0 3px 8px rgba(0,0,0,0.13), 0 1px 2px rgba(0,0,0,0.08);
+    --shadow-pin:   0 2px 4px rgba(0,0,0,0.25);
+    --radius-note:  3px;
+    --font-hand:    'Caveat', cursive;
+    --font-body:    'DM Sans', sans-serif;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: var(--font-body);
+    color: var(--ink);
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--cork);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.03) 3px,
+        rgba(0,0,0,0.03) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.03) 3px,
+        rgba(0,0,0,0.03) 4px
+      );
+    border-bottom: 3px solid var(--cork-dark);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+  }
+
+  .header-text { flex: 1; }
+
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);  /* was --cork-dark (#a8885e) — only 1.5:1 on cork; ink gives 7:1 */
+    margin-bottom: 4px;
+  }
+
+  .header-title {
+    font-family: var(--font-hand);
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .header-sub {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    max-width: 480px;
+    line-height: 1.5;
+  }
+
+  .live-count {
+    font-family: var(--font-hand);
+    font-size: 22px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .live-count span {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ── SUBMIT AREA ── */
+  .submit-section {
+    max-width: 680px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+  }
+
+  .submit-card {
+    background: white;
+    border-radius: 8px;
+    padding: 28px 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .submit-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .submit-hint {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .submit-textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: 6px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    line-height: 1.5;
+  }
+
+  .submit-textarea:focus {
+    border-color: var(--cork);
+  }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    gap: 12px;
+  }
+
+  .char-count {
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  .char-count.near-limit { color: #c0392b; }
+
+  .submit-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    min-height: 44px;
+    min-width: 120px;
+  }
+
+  .submit-btn:hover:not(:disabled) { background: var(--accent-hover); }
+  .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .submitted-msg {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #2d7a4f;
+    font-weight: 500;
+  }
+
+  .submitted-msg.visible { display: flex; }
+
+  /* ── BOARD ── */
+  .board-section {
+    padding: 32px 32px 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .board-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .board-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .clear-btn {
+    background: var(--clear-bg);
+    border: 1px solid var(--clear-border);
+    color: #8b3a35;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-height: 36px;
+  }
+
+  .clear-btn:hover { background: #fbe8e6; }
+
+  /* note grid */
+  .notes-grid {
+    column-count: 4;
+    column-gap: 20px;
+  }
+
+  @media (max-width: 1100px) { .notes-grid { column-count: 3; } }
+  @media (max-width: 760px)  { .notes-grid { column-count: 2; } }
+  @media (max-width: 480px)  { .notes-grid { column-count: 1; } }
+
+  .note {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    display: inline-block;
+    width: 100%;
+    border-radius: var(--radius-note);
+    padding: 20px 18px 16px;
+    box-shadow: var(--shadow-note);
+    position: relative;
+    transform-origin: center;
+    animation: noteIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes noteIn {
+    from { opacity: 0; transform: scale(0.85) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* slight random tilts via nth-child */
+  .note:nth-child(5n+1) { transform: rotate(-1.2deg); }
+  .note:nth-child(5n+2) { transform: rotate(0.8deg); }
+  .note:nth-child(5n+3) { transform: rotate(-0.5deg); }
+  .note:nth-child(5n+4) { transform: rotate(1.5deg); }
+  .note:nth-child(5n+5) { transform: rotate(-0.9deg); }
+
+  /* pin */
+  .note::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #e05555, #a02020);
+    box-shadow: var(--shadow-pin);
+    z-index: 1;
+  }
+
+  .note-text {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: #2c2418;
+    word-break: break-word;
+  }
+
+  /* stable per-note colors — assigned by ID hash, not position, so they don't shift on refresh */
+  .note-color-1 { background: var(--note-1); }
+  .note-color-2 { background: var(--note-2); }
+  .note-color-3 { background: var(--note-3); }
+  .note-color-4 { background: var(--note-4); }
+  .note-color-5 { background: var(--note-5); }
+
+  /* empty state */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--ink-faint);
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-text {
+    font-family: var(--font-body);
+    font-size: 18px;
+    color: var(--ink-faint);
+  }
+
+  /* ── CONNECTION STATUS ── */
+  .status-bar {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(6px);
+    border-radius: 20px;
+    padding: 6px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: background 0.3s;
+  }
+
+  .status-dot.connected    { background: #2ecc71; }
+  .status-dot.connecting   { background: #f39c12; animation: pulse 1s infinite; }
+  .status-dot.disconnected { background: #e74c3c; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ── SESSION PICKER ── */
+  .session-picker-backdrop {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: rgba(196, 168, 130, 0.92);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .session-picker-title {
+    font-family: var(--font-hand);
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .session-picker-sub {
+    font-size: 15px;
+    color: var(--ink);  /* --ink-soft is 3.6:1 on cork backdrop — fails AA; use ink (7:1) */
+    text-align: center;
+    margin-top: -16px;
+  }
+
+  .session-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .session-btn {
+    width: 88px;
+    height: 88px;
+    border-radius: 8px;
+    border: none;
+    background: white;
+    box-shadow: var(--shadow-note);
+    font-family: var(--font-hand);
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+
+  .session-btn:hover {
+    transform: scale(1.08) rotate(-1deg);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  }
+
+  .session-btn:active { transform: scale(0.96); }
+
+  /* ── CLEAR MODAL ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 10px;
+    padding: 32px;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+
+  .modal h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .modal input {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    border: 2px solid rgba(0,0,0,0.12);
+    border-radius: 6px;
+    outline: none;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+
+  .modal input:focus { border-color: var(--cork); }
+
+  .modal-error {
+    font-size: 13px;
+    color: #c0392b;
+    min-height: 18px;
+    margin-bottom: 16px;
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .modal-cancel {
+    background: none;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 6px;
+    padding: 9px 20px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    cursor: pointer;
+    min-height: 40px;
+  }
+
+  .modal-cancel:hover { background: var(--bg); }
+
+  .modal-confirm {
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 20px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 40px;
+  }
+
+  .modal-confirm:hover { background: #a93226; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-text">
+    <div class="header-eyebrow">Anonymous Feedback</div>
+    <div class="header-title">The Amnesty Box</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+    <div class="live-count"><span id="noteCount">0</span> notes on the board</div>
+    <div id="sessionBadge" style="display:none;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--cork-dark);background:rgba(0,0,0,0.08);border-radius:4px;padding:3px 8px;">Session <span id="sessionNum"></span></div>
+  </div>
+</header>
+
+<!-- SUBMIT -->
+<section class="submit-section">
+  <div class="submit-card">
+    <label class="submit-label" for="noteInput">What's on your mind?</label>
+    <textarea
+      id="noteInput"
+      class="submit-textarea"
+      placeholder="I wish we had more time on... / I'm still fuzzy on... / Can we revisit..."
+      maxlength="280"
+      rows="3"
+    ></textarea>
+    <div class="submit-row">
+      <span class="char-count" id="charCount">0 / 280</span>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span class="submitted-msg" id="submittedMsg">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="#2d7a4f"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="#2d7a4f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Posted!
+        </span>
+        <button class="submit-btn" id="submitBtn">Post it</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOARD -->
+<section class="board-section">
+  <div class="board-header">
+    <span class="board-label">The Board</span>
+    <button class="clear-btn" id="clearBtn">Clear board</button>
+  </div>
+  <div id="notesGrid" class="notes-grid">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📌</div>
+      <div class="empty-text">The board is empty -- be the first to post!</div>
+    </div>
+  </div>
+</section>
+
+<!-- SESSION PICKER -->
+<div class="session-picker-backdrop" id="sessionPicker">
+  <div class="session-picker-title">The Amnesty Box</div>
+  <div class="session-picker-sub">Choose your session</div>
+  <div class="session-grid" id="sessionGrid"></div>
+</div>
+
+<!-- STATUS -->
+<div class="status-bar">
+  <div class="status-dot connecting" id="statusDot"></div>
+  <span id="statusText">Connecting...</span>
+</div>
+
+<!-- CLEAR MODAL -->
+<div class="modal-backdrop" id="clearModal">
+  <div class="modal">
+    <h2>Clear the board?</h2>
+    <p>This will remove all notes for everyone. Enter the instructor password to confirm.</p>
+    <input type="password" id="clearPassword" placeholder="Password" autocomplete="off">
+    <div class="modal-error" id="clearError"></div>
+    <div class="modal-buttons">
+      <button class="modal-cancel" id="modalCancel">Cancel</button>
+      <button class="modal-confirm" id="modalConfirm">Clear board</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────────────
+  const ABLY_KEY  = '9K3Yww.CdrKNA:0rAn91BzUR72SFbIX3ZjdzmwkMm1U1J4QmPY6z61dWE';  // injected by GitHub Actions
+  const MAX_CHARS = 280;
+
+  // ── SESSION ──────────────────────────────────────────────────────
+  const SESSION      = (new URLSearchParams(location.search).get('s') || '').replace(/[^1-9]/g, '');
+  const CHANNEL_NAME = `amnesty-wall-${SESSION || '0'}`;
+  const CLEAR_PASS   = SESSION ? `111${SESSION}` : 'bootcamp';
+  const STORAGE_KEY  = `amnesty-notes-${SESSION || '0'}`;
+  const CLEAR_TS_KEY = `amnesty-clear-ts-${SESSION || '0'}`;
+  const CLIENT_ID    = Math.random().toString(36).slice(2);  // identifies this tab for sync
+
+  // ── STATE ────────────────────────────────────────────────────────
+  let notes = [];
+  let lastClearTs = parseInt(localStorage.getItem(CLEAR_TS_KEY) || '0', 10);
+
+  // ── DOM REFS ──────────────────────────────────────────────────────
+  const textarea      = document.getElementById('noteInput');
+  const submitBtn     = document.getElementById('submitBtn');
+  const charCountEl   = document.getElementById('charCount');
+  const submittedMsg  = document.getElementById('submittedMsg');
+  const notesGrid     = document.getElementById('notesGrid');
+  const emptyState    = document.getElementById('emptyState');
+  const noteCountEl   = document.getElementById('noteCount');
+  const statusDot     = document.getElementById('statusDot');
+  const statusText    = document.getElementById('statusText');
+  const clearBtn      = document.getElementById('clearBtn');
+  const clearModal    = document.getElementById('clearModal');
+  const clearPassword = document.getElementById('clearPassword');
+  const clearError    = document.getElementById('clearError');
+  const modalCancel   = document.getElementById('modalCancel');
+  const modalConfirm  = document.getElementById('modalConfirm');
+  const sessionPicker = document.getElementById('sessionPicker');
+  const sessionGrid   = document.getElementById('sessionGrid');
+
+  // ── SESSION PICKER ────────────────────────────────────────────────
+  if (!SESSION) {
+    for (let i = 1; i <= 9; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'session-btn';
+      btn.textContent = i;
+      btn.addEventListener('click', () => {
+        window.location.href = window.location.pathname + '?s=' + i;
+      });
+      sessionGrid.appendChild(btn);
+    }
+  } else {
+    sessionPicker.style.display = 'none';
+    document.getElementById('sessionBadge').style.display = 'block';
+    document.getElementById('sessionNum').textContent = SESSION;
+  }
+
+  // ── LOCAL STORAGE ────────────────────────────────────────────────
+  // Notes survive refresh for the same browser. Sync-request fills gaps for others.
+  function loadStored() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveStored() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); }
+    catch { /* quota full — silently skip */ }
+  }
+
+  // ── NOTE COLOR ───────────────────────────────────────────────────
+  // Hash the note ID to a stable 1-5 index. Same ID → same color on every browser.
+  function noteColorIndex(id) {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff;
+    return (h % 5) + 1;
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────
+  function renderNotes() {
+    noteCountEl.textContent = notes.length;
+    emptyState.style.display = notes.length === 0 ? 'block' : 'none';
+  }
+
+  // Returns true if the note was new (added), false if duplicate or stale
+  function addNote(note, animate) {
+    if (note.ts && note.ts < lastClearTs) return false;
+    if (notes.find(n => n.id === note.id)) return false;
+    notes.push(note);
+    emptyState.style.display = 'none';
+    const el = document.createElement('div');
+    el.className = `note note-color-${noteColorIndex(note.id)}`;
+    el.dataset.id = note.id;
+    if (!animate) el.style.animation = 'none';
+    el.innerHTML = `<div class="note-text">${escapeHtml(note.text)}</div>`;
+    notesGrid.appendChild(el);
+    noteCountEl.textContent = notes.length;
+    return true;
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function clearAllNotes(ts) {
+    notes = [];
+    lastClearTs = ts || Date.now();
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { localStorage.setItem(CLEAR_TS_KEY, String(lastClearTs)); } catch {}
+    [...notesGrid.querySelectorAll('.note')].forEach(n => n.remove());
+    renderNotes();
+  }
+
+  // ── TEXTAREA CHAR COUNT ───────────────────────────────────────────
+  textarea.addEventListener('input', () => {
+    const len = textarea.value.length;
+    charCountEl.textContent = `${len} / ${MAX_CHARS}`;
+    charCountEl.classList.toggle('near-limit', len > MAX_CHARS - 30);
+  });
+
+  // ── ABLY ──────────────────────────────────────────────────────────
+  let channel;
+
+  function setStatus(state) {
+    statusDot.className = 'status-dot ' + state;
+    statusText.textContent = { connected: 'Live', connecting: 'Connecting…', disconnected: 'Disconnected' }[state] || state;
+  }
+
+  function initAbly() {
+    const ably = new Ably.Realtime({ key: ABLY_KEY });
+
+    ably.connection.on('connecting',   () => setStatus('connecting'));
+    ably.connection.on('disconnected', () => setStatus('disconnected'));
+    ably.connection.on('failed',       () => setStatus('disconnected'));
+
+    ably.connection.on('connected', () => {
+      setStatus('connected');
+      // 1. Restore this browser's own notes from localStorage immediately
+      for (const note of loadStored()) addNote(note, false);
+      renderNotes();
+      // 2. Ask any currently-connected peers to share their notes (handles other students' posts)
+      setTimeout(() => channel.publish('sync-request', { from: CLIENT_ID }), 500);
+    });
+
+    channel = ably.channels.get(CHANNEL_NAME);
+
+    // New note from any browser → add to board and save locally
+    channel.subscribe('note', (msg) => {
+      if (addNote(msg.data, true)) saveStored();
+    });
+
+    // Board cleared → wipe everything including localStorage
+    channel.subscribe('clear', (msg) => clearAllNotes(msg.data.ts));
+
+    // A peer just joined and wants existing notes — share ours after a random delay
+    // (random delay prevents everyone responding at once; first responder is enough)
+    channel.subscribe('sync-request', (msg) => {
+      if (msg.data.from === CLIENT_ID) return;
+      setTimeout(() => {
+        channel.publish('sync-response', { notes, lastClearTs });
+      }, Math.random() * 600 + 100);
+    });
+
+    // Receive notes from a peer who answered our sync-request
+    channel.subscribe('sync-response', (msg) => {
+      // If the peer has a newer clear timestamp, adopt it and wipe stale notes
+      const peerClearTs = msg.data.lastClearTs || 0;
+      if (peerClearTs > lastClearTs) {
+        clearAllNotes(peerClearTs);
+      }
+      let changed = false;
+      for (const note of (msg.data.notes || [])) {
+        if (addNote(note, false)) changed = true;
+      }
+      if (changed) saveStored();
+    });
+  }
+
+  // ── SUBMIT ────────────────────────────────────────────────────────
+  submitBtn.addEventListener('click', postNote);
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) postNote();
+  });
+
+  function postNote() {
+    const text = textarea.value.trim();
+    if (!text || submitBtn.disabled) return;
+
+    submitBtn.disabled = true;
+    const note = {
+      id:   Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      text: text.slice(0, MAX_CHARS),
+      ts:   Date.now()
+    };
+
+    channel.publish('note', note);
+
+    textarea.value = '';
+    charCountEl.textContent = `0 / ${MAX_CHARS}`;
+    submittedMsg.classList.add('visible');
+    // Re-enable after brief confirmation so they can post again
+    setTimeout(() => {
+      submittedMsg.classList.remove('visible');
+      submitBtn.disabled = false;
+      textarea.focus();
+    }, 1800);
+  }
+
+  // ── CLEAR MODAL ───────────────────────────────────────────────────
+  clearBtn.addEventListener('click', () => {
+    clearPassword.value = '';
+    clearError.textContent = '';
+    clearModal.classList.add('open');
+    clearPassword.focus();
+  });
+
+  modalCancel.addEventListener('click', () => clearModal.classList.remove('open'));
+
+  clearModal.addEventListener('click', (e) => {
+    if (e.target === clearModal) clearModal.classList.remove('open');
+  });
+
+  clearPassword.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') modalConfirm.click();
+  });
+
+  modalConfirm.addEventListener('click', () => {
+    if (clearPassword.value === CLEAR_PASS) {
+      const ts = Date.now();
+      channel.publish('clear', { ts });
+      clearAllNotes(ts);
+      clearModal.classList.remove('open');
+    } else {
+      clearError.textContent = 'Incorrect password.';
+      clearPassword.value = '';
+      clearPassword.focus();
+    }
+  });
+
+  // ── INIT ──────────────────────────────────────────────────────────
+  if (SESSION) initAbly();
+</script>
+</body>
+</html>

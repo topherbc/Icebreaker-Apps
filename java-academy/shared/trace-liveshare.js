@@ -47,11 +47,11 @@
   'use strict';
 
   // ── Ably key (split to avoid plaintext secret in source) ─────────────
-  const _k1 = '9K3Yw';
-  const _k2 = 'w.CdrK';
-  const _k3 = 'NA:0rAn';
-  const _k4 = '91BzUR72';
-  const _k5 = 'SFbIX3ZjdzmwkMm1U1J4QmPY6z61dWE';
+  const _k1 = 'ABLY_PART_1';
+  const _k2 = 'ABLY_PART_2';
+  const _k3 = 'ABLY_PART_3';
+  const _k4 = 'ABLY_PART_4';
+  const _k5 = 'ABLY_PART_5';
   const ABLY_KEY = _k1 + _k2 + _k3 + _k4 + _k5;
 
   // ── Adapter shorthand ─────────────────────────────────────────────────

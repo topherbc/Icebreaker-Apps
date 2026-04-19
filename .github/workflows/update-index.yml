@@ -6,9 +6,6 @@ on:
     paths-ignore:
       - 'index.html'
       - 'live-code/**'
-      - 'java-academy/week-1/1-mon-monkey-bot.html'
-      - 'java-academy/shared/trace-liveshare.js'
-      - 'classroom-apps/race-mode-rapid-fire.html'
 
 jobs:
   maintain:
@@ -18,40 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Inject Ably key parts
-        run: |
-          KEY="${{ secrets.ABLY_API_KEY }}"
-          P1="${KEY:0:5}"
-          P2="${KEY:5:6}"
-          P3="${KEY:11:7}"
-          P4="${KEY:18:8}"
-          P5="${KEY:26}"
-          sed -i "s|ABLY_PART_1|$P1|g" java-academy/week-1/1-mon-monkey-bot.html
-          sed -i "s|ABLY_PART_2|$P2|g" java-academy/week-1/1-mon-monkey-bot.html
-          sed -i "s|ABLY_PART_3|$P3|g" java-academy/week-1/1-mon-monkey-bot.html
-          sed -i "s|ABLY_PART_4|$P4|g" java-academy/week-1/1-mon-monkey-bot.html
-          sed -i "s|ABLY_PART_5|$P5|g" java-academy/week-1/1-mon-monkey-bot.html
-          sed -i "s|ABLY_PART_1|$P1|g" java-academy/shared/trace-liveshare.js
-          sed -i "s|ABLY_PART_2|$P2|g" java-academy/shared/trace-liveshare.js
-          sed -i "s|ABLY_PART_3|$P3|g" java-academy/shared/trace-liveshare.js
-          sed -i "s|ABLY_PART_4|$P4|g" java-academy/shared/trace-liveshare.js
-          sed -i "s|ABLY_PART_5|$P5|g" java-academy/shared/trace-liveshare.js
-          sed -i "s|ABLY_PART_1|$P1|g" classroom-apps/live-code.html
-          sed -i "s|ABLY_PART_2|$P2|g" classroom-apps/live-code.html
-          sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/live-code.html
-          sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/live-code.html
-          sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/live-code.html
-          sed -i "s|ABLY_PART_1|$P1|g" classroom-apps/amnesty-box.html
-          sed -i "s|ABLY_PART_2|$P2|g" classroom-apps/amnesty-box.html
-          sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/amnesty-box.html
-          sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/amnesty-box.html
-          sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/amnesty-box.html
-          sed -i "s|ABLY_PART_1|$P1|g" classroom-apps/race-mode-rapid-fire.html
-          sed -i "s|ABLY_PART_2|$P2|g" classroom-apps/race-mode-rapid-fire.html
-          sed -i "s|ABLY_PART_3|$P3|g" classroom-apps/race-mode-rapid-fire.html
-          sed -i "s|ABLY_PART_4|$P4|g" classroom-apps/race-mode-rapid-fire.html
-          sed -i "s|ABLY_PART_5|$P5|g" classroom-apps/race-mode-rapid-fire.html
 
       - name: Generate index.html
         run: |
@@ -189,15 +152,38 @@ jobs:
           print("index.html written.")
           EOF
 
-      - name: Commit and push all changes
+      - name: Commit and push index
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git add java-academy/week-1/1-mon-monkey-bot.html
-          git add java-academy/shared/trace-liveshare.js
-          git add classroom-apps/live-code.html
-          git add classroom-apps/amnesty-box.html
-          git add classroom-apps/race-mode-rapid-fire.html
-          git diff --staged --quiet || git commit -m "chore: inject keys and regenerate index [skip ci]"
+          git diff --staged --quiet || git commit -m "chore: regenerate index [skip ci]"
           git push
+
+      - name: Inject Ably key parts (deploy only, never committed to main)
+        run: |
+          KEY="${{ secrets.ABLY_API_KEY }}"
+          P1="${KEY:0:5}"
+          P2="${KEY:5:6}"
+          P3="${KEY:11:7}"
+          P4="${KEY:18:8}"
+          P5="${KEY:26}"
+          for f in \
+            java-academy/week-1/1-mon-monkey-bot.html \
+            java-academy/shared/trace-liveshare.js \
+            classroom-apps/live-code.html \
+            classroom-apps/amnesty-box.html \
+            classroom-apps/race-mode-rapid-fire.html; do
+            sed -i "s|ABLY_PART_1|$P1|g" "$f"
+            sed -i "s|ABLY_PART_2|$P2|g" "$f"
+            sed -i "s|ABLY_PART_3|$P3|g" "$f"
+            sed -i "s|ABLY_PART_4|$P4|g" "$f"
+            sed -i "s|ABLY_PART_5|$P5|g" "$f"
+          done
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          exclude_assets: '.github,live-code,node_modules,.git'

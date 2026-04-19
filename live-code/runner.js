@@ -112,6 +112,9 @@ function startJava({ files, mainClass }, { onStdout, onStderr, onDone }) {
         _stdinQueue.push(text);
       }
     },
+    kill() {
+      if (_child && !_child.killed) _child.kill();
+    },
   };
 }
 

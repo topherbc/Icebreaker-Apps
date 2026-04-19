@@ -66,6 +66,10 @@ const _activeRuns = new Map();
 ipcMain.on('run-java-stream', (event, payload) => {
   const id = event.sender.id;
 
+  // Kill any previous run from this renderer before starting a new one
+  const prev = _activeRuns.get(id);
+  if (prev) prev.kill();
+
   const handle = startJava(payload, {
     onStdout: (chunk) => {
       if (!event.sender.isDestroyed()) event.sender.send('java-stdout', chunk);
@@ -101,6 +105,11 @@ app.whenReady().then(async () => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+app.on('before-quit', () => {
+  for (const handle of _activeRuns.values()) handle.kill();
+  _activeRuns.clear();
 });
 
 app.on('window-all-closed', () => {

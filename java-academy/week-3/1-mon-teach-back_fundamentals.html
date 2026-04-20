@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Teach-Back</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #dddbd5;
+    --border-strong: #b8b5ae;
+    --text: #1a1917;
+    --text-muted: #6b6862;
+    --accent: #2d5a8e;
+    --accent-light: #e8f0f9;
+    --accent-mid: #c2d6ef;
+    --tag-bg: #eceae4;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-comment: #6c7086;
+    --code-keyword: #cba6f7;
+    --code-string: #a6e3a1;
+    --code-number: #fab387;
+    --code-type: #89b4fa;
+    --reveal-bg: #f0f5fb;
+    --radius: 10px;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .header-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .intro {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 600px;
+    line-height: 1.7;
+  }
+
+  .how-it-works {
+    margin-top: 20px;
+    background: var(--accent-light);
+    border: 1px solid var(--accent-mid);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--accent);
+    line-height: 1.7;
+  }
+
+  .how-it-works strong {
+    font-weight: 600;
+  }
+
+  /* CONCEPT LIST INDEX */
+  .concept-index {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .index-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .index-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .index-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* CONCEPT CARDS */
+  .concepts {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .concept-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .concept-card.open {
+    border-color: var(--accent);
+  }
+
+  .concept-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.12s;
+  }
+
+  .concept-header:hover {
+    background: var(--tag-bg);
+  }
+
+  .concept-card.open .concept-header {
+    background: var(--accent-light);
+    border-bottom: 1.5px solid var(--accent-mid);
+  }
+
+  .concept-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 24px;
+    flex-shrink: 0;
+  }
+
+  .concept-card.open .concept-num {
+    color: var(--accent);
+  }
+
+  .concept-title {
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .chevron {
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .concept-card.open .chevron {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+
+  /* CONCEPT BODY */
+  .concept-body {
+    display: none;
+    padding: 24px;
+  }
+
+  .concept-card.open .concept-body {
+    display: block;
+  }
+
+  /* PROMPT BOX */
+  .prompt-box {
+    background: var(--tag-bg);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .prompt-box .prompt-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  /* REVEAL SECTIONS */
+  .reveal-section {
+    margin-bottom: 14px;
+  }
+
+  .reveal-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    transition: background 0.12s, border-color 0.12s;
+  }
+
+  .reveal-toggle:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-mid);
+  }
+
+  .reveal-icon {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    width: 18px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+
+  .reveal-section.open .reveal-icon {
+    transform: rotate(90deg);
+  }
+
+  .reveal-content {
+    display: none;
+    margin-top: 10px;
+  }
+
+  .reveal-section.open .reveal-content {
+    display: block;
+  }
+
+  /* DEFINITION */
+  .definition {
+    background: var(--reveal-bg);
+    border: 1px solid var(--accent-mid);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text);
+  }
+
+  .definition code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: #d6e4f5;
+    color: #1a3a5c;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* CODE BLOCK */
+  .code-wrapper {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid #313244;
+  }
+
+  pre {
+    background: var(--code-bg);
+    padding: 20px;
+    overflow-x: auto;
+    margin: 0;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--code-text);
+  }
+
+  .kw { color: var(--code-keyword); }
+  .ty { color: var(--code-type); }
+  .st { color: var(--code-string); }
+  .nu { color: var(--code-number); }
+  .cm { color: var(--code-comment); font-style: italic; }
+  .fn { color: #f38ba8; }
+
+  .walkthrough-prompt {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--tag-bg);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="header-label">Java Bootcamp</div>
+    <h1>Teach-Back: Core Concepts</h1>
+    <p class="intro">You and your partner are going to take turns teaching each concept below. One person opens a section and explains the concept in their own words. Then you both look at the code and walk through it line by line together.</p>
+    <div class="how-it-works">
+      <strong>How it works:</strong> Open a section. Read the prompt. Try to explain it without peeking. When you're ready, reveal the definition, then the code. Walk through every line out loud. Then your partner takes the next one.
+    </div>
+  </header>
+
+  <div class="concepts" id="concepts"></div>
+
+</div>
+
+<script>
+const concepts = [
+  {
+    title: "Variables and Assignment",
+    prompt: "What is a variable, and what does it mean to assign a value to one? Why do we need them?",
+    definition: `A variable is a named container that holds a value in memory. When you declare a variable, you give it a type (like <code>int</code> or <code>String</code>), a name, and optionally an initial value. Assignment uses the <code>=</code> operator to store a value into that variable. The variable holds that value until something reassigns it.`,
+    code: `<span class="kw">int</span> score = <span class="nu">0</span>;
+<span class="kw">String</span> playerName = <span class="st">"Aldric"</span>;
+<span class="kw">boolean</span> isAlive = <span class="kw">true</span>;
+
+score = <span class="nu">42</span>;
+System.out.<span class="fn">println</span>(playerName + <span class="st">" has "</span> + score + <span class="st">" points"</span>);`,
+    walkthrough: "Walk through each line: what type is declared, what value is assigned, and what the last line prints to the console."
+  },
+  {
+    title: "If Statements and Conditions",
+    prompt: "What is an if statement, and how does a condition work? What happens when the condition is false?",
+    definition: `An <code>if</code> statement lets your program make a decision. It evaluates a condition (something that is either <code>true</code> or <code>false</code>). If the condition is true, the block of code inside the curly braces runs. If it's false, Java skips that block. You can add an <code>else</code> block to handle the false case.`,
+    code: `<span class="kw">int</span> health = <span class="nu">30</span>;
+
+<span class="kw">if</span> (health > <span class="nu">50</span>) {
+    System.out.<span class="fn">println</span>(<span class="st">"Healthy"</span>);
+} <span class="kw">else if</span> (health > <span class="nu">0</span>) {
+    System.out.<span class="fn">println</span>(<span class="st">"Wounded"</span>);
+} <span class="kw">else</span> {
+    System.out.<span class="fn">println</span>(<span class="st">"Defeated"</span>);
+}`,
+    walkthrough: "Trace through the code with health = 30. Which branch runs? What would print if health were 0? What if it were 75?"
+  },
+  {
+    title: "Methods",
+    prompt: "What is a method, and why do we use them? What are parameters and return values?",
+    definition: `A method is a named block of code that does a specific job. You define it once and can call it as many times as you need. Methods can accept input through <strong>parameters</strong> (values you pass in) and can send a result back using a <strong>return statement</strong>. The return type declared before the method name tells Java what type of value the method will give back (or <code>void</code> if it returns nothing).`,
+    code: `<span class="kw">static</span> <span class="ty">String</span> <span class="fn">greetPlayer</span>(<span class="ty">String</span> name, <span class="kw">int</span> level) {
+    <span class="kw">return</span> <span class="st">"Welcome, "</span> + name + <span class="st">"! You are level "</span> + level;
+}
+
+<span class="kw">static</span> <span class="kw">void</span> <span class="fn">printDivider</span>() {
+    System.out.<span class="fn">println</span>(<span class="st">"-------------------"</span>);
+}
+
+<span class="fn">printDivider</span>();
+System.out.<span class="fn">println</span>(<span class="fn">greetPlayer</span>(<span class="st">"Mira"</span>, <span class="nu">5</span>));
+<span class="fn">printDivider</span>();`,
+    walkthrough: "For each method: what are the parameters, what is the return type, and what does it actually do? Then trace through the three calling lines in order."
+  },
+  {
+    title: "Switch Statements",
+    prompt: "What is a switch statement, and when would you use one instead of an if/else chain? What does a break do?",
+    definition: `A <code>switch</code> statement compares one value against a list of cases and runs the matching block. Each <code>case</code> is a possible match. A <code>break</code> at the end of each case tells Java to stop and exit the switch; without it, execution falls through into the next case. A <code>default</code> case runs if nothing else matches.`,
+    code: `<span class="ty">String</span> role = <span class="st">"Mage"</span>;
+
+<span class="kw">switch</span> (role) {
+    <span class="kw">case</span> <span class="st">"Warrior"</span>:
+        System.out.<span class="fn">println</span>(<span class="st">"High armor, melee attacks"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">"Mage"</span>:
+        System.out.<span class="fn">println</span>(<span class="st">"Low armor, spell attacks"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">"Rogue"</span>:
+        System.out.<span class="fn">println</span>(<span class="st">"Medium armor, stealth attacks"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        System.out.<span class="fn">println</span>(<span class="st">"Unknown role"</span>);
+}`,
+    walkthrough: "Which case matches? What prints? What would happen if you removed the break after the Mage case? What does default handle?"
+  },
+  {
+    title: "Loops",
+    prompt: "What is a loop, and what problem does it solve? Describe both a for loop and a while loop.",
+    definition: `A loop repeats a block of code multiple times without you having to write it out manually. A <code>for</code> loop is used when you know how many times you want to repeat. A <code>while</code> loop keeps running as long as a condition stays true. Both loops have a way to eventually stop; without that, you get an infinite loop.`,
+    code: `<span class="cm">// For loop: counts from 1 to 5</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">1</span>; i <= <span class="nu">5</span>; i++) {
+    System.out.<span class="fn">println</span>(<span class="st">"Round "</span> + i);
+}
+
+<span class="cm">// While loop: runs until the player runs out of lives</span>
+<span class="kw">int</span> lives = <span class="nu">3</span>;
+<span class="kw">while</span> (lives > <span class="nu">0</span>) {
+    System.out.<span class="fn">println</span>(<span class="st">"Lives remaining: "</span> + lives);
+    lives--;
+}`,
+    walkthrough: "For the for loop: what are the three parts in the parentheses? For the while loop: what is the condition, and what eventually makes it stop?"
+  },
+  {
+    title: "Arrays",
+    prompt: "What is an array, and how is it different from a regular variable? How do you access something inside one?",
+    definition: `An array is a fixed-size container that holds multiple values of the same type, stored in order. Each slot has an index starting at <code>0</code>. You access a value by writing the array name followed by the index in square brackets. The size of an array is set when it's created and cannot change.`,
+    code: `<span class="ty">String</span>[] guild = {<span class="st">"Aldric"</span>, <span class="st">"Mira"</span>, <span class="st">"Finn"</span>, <span class="st">"Sera"</span>};
+
+System.out.<span class="fn">println</span>(guild[<span class="nu">0</span>]);  <span class="cm">// first element</span>
+System.out.<span class="fn">println</span>(guild[<span class="nu">3</span>]);  <span class="cm">// last element</span>
+System.out.<span class="fn">println</span>(guild.length); <span class="cm">// total size</span>
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i < guild.length; i++) {
+    System.out.<span class="fn">println</span>(<span class="st">"Member: "</span> + guild[i]);
+}`,
+    walkthrough: "What does each println print? Then walk through the loop: what value does i have each time through, and what gets printed on each iteration?"
+  },
+  {
+    title: "Classes, Objects, and Fields",
+    prompt: "What is a class, what is an object, and how do fields fit in? How does an object relate to the class it came from?",
+    definition: `A <strong>class</strong> is a blueprint that describes what something is and what data it holds. An <strong>object</strong> is a specific instance created from that blueprint. <strong>Fields</strong> (also called instance variables) are the pieces of data that each object carries around. Every object created from the same class has its own copy of those fields, with its own values.`,
+    code: `<span class="kw">class</span> <span class="ty">Hero</span> {
+    <span class="ty">String</span> name;
+    <span class="kw">int</span> level;
+    <span class="kw">boolean</span> isActive;
+}
+
+<span class="cm">// Creating two separate objects from the same class</span>
+<span class="ty">Hero</span> first = <span class="kw">new</span> <span class="ty">Hero</span>();
+first.name = <span class="st">"Aldric"</span>;
+first.level = <span class="nu">8</span>;
+first.isActive = <span class="kw">true</span>;
+
+<span class="ty">Hero</span> second = <span class="kw">new</span> <span class="ty">Hero</span>();
+second.name = <span class="st">"Mira"</span>;
+second.level = <span class="nu">5</span>;
+second.isActive = <span class="kw">false</span>;
+
+System.out.<span class="fn">println</span>(first.name + <span class="st">" vs "</span> + second.name);`,
+    walkthrough: "Identify the class, its fields, and then both objects. What is the value of first.level? Of second.isActive? What does the last line print?"
+  }
+];
+
+function buildConcepts() {
+  const container = document.getElementById('concepts');
+
+  concepts.forEach((concept, idx) => {
+    const num = String(idx + 1).padStart(2, '0');
+    const card = document.createElement('div');
+    card.className = 'concept-card';
+    card.innerHTML = `
+      <div class="concept-header" onclick="toggleCard(this)">
+        <span class="concept-num">${num}</span>
+        <span class="concept-title">${concept.title}</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+      <div class="concept-body">
+        <div class="prompt-box">
+          <div class="prompt-label">Your turn to explain</div>
+          ${concept.prompt}
+        </div>
+
+        <div class="reveal-section" id="def-${idx}">
+          <div class="reveal-toggle" onclick="toggleReveal('def-${idx}')">
+            <span class="reveal-icon">▶</span> Reveal definition
+          </div>
+          <div class="reveal-content">
+            <div class="definition">${concept.definition}</div>
+          </div>
+        </div>
+
+        <div class="reveal-section" style="margin-top:14px" id="code-${idx}">
+          <div class="reveal-toggle" onclick="toggleReveal('code-${idx}')">
+            <span class="reveal-icon">▶</span> Reveal code
+          </div>
+          <div class="reveal-content">
+            <div class="walkthrough-prompt" style="margin-bottom:10px;margin-top:0">Walk through each line of the code below with your partner. Explain what it does to the best of your ability before reading the prompt at the bottom.</div>
+            <div class="code-wrapper">
+              <pre><code>${concept.code}</code></pre>
+            </div>
+            <div class="walkthrough-prompt">${concept.walkthrough}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toggleCard(header) {
+  const card = header.closest('.concept-card');
+  card.classList.toggle('open');
+}
+
+function toggleReveal(id) {
+  const section = document.getElementById(id);
+  section.classList.toggle('open');
+}
+
+buildConcepts();
+</script>
+</body>
+</html>

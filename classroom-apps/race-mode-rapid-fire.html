@@ -2460,6 +2460,22 @@ label {
       <div id="student-mini-lb" class="hidden" style="width:100%; max-width:400px;"></div>
     </div>
 
+    <!-- Questions finished (waiting for podium) -->
+    <div id="student-finished" class="student-between hidden" style="display:none;">
+      <div class="loading-shapes" aria-hidden="true">
+        <svg class="loading-shape ls-1" width="40" height="40" viewBox="0 0 32 32"><polygon points="16,4 28,28 4,28" fill="var(--shape-triangle)"/></svg>
+        <svg class="loading-shape ls-2" width="40" height="40" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="var(--shape-circle)"/></svg>
+        <svg class="loading-shape ls-3" width="40" height="40" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="var(--shape-square)"/></svg>
+        <svg class="loading-shape ls-4" width="40" height="40" viewBox="0 0 32 32"><polygon points="16,2 30,16 16,30 2,16" fill="var(--shape-diamond)"/></svg>
+      </div>
+      <h2>That's all the questions!</h2>
+      <p style="color:var(--text-mid);">Waiting for results...</p>
+      <div class="student-score-card">
+        <div>Score<strong id="finished-score">0</strong></div>
+        <div>Rank<strong id="finished-rank">--</strong></div>
+      </div>
+    </div>
+
     <!-- Student podium -->
     <div id="student-podium" class="student-podium hidden" style="display:none; position:relative;">
       <div id="student-confetti-container" aria-hidden="true" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden;"></div>
@@ -3990,7 +4006,7 @@ function showLeaderboard(isFinal) {
   });
 
   // Broadcast
-  hostState.gameChannel.publish('leaderboard:show', { rankings: ranked.slice(0, 20) });
+  hostState.gameChannel.publish('leaderboard:show', { rankings: ranked.slice(0, 20), isFinal: isFinal });
 }
 
 // ================================================================
@@ -4477,7 +4493,11 @@ function subscribeToStudentEvents() {
   });
 
   ch.subscribe('leaderboard:show', function(msg) {
-    showStudentBetween(msg.data.rankings);
+    if (msg.data.isFinal) {
+      showStudentFinished(msg.data.rankings);
+    } else {
+      showStudentBetween(msg.data.rankings);
+    }
   });
 
   ch.subscribe('game:end', function(msg) {
@@ -4496,7 +4516,7 @@ function subscribeToStudentEvents() {
 //  STUDENT SCREENS
 // ================================================================
 function showStudentScreen(screen) {
-  ['student-join','student-loading','student-waiting','student-question','student-feedback','student-between','student-podium'].forEach(function(id) {
+  ['student-join','student-loading','student-waiting','student-question','student-feedback','student-between','student-finished','student-podium'].forEach(function(id) {
     var el = document.getElementById(id);
     el.style.display = 'none';
     el.classList.add('hidden');
@@ -4788,6 +4808,21 @@ function showStudentBetween(rankings) {
   }
   html += '</div>';
   miniLb.innerHTML = html;
+}
+
+// ================================================================
+//  STUDENT FINISHED (waiting for podium)
+// ================================================================
+function showStudentFinished(rankings) {
+  showStudentScreen('finished');
+
+  var myRanking = rankings.find(function(r) { return r.name === studentState.name; });
+  if (myRanking) {
+    studentState.rank = myRanking.rank;
+    studentState.score = myRanking.score;
+  }
+  document.getElementById('finished-score').textContent = studentState.score;
+  document.getElementById('finished-rank').textContent = studentState.rank ? '#' + studentState.rank : '--';
 }
 
 // ================================================================

@@ -643,7 +643,7 @@
 //  DATA
 // ══════════════════════════════════════════════
 
-const FUN_LABELS  = ['Origin Story','Field Profile','Psych Eval','Clearance Interview','Identity Check'];
+const FUN_LABELS  = ['Origin Story','Field Profile','Psych Eval','Clearance','Identity Check'];
 const TECH_LABELS = ['Systems Check','Code Clearance','Tech Screening','Data Audit','Analyst Drill'];
 
 const FUN_ICON_SVG = `<circle cx="11" cy="11" r="9" stroke="#a8880f" stroke-width="1.5" fill="none"/>
@@ -655,7 +655,7 @@ const TECH_ICON_SVG = `<rect x="2" y="5" width="18" height="12" rx="1" stroke="#
 const FUN_QS = [
   ["Your superpower only works on Tuesdays. What is it, and do you consider this a gift or a curse?", "tuesdayPower"],
   ["Describe your superhero origin story in one sentence. It must involve something embarrassing.", "origin"],
-  ["Name your one weakness. It cannot be kryptonite, the dark, or spicy food.", "weakness"],
+  ["Name your one weakness.", "weakness"],
   ["What is your hero name, and why would anyone be afraid of it?", "heroName"],
   ["Your signature move has a name. What is it, and what does it look like when it goes wrong?", "signatureMove"],
   ["What completely ordinary skill from your non-hero life would actually save the day on a mission?", "civilianSkill"],
@@ -689,13 +689,13 @@ const TECH_QS = [
   ["What method do you call on a BufferedReader to read one complete line at a time?",
    "readLine() -- returns a String, or null when the file ends"],
   ["Why does Java require a try/catch block when working with file IO?",
-   "IOException is a checked exception -- the compiler forces you to handle it explicitly"],
+   "An IOException can happen at runtime; the compiler forces you to handle it so the program doesn't crash unexpectedly"],
   ["You have a BufferedWriter called writer. What method writes a line of text to the file?",
    "writer.write(text) writes the text; call writer.newLine() to add a line break after it"],
   ["What is the risk of forgetting to call close() on your BufferedWriter after writing?",
    "The buffer may not flush -- data written to it may never actually reach the file"],
-  ["An IOException is a checked exception. What does that mean for the code that calls the method?",
-   "The caller must either catch it with try/catch or declare throws IOException on its own signature"],
+  ["Why do we require try/catch when calling a method that can throw an IOException?",
+   "The caller must either catch it with try/catch or declare throws IOException on its own signature so the error is handled"],
   ["What is the main difference between FileWriter and BufferedWriter?",
    "FileWriter writes directly to disk on every call; BufferedWriter batches writes in memory for efficiency"],
   ["What does the throws keyword on a method signature tell the caller?",
@@ -1134,66 +1134,52 @@ function showFinale() {
   showScreen('finaleScreen');
 }
 
-function s(key) {
-  if (slots[key]) return `<span class="slot-highlight">${slots[key]}</span>`;
-  return null;
+function hl(val) {
+  return `<span class="slot-highlight">${val}</span>`;
 }
+
+// Each template needs certain slots filled; text pulls from the recruit's answers
+const CLOSING_LINES = [
+  { needs: ['heroName'],       fn: () => `Hero name: ${hl(slots.heroName)}. HQ has been notified.` },
+  { needs: ['heroName'],       fn: () => `${hl(slots.heroName)}. Badge issued. Do not lose it.` },
+  { needs: ['weakness'],       fn: () => `Weakness on file: ${hl(slots.weakness)}. Field teams have been informed.` },
+  { needs: ['weakness'],       fn: () => `${hl(slots.weakness)}. Yes. Of course. HQ knew.` },
+  { needs: ['tuesdayPower'],   fn: () => `Tuesday ability: ${hl(slots.tuesdayPower)}. Wednesdays remain unaccounted for.` },
+  { needs: ['tuesdayPower'],   fn: () => `${hl(slots.tuesdayPower)}. Only on Tuesdays. The schedule has been updated.` },
+  { needs: ['origin'],         fn: () => `Origin: ${hl(slots.origin)}. Filed under "plausible."` },
+  { needs: ['signatureMove'],  fn: () => `Signature move: ${hl(slots.signatureMove)}. Do not attempt indoors.` },
+  { needs: ['signatureMove'],  fn: () => `${hl(slots.signatureMove)}. The training room will never be the same.` },
+  { needs: ['civilianSkill'],  fn: () => `Civilian skill: ${hl(slots.civilianSkill)}. Surprisingly relevant.` },
+  { needs: ['threeWords'],     fn: () => `Handler report: ${hl(slots.threeWords)}. This is on your permanent record.` },
+  { needs: ['hqLocation'],     fn: () => `Headquarters: ${hl(slots.hqLocation)}. Zoning has questions.` },
+  { needs: ['code'],           fn: () => `Code: ${hl(slots.code)}. The recruit said this with eye contact.` },
+  { needs: ['unheroicTrait'],  fn: () => `Liability: ${hl(slots.unheroicTrait)}. Squad leads have been briefed.` },
+  { needs: ['savedThing'],     fn: () => `Priority rescue item: ${hl(slots.savedThing)}. Noted twice.` },
+  { needs: ['nemesisTrait'],   fn: () => `Nemesis: ${hl(slots.nemesisTrait)}. "Yeah, that tracks."` },
+  { needs: ['heroName', 'weakness'],      fn: () => `${hl(slots.heroName)}, weakness: ${hl(slots.weakness)}. One of these will matter first.` },
+  { needs: ['heroName', 'signatureMove'], fn: () => `${hl(slots.heroName)} executes ${hl(slots.signatureMove)}. Cleared for field.` },
+  { needs: ['tuesdayPower', 'weakness'],  fn: () => `Power: ${hl(slots.tuesdayPower)}. Weakness: ${hl(slots.weakness)}. The math works out.` },
+  { needs: ['civilianSkill', 'heroName'], fn: () => `${hl(slots.heroName)}, formerly known for ${hl(slots.civilianSkill)}. Promoted.` },
+];
 
 function renderDossier() {
   const target = document.getElementById('finaleContent');
 
-  // ── Opener (always) ──
-  const hn   = s('heroName');
-  const name = hn ? hn : 'the recruit (name pending legal review)';
-  const opener = `Intake file ${sessionId}. Following a background check, two personality assessments, a surprisingly contentious eye test, and seventeen minutes in a waiting room with only a 2019 magazine about boats, ${name} has been processed and tentatively cleared for field assignment. HQ extends a warm welcome, budget permitting.`;
+  // Gather eligible one-liners
+  const eligible = CLOSING_LINES.filter(t => t.needs.every(k => slots[k] && slots[k].trim()));
 
-  // ── Candidate pool ──
-  const candidates = [];
+  // Pick up to 3 unique lines at random
+  const picked = shuffle([...eligible]).slice(0, 3).map(t => t.fn());
 
-  const origParts = [];
-  const orig = s('origin');
-  if (orig) origParts.push(`Official origin statement: ${orig}. This has been flagged as "plausible" by one reviewer and "extremely plausible" by a second reviewer who did not read it.`);
-  const wk = s('weakness');
-  if (wk) origParts.push(`Documented vulnerability: ${wk}. Field teams have been informed. Two of them laughed. One asked a clarifying question that made things worse.`);
-  if (origParts.length) candidates.push(origParts.join(' '));
+  // Fallback if no slots were filled
+  if (picked.length === 0) {
+    picked.push('Intake complete. Badge issued. Welcome to Hero Dispatch.');
+  }
 
-  const cs = s('civilianSkill');
-  if (cs) candidates.push(`Civilian asset assessment flagged one transferable skill: ${cs}. The tactical team spent twenty minutes arguing about whether this was useful or just interesting. They did not reach a conclusion. The meeting ended because someone had a dentist appointment.`);
+  // Always end with a closer
+  picked.push('File sealed. Welcome to Hero Dispatch.');
 
-  const tp = s('tuesdayPower');
-  if (tp) candidates.push(`Ability on file: ${tp}. Active Tuesdays only. The recruit was asked what they do on Wednesdays instead. They paused for a long time before answering. That pause has been logged separately.`);
-
-  const smParts = [];
-  const sm = s('signatureMove');
-  if (sm) smParts.push(`Primary combat technique: ${sm}. When asked to demonstrate, the recruit said they would rather not. This response has been entered into the record as "confident."`);
-  const tw = s('threeWords');
-  if (tw) smParts.push(`Handler description on file: ${tw}. HR notes this is technically four words if you count carefully, but has chosen not to bring this up.`);
-  if (smParts.length) candidates.push(smParts.join(' '));
-
-  const hqParts = [];
-  const hq = s('hqLocation');
-  if (hq) hqParts.push(`Proposed headquarters: ${hq}. Zoning has been contacted. Zoning has questions. Many questions. Zoning has asked that the recruit not contact them directly.`);
-  const code = s('code');
-  if (code) hqParts.push(`Personal code of conduct: ${code}. The recruit delivered this with eye contact that made the intake officer slightly uncomfortable. It has been filed under "committed."`);
-  if (hqParts.length) candidates.push(hqParts.join(' '));
-
-  const ut = s('unheroicTrait');
-  if (ut) candidates.push(`Team integration liability: ${ut}. This was disclosed voluntarily, which is either a sign of honesty or a sign that it is so obvious there was no point hiding it. Either way, squad leads have been briefed and have already started a group chat about it.`);
-
-  const st = s('savedThing');
-  if (st) candidates.push(`Emergency retrieval priority: ${st}. The Behavioral Analysis Unit reviewed this response for eleven minutes before writing the word "noted" and closing the file. They have since reopened it twice.`);
-
-  const nt = s('nemesisTrait');
-  if (nt) candidates.push(`Nemesis profile: ${nt}. Upon hearing this description, the recruit said "yeah, that tracks" and did not elaborate. This has been entered into the system as a security concern, a personality insight, and, in one analyst's words, "kind of impressive actually."`);
-
-  // ── Pick 2 at random ──
-  const chosen = shuffle([...candidates]).slice(0, 2);
-
-  // ── Closer (always) ──
-  const closer = `File sealed. Badge issued. Please do not bend the badge. The last recruit bent their badge and we have not recovered from it as an organization. Welcome to Hero Dispatch.`;
-
-  const all = [opener, ...chosen, closer];
-  target.innerHTML = all.map(p => `<p>${p}</p>`).join('');
+  target.innerHTML = picked.map(p => `<p>${p}</p>`).join('');
 }
 function restart() {
   slots = {}; cards = []; activeCards = []; rotationDeg = 0; landedIndex = -1;

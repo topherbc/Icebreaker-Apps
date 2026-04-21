@@ -72,7 +72,7 @@
 
   // ── Ably handles ──────────────────────────────────────────────────────
   let ablyClient = null, ablyChannel = null, ablyPresence = null;
-  let bc = null, subscribed = false;
+  let bc = null, subscribed = false, presenceSubscribed = false;
   let _heartbeatTimer = null, _staleTimer = null, _hideCloseTimer = null;
 
   // ── Avatar palette ────────────────────────────────────────────────────
@@ -939,11 +939,14 @@
       });
       subscribed = true;
     }
-    ablyPresence.subscribe('enter',  m => onPresenceEnter(m.clientId));
-    ablyPresence.subscribe('leave',  m => onPresenceLeave(m.clientId));
-    ablyPresence.subscribe('update', () => {});
-    ablyChannel.on('attached', () => enterPresenceAndAnnounce());
-    enterPresenceAndAnnounce();
+    if (!presenceSubscribed) {
+      ablyPresence.subscribe('enter',  m => onPresenceEnter(m.clientId));
+      ablyPresence.subscribe('leave',  m => onPresenceLeave(m.clientId));
+      ablyPresence.subscribe('update', () => {});
+      presenceSubscribed = true;
+    }
+    ablyChannel.once('attached', () => enterPresenceAndAnnounce());
+    if (ablyChannel.state === 'attached') enterPresenceAndAnnounce();
   }
 
   function enterPresenceAndAnnounce() {
@@ -1005,7 +1008,7 @@
   function onPresenceLeave(clientId) {
     if (clientId === getClientId()) return;
     const name = displayName(clientId);
-    console.log('[presence] LEAVE fired for', name, '— starting 3s grace timer');
+    console.log('[presence] LEAVE fired for', name, '— starting 10s grace timer');
     if (_presenceLeaveTimers[name]) clearTimeout(_presenceLeaveTimers[name]);
     _presenceLeaveTimers[name] = setTimeout(() => {
       delete _presenceLeaveTimers[name];
@@ -1021,7 +1024,7 @@
     if (ablyChannel)  { try { ablyChannel.unsubscribe(); ablyChannel.presence.unsubscribe(); } catch(e) {} ablyChannel = null; }
     if (ablyClient)   { try { ablyClient.close().catch(() => {}); } catch(e) {} ablyClient = null; }
     if (bc)           { try { bc.close(); } catch(e) {} bc = null; }
-    subscribed = false;
+    subscribed = false; presenceSubscribed = false;
   }
 
   function leaveSession() {
@@ -1033,7 +1036,7 @@
     stopHeartbeat();
     stopStaleCheck();
     const _ch = ablyChannel, _cl = ablyClient, _bc = bc;
-    ablyPresence = null; ablyChannel = null; ablyClient = null; bc = null; subscribed = false;
+    ablyPresence = null; ablyChannel = null; ablyClient = null; bc = null; subscribed = false; presenceSubscribed = false;
     setTimeout(() => {
       if (_ch) { try { _ch.unsubscribe(); _ch.presence.unsubscribe(); } catch(e) {} }
       if (_cl) { try { _cl.close().catch(() => {}); } catch(e) {} }
@@ -1263,7 +1266,7 @@
     const _bc = bc;
     try { ablyClient.close(); } catch(e) {}
     if (_bc) { try { _bc.close(); } catch(e) {} }
-    ablyPresence = null; ablyChannel = null; ablyClient = null; bc = null; subscribed = false;
+    ablyPresence = null; ablyChannel = null; ablyClient = null; bc = null; subscribed = false; presenceSubscribed = false;
   }
   window.addEventListener('beforeunload', _handlePageUnload);
   window.addEventListener('pagehide',     _handlePageUnload);

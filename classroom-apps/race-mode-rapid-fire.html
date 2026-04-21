@@ -1007,6 +1007,11 @@ label {
   gap: 8px;
   min-height: 48px;
 }
+.player-tile.player-disconnected {
+  opacity: 0.45;
+  border-style: dashed;
+  border-color: rgba(245,166,35,0.3);
+}
 .player-tile .kick-btn {
   background: transparent;
   border: none;
@@ -1927,6 +1932,10 @@ label {
   border-color: var(--surface2);
   color: var(--amber);
 }
+[data-theme="dark"] .player-tile.player-disconnected {
+  opacity: 0.45;
+  border-style: dashed;
+}
 /* Student between dark mode */
 [data-theme="dark"] .student-between p {
   color: var(--text-on-dark-mid);
@@ -2822,7 +2831,9 @@ var hostState = {
   timerTotal: 0,
   isPaused: false,
   isRoomLocked: false,
-  players: {},        // { clientId: { id, name, score, streak, answers } }
+  players: {},        // { clientId: { id, name, score, streak, answers, disconnected } }
+  kickedPlayerIds: {},   // { clientId: true } -- explicitly kicked, block rejoin
+  disconnectTimers: {},  // { clientId: timeoutId } -- grace period before removal
   answerTally: {},     // { answerId: count }
   answeredThisRound: 0,
   timerInterval: null,
@@ -3444,23 +3455,66 @@ function setupHostChannels(code) {
 
   // Presence: track players joining/leaving (skip the host's own entry)
   hostState.presenceChannel.presence.subscribe('enter', function(msg) {
-    if (hostState.isRoomLocked) return;
     var data = msg.data || {};
     if (data.role === 'host') return;
+
+    var existingPlayer = hostState.players[msg.clientId];
+
+    // Known player reconnecting: restore them regardless of room lock
+    if (existingPlayer) {
+      if (hostState.disconnectTimers[msg.clientId]) {
+        clearTimeout(hostState.disconnectTimers[msg.clientId]);
+        delete hostState.disconnectTimers[msg.clientId];
+      }
+      existingPlayer.disconnected = false;
+      existingPlayer.name = data.name || existingPlayer.name;
+      existingPlayer.emoji = data.emoji || existingPlayer.emoji;
+      renderLobbyPlayers();
+      updateAnsweredCount();
+      return;
+    }
+
+    // Kicked player trying to rejoin: block
+    if (hostState.kickedPlayerIds[msg.clientId]) return;
+
+    // Room locked and not a known player: block new joins
+    if (hostState.isRoomLocked) return;
+
+    // New player joining open lobby
     hostState.players[msg.clientId] = {
       id: msg.clientId,
       name: data.name || 'Anonymous',
       emoji: data.emoji || '',
       score: 0,
       streak: 0,
-      answers: []
+      answers: [],
+      disconnected: false
     };
     renderLobbyPlayers();
   });
 
   hostState.presenceChannel.presence.subscribe('leave', function(msg) {
-    delete hostState.players[msg.clientId];
-    renderLobbyPlayers();
+    var player = hostState.players[msg.clientId];
+    if (!player) return;
+
+    // In lobby: remove immediately (normal behavior)
+    if (!hostState.isRoomLocked && hostState.gameStatus === 'lobby') {
+      delete hostState.players[msg.clientId];
+      renderLobbyPlayers();
+      return;
+    }
+
+    // Game active: mark disconnected, start 60s grace period
+    player.disconnected = true;
+    updateAnsweredCount();
+
+    hostState.disconnectTimers[msg.clientId] = setTimeout(function() {
+      if (hostState.players[msg.clientId] && hostState.players[msg.clientId].disconnected) {
+        delete hostState.players[msg.clientId];
+        delete hostState.disconnectTimers[msg.clientId];
+        updateAnsweredCount();
+      }
+    }, 60000);
   });
 
   // Host enters presence so students can detect the room exists
@@ -3494,6 +3548,8 @@ function launchGame() {
   }
 
   hostState.players = {};
+  hostState.kickedPlayerIds = {};
+  hostState.disconnectTimers = {};
   hostState.currentQuestionIndex = 0;
   hostState.gameStatus = 'lobby';
   hostState.isRoomLocked = false;
@@ -3517,20 +3573,28 @@ function renderLobbyPlayers() {
   var grid = document.getElementById('player-grid');
   var names = Object.values(hostState.players);
   grid.innerHTML = names.map(function(p) {
-    return '<div class="player-tile" role="listitem">' +
+    var dcClass = p.disconnected ? ' player-disconnected' : '';
+    var dcLabel = p.disconnected ? ' <em style="font-weight:400;opacity:0.7;">(reconnecting)</em>' : '';
+    return '<div class="player-tile' + dcClass + '" role="listitem">' +
       (p.emoji ? '<span style="font-size:20px;">' + p.emoji + '</span>' : '') +
-      '<span>' + escHtml(p.name) + '</span>' +
+      '<span>' + escHtml(p.name) + dcLabel + '</span>' +
       '<button class="kick-btn" onclick="kickPlayer(\''+p.id+'\')" aria-label="Kick '+escAttr(p.name)+'">&#10005;</button>' +
       '</div>';
   }).join('');
-  document.getElementById('player-count-num').textContent = names.length;
-  document.getElementById('start-game-btn').disabled = names.length < 1;
+  var connectedCount = names.filter(function(p) { return !p.disconnected; }).length;
+  document.getElementById('player-count-num').textContent = connectedCount;
+  document.getElementById('start-game-btn').disabled = connectedCount < 1;
 }
 
 function kickPlayer(clientId) {
   var p = hostState.players[clientId];
   if (!p) return;
   hostState.gameChannel.publish('player:kicked', { playerId: clientId });
+  hostState.kickedPlayerIds[clientId] = true;
+  if (hostState.disconnectTimers[clientId]) {
+    clearTimeout(hostState.disconnectTimers[clientId]);
+    delete hostState.disconnectTimers[clientId];
+  }
   delete hostState.players[clientId];
   renderLobbyPlayers();
 }
@@ -3698,8 +3762,15 @@ function renderTallyBars(q) {
 }
 
 function updateAnsweredCount() {
-  var total = Object.keys(hostState.players).length;
-  document.getElementById('live-q-answered').textContent = hostState.answeredThisRound + ' / ' + total + ' answered';
+  var allPlayers = Object.values(hostState.players);
+  var connected = allPlayers.filter(function(p) { return !p.disconnected; });
+  var el = document.getElementById('live-q-answered');
+  var dc = allPlayers.length - connected.length;
+  if (dc > 0) {
+    el.textContent = hostState.answeredThisRound + ' / ' + connected.length + ' answered (' + dc + ' reconnecting)';
+  } else {
+    el.textContent = hostState.answeredThisRound + ' / ' + allPlayers.length + ' answered';
+  }
 }
 
 // ================================================================
@@ -4138,6 +4209,8 @@ function playAgain() {
 
   // Reset scores, re-launch with same quiz in lobby
   hostState.players = {};
+  hostState.kickedPlayerIds = {};
+  hostState.disconnectTimers = {};
   hostState.roomCode = generateRoomCode();
   hostState.gameStatus = 'lobby';
   hostState.isRoomLocked = false;

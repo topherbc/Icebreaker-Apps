@@ -719,14 +719,14 @@
         <span class="line-content"> </span>
       </div>
 
-      <!-- BUG 3 -- Line 22: loop variable is Object instead of String -->
+      <!-- BUG 3 -- Line 22: off-by-one, <= should be < -->
       <div class="code-line editable" id="cl-22" data-bug-index="2">
         <span class="line-num">22</span>
         <input
           class="line-edit"
           id="edit-22"
           type="text"
-          value="        for (Object villain : villains) {"
+          value="        for (int i = 0; i <= villains.size(); i++) {"
           aria-label="Editable code line 22 -- fix the bug"
           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
           oninput="handleBugEdit(2, this.value)"
@@ -739,14 +739,14 @@
         <span class="line-content"> </span>
       </div>
 
-      <!-- BUG 2 -- Line 24: get uses wrong case -->
+      <!-- BUG 2 -- Line 24: .get(i) passes int index instead of String key -->
       <div class="code-line editable" id="cl-24" data-bug-index="1">
         <span class="line-num">24</span>
         <input
           class="line-edit"
           id="edit-24"
           type="text"
-          value='            String threat = threatLevels.get("doctor nullius");'
+          value="            String threat = threatLevels.get(i);"
           aria-label="Editable code line 24 -- fix the bug"
           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
           oninput="handleBugEdit(1, this.value)"
@@ -762,7 +762,7 @@
       <!-- Line 26: println -->
       <div class="code-line" id="cl-26">
         <span class="line-num">26</span>
-        <span class="line-content">            <span class="ty">System</span>.out.<span class="mt">println</span>(villain + <span class="st">": "</span> + threat);</span>
+        <span class="line-content">            <span class="ty">System</span>.out.<span class="mt">println</span>(villains.<span class="mt">get</span>(i) + <span class="st">": "</span> + threat);</span>
       </div>
 
       <!-- Line 27: close for -->
@@ -798,7 +798,7 @@
     <!-- Q1 -->
     <div class="question-block" id="card-q1">
       <span class="question-anchor">Anchored to: ArrayList declaration (line 8)</span>
-      <p class="question-text">This ArrayList is missing something in its declaration. Before moving on -- what is missing and why does it matter in Java?</p>
+      <p class="question-text">Look at how this ArrayList is declared. What is missing, and why does it matter?</p>
       <textarea
         class="prediction-input"
         id="q1"
@@ -842,8 +842,8 @@
 
     <!-- Q4 -->
     <div class="question-block" id="card-q4">
-      <span class="question-anchor">Anchored to: HashMap put and get calls (lines 16-18, 24)</span>
-      <p class="question-text">When a HashMap .get() call uses a key that does not exist in the map, what does Java return? What does that mean for how the output line prints?</p>
+      <span class="question-anchor">Anchored to: HashMap .get() call (line 24)</span>
+      <p class="question-text">Look at what is being passed into <code>.get()</code> on this line. What type does the HashMap expect as a key? What is actually being passed in, and why is that a problem?</p>
       <textarea
         class="prediction-input"
         id="q4"
@@ -861,8 +861,8 @@
 
     <!-- Q5 -->
     <div class="question-block" id="card-q5">
-      <span class="question-anchor">Anchored to: enhanced for loop (line 22)</span>
-      <p class="question-text">Walk through what happens when this loop runs as written. What does Java actually know about each element? Why is Object the wrong choice here, and what makes your fix correct?</p>
+      <span class="question-anchor">Anchored to: for loop (line 22)</span>
+      <p class="question-text">Trace through this loop. How many times does it execute? How many items are in the list? What happens on the final iteration?</p>
       <textarea
         class="prediction-input"
         id="q5"
@@ -893,11 +893,8 @@
 <script>
 // ===== BUG DEFINITIONS =====
 // Bug 0: raw ArrayList -- fix: ArrayList<String> villains = new ArrayList<>();  OR  ArrayList<String> villains = new ArrayList<String>();
-// Bug 1: casing mismatch in get -- fix: replace "doctor nullius" with "villain" variable (the correct fix)
-//        Actually the correct fix is to use `villain` as the key, not a hardcoded string with wrong case.
-//        Accept: threatLevels.get(villain)  -- this is the structurally correct fix.
-//        Also accept: threatLevels.get("Doctor Nullius") -- acceptable partial fix
-// Bug 2: Object loop var -- fix: String villain : villains
+// Bug 1: .get(i) wrong key type -- fix: threatLevels.get(villains.get(i))
+// Bug 2: off-by-one in for loop -- fix: i < villains.size() instead of i <= villains.size()
 
 const BUGS = [
   {
@@ -916,36 +913,31 @@ const BUGS = [
     }
   },
   {
-    // Bug 1: casing mismatch in get, line 24
+    // Bug 1: .get(i) passes int index instead of String key, line 24
     dotIndex: 1,
     lineEl: 'cl-24',
     inputEl: 'edit-24',
     identified: false,
     fixed: false,
-    originalValue: '            String threat = threatLevels.get("doctor nullius");',
+    originalValue: '            String threat = threatLevels.get(i);',
     validate: (val) => {
       const v = val.replace(/\s+/g, ' ').trim();
-      // Accept: threatLevels.get(villain) -- use the loop variable
-      // Accept: threatLevels.get("Doctor Nullius") -- fix the case
-      // Reject: anything still containing "doctor nullius" lowercase
-      if (v.toLowerCase().includes('"doctor nullius"')) return false;
-      return (
-        v.includes('threatLevels.get(villain)') ||
-        v.includes('threatLevels.get("Doctor Nullius")')
-      );
+      // Accept: threatLevels.get(villains.get(i))
+      return v.includes('threatLevels.get(villains.get(i))');
     }
   },
   {
-    // Bug 2: Object loop var, line 22
+    // Bug 2: off-by-one, <= should be <, line 22
     dotIndex: 2,
     lineEl: 'cl-22',
     inputEl: 'edit-22',
     identified: false,
     fixed: false,
-    originalValue: '        for (Object villain : villains) {',
+    originalValue: '        for (int i = 0; i <= villains.size(); i++) {',
     validate: (val) => {
-      const v = val.replace(/\s+/g, ' ').trim().toLowerCase();
-      return v.includes('for (string villain') || v.includes('for(string villain');
+      const v = val.replace(/\s+/g, ' ').trim();
+      // Must contain i < villains.size() and NOT <=
+      return v.includes('i < villains.size()') && !v.includes('i <= villains.size()');
     }
   }
 ];
@@ -1064,11 +1056,11 @@ const CODE_LINES = [
   '',
   '        System.out.println("--- Villain Threat Report ---");',
   '',
-  '        for (Object villain : villains) {',
+  '        for (int i = 0; i <= villains.size(); i++) {',
   '',
-  '            String threat = threatLevels.get("doctor nullius");',
+  '            String threat = threatLevels.get(i);',
   '',
-  '            System.out.println(villain + ": " + threat);',
+  '            System.out.println(villains.get(i) + ": " + threat);',
   '        }',
   '',
   '    }',
@@ -1079,8 +1071,8 @@ const Q_META = [
   { id: 'q1', anchor: 'Line 8',           label: 'ArrayList generics declaration' },
   { id: 'q2', anchor: 'Lines 10-12',      label: 'ArrayList indexing' },
   { id: 'q3', anchor: 'Line 14',          label: 'HashMap key/value types' },
-  { id: 'q4', anchor: 'Lines 16-18, 24',  label: 'HashMap null return behavior' },
-  { id: 'q5', anchor: 'Line 22',          label: 'Enhanced for-loop type mismatch (Bug 3)' },
+  { id: 'q4', anchor: 'Line 24',           label: 'HashMap .get() wrong key type' },
+  { id: 'q5', anchor: 'Line 22',          label: 'For-loop off-by-one (Bug 3)' },
   { id: 'q6', anchor: 'Full program',     label: 'Full console trace (all bugs fixed)' },
 ];
 
@@ -1088,12 +1080,12 @@ const BUG_META = [
   { bugIndex: 0, line: 8,  label: 'Raw ArrayList (generics missing)',
     original: 'ArrayList villains = new ArrayList();',
     fix:      'ArrayList<String> villains = new ArrayList<>();' },
-  { bugIndex: 1, line: 24, label: 'HashMap key casing mismatch (Logic)',
-    original: 'String threat = threatLevels.get("doctor nullius");',
-    fix:      'String threat = threatLevels.get(villain);' },
-  { bugIndex: 2, line: 22, label: 'Enhanced for-loop type mismatch (Type safety)',
-    original: 'for (Object villain : villains) {',
-    fix:      'for (String villain : villains) {' },
+  { bugIndex: 1, line: 24, label: 'HashMap .get() wrong key type',
+    original: 'String threat = threatLevels.get(i);',
+    fix:      'String threat = threatLevels.get(villains.get(i));' },
+  { bugIndex: 2, line: 22, label: 'For-loop off-by-one (IndexOutOfBoundsException)',
+    original: 'for (int i = 0; i <= villains.size(); i++) {',
+    fix:      'for (int i = 0; i < villains.size(); i++) {' },
 ];
 
 // ===== EXPORT =====
@@ -1101,7 +1093,7 @@ function exportPredictions() {
   const out = [];
 
   out.push('# Hero HQ -- Villain Tracker Debug Session');
-  out.push('**Week 3, Thursday | Topic: ArrayList, HashMap, enhanced for-loop**');
+  out.push('**Week 3, Thursday | Topic: ArrayList, HashMap, for-loop**');
   out.push('');
   out.push('---');
   out.push('');

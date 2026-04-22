@@ -406,8 +406,10 @@
     if (!ctrl) return;
 
     // Find the export button reference point — apps use different IDs.
-    const exportBtn = document.getElementById('export-btn')
+    // Only use it as an insertBefore anchor if it lives inside ctrl.
+    const _exportBtn = document.getElementById('export-btn')
       || document.getElementById('btn-export');
+    const exportBtn = (_exportBtn && ctrl.contains(_exportBtn)) ? _exportBtn : null;
 
     // Match the leave button class to the app's existing button style.
     // Find the first non-theme button in the container to borrow its class.

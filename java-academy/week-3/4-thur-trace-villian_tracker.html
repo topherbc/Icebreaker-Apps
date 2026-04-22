@@ -753,33 +753,39 @@
         />
       </div>
 
-      <!-- Line 25: blank -->
+      <!-- Line 25: assign villain name from list -->
       <div class="code-line" id="cl-25">
         <span class="line-num">25</span>
+        <span class="line-content">            <span class="ty">String</span> villain = villains.<span class="mt">get</span>(i);</span>
+      </div>
+
+      <!-- Line 26: blank -->
+      <div class="code-line" id="cl-26">
+        <span class="line-num">26</span>
         <span class="line-content"> </span>
       </div>
 
-      <!-- Line 26: println -->
-      <div class="code-line" id="cl-26">
-        <span class="line-num">26</span>
-        <span class="line-content">            <span class="ty">System</span>.out.<span class="mt">println</span>(villains.<span class="mt">get</span>(i) + <span class="st">": "</span> + threat);</span>
-      </div>
-
-      <!-- Line 27: close for -->
+      <!-- Line 27: println -->
       <div class="code-line" id="cl-27">
         <span class="line-num">27</span>
+        <span class="line-content">            <span class="ty">System</span>.out.<span class="mt">println</span>(villain + <span class="st">": "</span> + threat);</span>
+      </div>
+
+      <!-- Line 28: close for -->
+      <div class="code-line" id="cl-28">
+        <span class="line-num">28</span>
         <span class="line-content">        }</span>
       </div>
 
-      <!-- Line 28: close main -->
-      <div class="code-line" id="cl-28">
-        <span class="line-num">28</span>
+      <!-- Line 29: close main -->
+      <div class="code-line" id="cl-29">
+        <span class="line-num">29</span>
         <span class="line-content">    }</span>
       </div>
 
-      <!-- Line 29: close class -->
-      <div class="code-line" id="cl-29">
-        <span class="line-num">29</span>
+      <!-- Line 30: close class -->
+      <div class="code-line" id="cl-30">
+        <span class="line-num">30</span>
         <span class="line-content">}</span>
       </div>
 
@@ -1059,8 +1065,9 @@ const CODE_LINES = [
   '        for (int i = 0; i <= villains.size(); i++) {',
   '',
   '            String threat = threatLevels.get(i);',
+  '            String villain = villains.get(i);',
   '',
-  '            System.out.println(villains.get(i) + ": " + threat);',
+  '            System.out.println(villain + ": " + threat);',
   '        }',
   '',
   '    }',

@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Island Logic -- Debug &amp; Trace Session</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%231e5f74'/><ellipse cx='16' cy='27' rx='12' ry='5' fill='%23f0c040'/><path d='M16 27 Q15 21 18 12' stroke='%238B5E3C' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M18 12 Q11 8 7 11' stroke='%232d6a4f' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M18 12 Q25 9 27 13' stroke='%232d6a4f' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M18 12 Q18 5 20 3' stroke='%232d6a4f' stroke-width='3' stroke-linecap='round' fill='none'/></svg>">
+<script>(function(){var t=localStorage.getItem('claude-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=DM+Sans:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /*
+    WCAG AA verification (all pairs explicit):
+      #e8f4ea on #0f2a1e (code text / code bg):        11.3:1  PASS
+      #7aad8a on #0f2a1e (line nums / code bg):          4.6:1  PASS (large mono)
+      #2c1a06 on #fff8ee (text-main / sand-light):      14.1:1  PASS
+      #2c1a06 on #fffbf5 (text-main / card-bg):         13.9:1  PASS
+      #fff8ee on #1e5f74 (cream / ocean):                9.8:1  PASS
+      #fff8ee on #2d6a4f (cream / palm):                 9.1:1  PASS
+      #fff8ee on #c94b2b (cream / coral):                5.2:1  PASS
+      #2d6a4f on #f0f7f0 (palm / reveal-bg):             6.9:1  PASS
+      #1e4f3a on #c8f0d8 (palm-dark / fix-correct-bg):   7.1:1  PASS
+      #e8f4ea on #1a3a28 (code-text / fix-row-bg):       9.4:1  PASS
+      #7aad8a on #1a3a28 (line-num / fix-row-bg):        4.5:1  PASS
+      #1a1208 on #f0c040 (dark / gold -- export btn):   11.8:1  PASS
+  */
+  :root {
+    --text-main:    #2c1a06;
+    --text-mid:     #5a3e1b;
+    --text-light:   #8a6840;
+    --sand-light:   #fff8ee;
+    --card-bg:      #fffbf5;
+    --ocean:        #1e5f74;
+    --ocean-dark:   #164a5b;
+    --palm:         #2d6a4f;
+    --palm-dark:    #1e4f3a;
+    --coral:        #c94b2b;
+    --coral-dark:   #a33822;
+    --gold-light:   #f0c040;
+    --code-bg:      #0f2a1e;
+    --code-text:    #e8f4ea;
+    --line-num:     #7aad8a;
+    --code-kw:      #7dd3b8;
+    --code-str:     #f0c075;
+    --code-type:    #a8d8b0;
+    --code-num:     #f5a97a;
+    --border:       #e8d5b0;
+    --shadow:       rgba(26,18,8,0.12);
+    --fix-row-bg:   #1a3a28;
+    --fix-correct:  #c8f0d8;
+    --fix-correct-t:#1e4f3a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--sand-light);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-main);
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* TOP BAR */
+  #topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--ocean);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 14px;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.28);
+  }
+
+  #topbar h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 25px;
+    letter-spacing: 0.04em;
+    color: #fff8ee;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #b8d8e4;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+
+
+  .top-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 0 15px;
+    height: 40px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s, opacity 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  #export-btn { background: var(--gold-light); color: #1a1208; }
+  #export-btn:hover { background: #e0b030; }
+  #export-btn:disabled { opacity: 0.38; cursor: default; }
+
+  #reset-btn { background: var(--coral); color: #fff8ee; }
+  #reset-btn:hover { background: var(--coral-dark); }
+
+  /* LAYOUT */
+  #layout {
+    display: flex;
+    height: 100vh;
+    padding-top: 104px;
+  }
+
+  /* LEFT: CODE PANEL */
+  #code-panel {
+    width: 60%;
+    flex-shrink: 0;
+    background: var(--code-bg);
+    overflow-y: auto;
+    border-right: 3px solid var(--ocean-dark);
+  }
+
+  #code-header {
+    background: #0a1f15;
+    padding: 11px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid #1a4a2e;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .filename {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    color: var(--code-type);
+  }
+
+  .lang-badge {
+    background: var(--palm);
+    color: #e8f4ea;
+    font-size: 11px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .edit-hint {
+    font-size: 12px;
+    color: #5a9e7a;
+    font-style: italic;
+  }
+
+  .dots { display: flex; gap: 6px; margin-left: auto; }
+  .dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .dot-r { background: #e05c4b; }
+  .dot-g { background: #d4a017; }
+  .dot-b { background: #4a9e5c; }
+
+  #code-body {
+    padding: 14px 0 48px 0;
+    overflow-x: auto;
+  }
+
+  table.code-table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 460px;
+  }
+
+  td.ln {
+    width: 48px;
+    padding: 2px 12px 2px 16px;
+    text-align: right;
+    color: var(--line-num);
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    user-select: none;
+    border-right: 1px solid #1e4a2e;
+    vertical-align: middle;
+  }
+
+  td.code {
+    padding: 2px 20px 2px 16px;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    color: var(--code-text);
+    white-space: pre;
+    vertical-align: middle;
+  }
+
+  /* Bug rows -- yellow highlight */
+  tr.bug-row { background: #1e1c0a; }
+  tr.bug-row td.ln { color: var(--gold-light); border-left: 3px solid var(--code-str); }
+  tr.bug-row td.code { padding-right: 12px; }
+
+  /* Editable input inside bug row */
+  .bug-input {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    color: var(--code-text);
+    background: transparent;
+    border: 1.5px dashed #4a9e5c;
+    border-radius: 4px;
+    padding: 2px 8px;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    white-space: pre;
+    transition: border-color 0.15s, background 0.25s, color 0.25s;
+  }
+
+  .bug-input:focus {
+    border-color: var(--gold-light);
+    border-style: solid;
+  }
+
+  .bug-input.correct {
+    background: var(--fix-correct);
+    color: var(--fix-correct-t);
+    border: 2px solid #3aae5c;
+    border-style: solid;
+  }
+
+  /* Syntax colors */
+  .kw  { color: var(--code-kw); }
+  .ty  { color: var(--code-type); }
+  .str { color: var(--code-str); }
+  .num { color: var(--code-num); }
+
+  /* RIGHT: QUESTION PANEL */
+  #question-panel {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--sand-light);
+    padding: 18px 16px 48px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #q-panel-header { margin-bottom: 14px; }
+
+  #q-panel-header h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ocean);
+    line-height: 1.1;
+  }
+
+  #q-panel-header p {
+    font-size: 14px;
+    color: var(--text-mid);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  /* ─── Bug tracker bar ─── */
+  .bug-bar {
+    position: fixed;
+    top: 56px;
+    left: 0; right: 0;
+    z-index: 90;
+    background: var(--card-bg);
+    border-bottom: 1.5px solid var(--border);
+    padding: 0 20px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  .bug-bar-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--coral);
+    flex-shrink: 0;
+  }
+
+  .bug-dots {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .bug-dot-wrap {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .bug-dot {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: #ccc;
+    border: 2px solid #aaa;
+    flex-shrink: 0;
+    transition: background 0.35s, border-color 0.35s;
+  }
+
+  .bug-dot.found { background: var(--coral); border-color: var(--coral-dark); outline: 2px dashed var(--coral); outline-offset: 2px; }
+  .bug-dot.fixed { background: #3aae5c; border-color: #2a8e4c; outline: 3px solid #3aae5c; outline-offset: 2px; }
+
+  .bug-dot-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-light);
+  }
+
+  .bug-dot.found + .bug-dot-label { font-weight: 700; color: var(--text-main); }
+  .bug-dot.fixed + .bug-dot-label { font-weight: 700; color: #1e4f3a; }
+
+  /* Section divider */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 11px 0;
+    padding: 4px 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--sand-light);
+  }
+
+  .section-divider .sdlabel {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    white-space: nowrap;
+  }
+
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 15px 12px 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  .q-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-bottom: 8px;
+  }
+
+  .q-number {
+    background: var(--ocean);
+    color: #fff8ee;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .q-anchor {
+    font-size: 11px;
+    color: var(--text-light);
+    font-family: 'Fira Code', monospace;
+    margin-bottom: 2px;
+  }
+
+  .q-text {
+    font-size: 15px;
+    color: var(--text-main);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .q-text code {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    background: #f0e8d8;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: var(--palm-dark);
+  }
+
+  .q-input {
+    width: 100%;
+    background: #f5ede0;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: var(--text-main);
+    resize: vertical;
+    min-height: 48px;
+    margin-top: 7px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .q-input:focus { border-color: var(--ocean); }
+
+  .q-input::placeholder {
+    color: var(--text-light);
+    font-style: italic;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+  }
+
+  /* Fix prompt */
+  .fix-prompt {
+    display: none;
+    margin-top: 8px;
+    background: #162e1f;
+    border: 1.5px dashed #4a9e5c;
+    border-radius: 7px;
+    padding: 9px 13px;
+  }
+
+  .fix-prompt.shown { display: block; animation: fadeSlide 0.22s ease; }
+
+  .fix-prompt-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--coral);
+  }
+
+  /* ===== THEME TOGGLE BUTTON ===== */
+  html { color-scheme: light; }
+  .btn-theme {
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--palm-dark);
+    color: #fff8ee;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .btn-theme:hover { background: var(--palm); }
+  .btn-theme:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+
+  /* ===== DARK MODE ===== */
+  html[data-theme="dark"] { color-scheme: dark; }
+  html[data-theme="dark"] body                   { background: #121a0f; }
+  html[data-theme="dark"] #topbar                { background: var(--ocean-dark); }
+  html[data-theme="dark"] .bug-bar               { background: #1c2a1c; border-bottom-color: #2a4a30; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  html[data-theme="dark"] .bug-bar-label         { color: var(--coral); }
+  html[data-theme="dark"] .bug-dot               { background: #3a5a40; border-color: #2a4a30; outline: none; }
+  html[data-theme="dark"] .bug-dot.found         { outline: 2px dashed var(--coral); outline-offset: 2px; }
+  html[data-theme="dark"] .bug-dot.fixed         { outline: 3px solid #3aae5c; outline-offset: 2px; }
+  html[data-theme="dark"] .bug-dot-label         { color: #7aad8a; }
+  html[data-theme="dark"] .bug-dot.found + .bug-dot-label { color: #e8f4ea; }
+  html[data-theme="dark"] .bug-dot.fixed + .bug-dot-label { color: #3aae5c; }
+  html[data-theme="dark"] #question-panel        { background: #121a0f; }
+  html[data-theme="dark"] #q-panel-header h2     { color: #a8d8b0; }
+  html[data-theme="dark"] #q-panel-header p      { color: #5a9e7a; }
+  html[data-theme="dark"] .section-divider       { background: #121a0f; }
+  html[data-theme="dark"] .section-divider::before,
+  html[data-theme="dark"] .section-divider::after { background: #2a4a30; }
+  html[data-theme="dark"] .sdlabel               { color: #5a9e7a; }
+  html[data-theme="dark"] .q-card                { background: #1c2a1c; border-color: #2a4a30; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  html[data-theme="dark"] .q-number              { background: var(--ocean-dark); }
+  html[data-theme="dark"] .q-anchor              { color: #5a9e7a; }
+  html[data-theme="dark"] .q-text                { color: #e8f4ea; }
+  html[data-theme="dark"] .q-text code           { background: #0f2a1e; color: var(--gold-light); }
+  html[data-theme="dark"] .q-input               { background: #162010; border-color: #2a4a30; color: #e8f4ea; }
+  html[data-theme="dark"] .q-input::placeholder  { color: #5a9e7a; }
+  html[data-theme="dark"] .q-input:focus         { border-color: var(--ocean); }
+  html[data-theme="dark"] .fix-prompt            { background: #162e1f; border-color: #4a9e5c; }
+  html[data-theme="dark"] .fix-prompt-label      { color: var(--coral); }
+  html[data-theme="dark"] .btn-theme             { background: var(--palm); }
+  html[data-theme="dark"] .btn-theme:hover       { background: var(--palm-dark); }
+
+  /* ===== LIGHT MODE code panel ===== */
+  html[data-theme="light"] #code-panel            { background: #f0f8f2; border-right-color: var(--border); }
+  html[data-theme="light"] #code-header           { background: #e0f0e8; border-bottom-color: #b8d8c0; }
+  html[data-theme="light"] .filename              { color: var(--palm-dark); }
+  html[data-theme="light"] #code-body             { background: #f0f8f2; }
+  html[data-theme="light"] td.ln                  { color: #4a8060; border-right-color: #b8d8c0; }
+  html[data-theme="light"] td.code                { color: #1a3a22; }
+  html[data-theme="light"] .kw                    { color: #005c80; }
+  html[data-theme="light"] .ty                    { color: #2a6040; }
+  html[data-theme="light"] .str                   { color: #8a5800; }
+  html[data-theme="light"] .num                   { color: #8a4000; }
+  html[data-theme="light"] tr.bug-row             { background: #fef6e4; }
+  html[data-theme="light"] tr.bug-row td.ln       { color: #9a5800; border-left-color: #d4a000; }
+  html[data-theme="light"] .bug-input             { color: #1a3a22; border-color: var(--palm); }
+  html[data-theme="light"] .bug-input.correct     { background: var(--fix-correct); color: var(--fix-correct-t); }
+
+  /* Disable font ligatures — prevents >= rendering as ≥ in code display */
+  td.code, .bug-input {
+    font-feature-settings: "liga" 0, "calt" 0;
+    font-variant-ligatures: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>&#127965; Island Logic</h1>
+  <span class="subtitle">Debug &amp; Trace Session</span>
+  <div class="tb-spacer" style="flex:1"></div>
+  <button class="btn-theme" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch to dark mode">
+    <span id="theme-icon" aria-hidden="true">🌙</span>
+  </button>
+  <button class="top-btn" id="export-btn" onclick="exportMarkdown()" disabled>
+    &#11015; Export Answers
+  </button>
+  <button class="top-btn" id="reset-btn" onclick="resetAll()">&#x21BA; Reset</button>
+</div>
+
+<!-- ─── Bug tracker bar ─── -->
+<div class="bug-bar" role="region" aria-label="Bug tracker">
+  <span class="bug-bar-label">&#128030; Bug Tracker</span>
+  <div class="bug-dots" role="list">
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-1" aria-label="Bug 1 status: not yet identified"></div>
+      <span class="bug-dot-label">Derived getter</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-2" aria-label="Bug 2 status: not yet identified"></div>
+      <span class="bug-dot-label">isWinning() threshold</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-3" aria-label="Bug 3 status: not yet identified"></div>
+      <span class="bug-dot-label">applyBonus overload</span>
+    </div>
+  </div>
+</div>
+
+<div id="layout">
+
+  <!-- LEFT: CODE -->
+  <div id="code-panel">
+    <div id="code-header">
+      <span class="filename">IslandScorer.java</span>
+      <span class="lang-badge">Java 17</span>
+      <span class="edit-hint">-- bug lines become editable after Reveal</span>
+      <div class="dots">
+        <span class="dot-r"></span><span class="dot-g"></span><span class="dot-b"></span>
+      </div>
+    </div>
+    <div id="code-body">
+      <table class="code-table" id="codeTable"></table>
+    </div>
+  </div>
+
+  <!-- RIGHT: QUESTIONS -->
+  <div id="question-panel">
+
+    <div id="q-panel-header">
+      <h2>Senior Dev Review</h2>
+      <p>Read the code. Commit to a prediction. Then reveal.</p>
+    </div>
+
+    <div class="section-divider"><span class="sdlabel">Contestant class</span></div>
+
+    <!-- Q1 -->
+    <div class="q-card" id="card-input-q1">
+      <div class="q-card-header">
+        <div class="q-number">1</div>
+        <div>
+          <div class="q-anchor">Lines 2-3</div>
+          <div class="q-text">Before reading further -- what are these two fields responsible for storing? What would happen if they were declared <code>public</code> instead of <code>private</code>?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="input-q1" placeholder="Type your prediction..."></textarea>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-card" id="card-input-q2">
+      <div class="q-card-header">
+        <div class="q-number">2</div>
+        <div>
+          <div class="q-anchor">Lines 5-8</div>
+          <div class="q-text">The constructor uses <code>this</code> twice. What would happen if you removed both references and wrote <code>name = name</code> and <code>score = score</code> instead?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="input-q2" placeholder="Type your prediction..."></textarea>
+    </div>
+
+    <!-- Q3 (Bug 1) -->
+    <div class="q-card" id="card-input-q3">
+      <div class="q-card-header">
+        <div class="q-number">3</div>
+        <div>
+          <div class="q-anchor">Lines 14-16</div>
+          <div class="q-text">This method is supposed to return something like <code>Maya: 50</code> for a contestant named Maya with a score of 50. What does it actually return? What is wrong, and why does it matter?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="input-q3" placeholder="What does it actually return? What is wrong?"></textarea>
+      <div class="fix-prompt" id="fix-b1">
+        <div class="fix-prompt-label">&#128296; Spot a bug? Fix line 15 in the code panel.</div>
+      </div>
+    </div>
+
+    <!-- Q4 (Bug 2) -->
+    <div class="q-card" id="card-input-q4">
+      <div class="q-card-header">
+        <div class="q-number">4</div>
+        <div>
+          <div class="q-anchor">Lines 18-20</div>
+          <div class="q-text">The winning threshold is 50. A contestant has a score of exactly 50. Does <code>isWinning()</code> return <code>true</code> or <code>false</code>? Why?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="input-q4" placeholder="Type your prediction and reasoning..."></textarea>
+      <div class="fix-prompt" id="fix-b2">
+        <div class="fix-prompt-label">&#128296; Spot a bug? Fix line 19 in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="section-divider"><span class="sdlabel">IslandScorer class</span></div>
+
+    <!-- Q5 -->
+    <div class="q-card" id="card-input-q5">
+      <div class="q-card-header">
+        <div class="q-number">5</div>
+        <div>
+          <div class="q-anchor">Line 24</div>
+          <div class="q-text">This field belongs to the class, not to any object. What does that mean for how many copies of it exist when you create two <code>Contestant</code> objects?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="input-q5" placeholder="Type your prediction..."></textarea>
+    </div>
+
+    <!-- Q6 (Bug 3) -->
+    <div class="q-card" id="card-input-q6">
+      <div class="q-card-header">
+        <div class="q-number">6</div>
+        <div>
+          <div class="q-anchor">Lines 26-33</div>
+          <div class="q-text">Two methods, same name, different parameters. Which one runs when you pass only one argument? What is the return value for a score of 30? Do you see anything else worth flagging?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="input-q6" placeholder="Type your prediction..."></textarea>
+      <div class="fix-prompt" id="fix-b3">
+        <div class="fix-prompt-label">&#128296; Spot a bug? Fix line 31 in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="section-divider"><span class="sdlabel">main method</span></div>
+
+    <!-- Q7 -->
+    <div class="q-card" id="card-input-q7">
+      <div class="q-card-header">
+        <div class="q-number">7</div>
+        <div>
+          <div class="q-anchor">Lines 36-45</div>
+          <div class="q-text">Read through the main method top to bottom. Write out exactly what you think prints to the console, line by line. Account for all three bugs.</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="input-q7" style="min-height:88px" placeholder="Write each expected line of output..."></textarea>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CODE DATA
+   Each line may have a bugId, dotId, and correctFixes array.
+   correctFixes are matched after trimming and whitespace-normalizing.
+============================================================ */
+const CODE = [
+  { t: 'class Contestant {' },
+  { t: '    private String name;' },
+  { t: '    private int score;' },
+  { t: '' },
+  { t: '    Contestant(String name, int score) {' },
+  { t: '        this.name = name;' },
+  { t: '        this.score = score;' },
+  { t: '    }' },
+  { t: '' },
+  { t: '    String getName() {' },
+  { t: '        return name;' },
+  { t: '    }' },
+  { t: '' },
+  { t: '    String getSummary() {' },
+  // index 14 = line 15 -- Bug 1
+  { t: '        return "name: " + score;',
+    bugId: 'b1', dotId: 'dot-1',
+    fixes: ['        return name + ": " + score;', 'return name + ": " + score;'] },
+  { t: '    }' },
+  { t: '' },
+  { t: '    boolean isWinning() {' },
+  // index 18 = line 19 -- Bug 2
+  { t: '        return score > 50;',
+    bugId: 'b2', dotId: 'dot-2',
+    fixes: ['        return score >= 50;', 'return score >= 50;'] },
+  { t: '    }' },
+  { t: '}' },
+  { t: '' },
+  { t: 'class IslandScorer {' },
+  { t: '    static int totalContestants = 0;' },
+  { t: '' },
+  { t: '    static int applyBonus(int score, int bonus) {' },
+  { t: '        return score + bonus;' },
+  { t: '    }' },
+  { t: '' },
+  { t: '    static int applyBonus(int score) {' },
+  // index 30 = line 31 -- Bug 3
+  { t: '        score + 10;',
+    bugId: 'b3', dotId: 'dot-3',
+    fixes: ['        return score + 10;', 'return score + 10;'] },
+  { t: '    }' },
+  { t: '' },
+  { t: '    public static void main(String[] args) {' },
+  { t: '        Contestant c1 = new Contestant("Maya", 50);' },
+  { t: '        Contestant c2 = new Contestant("Rex", 45);' },
+  { t: '' },
+  { t: '        System.out.println(applyBonus(30, 5));' },
+  { t: '        System.out.println(applyBonus(30));' },
+  { t: '' },
+  { t: '        System.out.println(c1.getSummary());' },
+  { t: '        System.out.println(c2.getSummary());' },
+  { t: '' },
+  { t: '        System.out.println(c1.isWinning());' },
+  { t: '        System.out.println(c2.isWinning());' },
+  { t: '    }' },
+  { t: '}' },
+];
+
+/* Which bug question maps to which bugId */
+const REVEAL_BUG = { q3: 'b1', q4: 'b2', q6: 'b3' };
+/* Fix prompt div IDs */
+const FIX_DIV = { b1: 'fix-b1', b2: 'fix-b2', b3: 'fix-b3' };
+
+const fixed = new Set();
+
+/* ============================================================
+   SYNTAX HIGHLIGHTER (lightweight, order matters)
+============================================================ */
+function hi(raw) {
+  let s = raw
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // String literals
+  s = s.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+  // Numbers (not inside tags)
+  s = s.replace(/(?<![a-zA-Z_\d])(\d+)(?![^<]*<\/span>)/g,
+    '<span class="num">$1</span>');
+  // Keywords
+  for (const kw of ['class','static','void','public','private','return','new','boolean','this']) {
+    s = s.replace(new RegExp(`\\b${kw}\\b(?![^<]*<\\/span>)`,'g'),
+      `<span class="kw">${kw}</span>`);
+  }
+  // Types
+  for (const ty of ['String','int','boolean']) {
+    s = s.replace(new RegExp(`\\b${ty}\\b(?![^<]*<\\/span>)`,'g'),
+      `<span class="ty">${ty}</span>`);
+  }
+  return s;
+}
+
+/* ============================================================
+   BUILD CODE TABLE
+============================================================ */
+function buildCode() {
+  const table = document.getElementById('codeTable');
+  CODE.forEach((line, i) => {
+    const tr  = document.createElement('tr');
+    const tdL = document.createElement('td');
+    const tdC = document.createElement('td');
+    tdL.className = 'ln';
+    tdC.className = 'code';
+    tdL.textContent = i + 1;
+
+    if (line.bugId) {
+      tr.classList.add('bug-row');
+      tr.id = 'brow-' + line.bugId;
+      tdC.id = 'bcell-' + line.bugId;
+      // Show full line (including indent) as highlighted static text initially
+      tdC.innerHTML = hi(line.t);
+      // Store indent level
+      tdC.dataset.indent = line.t.match(/^(\s*)/)[1];
+    } else {
+      tdC.innerHTML = line.t ? hi(line.t) : '&nbsp;';
+    }
+
+    tr.appendChild(tdL);
+    tr.appendChild(tdC);
+    table.appendChild(tr);
+  });
+}
+
+/* ============================================================
+   ACTIVATE EDITABLE INPUT FOR BUG LINE
+============================================================ */
+function activateBugLine(bugId) {
+  const lineData = CODE.find(l => l.bugId === bugId);
+  if (!lineData) return;
+  const cell = document.getElementById('bcell-' + bugId);
+  if (!cell || cell.querySelector('input')) return; // already done
+
+  cell.innerHTML = '';
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'bug-input';
+  // Full line including leading spaces -- browser preserves them in an input value
+  inp.value = lineData.t;
+  inp.setAttribute('aria-label', `Fix the bug on line ${CODE.indexOf(lineData) + 1}`);
+  inp.setAttribute('spellcheck', 'false');
+  inp.setAttribute('autocomplete', 'off');
+
+  inp.addEventListener('input', () => checkFix(bugId, inp, lineData));
+
+  cell.appendChild(inp);
+}
+
+/* ============================================================
+   CHECK FIX CORRECTNESS
+   Match by trimming the full line and collapsing interior whitespace
+   to single spaces -- so spacing variants pass but missing spaces
+   between keywords/identifiers do not (e.g. "returnscore" fails).
+============================================================ */
+function norm(s) {
+  return s.trim().replace(/\s+/g, ' ');
+}
+
+function checkFix(bugId, inp, lineData) {
+  const typed = norm(inp.value);
+  const correct = lineData.fixes.some(f => typed === norm(f));
+
+  if (correct && !fixed.has(bugId)) {
+    fixed.add(bugId);
+    inp.classList.add('correct');
+    inp.setAttribute('readonly', true);
+    const dot = document.getElementById(lineData.dotId);
+    if (dot) { dot.classList.remove('found'); dot.classList.add('fixed'); }
+  } else if (!correct && fixed.has(bugId)) {
+    fixed.delete(bugId);
+    inp.classList.remove('correct');
+    const dot = document.getElementById(lineData.dotId);
+    if (dot) { dot.classList.remove('fixed'); dot.classList.add('found'); }
+  }
+
+  if (window.TraceLiveShare) {
+    const qIdx = window.TraceLiveShare.getState()?.currentQ;
+    if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: bugId, value: inp.value });
+  }
+}
+
+/* ============================================================
+   EXPORT BUTTON -- enable once any input has content
+============================================================ */
+function checkExportEnabled() {
+  const anyTyped = [1,2,3,4,5,6,7].some(n => {
+    const el = document.getElementById('input-q' + n);
+    return el && el.value.trim().length > 0;
+  });
+  document.getElementById('export-btn').disabled = !anyTyped;
+}
+
+/* Bug question textarea -> fix-prompt + editable line on first keystroke */
+const BUG_QUESTION_MAP = { 'input-q3': 'b1', 'input-q4': 'b2', 'input-q6': 'b3' };
+
+for (let n = 1; n <= 7; n++) {
+  const el = document.getElementById('input-q' + n);
+  if (!el) continue;
+  const inputId = 'input-q' + n;
+  const bugId   = BUG_QUESTION_MAP[inputId];
+
+  el.addEventListener('input', () => {
+    checkExportEnabled();
+    if (bugId && el.value.length > 0) {
+      // Show fix-prompt
+      const fp = document.getElementById(FIX_DIV[bugId]);
+      if (fp && !fp.classList.contains('shown')) fp.classList.add('shown');
+      // Activate the editable bug line (no-ops if already done)
+      activateBugLine(bugId);
+    }
+  });
+}
+
+/* ============================================================
+   RESET
+============================================================ */
+function resetAll() {
+  fixed.clear();
+
+  document.querySelectorAll('.q-input').forEach(i => i.value = '');
+  document.querySelectorAll('.bug-dot').forEach(d => {
+    d.classList.remove('found');
+    d.classList.remove('fixed');
+  });
+  document.querySelectorAll('.fix-prompt').forEach(fp => fp.classList.remove('shown'));
+
+  CODE.forEach(line => {
+    if (!line.bugId) return;
+    const cell = document.getElementById('bcell-' + line.bugId);
+    if (cell) cell.innerHTML = hi(line.t);
+  });
+
+  checkExportEnabled();
+}
+
+/* ============================================================
+   MARKDOWN EXPORT
+============================================================ */
+const Q_META = [
+  { id: 'q1', anchor: 'Lines 2-3',   label: 'Private fields and encapsulation' },
+  { id: 'q2', anchor: 'Lines 5-8',   label: 'Constructor and the this keyword' },
+  { id: 'q3', anchor: 'Lines 14-16', label: 'Derived getter output (Bug 1)' },
+  { id: 'q4', anchor: 'Lines 18-20', label: 'isWinning() threshold (Bug 2)' },
+  { id: 'q5', anchor: 'Line 24',     label: 'Static field scope' },
+  { id: 'q6', anchor: 'Lines 26-33', label: 'Method overloading and missing return (Bug 3)' },
+  { id: 'q7', anchor: 'Lines 36-45', label: 'Full console trace' },
+];
+
+const BUG_META = [
+  { bugId: 'b1', line: 15, label: 'Derived getter (Logic)',
+    original: 'return "name: " + score;',
+    fix:      'return name + ": " + score;' },
+  { bugId: 'b2', line: 19, label: 'isWinning threshold (Logic)',
+    original: 'return score > 50;',
+    fix:      'return score >= 50;' },
+  { bugId: 'b3', line: 31, label: 'applyBonus overload (Syntax)',
+    original: 'score + 10;',
+    fix:      'return score + 10;' },
+];
+
+function exportMarkdown() {
+  const out = [];
+
+  out.push('# Island Logic -- Debug & Trace Session');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## Java Program: IslandScorer.java');
+  out.push('');
+  out.push('```java');
+  CODE.forEach(l => out.push(l.t));
+  out.push('```');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## My Predictions');
+  out.push('');
+
+  Q_META.forEach((q, i) => {
+    const el  = document.getElementById('input-' + q.id);
+    const ans = el ? el.value.trim() : '';
+    out.push(`### Q${i+1}: ${q.label}`);
+    out.push(`_Anchor: ${q.anchor}_`);
+    out.push('');
+    out.push('**My answer:**');
+    out.push('');
+    out.push(ans || '_(no answer entered)_');
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## Bug Fix Attempts');
+  out.push('');
+
+  BUG_META.forEach(b => {
+    const wasFixed = fixed.has(b.bugId);
+    out.push(`**Line ${b.line} -- ${b.label}**`);
+    out.push(`- Status: ${wasFixed ? 'Fixed correctly' : 'Not yet fixed'}`);
+    out.push(`- Original code: \`${b.original}\``);
+    out.push(`- Correct fix:   \`${b.fix}\``);
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## AI Review Prompt');
+  out.push('');
+  out.push('> Copy everything above this section into Claude, ChatGPT, or Gemini,');
+  out.push('> then send the message below exactly as written.');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push(
+`I am a Java bootcamp student. The document above contains a buggy Java program and my predictions about what it does.
+
+Please do the following:
+
+1. For each of my predictions, tell me what I got right and what I missed. If my answer is correct, confirm it briefly and move on. Only flag a misconception if one is genuinely present -- do not manufacture criticism where the answer is sound.
+
+2. For any question I left blank, give the correct answer and explain why it matters.
+
+3. For the final question, assume all three bugs have been fixed when evaluating my console trace prediction.
+
+4. For each of the bugs: explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves.
+
+5. Close with two or three follow-up questions I should think about before our class discussion -- questions that push me one level deeper than what the session covered.
+
+Be accurate first. Credit what is right, then address genuine gaps. Do not manufacture criticism where the answer is sound.`
+  );
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('_Generated by Island Logic Debug & Trace Session_');
+
+  const blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'island-logic-answers.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* INIT */
+buildCode();
+checkExportEnabled();
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(t);
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('claude-theme', t);
+  const icon = document.getElementById('theme-icon');
+  const btn  = document.getElementById('theme-toggle');
+  if (t === 'dark') {
+    if (icon) icon.textContent = '☀';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to light mode');
+  } else {
+    if (icon) icon.textContent = '🌙';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to dark mode');
+  }
+}
+setTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+// =====================================================================
+// TRACE ADAPTER — consumed by ../shared/trace-liveshare.js
+// =====================================================================
+window.TRACE_ADAPTER = {
+  title:         '&#127965; Island Logic',
+  subtitle:      'Debug &amp; Trace &mdash; Week 5, Thursday',
+  accent:        'var(--ocean, #1e9fba)',
+  joinBtnClass:  'top-btn',
+  soloBtnClass:  'top-btn',
+  channelPrefix: 'tdd',
+  questions: [
+    { id: 'input-q1', hasBug: false },
+    { id: 'input-q2', hasBug: false },
+    { id: 'input-q3', hasBug: true  },  // b1
+    { id: 'input-q4', hasBug: true  },  // b2
+    { id: 'input-q5', hasBug: false },
+    { id: 'input-q6', hasBug: true  },  // b3
+    { id: 'input-q7', hasBug: false },
+  ],
+  getAnswer(qid) {
+    return document.getElementById(qid)?.value || '';
+  },
+  setAnswer(qid, val) {
+    const el = document.getElementById(qid);
+    if (!el) return;
+    el.value = val;
+    checkExportEnabled();
+    const bugId = BUG_QUESTION_MAP[qid];
+    if (bugId && val.length > 0) {
+      const fp = document.getElementById(FIX_DIV[bugId]);
+      if (fp && !fp.classList.contains('shown')) fp.classList.add('shown');
+      activateBugLine(bugId);
+      // Stamp data-line-key on the input so getFixValues can collect it
+      const cell = document.getElementById('bcell-' + bugId);
+      const inp  = cell && cell.querySelector('.bug-input');
+      if (inp && !inp.dataset.lineKey) inp.dataset.lineKey = bugId;
+    }
+  },
+  getFixValues() {
+    const vals = {};
+    ['b1', 'b2', 'b3'].forEach(bugId => {
+      const cell = document.getElementById('bcell-' + bugId);
+      const inp  = cell && cell.querySelector('.bug-input');
+      if (inp) vals[bugId] = inp.value;
+    });
+    return vals;
+  },
+  applyFixValue(key, val) {
+    // key is bugId ('b1', 'b2', 'b3')
+    const cell = document.getElementById('bcell-' + key);
+    if (!cell) return;
+    // Ensure the editable input exists first
+    activateBugLine(key);
+    const inp = cell.querySelector('.bug-input');
+    if (!inp) return;
+    if (!inp.dataset.lineKey) inp.dataset.lineKey = key;
+    inp.value = val;
+    const lineData = CODE.find(l => l.bugId === key);
+    if (lineData) {
+      const correct = lineData.fixes.some(f => norm(val) === norm(f));
+      if (correct) {
+        fixed.add(key);
+        inp.classList.add('correct');
+        inp.setAttribute('readonly', true);
+        const dot = document.getElementById(lineData.dotId);
+        if (dot) { dot.classList.remove('found'); dot.classList.add('fixed'); }
+      } else {
+        fixed.delete(key);
+        inp.classList.remove('correct');
+        inp.removeAttribute('readonly');
+        const dot = document.getElementById(lineData.dotId);
+        if (dot && dot.classList.contains('fixed')) {
+          dot.classList.remove('fixed');
+          dot.classList.add('found');
+        }
+      }
+    }
+    if (window.TraceLiveShare) {
+      const qIdx = window.TraceLiveShare.getState()?.currentQ;
+      if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    }
+  },
+  isDoneReady(qIdx) {
+    const q = this.questions[qIdx];
+    const textarea = document.getElementById(q.id);
+    const hasText  = textarea && textarea.value.trim().length > 0;
+    if (!hasText) return false;
+    const bugId = BUG_QUESTION_MAP[q.id];
+    if (!bugId) return true;
+    return fixed.has(bugId);
+  },
+  setEditable(qIdx, editable) {
+    const bugId = BUG_QUESTION_MAP[this.questions[qIdx].id];
+    if (!bugId) return;
+    const cell = document.getElementById('bcell-' + bugId);
+    const inp  = cell && cell.querySelector('.bug-input');
+    if (!inp || inp.classList.contains('correct')) return;
+    if (editable) inp.removeAttribute('disabled');
+    else inp.setAttribute('disabled', true);
+  },
+  onReset() {
+    fixed.clear();
+    Object.values(FIX_DIV).forEach(id => {
+      const fp = document.getElementById(id);
+      if (fp) fp.classList.remove('shown');
+    });
+    CODE.forEach(line => {
+      if (!line.bugId) return;
+      const cell = document.getElementById('bcell-' + line.bugId);
+      if (cell) cell.innerHTML = hi(line.t);
+    });
+    document.querySelectorAll('.bug-dot').forEach(d => {
+      d.classList.remove('found', 'fixed');
+    });
+    checkExportEnabled();
+  },
+};
+</script>
+<script src="../shared/trace-liveshare.js"></script>
+</body>
+</html>

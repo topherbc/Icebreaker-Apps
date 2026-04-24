@@ -1,0 +1,384 @@
+{
+  "id": "week-5",
+  "title": "Object Oriented Programming",
+  "labels": [
+    {
+      "id": "class",
+      "name": "Class",
+      "desc": "A blueprint that defines structure and behavior",
+      "example": "public class Room {\n    // fields, constructor, methods\n}"
+    },
+    {
+      "id": "object",
+      "name": "Object",
+      "desc": "An instance created from a class",
+      "example": "Room r = new Room(false, true);"
+    },
+    {
+      "id": "method",
+      "name": "Method",
+      "desc": "A behavior defined on a class",
+      "example": "public boolean isAvailable() {\n    return !occupied && cleaned;\n}"
+    },
+    {
+      "id": "field",
+      "name": "Field",
+      "desc": "A piece of state stored on an object",
+      "example": "private boolean occupied;\nprivate boolean cleaned;"
+    },
+    {
+      "id": "getter",
+      "name": "Getter",
+      "desc": "A method that reads or computes a value — may derive from other fields rather than storing it directly",
+      "example": "public double getTotalCost() {\n    return rate * numberOfNights;\n}"
+    },
+    {
+      "id": "static",
+      "name": "Static",
+      "desc": "Belongs to the class itself, not any single instance",
+      "example": "public static String format(String last, String first) {\n    return last + \", \" + first;\n}"
+    },
+    {
+      "id": "condition",
+      "name": "Condition",
+      "desc": "A decision or branch based on a value",
+      "example": "if (amount <= balance) {\n    balance -= amount;\n}"
+    },
+    {
+      "id": "encapsulation",
+      "name": "Encapsulation",
+      "desc": "Keeping fields private, exposing them only through controlled methods",
+      "example": "private double balance;\npublic double getBalance() {\n    return balance;\n}"
+    }
+  ],
+  "prompts": [
+    {
+      "title": "Room Availability",
+      "statement": "A hotel management system tracks whether each room is occupied and whether it has been cleaned. A room should only appear as available when both conditions are met — it's clean and no one is in it.",
+      "expectedTags": [
+        {
+          "phrase": "tracks whether each room is occupied and whether it has been cleaned",
+          "labels": ["field", "encapsulation"],
+          "explanation": "Whether a room is occupied and whether it is cleaned are two separate pieces of state that each room must remember — these are fields. Keeping them internal to the room and exposing them only through controlled access is encapsulation.",
+          "codeSnippets": {
+            "field": "private boolean occupied;\nprivate boolean cleaned;",
+            "encapsulation": "private boolean occupied;\nprivate boolean cleaned;\npublic boolean isOccupied() {\n    return occupied;\n}\npublic boolean isCleaned() {\n    return cleaned;\n}"
+          }
+        },
+        {
+          "phrase": "only appear as available when both conditions are met",
+          "labels": ["condition", "getter"],
+          "explanation": "Availability is derived by checking two conditions at once rather than being stored directly — making this a computed getter. The requirement that both must be true is a logical condition the code must evaluate.",
+          "codeSnippets": {
+            "condition": "return !occupied && cleaned;",
+            "getter": "public boolean isAvailable() {\n    return !occupied && cleaned;\n}"
+          }
+        },
+        {
+          "phrase": "it's clean and no one is in it",
+          "labels": ["condition"],
+          "explanation": "This phrase spells out the two-part rule that drives the availability check — the method must branch on both of these conditions to return the correct result.",
+          "codeSnippets": {
+            "condition": "return !occupied && cleaned;"
+          }
+        }
+      ],
+      "code": "public class Room {\n    private boolean occupied;\n    private boolean cleaned;\n\n    public Room(boolean occupied, boolean cleaned) {\n        this.occupied = occupied;\n        this.cleaned = cleaned;\n    }\n\n    public boolean isOccupied() { return occupied; }\n    public void setOccupied(boolean occupied) { this.occupied = occupied; }\n    public boolean isCleaned() { return cleaned; }\n    public void setCleaned(boolean cleaned) { this.cleaned = cleaned; }\n\n    public boolean isAvailable() {\n        return !occupied && cleaned;\n    }\n}"
+    },
+    {
+      "title": "Reservation Pricing",
+      "statement": "A reservation system calculates the price of a stay based on room type and dates. King rooms cost more per night than doubles, and weekend nights carry a higher rate. The booking should be able to report its total cost at any time.",
+      "expectedTags": [
+        {
+          "phrase": "room type and dates",
+          "labels": ["field", "encapsulation"],
+          "explanation": "Room type and date information are the pieces of state a reservation must remember — these become the private fields that the rest of the pricing logic reads from.",
+          "codeSnippets": {
+            "field": "private String roomType;\nprivate int numberOfNights;\nprivate boolean includesWeekend;",
+            "encapsulation": "private String roomType;\nprivate int numberOfNights;\nprivate boolean includesWeekend;"
+          }
+        },
+        {
+          "phrase": "report its total cost at any time",
+          "labels": ["getter"],
+          "explanation": "Total cost is not stored directly on the reservation — it is computed on demand from the other fields each time it is requested, which is the defining trait of a computed getter.",
+          "codeSnippets": {
+            "getter": "public double getTotalCost() {\n    double rate = roomType.equalsIgnoreCase(\"king\")\n        ? 189.99 : 149.99;\n    if (includesWeekend) {\n        rate *= 1.20;\n    }\n    return rate * numberOfNights;\n}"
+          }
+        },
+        {
+          "phrase": "King rooms cost more per night than doubles",
+          "labels": ["condition"],
+          "explanation": "Choosing a different rate based on room type requires a branch in the logic — the code must check which room type applies before it can set the correct nightly rate.",
+          "codeSnippets": {
+            "condition": "double ratePerNight = roomType.equalsIgnoreCase(\"king\") ? 189.99 : 149.99;"
+          }
+        },
+        {
+          "phrase": "weekend nights carry a higher rate",
+          "labels": ["condition"],
+          "explanation": "Applying a weekend surcharge only when the stay includes a weekend is a conditional step — the code checks a flag and adjusts the rate only if that condition is true.",
+          "codeSnippets": {
+            "condition": "if (includesWeekend) {\n    ratePerNight *= 1.20;\n}"
+          }
+        }
+      ],
+      "code": "public class Reservation {\n    private String roomType;\n    private int numberOfNights;\n    private boolean includesWeekend;\n\n    public Reservation(String roomType, int numberOfNights, boolean includesWeekend) {\n        this.roomType = roomType;\n        this.numberOfNights = numberOfNights;\n        this.includesWeekend = includesWeekend;\n    }\n\n    public double getTotalCost() {\n        double ratePerNight = roomType.equalsIgnoreCase(\"king\") ? 189.99 : 149.99;\n        if (includesWeekend) ratePerNight *= 1.20;\n        return ratePerNight * numberOfNights;\n    }\n}"
+    },
+    {
+      "title": "Employee Pay Calculation",
+      "statement": "A payroll system tracks each employee's hourly rate and hours worked for the week. The system needs to report regular hours, overtime hours, and total pay — but those values should be derived on demand, not stored separately. Up to 40 hours in the week counts as regular time; hours beyond that are overtime.",
+      "expectedTags": [
+        {
+          "phrase": "hourly rate and hours worked for the week",
+          "labels": ["field", "encapsulation"],
+          "explanation": "Pay rate and hours worked are the core facts the system must remember about each employee — they become private fields whose values drive all downstream calculations.",
+          "codeSnippets": {
+            "field": "private double payRate;\nprivate double hoursWorked;",
+            "encapsulation": "private double payRate;\nprivate double hoursWorked;"
+          }
+        },
+        {
+          "phrase": "report regular hours, overtime hours, and total pay",
+          "labels": ["getter", "method"],
+          "explanation": "Each of these three values is computed from the stored fields rather than looked up from a stored copy — making them computed getters that calculate and return a result on demand.",
+          "codeSnippets": {
+            "getter": "public double getRegularHours() {\n    return Math.min(hoursWorked, 40);\n}\npublic double getOvertimeHours() {\n    return Math.max(0, hoursWorked - 40);\n}\npublic double getTotalPay() { ... }",
+            "method": "public double getRegularHours() { ... }\npublic double getOvertimeHours() { ... }\npublic double getTotalPay() { ... }"
+          }
+        },
+        {
+          "phrase": "derived on demand, not stored separately",
+          "labels": ["encapsulation"],
+          "explanation": "Keeping derived values out of storage and computing them through methods is a form of encapsulation — it ensures that the internal fields are the single source of truth and outside code cannot accidentally corrupt a cached value.",
+          "codeSnippets": {
+            "encapsulation": "// Not stored as fields — computed when requested:\npublic double getRegularHours() {\n    return Math.min(hoursWorked, 40);\n}\npublic double getTotalPay() {\n    return (getRegularHours() * payRate)\n        + (getOvertimeHours() * payRate * 1.5);\n}"
+          }
+        },
+        {
+          "phrase": "Up to 40 hours in the week counts as regular time",
+          "labels": ["condition"],
+          "explanation": "Regular hours are capped at 40 — determining how many hours count as regular requires a condition that checks whether total hours exceed that threshold.",
+          "codeSnippets": {
+            "condition": "public double getRegularHours() {\n    return Math.min(hoursWorked, 40);\n}"
+          }
+        },
+        {
+          "phrase": "hours beyond that are overtime",
+          "labels": ["condition"],
+          "explanation": "Overtime only exists when hours exceed 40, so computing it requires a condition that returns zero when the employee has not crossed that boundary.",
+          "codeSnippets": {
+            "condition": "public double getOvertimeHours() {\n    return Math.max(0, hoursWorked - 40);\n}"
+          }
+        }
+      ],
+      "code": "public class Employee {\n    private int id;\n    private String name;\n    private String department;\n    private double payRate;\n    private double hoursWorked;\n\n    public Employee(int id, String name, String department, double payRate, double hoursWorked) {\n        this.id = id;\n        this.name = name;\n        this.department = department;\n        this.payRate = payRate;\n        this.hoursWorked = hoursWorked;\n    }\n\n    public double getRegularHours() {\n        return Math.min(hoursWorked, 40);\n    }\n\n    public double getOvertimeHours() {\n        return Math.max(0, hoursWorked - 40);\n    }\n\n    public double getTotalPay() {\n        return (getRegularHours() * payRate) + (getOvertimeHours() * payRate * 1.5);\n    }\n}"
+    },
+    {
+      "title": "Hotel Booking",
+      "statement": "A hotel tracks its total suites and standard rooms and how many of each are currently reserved. Only the hotel's own booking process should be able to change reservation counts — outside systems should only be able to read availability. The system needs to accept booking requests and confirm whether they succeeded.",
+      "expectedTags": [
+        {
+          "phrase": "total suites and standard rooms and how many of each are currently reserved",
+          "labels": ["field", "encapsulation"],
+          "explanation": "The total capacity and current reservation counts for each room type are pieces of state the hotel must store — these become private fields so that only the hotel's own logic can modify them.",
+          "codeSnippets": {
+            "field": "private int totalSuites;\nprivate int totalRooms;\nprivate int bookedSuites;\nprivate int bookedRooms;",
+            "encapsulation": "private int totalSuites;\nprivate int totalRooms;\nprivate int bookedSuites;\nprivate int bookedRooms;"
+          }
+        },
+        {
+          "phrase": "outside systems should only be able to read availability",
+          "labels": ["getter", "encapsulation"],
+          "explanation": "Availability is computed from the stored counts and exposed as a read-only value — this is a computed getter, and restricting outside access to reads only is encapsulation in action.",
+          "codeSnippets": {
+            "getter": "public int getAvailableSuites() {\n    return totalSuites - bookedSuites;\n}\npublic int getAvailableRooms() {\n    return totalRooms - bookedRooms;\n}",
+            "encapsulation": "// No public setters —\n// balance changes only through bookRooms()\npublic int getAvailableSuites() {\n    return totalSuites - bookedSuites;\n}"
+          }
+        },
+        {
+          "phrase": "accept booking requests and confirm whether they succeeded",
+          "labels": ["method", "condition"],
+          "explanation": "Processing a booking is a behavior the hotel exposes through a method. Whether a booking can proceed depends on a condition — checking that enough rooms are currently available before making any changes.",
+          "codeSnippets": {
+            "method": "public boolean bookRooms(int suites, int rooms) {\n    if (suites > getAvailableSuites()\n            || rooms > getAvailableRooms()) {\n        return false;\n    }\n    bookedSuites += suites;\n    bookedRooms += rooms;\n    return true;\n}",
+            "condition": "if (suites > getAvailableSuites()\n        || rooms > getAvailableRooms()) {\n    return false;\n}"
+          }
+        }
+      ],
+      "code": "public class Hotel {\n    private int totalSuites;\n    private int totalRooms;\n    private int bookedSuites;\n    private int bookedRooms;\n\n    public Hotel(int totalSuites, int totalRooms) {\n        this.totalSuites = totalSuites;\n        this.totalRooms = totalRooms;\n    }\n\n    public int getAvailableSuites() { return totalSuites - bookedSuites; }\n    public int getAvailableRooms() { return totalRooms - bookedRooms; }\n\n    public boolean bookRooms(int suites, int rooms) {\n        if (suites > getAvailableSuites() || rooms > getAvailableRooms()) return false;\n        bookedSuites += suites;\n        bookedRooms += rooms;\n        return true;\n    }\n}"
+    },
+    {
+      "title": "Name Formatter",
+      "statement": "An application needs to format names into a standard display pattern like 'Johnson, Dr. Mel B, PhD'. Callers should not need to create anything to use this — it should work like a utility available directly.",
+      "expectedTags": [
+        {
+          "phrase": "format names into a standard display pattern",
+          "labels": ["method"],
+          "explanation": "Formatting a name is a behavior — it takes inputs, applies a rule, and returns a result. That makes it a method, and offering multiple variations (with or without title, with or without suffix) means multiple method signatures.",
+          "codeSnippets": {
+            "method": "public static String format(String lastName, String firstName) {\n    return lastName + \", \" + firstName;\n}"
+          }
+        },
+        {
+          "phrase": "Callers should not need to create anything to use this",
+          "labels": ["static", "object"],
+          "explanation": "When a utility works without requiring the caller to create an instance first, its methods belong to the type itself rather than to any particular object — that is what static means, and it means no object needs to be created.",
+          "codeSnippets": {
+            "static": "public static String format(String lastName, String firstName) { ... }",
+            "object": "// No object needed:\nString formatted = NameFormatter.format(\"Johnson\", \"Mel\");"
+          }
+        },
+        {
+          "phrase": "work like a utility available directly",
+          "labels": ["static"],
+          "explanation": "Being callable directly — without going through an instance — is the defining characteristic of a static method. The caller references the type name itself rather than any created object.",
+          "codeSnippets": {
+            "static": "String result = NameFormatter.format(\"Johnson\", \"Dr.\", \"Mel\", \"PhD\");"
+          }
+        }
+      ],
+      "code": "public class NameFormatter {\n    public static String format(String lastName, String firstName) {\n        return lastName + \", \" + firstName;\n    }\n\n    public static String format(String lastName, String firstName, String title) {\n        return lastName + \", \" + title + \" \" + firstName;\n    }\n\n    public static String format(String lastName, String firstName, String title, String suffix) {\n        return lastName + \", \" + title + \" \" + firstName + \", \" + suffix;\n    }\n}"
+    },
+    {
+      "title": "Dealership Architecture",
+      "statement": "A vehicle dealership application has grown too large to manage as a single unit. It needs to be split into focused pieces: one holds vehicle data, one manages the inventory, one handles file reads and writes, one handles all user interaction, and one whose only job is to start the program.",
+      "expectedTags": [
+        {
+          "phrase": "one holds vehicle data",
+          "labels": ["field", "getter"],
+          "explanation": "The piece responsible for vehicle data stores the individual attributes of each vehicle as fields and exposes them through getters so other parts of the application can read them.",
+          "codeSnippets": {
+            "field": "public class Vehicle {\n    private String make;\n    private double price;\n    // all data fields\n}",
+            "getter": "public String getMake() {\n    return make;\n}\npublic double getPrice() {\n    return price;\n}"
+          }
+        },
+        {
+          "phrase": "one manages the inventory",
+          "labels": ["class", "object"],
+          "explanation": "Managing inventory means working with a collection of vehicle objects — this piece defines its own blueprint (class) and operates on the vehicle objects the data piece describes.",
+          "codeSnippets": {
+            "class": "public class Dealership {\n    private List<Vehicle> inventory;\n    public void addVehicle(Vehicle v) { ... }\n}",
+            "object": "Dealership lot = new Dealership();\nlot.addVehicle(vehicle);"
+          }
+        },
+        {
+          "phrase": "one handles file reads and writes",
+          "labels": ["class", "method"],
+          "explanation": "File I/O is a focused responsibility — it belongs in its own blueprint (class) and is exposed through methods that other parts of the application call to load or save data.",
+          "codeSnippets": {
+            "class": "public class DealershipDao { ... }",
+            "method": "public List<Vehicle> getVehicles() { /* reads from file */ }\npublic void saveVehicles(List<Vehicle> vehicles) { /* writes to file */ }"
+          }
+        },
+        {
+          "phrase": "one handles all user interaction",
+          "labels": ["class", "method"],
+          "explanation": "The piece dedicated to user interaction is its own blueprint — it defines the menus, input prompts, and display logic as methods that respond to the user.",
+          "codeSnippets": {
+            "class": "public class UserInterface { /* Scanner, menus, display */ }",
+            "method": "public void run() { /* main interaction loop */ }\npublic void displayMenu() { /* show options */ }"
+          }
+        },
+        {
+          "phrase": "one whose only job is to start the program",
+          "labels": ["static", "method"],
+          "explanation": "The entry point of a Java program is the main method, which must be static so the runtime can call it without creating an instance first. A class whose only job is to start the program exists solely to host that static method.",
+          "codeSnippets": {
+            "static": "public static void main(String[] args) {\n    new UserInterface().run();\n}",
+            "method": "public static void main(String[] args) { ... }"
+          }
+        }
+      ],
+      "code": "// Vehicle.java — data only\npublic class Vehicle { /* fields, constructor, getters/setters */ }\n\n// DealershipDao.java — file I/O\npublic class DealershipDao {\n    public List<Vehicle> getVehicles() { /* reads from file */ }\n    public void saveVehicles(List<Vehicle> vehicles) { /* writes to file */ }\n}\n\n// Dealership.java — inventory logic\npublic class Dealership {\n    private List<Vehicle> inventory;\n    public void addVehicle(Vehicle v) { inventory.add(v); }\n    public List<Vehicle> search(String makeModel) { /* search logic */ }\n}\n\n// UserInterface.java — all I/O\npublic class UserInterface { /* Scanner, menus, display */ }\n\n// App.java — entry point only\npublic class App {\n    public static void main(String[] args) { new UserInterface().run(); }\n}"
+    },
+    {
+      "title": "Bank Account",
+      "statement": "A bank account needs to protect its balance. No code outside the account should be able to set the balance directly. The only ways to change it should be deposits and withdrawals — and a withdrawal should be rejected if there aren't enough funds.",
+      "expectedTags": [
+        {
+          "phrase": "protect its balance",
+          "labels": ["encapsulation"],
+          "explanation": "Protecting the balance means keeping it hidden from direct outside access — this is the core idea of encapsulation, where internal state is shielded and only reachable through controlled entry points.",
+          "codeSnippets": {
+            "encapsulation": "private double balance;\npublic double getBalance() { return balance; }\n// No setBalance() — balance only changes through deposit/withdraw"
+          }
+        },
+        {
+          "phrase": "No code outside the account should be able to set the balance directly",
+          "labels": ["encapsulation", "field"],
+          "explanation": "Making the balance a private field and providing no public setter enforces encapsulation — outside code cannot reach in and change the value without going through the account's own logic.",
+          "codeSnippets": {
+            "encapsulation": "private double balance; // no public setter",
+            "field": "private double balance;"
+          }
+        },
+        {
+          "phrase": "The only ways to change it should be deposits and withdrawals",
+          "labels": ["method", "encapsulation"],
+          "explanation": "Deposits and withdrawals are behaviors — they are methods that the account exposes as the controlled pathways for changing the balance. Allowing change only through these methods is encapsulation.",
+          "codeSnippets": {
+            "method": "public void deposit(double amount) {\n    if (amount > 0) {\n        balance += amount;\n    }\n}\n\npublic boolean withdraw(double amount) {\n    if (amount > 0 && amount <= balance) {\n        balance -= amount;\n        return true;\n    }\n    return false;\n}",
+            "encapsulation": "// Only deposit() and withdraw() can change the balance\nprivate double balance;"
+          }
+        },
+        {
+          "phrase": "a withdrawal should be rejected if there aren't enough funds",
+          "labels": ["condition"],
+          "explanation": "Before completing a withdrawal the code must check whether the requested amount is available — this check is a condition that determines whether the balance changes or the request is turned away.",
+          "codeSnippets": {
+            "condition": "if (amount > 0 && amount <= balance) {\n    balance -= amount;\n    return true;\n}\nreturn false;"
+          }
+        }
+      ],
+      "code": "public class BankAccount {\n    private double balance;\n\n    public BankAccount(double initialBalance) {\n        this.balance = initialBalance;\n    }\n\n    public double getBalance() { return balance; }\n\n    public void deposit(double amount) {\n        if (amount > 0) balance += amount;\n    }\n\n    public boolean withdraw(double amount) {\n        if (amount > 0 && amount <= balance) {\n            balance -= amount;\n            return true;\n        }\n        return false;\n    }\n}"
+    },
+    {
+      "title": "Card Game",
+      "statement": "A simple card game deals two cards to each player from a shuffled deck. After dealing, each player's hand has a total point value, and the highest total wins.",
+      "expectedTags": [
+        {
+          "phrase": "a shuffled deck",
+          "labels": ["object"],
+          "explanation": "A deck is a concrete thing the program creates and works with — it is an object, an instance brought to life from a blueprint that knows how to hold and shuffle cards.",
+          "codeSnippets": {
+            "object": "Deck deck = new Deck();\ndeck.shuffle();"
+          }
+        },
+        {
+          "phrase": "each player",
+          "labels": ["object"],
+          "explanation": "Each player is also a distinct object — a separate instance that holds its own hand and accumulates its own cards independently of the other player.",
+          "codeSnippets": {
+            "object": "Player player1 = new Player(\"Alice\");\nPlayer player2 = new Player(\"Bob\");"
+          }
+        },
+        {
+          "phrase": "deals two cards to each player",
+          "labels": ["method"],
+          "explanation": "Dealing is a behavior the deck performs — it has a defined process for removing a card from the top and delivering it. Calling that behavior on the deck produces the cards each player's hand receives.",
+          "codeSnippets": {
+            "method": "player1.getHand().addCard(deck.deal());\nplayer1.getHand().addCard(deck.deal());\nplayer2.getHand().addCard(deck.deal());\nplayer2.getHand().addCard(deck.deal());"
+          }
+        },
+        {
+          "phrase": "each player's hand has a total point value",
+          "labels": ["getter"],
+          "explanation": "The total point value is derived by summing the cards in the hand rather than being stored as a fixed number — retrieving it is a computed getter that calculates the answer from the hand's current contents.",
+          "codeSnippets": {
+            "getter": "int score1 = player1.getHand().getTotalValue();\nint score2 = player2.getHand().getTotalValue();"
+          }
+        },
+        {
+          "phrase": "the highest total wins",
+          "labels": ["condition"],
+          "explanation": "Determining who wins requires comparing the two scores — the code branches based on which total is greater, which is a condition that drives the final output.",
+          "codeSnippets": {
+            "condition": "if (score1 > score2) {\n    System.out.println(player1.getName() + \" wins!\");\n} else if (score2 > score1) {\n    System.out.println(player2.getName() + \" wins!\");\n} else {\n    System.out.println(\"It's a tie!\");\n}"
+          }
+        }
+      ],
+      "code": "Deck deck = new Deck();\ndeck.shuffle();\n\nPlayer player1 = new Player(\"Alice\");\nPlayer player2 = new Player(\"Bob\");\n\nplayer1.getHand().addCard(deck.deal());\nplayer1.getHand().addCard(deck.deal());\nplayer2.getHand().addCard(deck.deal());\nplayer2.getHand().addCard(deck.deal());\n\nint score1 = player1.getHand().getTotalValue();\nint score2 = player2.getHand().getTotalValue();\n\nif (score1 > score2) {\n    System.out.println(player1.getName() + \" wins!\");\n} else if (score2 > score1) {\n    System.out.println(player2.getName() + \" wins!\");\n} else {\n    System.out.println(\"It's a tie!\");\n}"
+    }
+  ]
+}

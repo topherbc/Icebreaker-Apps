@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌴</text></svg>">
+<title>Island Confessional &mdash; Season 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --sand:        #FDF6EC;
+  --sand-mid:    #F5E9D5;
+  --sand-card:   #FFFAF3;
+  --navy:        #1A2332;
+  --navy-mid:    #263347;
+  --coral:       #CC4525;
+  --coral-light: #E86B4A;
+  --coral-pale:  #FBE8E2;
+  --teal:        #2D7D5A;
+  --teal-light:  #3D9E72;
+  --teal-pale:   #E0F2EB;
+  --ocean:       #1B6B9E;
+  --ocean-pale:  #DFF0FB;
+  --gold:        #C68B22;
+  --gold-pale:   #FDF0D5;
+  --slate:       #5A6B7A;
+  --slate-light: #536470;
+  --border:      #E8DECA;
+  --border-card: #EFE6D6;
+  --shadow-card: 0 2px 16px rgba(26,35,50,0.09), 0 1px 4px rgba(26,35,50,0.06);
+  --shadow-lift: 0 8px 36px rgba(26,35,50,0.16), 0 2px 8px rgba(26,35,50,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; min-height: 100vh;
+  background: var(--sand);
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* ======= LOAD SCREEN ======= */
+#load-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+#load-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 85% 10%, rgba(204,69,37,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 10% 90%, rgba(45,125,90,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(27,107,158,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* decorative palm leaves */
+#load-screen::after {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 320px; height: 320px;
+  background:
+    radial-gradient(ellipse 30% 80% at 80% 20%, rgba(45,125,90,0.08) 0%, transparent 100%),
+    radial-gradient(ellipse 20% 60% at 60% 40%, rgba(204,69,37,0.06) 0%, transparent 100%);
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+
+.load-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  max-width: 540px;
+  width: 100%;
+  text-align: center;
+  z-index: 1;
+}
+
+.load-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--coral-pale);
+  color: #B83B1F;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(204,69,37,0.2);
+}
+
+.load-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(72px, 10vw, 112px);
+  color: var(--navy);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+
+.load-title .accent {
+  color: var(--coral);
+}
+
+.load-season {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-bottom: 36px;
+}
+
+.load-divider {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--border), transparent);
+  margin: 0 auto 36px;
+}
+
+.load-form {
+  background: var(--sand-card);
+  border: 1px solid var(--border-card);
+  border-radius: 24px;
+  padding: 36px 40px;
+  box-shadow: var(--shadow-card);
+  width: 100%;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy-mid);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  flex: 1;
+  height: 58px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--sand);
+  color: var(--navy);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: textfield;
+  -moz-appearance: textfield;
+  letter-spacing: 0.04em;
+}
+
+.form-input::-webkit-inner-spin-button,
+.form-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+.form-input:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgba(204,69,37,0.12);
+}
+
+.stepper-btn {
+  width: 58px; height: 58px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--sand);
+  color: var(--navy);
+  font-size: 26px;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.stepper-btn:hover {
+  background: var(--coral-pale);
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
+.form-hint {
+  font-size: 13px;
+  color: var(--slate-light);
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.begin-btn {
+  width: 100%;
+  height: 62px;
+  background: var(--coral);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(204,69,37,0.32);
+}
+
+.begin-btn:hover {
+  background: var(--coral-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(204,69,37,0.38);
+}
+
+.begin-btn:active { transform: translateY(0); }
+
+.load-footer {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--slate-light);
+}
+
+.load-footer-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+
+/* ======= CARD SCREEN ======= */
+#card-screen {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+/* ======= HEADER ======= */
+.deck-header {
+  padding: 16px 36px;
+  border-bottom: 1px solid var(--border-card);
+  background: var(--sand-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 1px 10px rgba(26,35,50,0.07);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: var(--navy);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.header-logo span { color: var(--coral); }
+
+.header-season {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate-light);
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+}
+
+.deck-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--slate);
+  background: var(--sand);
+  border: 1px solid var(--border);
+  padding: 6px 16px;
+  border-radius: 100px;
+}
+
+.progress-bar-track {
+  width: 80px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--coral);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.progress-text strong { color: var(--navy); font-weight: 700; }
+
+
+/* ======= BODY ======= */
+.deck-body {
+  flex: 1;
+  padding: 36px 36px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+}
+
+
+/* ======= CARD GRID ======= */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 1400px;
+}
+
+@media (max-width: 1200px) {
+  .card-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+
+/* ======= CARD ======= */
+.card {
+  background: var(--sand-card);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 20px 18px 18px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  animation: cardIn 0.4s ease both;
+  min-height: 48px;
+}
+
+.card:not(.is-revealed):hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--border);
+}
+
+.card.is-revealed {
+  background: var(--sand);
+  border-color: var(--border);
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* top stripe */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 16px 16px 0 0;
+}
+
+.card::before { background: var(--coral); }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.card-label {
+  background: var(--coral-pale);
+  color: var(--coral);
+  border: 1px solid rgba(204,69,37,0.2);
+}
+
+.card-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--slate-light);
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+/* card-front removed -- question always rendered, blurred until revealed */
+
+.reveal-btn {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, opacity 0.15s;
+  flex-shrink: 0;
+  background: var(--coral);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(204,69,37,0.25);
+}
+
+.reveal-btn:hover { background: var(--coral-light); transform: translateY(-1px); }
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.reveal-btn:active { transform: scale(0.97) !important; }
+
+.reveal-btn.done {
+  background: var(--coral);
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* revealed content — always rendered, question blurred until reveal */
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-question {
+  font-family: 'Crimson Pro', serif;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--navy);
+  flex: 1;
+  filter: blur(5px);
+  user-select: none;
+  transition: filter 0.3s ease;
+}
+
+.card.is-revealed .card-question {
+  filter: none;
+  user-select: auto;
+}
+
+.card-front { display: none; }
+
+/* fun: textarea */
+.answer-area { display: none; flex-direction: column; gap: 6px; }
+.card.is-revealed .answer-area { display: flex; }
+
+.answer-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--navy);
+  background: var(--sand);
+  resize: none;
+  outline: none;
+  min-height: 52px;
+  transition: border-color 0.2s;
+}
+.answer-input:focus { border-color: var(--coral); }
+
+/* tech: answer key */
+.answer-key-wrap { display: none; flex-direction: column; gap: 4px; }
+.card.is-revealed .answer-key-wrap { display: flex; }
+
+.answer-key-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--slate-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.15s;
+  width: fit-content;
+}
+.answer-key-btn:hover { color: var(--coral); }
+
+.answer-key-btn svg {
+  width: 11px; height: 11px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.answer-key-btn.open svg { transform: rotate(90deg); }
+
+.answer-key-text {
+  display: none;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--navy-mid);
+  background: var(--coral-pale);
+  border: 1px solid rgba(204,69,37,0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+  line-height: 1.45;
+}
+.answer-key-text.open { display: block; }
+
+/* revealed indicator */
+.revealed-badge {
+  display: none;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate-light);
+  text-align: right;
+}
+.card.is-revealed .revealed-badge { display: block; }
+
+
+/* ======= FINALE SECTION ======= */
+#finale-section {
+  width: 100%;
+  max-width: 1400px;
+}
+
+.finale-trigger {
+  width: 100%;
+  height: 66px;
+  background: linear-gradient(135deg, var(--coral) 0%, #D9562A 50%, #C0431F 100%);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(204,69,37,0.38);
+}
+
+.finale-trigger:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(204,69,37,0.42); }
+.finale-trigger:active { transform: translateY(0); }
+.finale-trigger svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+
+/* ======= MEMO CARD ======= */
+#memo-card {
+  display: none;
+  margin-top: 20px;
+  background: var(--sand-card);
+  border: 1px solid var(--border-card);
+  border-radius: 24px;
+  padding: 52px 56px;
+  box-shadow: var(--shadow-lift);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+#memo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--coral) 0%, var(--gold) 50%, var(--teal) 100%);
+}
+
+.memo-stamp {
+  position: absolute;
+  top: 36px; right: 52px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  color: var(--coral);
+  border: 2px solid var(--coral);
+  padding: 4px 12px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transform: rotate(8deg);
+}
+
+.memo-header-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--coral);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.memo-header-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.memo-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 44px;
+  letter-spacing: 0.03em;
+  color: var(--navy);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.memo-meta {
+  font-size: 14px;
+  color: var(--slate-light);
+  margin-bottom: 32px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.memo-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px 0;
+}
+
+.memo-body {
+  font-family: 'Crimson Pro', serif;
+  font-size: 21px;
+  line-height: 1.8;
+  color: var(--navy);
+}
+
+.memo-body p { margin-bottom: 20px; }
+.memo-body p:last-child { margin-bottom: 0; }
+
+.slot-val {
+  color: var(--coral);
+  font-weight: 600;
+  font-style: italic;
+  border-bottom: 1.5px solid rgba(204,69,37,0.35);
+  padding-bottom: 1px;
+}
+
+.memo-footer {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--slate-light);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.memo-footer-sig {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--slate);
+}
+
+
+/* ======= RESET ======= */
+.reset-btn {
+  display: block;
+  margin: 28px auto 0;
+  height: 48px;
+  padding: 0 28px;
+  background: transparent;
+  color: var(--slate);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.reset-btn:hover {
+  border-color: var(--slate);
+  color: var(--navy);
+  background: var(--sand-mid);
+}
+
+#memo-card.show {
+  display: block;
+  animation: cardIn 0.5s ease both;
+}
+</style>
+</head>
+<body>
+
+<!-- ======= LOAD SCREEN ======= -->
+<div id="load-screen">
+  <div class="load-inner">
+    <div class="load-eyebrow">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <circle cx="8" cy="8" r="3"/>
+        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      Java Bootcamp &mdash; Week 3
+    </div>
+
+    <h1 class="load-title">Island<br><span class="accent">Confessional</span></h1>
+    <p class="load-season">Season 5 &nbsp;&bull;&nbsp; The Cam Never Lies</p>
+
+    <div class="load-divider"></div>
+
+    <div class="load-form">
+      <label class="form-label" for="producer-count">How many castaways today?</label>
+      <div class="form-row">
+        <button class="stepper-btn" id="dec-btn" aria-label="Decrease count">&#x2212;</button>
+        <input
+          class="form-input"
+          type="number"
+          id="producer-count"
+          min="6" max="30" value="25"
+          aria-label="Number of castaways"
+        >
+        <button class="stepper-btn" id="inc-btn" aria-label="Increase count">&#x2B;</button>
+      </div>
+      <p class="form-hint">Minimum 6 &middot; Maximum 30 castaways per session</p>
+      <button class="begin-btn" id="begin-btn">Enter the Confessional</button>
+    </div>
+
+    <div class="load-footer">
+      <div class="load-footer-item">
+        <span class="dot" style="background:var(--coral)"></span>
+        Hot Take
+      </div>
+      <div class="load-footer-item">
+        <span class="dot" style="background:var(--coral)"></span>
+        Island Gossip
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======= CARD SCREEN ======= -->
+<div id="card-screen" style="display:none; flex-direction:column;">
+  <header class="deck-header">
+    <div class="header-left">
+      <div class="header-logo">Island <span>Confessional</span></div>
+      <div class="header-season">Season 5</div>
+    </div>
+    <div class="deck-progress">
+      <span class="progress-text">
+        <strong id="progress-current">0</strong> of <strong id="progress-total">25</strong> Revealed
+      </span>
+      <div class="progress-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" id="progress-bar-role">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="deck-body">
+    <div class="card-grid" id="card-grid"></div>
+
+    <div id="finale-section">
+      <button class="finale-trigger" id="finale-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" fill="currentColor"/>
+          <circle cx="12" cy="12" r="9"/>
+          <line x1="12" y1="3" x2="12" y2="1"/>
+          <line x1="12" y1="23" x2="12" y2="21"/>
+          <line x1="3" y1="12" x2="1" y2="12"/>
+          <line x1="23" y1="12" x2="21" y2="12"/>
+        </svg>
+        Play the Tape
+      </button>
+
+      <div id="memo-card">
+        <div class="memo-stamp">ON THE RECORD</div>
+        <div class="memo-header-label">Confessional Cam &mdash; Season 5</div>
+        <div class="memo-title">The Tape</div>
+        <div class="memo-meta">Recorded on location &nbsp;&bull;&nbsp; Do not air without consent of Legal &nbsp;&bull;&nbsp; Legal has already approved it</div>
+        <div class="memo-divider"></div>
+        <div class="memo-body" id="memo-body"></div>
+        <div class="memo-footer">
+          <span>This footage is the sole property of the production. The contestant has been informed. The contestant does not care.</span>
+          <span class="memo-footer-sig">-- End of Tape --</span>
+        </div>
+      </div>
+
+      <button class="reset-btn" id="reset-btn">Start New Session</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ======= DATA =======
+
+const FUN_LABELS  = ["Hot Take", "Confessional Drop", "Tribal Whisper", "Island Gossip", "The Real Story"];
+const TECH_LABELS = ["Hot Take", "Confessional Drop", "Tribal Whisper", "Island Gossip", "The Real Story"];
+
+const FUN_QUESTIONS = [
+  { q: "What trait in someone makes you trust them less almost immediately, even if you cannot quite explain why?",             slot: "a villain trait",     placeholder: "noun phrase, e.g. \"quiet intimidation\"" },
+  { q: "What is something you are genuinely good at that most people would not expect to be useful under pressure?",           slot: "a challenge",         placeholder: "noun or verb phrase, e.g. \"memorizing names fast\"" },
+  { q: "If you could change one rule of any game, system, or situation you are currently in, what would you change?",          slot: "a twist",             placeholder: "noun phrase, e.g. \"two winners or none\"" },
+  { q: "What personality type do you find yourself watching most closely when you are new to a group, and why?",               slot: "a personality type",  placeholder: "noun phrase, e.g. \"the overconfident strategist\"" },
+  { q: "If you could give everyone in this room one rule to follow for the rest of the day, what would it be?",                slot: "one rule",            placeholder: "imperative sentence, e.g. \"Say the thing you are almost saying\"" },
+  { q: "What is one quality in a teammate that you find genuinely difficult to work around, even when you like the person?",   slot: "a dealbreaker",       placeholder: "adjective or adjective phrase, e.g. \"quietly checked out\"" },
+  { q: "What kind of task or situation reliably brings out the worst version of you?",                                         slot: "a personal weakness", placeholder: "noun phrase, e.g. \"open-ended tasks with no deadline\"" },
+  { q: "You just pulled off something you are genuinely proud of. What is the very first thing you do right after?",           slot: "a finale moment",     placeholder: "noun or verb phrase, e.g. \"go completely quiet for an hour\"" },
+  { q: "What is something you are quietly good at that almost never comes up in professional or academic settings?",           slot: "a secret skill",      placeholder: "noun phrase, e.g. \"reading a room in under a minute\"" },
+  { q: "What quality do you most respect in other people but rarely think to mention when describing yourself?",               slot: "a winning quality",   placeholder: "noun phrase, e.g. \"patient restraint\"" },
+  { q: "You have had a genuinely brutal week. What one specific thing -- food, activity, anything -- actually resets you?",    slot: "a feast item",        placeholder: "noun phrase, e.g. \"a long drive with no destination\"" },
+  { q: "What is something most teams or groups keep doing wrong, and what would you actually do instead?",                     slot: "an innovation",       placeholder: "noun or verb phrase, e.g. \"cut the status update meeting entirely\"" }
+];
+
+const TECH_QUESTIONS = [
+  { q: "A method is declared as void. What does that tell you about its return value?",
+    answer: "A void method does not return a value. The caller receives nothing back." },
+  { q: "You have two methods both named scoreChallenge -- one takes an int, one takes a String. What makes this valid Java?",
+    answer: "The parameter types are different, which makes this valid method overloading." },
+  { q: "Which version of scoreChallenge runs when you pass the number 42?",
+    answer: "The version that takes an int, because 42 is an integer literal." },
+  { q: "A method signature says: String getIslandName(). What must the method body include?",
+    answer: "A return statement that returns a String value." },
+  { q: "What is wrong with declaring two methods that have the same name and the same parameter types?",
+    answer: "Java cannot tell them apart -- it is a compile error. Overloading requires different parameter types." },
+  { q: "A method takes a double parameter called ratio. Where does the value of ratio come from when the method runs?",
+    answer: "From the caller -- whatever argument is passed in fills that parameter." },
+  { q: "What is the practical difference between a void return type and an int return type for the caller?",
+    answer: "A void method gives the caller nothing back. An int method gives the caller an integer they can use or store." },
+  { q: "You write: return \"Voted Off\"; inside a method. What must the method's return type be in the signature?",
+    answer: "String, because the method is returning a String value." },
+  { q: "A method is declared as int countVotes(String tribe). How many arguments must a caller pass in?",
+    answer: "One argument -- a String." },
+  { q: "What does method overloading mean in one sentence?",
+    answer: "Having multiple methods with the same name but different parameter lists in the same class." },
+  { q: "Can a void method have a return statement? What would it look like?",
+    answer: "Yes -- just the keyword return with a semicolon and nothing after it: return;" },
+  { q: "A method signature says: int countVotes(String tribe). What does the caller receive when it calls this method?",
+    answer: "An int value -- the result of counting votes for that tribe." },
+  { q: "You call displayResults() and nothing comes back to the caller. What return type does that method most likely have?",
+    answer: "void" }
+];
+
+// ======= STATE =======
+let slots         = {};
+let revealedCount = 0;
+let totalCards    = 0;
+
+// ======= UTILITY =======
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function randFrom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function clamp(v, lo, hi) {
+  return Math.min(Math.max(v, lo), hi);
+}
+
+// ======= DISTRIBUTION =======
+function buildCardPool(n) {
+  // Always use full 25-card pool (12 fun + 13 tech).
+  // Distribute proportionally: numFun = floor(12 * n / 25), numTech = n - numFun.
+  // Clamp so we never exceed pool sizes.
+  const numFun  = Math.min(12, Math.floor(12 * n / 25));
+  const numTech = Math.min(13, n - numFun);
+  const total   = numFun + numTech;
+
+  const funPool  = shuffle(FUN_QUESTIONS).slice(0, numFun);
+  const techPool = shuffle(TECH_QUESTIONS).slice(0, numTech);
+
+  // Interleave fun and tech proportionally then shuffle
+  const allQ = shuffle([
+    ...funPool.map(q  => ({ ...q,  type: 'fun'  })),
+    ...techPool.map(q => ({ ...q,  type: 'tech' }))
+  ]);
+
+  // Assign students: first pass round-robin, so each student gets one question first
+  // before anyone gets a second. Max 2 per student.
+  const cards = [];
+  for (let i = 0; i < allQ.length; i++) {
+    cards.push({ ...allQ[i], student: (i % n) + 1 });
+  }
+
+  // Sort by student number so cards are grouped
+  cards.sort((a, b) => a.student - b.student);
+  return cards;
+}
+
+// ======= LOAD SCREEN =======
+const countInput = document.getElementById('producer-count');
+const decBtn     = document.getElementById('dec-btn');
+const incBtn     = document.getElementById('inc-btn');
+const beginBtn   = document.getElementById('begin-btn');
+
+decBtn.addEventListener('click', () => {
+  countInput.value = clamp((parseInt(countInput.value) || 25) - 1, 6, 30);
+});
+incBtn.addEventListener('click', () => {
+  countInput.value = clamp((parseInt(countInput.value) || 25) + 1, 6, 30);
+});
+countInput.addEventListener('blur', () => {
+  let v = parseInt(countInput.value);
+  if (isNaN(v)) v = 25;
+  countInput.value = clamp(v, 6, 30);
+});
+countInput.addEventListener('keydown', e => { if (e.key === 'Enter') openRoom(); });
+beginBtn.addEventListener('click', openRoom);
+
+function openRoom() {
+  let n = parseInt(countInput.value);
+  if (isNaN(n)) n = 25;
+  n = clamp(n, 6, 30);
+
+  slots         = {};
+  revealedCount = 0;
+
+  const cards = buildCardPool(n);
+  totalCards  = cards.length;
+
+  document.getElementById('progress-total').textContent   = totalCards;
+  document.getElementById('progress-current').textContent = '0';
+  updateProgressBar();
+
+  renderCards(cards);
+
+  document.getElementById('load-screen').style.display  = 'none';
+  const cs = document.getElementById('card-screen');
+  cs.style.display = 'flex';
+  document.getElementById('memo-card').classList.remove('show');
+}
+
+// ======= PROGRESS =======
+function updateProgressBar() {
+  const pct = totalCards > 0 ? (revealedCount / totalCards) * 100 : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  const bar = document.getElementById('progress-bar-role');
+  bar.setAttribute('aria-valuenow', revealedCount);
+  bar.setAttribute('aria-valuemax', totalCards);
+}
+
+// ======= RENDER =======
+function renderCards(cards) {
+  const grid = document.getElementById('card-grid');
+  grid.innerHTML = '';
+
+  cards.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = `card ${card.type}`;
+    div.style.animationDelay = `${Math.min(idx * 0.035, 0.8)}s`;
+
+    const labelText = card.type === 'fun' ? randFrom(FUN_LABELS) : randFrom(TECH_LABELS);
+
+    // Single icon shape for all cards -- no visual tell for question type
+    const labelIcon = `<svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>`;
+
+    // Bottom content area (fun = textarea, tech = answer key)
+    const bottomArea = card.type === 'fun'
+      ? `<div class="answer-area">
+           <textarea class="answer-input" rows="2" aria-label="Enter answer" placeholder="${card.placeholder || ''}"></textarea>
+         </div>`
+      : `<div class="answer-key-wrap">
+           <button class="answer-key-btn" aria-expanded="false" aria-label="Show answer key">
+             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+               <polyline points="6 4 10 8 6 12"/>
+             </svg>
+             Show Answer
+           </button>
+           <div class="answer-key-text" role="status"></div>
+         </div>`;
+
+    div.innerHTML = `
+      <div class="card-top">
+        <span class="card-label">${labelIcon}&nbsp;${labelText}</span>
+        <span class="card-num" aria-label="Student ${card.student}">${card.student}</span>
+      </div>
+
+      <div class="card-content">
+        <p class="card-question">${escHtml(card.q)}</p>
+        ${bottomArea}
+      </div>
+
+      <div class="card-footer" style="margin-top:auto;">
+        <button class="reveal-btn" aria-label="Reveal card ${idx + 1}">Reveal</button>
+      </div>
+    `;
+
+    // Wire up reveal button
+    const revBtn = div.querySelector('.reveal-btn');
+
+    revBtn.addEventListener('click', () => {
+      div.classList.add('is-revealed');
+      revBtn.textContent = 'Revealed';
+      revBtn.classList.add('done');
+      revBtn.setAttribute('aria-label', `Card ${idx + 1} revealed`);
+
+      revealedCount++;
+      document.getElementById('progress-current').textContent = revealedCount;
+      updateProgressBar();
+
+      // Fun: listen for input to capture slot value
+      if (card.type === 'fun' && card.slot) {
+        const ta = div.querySelector('.answer-input');
+        ta.addEventListener('input', () => {
+          slots[card.slot] = ta.value.trim();
+        });
+      }
+
+      // Tech: wire up answer key toggle
+      if (card.type === 'tech') {
+        const togBtn  = div.querySelector('.answer-key-btn');
+        const togText = div.querySelector('.answer-key-text');
+        togText.textContent = card.answer || '';
+
+        togBtn.addEventListener('click', () => {
+          const isOpen = togText.classList.toggle('open');
+          togBtn.classList.toggle('open', isOpen);
+          togBtn.setAttribute('aria-expanded', String(isOpen));
+          // update text node (the label after the SVG)
+          togBtn.childNodes.forEach(n => {
+            if (n.nodeType === Node.TEXT_NODE) {
+              n.textContent = isOpen ? ' Hide Answer' : ' Show Answer';
+            }
+          });
+        });
+      }
+    });
+
+    grid.appendChild(div);
+  });
+}
+
+function escHtml(s) {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ======= FINALE =======
+document.getElementById('finale-btn').addEventListener('click', generateMemo);
+
+function generateMemo() {
+  const memoCard = document.getElementById('memo-card');
+  const body     = document.getElementById('memo-body');
+
+  const s  = key => (slots[key] && slots[key].trim()) ? slots[key].trim() : null;
+  const hi = val => `<span class="slot-val">${escHtml(val)}</span>`;
+
+  const paras = [];
+
+  // Opening -- always shown
+  paras.push('Okay. I am going to be very clear about something. I came here to win. Not to make friends. Not to "have an experience." To win. And I have been watching this camp for eighteen days and I can already tell you exactly how this ends. With me. Holding the check.');
+
+  // Para: villain + dealbreaker
+  const villain    = s('a villain trait');
+  const dealbreaker = s('a dealbreaker');
+  let p2 = '';
+  if (villain && dealbreaker) {
+    p2 = `You want to know who the real threat is out here? Look for ${hi(villain)}. That is the tell. That is always the tell. And anybody who is ${hi(dealbreaker)}? Gone. I do not care how good they are at challenges. You cannot win this game with that energy. I have already decided.`;
+  } else if (villain) {
+    p2 = `Everyone keeps talking about who they trust. I am watching for ${hi(villain)}. That is the only thing that matters out here. The people who have it do not even know they have it. I know. I have been watching.`;
+  } else if (dealbreaker) {
+    p2 = `I will tell you exactly who is not winning this game. Anyone who is ${hi(dealbreaker)}. I do not make the rules. The game makes the rules. I just understand them better than everyone else.`;
+  }
+  if (p2) paras.push(p2);
+
+  // Para: challenge + personal weakness
+  const challenge = s('a challenge');
+  const weakn     = s('a personal weakness');
+  let p3 = '';
+  if (challenge && weakn) {
+    p3 = `If I were running this game -- and spiritually, I am -- the next challenge would be ${hi(challenge)}. Watch half this tribe implode in under a minute. Now. Do I have weaknesses? One. ${hi(weakn)}. I said it. It is out there. And I am the only person on this island honest enough to admit it, which actually makes me stronger than everyone else.`;
+  } else if (challenge) {
+    p3 = `Production, if you are watching this -- and I know you are watching this -- the next challenge should be ${hi(challenge)}. You are welcome. Do not credit me. I do not need the credit.`;
+  } else if (weakn) {
+    p3 = `I will say this once. My one vulnerability out here is ${hi(weakn)}. I have accounted for it. I have a plan for it. Nobody else on this island has identified a single weakness in themselves. That is why they are going home before me.`;
+  }
+  if (p3) paras.push(p3);
+
+  // Para: twist + rule
+  const twist = s('a twist');
+  const rule  = s('one rule');
+  let p4 = '';
+  if (twist && rule) {
+    p4 = `There is a twist coming. I know there is a twist coming because there is always a twist coming, and I am fairly certain it is ${hi(twist)}. I am already prepared for it. I have been prepared for it since day two. As for how I play -- one rule: ${hi(rule)}. That is it. Write it down.`;
+  } else if (twist) {
+    p4 = `Something is coming. I do not know exactly what but I believe it is ${hi(twist)}. I have already made three contingency plans. My tribemates are still arguing about where to sleep.`;
+  } else if (rule) {
+    p4 = `People keep asking me what my strategy is. It is very simple: ${hi(rule)}. That is the whole thing. Everything else is noise.`;
+  }
+  if (p4) paras.push(p4);
+
+  // Para: personality type + winning quality
+  const personality = s('a personality type');
+  const winQ        = s('a winning quality');
+  let p5 = '';
+  if (personality && winQ) {
+    p5 = `Out here, the most dangerous person is always ${hi(personality)}. Everyone underestimates them and then everyone is shocked when they make the finale. And the quality that actually wins? ${hi(winQ)}. Nobody respects it until the reunion show. At the reunion show they act like they always knew.`;
+  } else if (personality) {
+    p5 = `Let me tell you who you should be afraid of in this game. ${hi(personality)}. Every season. Every time. Nobody learns.`;
+  } else if (winQ) {
+    p5 = `The quality that wins this game is ${hi(winQ)}. It is not flashy. Nobody toasts it at tribal. The jury votes for it anyway because at the end of forty days it is the only thing left standing.`;
+  }
+  if (p5) paras.push(p5);
+
+  // Para: secret skill + feast item
+  const skill = s('a secret skill');
+  const feast = s('a feast item');
+  let p6 = '';
+  if (skill && feast) {
+    p6 = `Nobody out here knows this but the thing that is going to decide this whole season is ${hi(skill)}. Not strength. Not social game. That. I have it. And when we hit the merge and they put ${hi(feast)} on that table -- which is the only thing I have thought about for eleven days -- I am going to eat my portion, smile at everyone, and go win individual immunity. In that order.`;
+  } else if (skill) {
+    p6 = `Everyone is out here lifting things and making fire. The actual weapon in this game is ${hi(skill)}. I am not going to explain further.`;
+  } else if (feast) {
+    p6 = `I have thought about the merge feast every single day. Every single day. I want ${hi(feast)} on that table. That is not a request. That is a vision board.`;
+  }
+  if (p6) paras.push(p6);
+
+  // Para: finale moment + innovation
+  const finale     = s('a finale moment');
+  const innovation = s('an innovation');
+  let p7 = '';
+  if (finale && innovation) {
+    p7 = `I have already seen the finale in my head. Right before the winner is announced -- ${hi(finale)}. That is the moment. That is the one they will play in the clip package for years. And for what it is worth, this whole format could be completely reinvented if they just tried ${hi(innovation)}. I pitched it. Nobody listened. They will listen eventually.`;
+  } else if (finale) {
+    p7 = `I know exactly how the finale goes. Right before the winner is announced: ${hi(finale)}. I have imagined it so many times it basically already happened.`;
+  } else if (innovation) {
+    p7 = `Twenty years of this show and nobody has tried ${hi(innovation)}. I am just saying. I am just putting it out there. If it ever happens you know where it came from.`;
+  }
+  if (p7) paras.push(p7);
+
+  // Closing -- always shown
+  paras.push('Anyway. That is where I am at. I am in a good spot. I am in complete control. Nobody out here knows what I am doing and I intend to keep it that way. If you are watching this back: hi. I won. You already know that. Okay. I think I am done. Is the camera still -- okay.');
+
+  body.innerHTML = paras.map(p => `<p>${p}</p>`).join('');
+  memoCard.classList.add('show');
+  memoCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ======= RESET =======
+document.getElementById('reset-btn').addEventListener('click', () => {
+  document.getElementById('card-screen').style.display = 'none';
+  document.getElementById('load-screen').style.display = 'flex';
+  document.getElementById('memo-card').classList.remove('show');
+  slots         = {};
+  revealedCount = 0;
+});
+</script>
+</body>
+</html>

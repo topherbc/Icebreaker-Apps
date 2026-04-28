@@ -2339,9 +2339,9 @@ label {
     <div id="live-lobby" class="lobby">
       <h2 class="display-font" style="font-size:28px; color:var(--text-mid);">Game Lobby</h2>
       <div class="lobby-code-row">
-        <div class="room-code-display" id="room-code-display" aria-label="Room code">------</div>
+        <div class="room-code-display" id="room-code-display" aria-label="Room code" onclick="copyRoomCode()" title="Click to copy code" style="cursor:pointer;">------</div>
         <div class="qr-display" id="qr-display" style="display:none;" aria-label="QR code to join game">
-          <canvas id="qr-canvas"></canvas>
+          <canvas id="qr-canvas" onclick="copyFullJoinUrl()" title="Click to copy join URL" style="cursor:pointer;"></canvas>
         </div>
       </div>
       <div class="lobby-info">
@@ -5200,6 +5200,23 @@ function copyJoinUrl() {
   navigator.clipboard.writeText(url).then(function() {
     var fb = document.getElementById('copy-feedback');
     if (fb) { fb.textContent = 'Copied!'; setTimeout(function() { fb.textContent = ''; }, 2000); }
+  });
+}
+
+function copyRoomCode() {
+  if (!hostState.roomCode) return;
+  navigator.clipboard.writeText(hostState.roomCode).then(function() {
+    var fb = document.getElementById('copy-feedback');
+    if (fb) { fb.textContent = 'Code copied!'; setTimeout(function() { fb.textContent = ''; }, 2000); }
+  });
+}
+
+function copyFullJoinUrl() {
+  if (!hostState.roomCode) return;
+  var url = window.location.origin + window.location.pathname + '?view=join&code=' + hostState.roomCode;
+  navigator.clipboard.writeText(url).then(function() {
+    var fb = document.getElementById('copy-feedback');
+    if (fb) { fb.textContent = 'Join URL copied!'; setTimeout(function() { fb.textContent = ''; }, 2000); }
   });
 }
 

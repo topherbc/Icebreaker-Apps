@@ -5066,7 +5066,7 @@ function renderBrandedQR(url, canvasId) {
 
   // Size QR to match room-code-display height (~120px CSS)
   var dpr = window.devicePixelRatio || 1;
-  var targetDisplaySize = 120;
+  var targetDisplaySize = 160;
   var modPx = Math.max(2, Math.floor((targetDisplaySize * dpr) / totalModules));
   var renderSize = totalModules * modPx;
   var displaySize = Math.round(renderSize / dpr);

@@ -987,6 +987,26 @@ label {
   border-radius: 6px;
   font-size: 16px;
 }
+.lobby-code-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: center;
+}
+.qr-display {
+  background: var(--near-black);
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  border: 3px solid var(--amber);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qr-display canvas {
+  display: block;
+  border-radius: 4px;
+}
 .player-grid {
   display: flex;
   flex-wrap: wrap;
@@ -2156,6 +2176,7 @@ label {
   .question-list-panel { width: 100%; min-width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid var(--border); }
   .live-q-text { font-size: 24px; }
   .room-code-display { font-size: 48px; padding: 16px 32px; }
+  .lobby-code-row { flex-direction: column; gap: 16px; }
   .shapes-grid { gap: 10px; }
   .shape-btn { padding: 16px; font-size: 16px; min-height: 80px; }
   .podium-wrap { gap: 8px; }
@@ -2317,12 +2338,16 @@ label {
     <!-- Lobby -->
     <div id="live-lobby" class="lobby">
       <h2 class="display-font" style="font-size:28px; color:var(--text-mid);">Game Lobby</h2>
-      <div class="room-code-display" id="room-code-display" aria-label="Room code">------</div>
+      <div class="lobby-code-row">
+        <div class="room-code-display" id="room-code-display" aria-label="Room code">------</div>
+        <div class="qr-display" id="qr-display" style="display:none;" aria-label="QR code to join game">
+          <canvas id="qr-canvas"></canvas>
+        </div>
+      </div>
       <div class="lobby-info">
         <p>Students join at: <code id="join-url" style="cursor:pointer;" onclick="copyJoinUrl()" title="Click to copy"></code>
         <button class="btn-ghost" onclick="copyJoinUrl()" style="font-size:12px; padding:4px 8px; min-height:32px; min-width:32px; color:var(--near-black); display:inline-flex; align-items:center; gap:4px;" aria-label="Copy join URL"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></p>
         <div id="copy-feedback" style="font-size:13px; font-weight:600; color:var(--near-black); min-height:20px;"></div>
-        <canvas id="qr-canvas" width="200" height="200" style="margin:12px auto 0; display:none; border-radius:8px; image-rendering:pixelated;" aria-label="QR code to join game"></canvas>
       </div>
       <div class="player-count" aria-live="polite">
         <span id="player-count-num">0</span> players joined
@@ -5321,42 +5346,60 @@ var QRCode = (function() {
 function renderBrandedQR(url, canvasId) {
   var canvas = document.getElementById(canvasId);
   if (!canvas) return;
+  var wrap = document.getElementById('qr-display');
   var qr = QRCode.encode(url);
-  if (!qr) { canvas.style.display = 'none'; return; }
+  if (!qr) { if (wrap) wrap.style.display = 'none'; return; }
 
   var moduleCount = qr.size;
-  var scale = Math.max(4, Math.floor(200 / moduleCount));
-  var px = moduleCount * scale;
-  canvas.width = px;
-  canvas.height = px;
-  canvas.style.width = px + 'px';
-  canvas.style.height = px + 'px';
-  canvas.style.display = 'block';
+  // Render at 2x for crisp display, CSS scales down
+  var displaySize = 140;
+  var dpr = window.devicePixelRatio || 1;
+  var renderSize = Math.round(displaySize * dpr);
+  var scale = renderSize / moduleCount;
+
+  canvas.width = renderSize;
+  canvas.height = renderSize;
+  canvas.style.width = displaySize + 'px';
+  canvas.style.height = displaySize + 'px';
+  if (wrap) wrap.style.display = 'flex';
 
   var ctx = canvas.getContext('2d');
 
-  // Draw QR modules
+  // Draw QR modules -- crisp at any scale
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, px, px);
+  ctx.fillRect(0, 0, renderSize, renderSize);
   ctx.fillStyle = '#1a1a2e';
   for (var r = 0; r < moduleCount; r++)
     for (var c = 0; c < moduleCount; c++)
-      if (qr.modules[r][c]) ctx.fillRect(c * scale, r * scale, scale, scale);
+      if (qr.modules[r][c])
+        ctx.fillRect(Math.floor(c * scale), Math.floor(r * scale),
+                     Math.ceil(scale), Math.ceil(scale));
 
   // Draw branded center overlay with 4 shapes
-  // Error correction H tolerates ~30% damage; our overlay is ~12%
-  var cs = Math.floor(px * 0.22); // center region size
-  var cx = Math.floor((px - cs) / 2);
-  var cy = Math.floor((px - cs) / 2);
+  // Error correction H tolerates ~30% damage; our overlay is ~15%
+  var cs = Math.round(renderSize * 0.28);
+  var centerX = renderSize / 2, centerY = renderSize / 2;
 
-  // White background circle with subtle border
-  var centerX = px / 2, centerY = px / 2, radius = cs / 2 + 2;
+  // White background rounded-rect with subtle border
+  var pad = Math.round(cs * 0.12);
+  var bgSize = cs + pad * 2;
+  var bgX = centerX - bgSize / 2, bgY = centerY - bgSize / 2;
+  var bgR = Math.round(bgSize * 0.18);
   ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.moveTo(bgX + bgR, bgY);
+  ctx.lineTo(bgX + bgSize - bgR, bgY);
+  ctx.quadraticCurveTo(bgX + bgSize, bgY, bgX + bgSize, bgY + bgR);
+  ctx.lineTo(bgX + bgSize, bgY + bgSize - bgR);
+  ctx.quadraticCurveTo(bgX + bgSize, bgY + bgSize, bgX + bgSize - bgR, bgY + bgSize);
+  ctx.lineTo(bgX + bgR, bgY + bgSize);
+  ctx.quadraticCurveTo(bgX, bgY + bgSize, bgX, bgY + bgSize - bgR);
+  ctx.lineTo(bgX, bgY + bgR);
+  ctx.quadraticCurveTo(bgX, bgY, bgX + bgR, bgY);
+  ctx.closePath();
   ctx.fillStyle = '#ffffff';
   ctx.fill();
-  ctx.strokeStyle = '#e0e0e0';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#d0d0d0';
+  ctx.lineWidth = Math.max(1, dpr);
   ctx.stroke();
 
   // Read theme-aware colors from CSS variables
@@ -5368,20 +5411,23 @@ function renderBrandedQR(url, canvasId) {
     diamond:  style.getPropertyValue('--shape-diamond').trim()   || '#0a5940'
   };
 
-  // Layout: 2x2 grid of shapes inside the center circle
-  var shapeSize = cs * 0.32;
-  var gap = cs * 0.06;
+  // Layout: 2x2 grid of shapes, centered in the overlay
+  var shapeSize = Math.round(cs * 0.38);
+  var gap = Math.round(cs * 0.08);
+  var gridSize = shapeSize * 2 + gap;
+  var gridX = centerX - gridSize / 2;
+  var gridY = centerY - gridSize / 2;
   var offsets = [
-    { x: centerX - shapeSize/2 - gap, y: centerY - shapeSize/2 - gap }, // top-left: triangle
-    { x: centerX + gap,               y: centerY - shapeSize/2 - gap }, // top-right: circle
-    { x: centerX - shapeSize/2 - gap, y: centerY + gap },               // bottom-left: square
-    { x: centerX + gap,               y: centerY + gap }                // bottom-right: diamond
+    { x: gridX,                     y: gridY },                      // top-left: triangle
+    { x: gridX + shapeSize + gap,   y: gridY },                      // top-right: circle
+    { x: gridX,                     y: gridY + shapeSize + gap },    // bottom-left: square
+    { x: gridX + shapeSize + gap,   y: gridY + shapeSize + gap }     // bottom-right: diamond
   ];
 
   // Triangle (top-left)
   ctx.fillStyle = colors.triangle;
   ctx.beginPath();
-  ctx.moveTo(offsets[0].x + shapeSize/2, offsets[0].y);
+  ctx.moveTo(offsets[0].x + shapeSize / 2, offsets[0].y);
   ctx.lineTo(offsets[0].x + shapeSize, offsets[0].y + shapeSize);
   ctx.lineTo(offsets[0].x, offsets[0].y + shapeSize);
   ctx.closePath();
@@ -5390,20 +5436,32 @@ function renderBrandedQR(url, canvasId) {
   // Circle (top-right)
   ctx.fillStyle = colors.circle;
   ctx.beginPath();
-  ctx.arc(offsets[1].x + shapeSize/2, offsets[1].y + shapeSize/2, shapeSize/2, 0, Math.PI * 2);
+  ctx.arc(offsets[1].x + shapeSize / 2, offsets[1].y + shapeSize / 2, shapeSize / 2, 0, Math.PI * 2);
   ctx.fill();
 
   // Square (bottom-left)
   ctx.fillStyle = colors.square;
-  ctx.fillRect(offsets[2].x, offsets[2].y, shapeSize, shapeSize);
+  var sqR = Math.round(shapeSize * 0.1);
+  ctx.beginPath();
+  ctx.moveTo(offsets[2].x + sqR, offsets[2].y);
+  ctx.lineTo(offsets[2].x + shapeSize - sqR, offsets[2].y);
+  ctx.quadraticCurveTo(offsets[2].x + shapeSize, offsets[2].y, offsets[2].x + shapeSize, offsets[2].y + sqR);
+  ctx.lineTo(offsets[2].x + shapeSize, offsets[2].y + shapeSize - sqR);
+  ctx.quadraticCurveTo(offsets[2].x + shapeSize, offsets[2].y + shapeSize, offsets[2].x + shapeSize - sqR, offsets[2].y + shapeSize);
+  ctx.lineTo(offsets[2].x + sqR, offsets[2].y + shapeSize);
+  ctx.quadraticCurveTo(offsets[2].x, offsets[2].y + shapeSize, offsets[2].x, offsets[2].y + shapeSize - sqR);
+  ctx.lineTo(offsets[2].x, offsets[2].y + sqR);
+  ctx.quadraticCurveTo(offsets[2].x, offsets[2].y, offsets[2].x + sqR, offsets[2].y);
+  ctx.closePath();
+  ctx.fill();
 
   // Diamond (bottom-right)
   ctx.fillStyle = colors.diamond;
   ctx.beginPath();
-  ctx.moveTo(offsets[3].x + shapeSize/2, offsets[3].y);
-  ctx.lineTo(offsets[3].x + shapeSize, offsets[3].y + shapeSize/2);
-  ctx.lineTo(offsets[3].x + shapeSize/2, offsets[3].y + shapeSize);
-  ctx.lineTo(offsets[3].x, offsets[3].y + shapeSize/2);
+  ctx.moveTo(offsets[3].x + shapeSize / 2, offsets[3].y);
+  ctx.lineTo(offsets[3].x + shapeSize, offsets[3].y + shapeSize / 2);
+  ctx.lineTo(offsets[3].x + shapeSize / 2, offsets[3].y + shapeSize);
+  ctx.lineTo(offsets[3].x, offsets[3].y + shapeSize / 2);
   ctx.closePath();
   ctx.fill();
 }

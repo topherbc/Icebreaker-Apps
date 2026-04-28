@@ -2322,6 +2322,7 @@ label {
         <p>Students join at: <code id="join-url" style="cursor:pointer;" onclick="copyJoinUrl()" title="Click to copy"></code>
         <button class="btn-ghost" onclick="copyJoinUrl()" style="font-size:12px; padding:4px 8px; min-height:32px; min-width:32px; color:var(--near-black); display:inline-flex; align-items:center; gap:4px;" aria-label="Copy join URL"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></p>
         <div id="copy-feedback" style="font-size:13px; font-weight:600; color:var(--near-black); min-height:20px;"></div>
+        <canvas id="qr-canvas" width="200" height="200" style="margin:12px auto 0; display:none; border-radius:8px; image-rendering:pixelated;" aria-label="QR code to join game"></canvas>
       </div>
       <div class="player-count" aria-live="polite">
         <span id="player-count-num">0</span> players joined
@@ -3316,6 +3317,8 @@ function openQuizSettings() {
   overlay.onclick = function(e) { if (e.target === overlay) closeModal(); };
   var html = '<div class="modal">';
   html += '<h2>Quiz Settings</h2>';
+  html += '<div class="field-group"><label>Quiz Name</label>';
+  html += '<input type="text" id="qs-name" value="'+escHtml(quiz.title)+'" maxlength="100"></div>';
   html += '<div class="field-group"><label>Description</label>';
   html += '<textarea id="qs-desc" rows="2">'+escHtml(quiz.description)+'</textarea></div>';
   html += '<div class="field-group"><label>Default Timer (seconds)</label>';
@@ -3361,6 +3364,7 @@ function openQuizSettings() {
 function saveQuizSettings() {
   var quiz = getActiveQuiz();
   if (!quiz) return;
+  quiz.title = document.getElementById('qs-name').value.trim() || 'Untitled Quiz';
   quiz.description = document.getElementById('qs-desc').value;
   quiz.settings.defaultTimer = +document.getElementById('qs-timer').value || 30;
   quiz.settings.defaultPoints = +document.getElementById('qs-points').value || 1000;
@@ -3373,6 +3377,8 @@ function saveQuizSettings() {
   quiz.updatedAt = new Date().toISOString();
   saveQuizzes(hostState.quizzes);
   closeModal();
+  renderQuizList();
+  renderQuizEditor();
 }
 
 function closeModal() {
@@ -5008,13 +5014,411 @@ function shortenUrl(longUrl, callback) {
   document.body.appendChild(script);
 }
 
+// ================================================================
+//  INLINE QR CODE GENERATOR (QR Model 2, error correction level H)
+// ================================================================
+var QRCode = (function() {
+  // Galois field GF(2^8) with polynomial 0x11d
+  var EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (function() {
+    var x = 1;
+    for (var i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x = (x << 1) ^ (x & 128 ? 0x11d : 0); }
+    for (var i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+
+  function gfMul(a, b) { return a && b ? EXP[LOG[a] + LOG[b]] : 0; }
+
+  function polyMul(a, b) {
+    var r = new Uint8Array(a.length + b.length - 1);
+    for (var i = 0; i < a.length; i++)
+      for (var j = 0; j < b.length; j++)
+        r[i + j] ^= gfMul(a[i], b[j]);
+    return r;
+  }
+
+  function polyRem(data, gen) {
+    var r = new Uint8Array(data.length + gen.length - 1);
+    r.set(data);
+    for (var i = 0; i < data.length; i++) {
+      if (!r[i]) continue;
+      for (var j = 0; j < gen.length; j++)
+        r[i + j] ^= gfMul(gen[j], r[i]);
+    }
+    return r.slice(data.length);
+  }
+
+  function genPoly(n) {
+    var g = new Uint8Array([1]);
+    for (var i = 0; i < n; i++) g = polyMul(g, new Uint8Array([1, EXP[i]]));
+    return g;
+  }
+
+  // Version info for versions 1-10 (enough for URLs up to ~150 chars with H)
+  // [totalCodewords, ecPerBlock, numBlocks, [group1Blocks, group1DataCW, group2Blocks, group2DataCW]]
+  var VERSION_INFO = [
+    null, // v0 placeholder
+    [26, 17, 1, [1, 9, 0, 0]],
+    [44, 28, 1, [1, 16, 0, 0]],
+    [70, 22, 2, [2, 13, 0, 0]],
+    [100, 16, 4, [4, 9, 0, 0]],
+    [134, 22, 4, [2, 11, 2, 12]],
+    [172, 28, 4, [2, 15, 2, 16]],
+    [196, 26, 5, [4, 13, 1, 14]],
+    [242, 26, 6, [4, 14, 2, 15]],
+    [292, 30, 6, [4, 12, 2, 13]],  // v9 -- not used for typical URLs
+    [346, 28, 8, [6, 15, 2, 16]],  // v10
+  ];
+
+  var ALIGNMENT_POS = [null, null, [6, 18], [6, 22], [6, 26], [6, 30], [6, 34],
+    [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50]];
+
+  function chooseVersion(dataBytes) {
+    for (var v = 1; v <= 10; v++) {
+      var info = VERSION_INFO[v];
+      var g = info[3];
+      var dataCap = g[0] * g[1] + g[2] * g[3];
+      // byte mode: 4 bits mode + char count bits + data + terminator
+      var charCountBits = v <= 9 ? 8 : 16;
+      var availBits = dataCap * 8;
+      var needed = 4 + charCountBits + dataBytes * 8;
+      if (needed <= availBits) return v;
+    }
+    return -1; // too long
+  }
+
+  function encode(text) {
+    var data = [];
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charCodeAt(i);
+      if (c > 255) { /* UTF-8 encode */
+        if (c > 0x7ff) { data.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f)); }
+        else { data.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f)); }
+      } else { data.push(c); }
+    }
+
+    var ver = chooseVersion(data.length);
+    if (ver < 0) return null;
+    var info = VERSION_INFO[ver];
+    var g = info[3];
+    var dataCap = g[0] * g[1] + g[2] * g[3];
+    var charCountBits = ver <= 9 ? 8 : 16;
+
+    // Build bit stream: mode 0100 (byte), char count, data, terminator
+    var bits = [];
+    function pushBits(val, len) { for (var i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); }
+    pushBits(4, 4); // byte mode
+    pushBits(data.length, charCountBits);
+    for (var i = 0; i < data.length; i++) pushBits(data[i], 8);
+    // Terminator
+    var maxBits = dataCap * 8;
+    var termLen = Math.min(4, maxBits - bits.length);
+    pushBits(0, termLen);
+    // Pad to byte boundary
+    while (bits.length % 8) bits.push(0);
+    // Pad bytes
+    var padBytes = [0xEC, 0x11]; var pi = 0;
+    while (bits.length < maxBits) { pushBits(padBytes[pi], 8); pi ^= 1; }
+
+    // Convert to byte array
+    var codewords = [];
+    for (var i = 0; i < bits.length; i += 8)
+      codewords.push((bits[i]<<7)|(bits[i+1]<<6)|(bits[i+2]<<5)|(bits[i+3]<<4)|(bits[i+4]<<3)|(bits[i+5]<<2)|(bits[i+6]<<1)|bits[i+7]);
+
+    // Split into blocks and compute EC
+    var ecLen = info[1];
+    var gp = genPoly(ecLen);
+    var blocks = [], ecBlocks = [], idx = 0;
+    for (var grp = 0; grp < 2; grp++) {
+      var nBlk = grp === 0 ? g[0] : g[2];
+      var nData = grp === 0 ? g[1] : g[3];
+      for (var b = 0; b < nBlk; b++) {
+        var blk = codewords.slice(idx, idx + nData);
+        blocks.push(blk);
+        ecBlocks.push(Array.from(polyRem(new Uint8Array(blk), gp)));
+        idx += nData;
+      }
+    }
+
+    // Interleave data
+    var interleaved = [];
+    var maxData = Math.max(g[1], g[3] || 0);
+    for (var i = 0; i < maxData; i++)
+      for (var b = 0; b < blocks.length; b++)
+        if (i < blocks[b].length) interleaved.push(blocks[b][i]);
+    for (var i = 0; i < ecLen; i++)
+      for (var b = 0; b < ecBlocks.length; b++)
+        interleaved.push(ecBlocks[b][i]);
+
+    // Build matrix
+    var size = ver * 4 + 17;
+    var matrix = [], reserved = [];
+    for (var r = 0; r < size; r++) { matrix[r] = new Uint8Array(size); reserved[r] = new Uint8Array(size); }
+
+    // Finder patterns
+    function setFinder(row, col) {
+      for (var r = -1; r <= 7; r++)
+        for (var c = -1; c <= 7; c++) {
+          var rr = row + r, cc = col + c;
+          if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+          var v = (r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
+                  (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
+                  (r >= 2 && r <= 4 && c >= 2 && c <= 4) ? 1 : 0;
+          matrix[rr][cc] = v; reserved[rr][cc] = 1;
+        }
+    }
+    setFinder(0, 0); setFinder(0, size - 7); setFinder(size - 7, 0);
+
+    // Timing patterns
+    for (var i = 8; i < size - 8; i++) {
+      matrix[6][i] = matrix[i][6] = (i % 2 === 0) ? 1 : 0;
+      reserved[6][i] = reserved[i][6] = 1;
+    }
+
+    // Alignment patterns
+    if (ALIGNMENT_POS[ver]) {
+      var ap = ALIGNMENT_POS[ver];
+      for (var i = 0; i < ap.length; i++)
+        for (var j = 0; j < ap.length; j++) {
+          if ((i === 0 && j === 0) || (i === 0 && j === ap.length-1) || (i === ap.length-1 && j === 0)) continue;
+          var cr = ap[i], cc = ap[j];
+          for (var r = -2; r <= 2; r++)
+            for (var c = -2; c <= 2; c++) {
+              matrix[cr+r][cc+c] = (Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0)) ? 1 : 0;
+              reserved[cr+r][cc+c] = 1;
+            }
+        }
+    }
+
+    // Reserve format info areas
+    for (var i = 0; i < 8; i++) {
+      reserved[8][i] = reserved[i][8] = 1;
+      reserved[8][size - 1 - i] = reserved[size - 1 - i][8] = 1;
+    }
+    reserved[8][8] = 1;
+    matrix[size - 8][8] = 1; reserved[size - 8][8] = 1; // dark module
+
+    // Place data bits
+    var bitIdx = 0;
+    var allBits = [];
+    for (var i = 0; i < interleaved.length; i++)
+      for (var b = 7; b >= 0; b--) allBits.push((interleaved[i] >> b) & 1);
+
+    var col = size - 1;
+    var upward = true;
+    while (col >= 0) {
+      if (col === 6) col--; // skip timing column
+      for (var row = 0; row < size; row++) {
+        var r = upward ? size - 1 - row : row;
+        for (var dc = 0; dc <= 1; dc++) {
+          var c = col - dc;
+          if (c < 0) continue;
+          if (reserved[r][c]) continue;
+          matrix[r][c] = bitIdx < allBits.length ? allBits[bitIdx++] : 0;
+          reserved[r][c] = 1;
+        }
+      }
+      upward = !upward;
+      col -= 2;
+    }
+
+    // Masking -- evaluate all 8 masks, pick best
+    var MASKS = [
+      function(r,c){return (r+c)%2===0;},
+      function(r,c){return r%2===0;},
+      function(r,c){return c%3===0;},
+      function(r,c){return (r+c)%3===0;},
+      function(r,c){return (Math.floor(r/2)+Math.floor(c/3))%2===0;},
+      function(r,c){return (r*c)%2+(r*c)%3===0;},
+      function(r,c){return ((r*c)%2+(r*c)%3)%2===0;},
+      function(r,c){return ((r+c)%2+(r*c)%3)%2===0;}
+    ];
+
+    // Format info bits for H level (ECC=2) and each mask
+    var FORMAT_POLY = 0x537;
+    var FORMAT_MASK = 0x5412;
+    function formatBits(mask) {
+      var d = (2 << 3) | mask; // H=2
+      var val = d << 10;
+      for (var i = 4; i >= 0; i--) if (val & (1 << (i + 10))) val ^= FORMAT_POLY << i;
+      return ((d << 10) | val) ^ FORMAT_MASK;
+    }
+
+    function applyMask(mat, maskFn) {
+      var m = mat.map(function(row) { return new Uint8Array(row); });
+      // Save which cells are data (placed after reserved setup but before format)
+      for (var r = 0; r < size; r++)
+        for (var c = 0; c < size; c++) {
+          // Only mask data modules
+          var isFinder = (r < 9 && c < 9) || (r < 9 && c >= size - 8) || (r >= size - 8 && c < 9);
+          var isTiming = r === 6 || c === 6;
+          var isAlign = false;
+          if (ALIGNMENT_POS[ver]) {
+            var ap2 = ALIGNMENT_POS[ver];
+            for (var ai = 0; ai < ap2.length && !isAlign; ai++)
+              for (var aj = 0; aj < ap2.length && !isAlign; aj++) {
+                if ((ai===0&&aj===0)||(ai===0&&aj===ap2.length-1)||(ai===ap2.length-1&&aj===0)) continue;
+                if (Math.abs(r-ap2[ai])<=2 && Math.abs(c-ap2[aj])<=2) isAlign = true;
+              }
+          }
+          if (isFinder || isTiming || isAlign || (r === size-8 && c === 8)) continue;
+          if (maskFn(r, c)) m[r][c] ^= 1;
+        }
+      return m;
+    }
+
+    function penalty(m) {
+      var p = 0;
+      // Rule 1: runs of 5+ same color
+      for (var r = 0; r < size; r++) {
+        var cnt = 1;
+        for (var c = 1; c < size; c++) {
+          if (m[r][c] === m[r][c-1]) { cnt++; } else { if (cnt >= 5) p += cnt - 2; cnt = 1; }
+        }
+        if (cnt >= 5) p += cnt - 2;
+      }
+      for (var c = 0; c < size; c++) {
+        var cnt = 1;
+        for (var r = 1; r < size; r++) {
+          if (m[r][c] === m[r-1][c]) { cnt++; } else { if (cnt >= 5) p += cnt - 2; cnt = 1; }
+        }
+        if (cnt >= 5) p += cnt - 2;
+      }
+      // Rule 2: 2x2 blocks
+      for (var r = 0; r < size-1; r++)
+        for (var c = 0; c < size-1; c++)
+          if (m[r][c]===m[r][c+1] && m[r][c]===m[r+1][c] && m[r][c]===m[r+1][c+1]) p += 3;
+      return p;
+    }
+
+    var bestMask = 0, bestPen = Infinity;
+    for (var mi = 0; mi < 8; mi++) {
+      var masked = applyMask(matrix, MASKS[mi]);
+      var pen = penalty(masked);
+      if (pen < bestPen) { bestPen = pen; bestMask = mi; }
+    }
+
+    var final = applyMask(matrix, MASKS[bestMask]);
+
+    // Write format info
+    var fmtBits = formatBits(bestMask);
+    var FMT_POSITIONS_A = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    var FMT_POSITIONS_B = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+    for (var i = 0; i < 15; i++) {
+      var bit = (fmtBits >> (14 - i)) & 1;
+      final[FMT_POSITIONS_A[i][0]][FMT_POSITIONS_A[i][1]] = bit;
+      final[FMT_POSITIONS_B[i][0]][FMT_POSITIONS_B[i][1]] = bit;
+    }
+
+    return { modules: final, size: size, version: ver };
+  }
+
+  return { encode: encode };
+})();
+
+// ================================================================
+//  BRANDED QR RENDERER (4-shape center overlay)
+// ================================================================
+function renderBrandedQR(url, canvasId) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  var qr = QRCode.encode(url);
+  if (!qr) { canvas.style.display = 'none'; return; }
+
+  var moduleCount = qr.size;
+  var scale = Math.max(4, Math.floor(200 / moduleCount));
+  var px = moduleCount * scale;
+  canvas.width = px;
+  canvas.height = px;
+  canvas.style.width = px + 'px';
+  canvas.style.height = px + 'px';
+  canvas.style.display = 'block';
+
+  var ctx = canvas.getContext('2d');
+
+  // Draw QR modules
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, px, px);
+  ctx.fillStyle = '#1a1a2e';
+  for (var r = 0; r < moduleCount; r++)
+    for (var c = 0; c < moduleCount; c++)
+      if (qr.modules[r][c]) ctx.fillRect(c * scale, r * scale, scale, scale);
+
+  // Draw branded center overlay with 4 shapes
+  // Error correction H tolerates ~30% damage; our overlay is ~12%
+  var cs = Math.floor(px * 0.22); // center region size
+  var cx = Math.floor((px - cs) / 2);
+  var cy = Math.floor((px - cs) / 2);
+
+  // White background circle with subtle border
+  var centerX = px / 2, centerY = px / 2, radius = cs / 2 + 2;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Read theme-aware colors from CSS variables
+  var style = getComputedStyle(document.documentElement);
+  var colors = {
+    triangle: style.getPropertyValue('--shape-triangle').trim() || '#7b2d8e',
+    circle:   style.getPropertyValue('--shape-circle').trim()   || '#c53030',
+    square:   style.getPropertyValue('--shape-square').trim()    || '#1a4d9e',
+    diamond:  style.getPropertyValue('--shape-diamond').trim()   || '#0a5940'
+  };
+
+  // Layout: 2x2 grid of shapes inside the center circle
+  var shapeSize = cs * 0.32;
+  var gap = cs * 0.06;
+  var offsets = [
+    { x: centerX - shapeSize/2 - gap, y: centerY - shapeSize/2 - gap }, // top-left: triangle
+    { x: centerX + gap,               y: centerY - shapeSize/2 - gap }, // top-right: circle
+    { x: centerX - shapeSize/2 - gap, y: centerY + gap },               // bottom-left: square
+    { x: centerX + gap,               y: centerY + gap }                // bottom-right: diamond
+  ];
+
+  // Triangle (top-left)
+  ctx.fillStyle = colors.triangle;
+  ctx.beginPath();
+  ctx.moveTo(offsets[0].x + shapeSize/2, offsets[0].y);
+  ctx.lineTo(offsets[0].x + shapeSize, offsets[0].y + shapeSize);
+  ctx.lineTo(offsets[0].x, offsets[0].y + shapeSize);
+  ctx.closePath();
+  ctx.fill();
+
+  // Circle (top-right)
+  ctx.fillStyle = colors.circle;
+  ctx.beginPath();
+  ctx.arc(offsets[1].x + shapeSize/2, offsets[1].y + shapeSize/2, shapeSize/2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Square (bottom-left)
+  ctx.fillStyle = colors.square;
+  ctx.fillRect(offsets[2].x, offsets[2].y, shapeSize, shapeSize);
+
+  // Diamond (bottom-right)
+  ctx.fillStyle = colors.diamond;
+  ctx.beginPath();
+  ctx.moveTo(offsets[3].x + shapeSize/2, offsets[3].y);
+  ctx.lineTo(offsets[3].x + shapeSize, offsets[3].y + shapeSize/2);
+  ctx.lineTo(offsets[3].x + shapeSize/2, offsets[3].y + shapeSize);
+  ctx.lineTo(offsets[3].x, offsets[3].y + shapeSize/2);
+  ctx.closePath();
+  ctx.fill();
+}
+
 function setJoinUrl(roomCode) {
   var fullUrl = window.location.origin + window.location.pathname + '?view=join&code=' + roomCode;
   var el = document.getElementById('join-url');
   el.textContent = fullUrl.replace(/^https?:\/\//, '');
+  // Render QR immediately with full URL
+  renderBrandedQR(fullUrl, 'qr-canvas');
   shortenUrl(fullUrl, function(short) {
     hostState.shortJoinUrl = short;
     el.textContent = short.replace(/^https?:\/\//, '');
+    // Re-render QR with shortened URL (shorter = simpler QR = easier to scan)
+    renderBrandedQR(short, 'qr-canvas');
   });
 }
 

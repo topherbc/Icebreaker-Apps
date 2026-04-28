@@ -5043,7 +5043,7 @@ function shortenUrl(longUrl, callback) {
 //  INLINE QR CODE GENERATOR (QR Model 2, error correction level H)
 // ================================================================
 var QRCode = (function() {
-  // Galois field GF(2^8) with polynomial 0x11d
+  // Galois field GF(2^8) with primitive polynomial 0x11d
   var EXP = new Uint8Array(512), LOG = new Uint8Array(256);
   (function() {
     var x = 1;
@@ -5078,84 +5078,78 @@ var QRCode = (function() {
     return g;
   }
 
-  // Version info for versions 1-10 (enough for URLs up to ~150 chars with H)
-  // [totalCodewords, ecPerBlock, numBlocks, [group1Blocks, group1DataCW, group2Blocks, group2DataCW]]
-  var VERSION_INFO = [
-    null, // v0 placeholder
-    [26, 17, 1, [1, 9, 0, 0]],
-    [44, 28, 1, [1, 16, 0, 0]],
-    [70, 22, 2, [2, 13, 0, 0]],
-    [100, 16, 4, [4, 9, 0, 0]],
-    [134, 22, 4, [2, 11, 2, 12]],
-    [172, 28, 4, [2, 15, 2, 16]],
-    [196, 26, 5, [4, 13, 1, 14]],
-    [242, 26, 6, [4, 14, 2, 15]],
-    [292, 30, 6, [4, 12, 2, 13]],  // v9 -- not used for typical URLs
-    [346, 28, 8, [6, 15, 2, 16]],  // v10
+  // EC table for level H: [ecPerBlock, group1Blocks, group1DataCW, group2Blocks, group2DataCW]
+  // Verified: for each version, g1Blk*g1Data + g2Blk*g2Data + (g1Blk+g2Blk)*ecPerBlk = totalCW
+  var EC_TABLE = [
+    null,
+    [17, 1, 9, 0, 0],    // v1:  9+17=26
+    [28, 1, 16, 0, 0],   // v2:  16+28=44
+    [22, 2, 13, 0, 0],   // v3:  26+44=70
+    [16, 4, 9, 0, 0],    // v4:  36+64=100
+    [22, 2, 11, 2, 12],  // v5:  46+88=134
+    [28, 4, 15, 0, 0],   // v6:  60+112=172
+    [26, 4, 13, 1, 14],  // v7:  66+130=196
+    [26, 4, 14, 2, 15],  // v8:  86+156=242
+    [24, 4, 12, 4, 13],  // v9:  100+192=292
+    [28, 6, 15, 2, 16],  // v10: 122+224=346
+    [30, 3, 12, 8, 13],  // v11: 140+330=470  (not typically needed)
+    [26, 7, 14, 4, 15],  // v12: 158+364=522
+    [30, 12, 11, 4, 12],  // v13: 180+390=570
   ];
 
-  var ALIGNMENT_POS = [null, null, [6, 18], [6, 22], [6, 26], [6, 30], [6, 34],
-    [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50]];
+  var ALIGNMENT_POS = [null, null, [6,18], [6,22], [6,26], [6,30], [6,34],
+    [6,22,38], [6,24,42], [6,26,46], [6,28,50], [6,30,54], [6,32,58], [6,34,62]];
 
   function chooseVersion(dataBytes) {
-    for (var v = 1; v <= 10; v++) {
-      var info = VERSION_INFO[v];
-      var g = info[3];
-      var dataCap = g[0] * g[1] + g[2] * g[3];
-      // byte mode: 4 bits mode + char count bits + data + terminator
+    for (var v = 1; v < EC_TABLE.length; v++) {
+      var e = EC_TABLE[v];
+      var dataCap = e[1] * e[2] + e[3] * e[4];
       var charCountBits = v <= 9 ? 8 : 16;
-      var availBits = dataCap * 8;
-      var needed = 4 + charCountBits + dataBytes * 8;
-      if (needed <= availBits) return v;
+      if (4 + charCountBits + dataBytes * 8 <= dataCap * 8) return v;
     }
-    return -1; // too long
+    return -1;
   }
 
   function encode(text) {
     var data = [];
     for (var i = 0; i < text.length; i++) {
       var c = text.charCodeAt(i);
-      if (c > 255) { /* UTF-8 encode */
-        if (c > 0x7ff) { data.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f)); }
-        else { data.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f)); }
+      if (c > 255) {
+        if (c > 0x7ff) { data.push(0xe0|(c>>12), 0x80|((c>>6)&0x3f), 0x80|(c&0x3f)); }
+        else { data.push(0xc0|(c>>6), 0x80|(c&0x3f)); }
       } else { data.push(c); }
     }
 
     var ver = chooseVersion(data.length);
     if (ver < 0) return null;
-    var info = VERSION_INFO[ver];
-    var g = info[3];
-    var dataCap = g[0] * g[1] + g[2] * g[3];
+    var e = EC_TABLE[ver];
+    var ecLen = e[0];
+    var dataCap = e[1] * e[2] + e[3] * e[4];
     var charCountBits = ver <= 9 ? 8 : 16;
 
-    // Build bit stream: mode 0100 (byte), char count, data, terminator
+    // Build bit stream: mode 0100 (byte), char count, data, terminator, padding
     var bits = [];
     function pushBits(val, len) { for (var i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); }
-    pushBits(4, 4); // byte mode
+    pushBits(4, 4);
     pushBits(data.length, charCountBits);
     for (var i = 0; i < data.length; i++) pushBits(data[i], 8);
-    // Terminator
     var maxBits = dataCap * 8;
-    var termLen = Math.min(4, maxBits - bits.length);
-    pushBits(0, termLen);
-    // Pad to byte boundary
+    pushBits(0, Math.min(4, maxBits - bits.length));
     while (bits.length % 8) bits.push(0);
-    // Pad bytes
     var padBytes = [0xEC, 0x11]; var pi = 0;
     while (bits.length < maxBits) { pushBits(padBytes[pi], 8); pi ^= 1; }
 
-    // Convert to byte array
+    // Convert bits to codewords
     var codewords = [];
     for (var i = 0; i < bits.length; i += 8)
       codewords.push((bits[i]<<7)|(bits[i+1]<<6)|(bits[i+2]<<5)|(bits[i+3]<<4)|(bits[i+4]<<3)|(bits[i+5]<<2)|(bits[i+6]<<1)|bits[i+7]);
 
     // Split into blocks and compute EC
-    var ecLen = info[1];
     var gp = genPoly(ecLen);
     var blocks = [], ecBlocks = [], idx = 0;
     for (var grp = 0; grp < 2; grp++) {
-      var nBlk = grp === 0 ? g[0] : g[2];
-      var nData = grp === 0 ? g[1] : g[3];
+      var nBlk = grp === 0 ? e[1] : e[3];
+      var nData = grp === 0 ? e[2] : e[4];
       for (var b = 0; b < nBlk; b++) {
         var blk = codewords.slice(idx, idx + nData);
         blocks.push(blk);
@@ -5164,9 +5158,9 @@ var QRCode = (function() {
       }
     }
 
-    // Interleave data
+    // Interleave data then EC
     var interleaved = [];
-    var maxData = Math.max(g[1], g[3] || 0);
+    var maxData = Math.max(e[2], e[4] || 0);
     for (var i = 0; i < maxData; i++)
       for (var b = 0; b < blocks.length; b++)
         if (i < blocks[b].length) interleaved.push(blocks[b][i]);
@@ -5174,12 +5168,12 @@ var QRCode = (function() {
       for (var b = 0; b < ecBlocks.length; b++)
         interleaved.push(ecBlocks[b][i]);
 
-    // Build matrix
+    // Build module matrix
     var size = ver * 4 + 17;
-    var matrix = [], reserved = [];
-    for (var r = 0; r < size; r++) { matrix[r] = new Uint8Array(size); reserved[r] = new Uint8Array(size); }
+    var matrix = [], isFunc = [];
+    for (var r = 0; r < size; r++) { matrix[r] = new Uint8Array(size); isFunc[r] = new Uint8Array(size); }
 
-    // Finder patterns
+    // Finder patterns + separators
     function setFinder(row, col) {
       for (var r = -1; r <= 7; r++)
         for (var c = -1; c <= 7; c++) {
@@ -5188,7 +5182,7 @@ var QRCode = (function() {
           var v = (r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
                   (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
                   (r >= 2 && r <= 4 && c >= 2 && c <= 4) ? 1 : 0;
-          matrix[rr][cc] = v; reserved[rr][cc] = 1;
+          matrix[rr][cc] = v; isFunc[rr][cc] = 1;
         }
     }
     setFinder(0, 0); setFinder(0, size - 7); setFinder(size - 7, 0);
@@ -5196,7 +5190,7 @@ var QRCode = (function() {
     // Timing patterns
     for (var i = 8; i < size - 8; i++) {
       matrix[6][i] = matrix[i][6] = (i % 2 === 0) ? 1 : 0;
-      reserved[6][i] = reserved[i][6] = 1;
+      isFunc[6][i] = isFunc[i][6] = 1;
     }
 
     // Alignment patterns
@@ -5209,44 +5203,49 @@ var QRCode = (function() {
           for (var r = -2; r <= 2; r++)
             for (var c = -2; c <= 2; c++) {
               matrix[cr+r][cc+c] = (Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0)) ? 1 : 0;
-              reserved[cr+r][cc+c] = 1;
+              isFunc[cr+r][cc+c] = 1;
             }
         }
     }
 
-    // Reserve format info areas
+    // Reserve format info and dark module (mark as function so data skips them)
     for (var i = 0; i < 8; i++) {
-      reserved[8][i] = reserved[i][8] = 1;
-      reserved[8][size - 1 - i] = reserved[size - 1 - i][8] = 1;
+      isFunc[8][i] = isFunc[i][8] = 1;
+      isFunc[8][size - 1 - i] = isFunc[size - 1 - i][8] = 1;
     }
-    reserved[8][8] = 1;
-    matrix[size - 8][8] = 1; reserved[size - 8][8] = 1; // dark module
+    isFunc[8][8] = 1;
+    matrix[size - 8][8] = 1; isFunc[size - 8][8] = 1;
 
-    // Place data bits
-    var bitIdx = 0;
+    // Version info for v7+ (reserve only; written after masking)
+    if (ver >= 7) {
+      for (var i = 0; i < 6; i++)
+        for (var j = 0; j < 3; j++) {
+          isFunc[i][size - 11 + j] = 1;
+          isFunc[size - 11 + j][i] = 1;
+        }
+    }
+
+    // Place data bits (right-to-left, alternating up/down)
     var allBits = [];
     for (var i = 0; i < interleaved.length; i++)
       for (var b = 7; b >= 0; b--) allBits.push((interleaved[i] >> b) & 1);
 
-    var col = size - 1;
-    var upward = true;
+    var bitIdx = 0, col = size - 1, upward = true;
     while (col >= 0) {
-      if (col === 6) col--; // skip timing column
+      if (col === 6) col--;
       for (var row = 0; row < size; row++) {
         var r = upward ? size - 1 - row : row;
         for (var dc = 0; dc <= 1; dc++) {
           var c = col - dc;
-          if (c < 0) continue;
-          if (reserved[r][c]) continue;
+          if (c < 0 || isFunc[r][c]) continue;
           matrix[r][c] = bitIdx < allBits.length ? allBits[bitIdx++] : 0;
-          reserved[r][c] = 1;
         }
       }
       upward = !upward;
       col -= 2;
     }
 
-    // Masking -- evaluate all 8 masks, pick best
+    // Masking: try all 8 masks, pick lowest penalty
     var MASKS = [
       function(r,c){return (r+c)%2===0;},
       function(r,c){return r%2===0;},
@@ -5258,60 +5257,47 @@ var QRCode = (function() {
       function(r,c){return ((r+c)%2+(r*c)%3)%2===0;}
     ];
 
-    // Format info bits for H level (ECC=2) and each mask
-    var FORMAT_POLY = 0x537;
-    var FORMAT_MASK = 0x5412;
-    function formatBits(mask) {
-      var d = (2 << 3) | mask; // H=2
-      var val = d << 10;
-      for (var i = 4; i >= 0; i--) if (val & (1 << (i + 10))) val ^= FORMAT_POLY << i;
-      return ((d << 10) | val) ^ FORMAT_MASK;
-    }
-
     function applyMask(mat, maskFn) {
       var m = mat.map(function(row) { return new Uint8Array(row); });
-      // Save which cells are data (placed after reserved setup but before format)
       for (var r = 0; r < size; r++)
-        for (var c = 0; c < size; c++) {
-          // Only mask data modules
-          var isFinder = (r < 9 && c < 9) || (r < 9 && c >= size - 8) || (r >= size - 8 && c < 9);
-          var isTiming = r === 6 || c === 6;
-          var isAlign = false;
-          if (ALIGNMENT_POS[ver]) {
-            var ap2 = ALIGNMENT_POS[ver];
-            for (var ai = 0; ai < ap2.length && !isAlign; ai++)
-              for (var aj = 0; aj < ap2.length && !isAlign; aj++) {
-                if ((ai===0&&aj===0)||(ai===0&&aj===ap2.length-1)||(ai===ap2.length-1&&aj===0)) continue;
-                if (Math.abs(r-ap2[ai])<=2 && Math.abs(c-ap2[aj])<=2) isAlign = true;
-              }
-          }
-          if (isFinder || isTiming || isAlign || (r === size-8 && c === 8)) continue;
-          if (maskFn(r, c)) m[r][c] ^= 1;
-        }
+        for (var c = 0; c < size; c++)
+          if (!isFunc[r][c] && maskFn(r, c)) m[r][c] ^= 1;
       return m;
     }
 
     function penalty(m) {
-      var p = 0;
-      // Rule 1: runs of 5+ same color
-      for (var r = 0; r < size; r++) {
+      var p = 0, s = size;
+      // Rule 1: adjacent same-color runs of 5+
+      for (var r = 0; r < s; r++) {
         var cnt = 1;
-        for (var c = 1; c < size; c++) {
-          if (m[r][c] === m[r][c-1]) { cnt++; } else { if (cnt >= 5) p += cnt - 2; cnt = 1; }
-        }
+        for (var c = 1; c < s; c++) { if (m[r][c] === m[r][c-1]) cnt++; else { if (cnt >= 5) p += cnt - 2; cnt = 1; } }
         if (cnt >= 5) p += cnt - 2;
       }
-      for (var c = 0; c < size; c++) {
+      for (var c = 0; c < s; c++) {
         var cnt = 1;
-        for (var r = 1; r < size; r++) {
-          if (m[r][c] === m[r-1][c]) { cnt++; } else { if (cnt >= 5) p += cnt - 2; cnt = 1; }
-        }
+        for (var r = 1; r < s; r++) { if (m[r][c] === m[r-1][c]) cnt++; else { if (cnt >= 5) p += cnt - 2; cnt = 1; } }
         if (cnt >= 5) p += cnt - 2;
       }
-      // Rule 2: 2x2 blocks
-      for (var r = 0; r < size-1; r++)
-        for (var c = 0; c < size-1; c++)
+      // Rule 2: 2x2 blocks of same color
+      for (var r = 0; r < s-1; r++)
+        for (var c = 0; c < s-1; c++)
           if (m[r][c]===m[r][c+1] && m[r][c]===m[r+1][c] && m[r][c]===m[r+1][c+1]) p += 3;
+      // Rule 3: finder-like patterns (1,0,1,1,1,0,1,0,0,0,0 or reverse)
+      for (var r = 0; r < s; r++)
+        for (var c = 0; c <= s - 11; c++) {
+          if (m[r][c]===1&&m[r][c+1]===0&&m[r][c+2]===1&&m[r][c+3]===1&&m[r][c+4]===1&&m[r][c+5]===0&&m[r][c+6]===1&&m[r][c+7]===0&&m[r][c+8]===0&&m[r][c+9]===0&&m[r][c+10]===0) p+=40;
+          if (m[r][c]===0&&m[r][c+1]===0&&m[r][c+2]===0&&m[r][c+3]===0&&m[r][c+4]===1&&m[r][c+5]===0&&m[r][c+6]===1&&m[r][c+7]===1&&m[r][c+8]===1&&m[r][c+9]===0&&m[r][c+10]===1) p+=40;
+        }
+      for (var c = 0; c < s; c++)
+        for (var r = 0; r <= s - 11; r++) {
+          if (m[r][c]===1&&m[r+1][c]===0&&m[r+2][c]===1&&m[r+3][c]===1&&m[r+4][c]===1&&m[r+5][c]===0&&m[r+6][c]===1&&m[r+7][c]===0&&m[r+8][c]===0&&m[r+9][c]===0&&m[r+10][c]===0) p+=40;
+          if (m[r][c]===0&&m[r+1][c]===0&&m[r+2][c]===0&&m[r+3][c]===0&&m[r+4][c]===1&&m[r+5][c]===0&&m[r+6][c]===1&&m[r+7][c]===1&&m[r+8][c]===1&&m[r+9][c]===0&&m[r+10][c]===1) p+=40;
+        }
+      // Rule 4: dark/light proportion
+      var dark = 0;
+      for (var r = 0; r < s; r++) for (var c = 0; c < s; c++) if (m[r][c]) dark++;
+      var pct = dark * 100 / (s * s);
+      p += Math.floor(Math.abs(pct - 50) / 5) * 10;
       return p;
     }
 
@@ -5324,14 +5310,35 @@ var QRCode = (function() {
 
     var final = applyMask(matrix, MASKS[bestMask]);
 
-    // Write format info
-    var fmtBits = formatBits(bestMask);
-    var FMT_POSITIONS_A = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
-    var FMT_POSITIONS_B = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+    // Write format info (BCH 15,5 with mask 0x5412)
+    var FORMAT_POLY = 0x537, FORMAT_MASK = 0x5412;
+    var d = (2 << 3) | bestMask; // H=2
+    var fval = d << 10;
+    for (var i = 4; i >= 0; i--) if (fval & (1 << (i + 10))) fval ^= FORMAT_POLY << i;
+    var fmtBits = ((d << 10) | fval) ^ FORMAT_MASK;
+
+    // Position A: around top-left finder
+    var FA = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    // Position B: bottom-left + top-right
+    var FB = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
     for (var i = 0; i < 15; i++) {
       var bit = (fmtBits >> (14 - i)) & 1;
-      final[FMT_POSITIONS_A[i][0]][FMT_POSITIONS_A[i][1]] = bit;
-      final[FMT_POSITIONS_B[i][0]][FMT_POSITIONS_B[i][1]] = bit;
+      final[FA[i][0]][FA[i][1]] = bit;
+      final[FB[i][0]][FB[i][1]] = bit;
+    }
+
+    // Version info for v7+ (BCH 18,6)
+    if (ver >= 7) {
+      var VER_POLY = 0x1F25;
+      var vval = ver << 12;
+      for (var i = 5; i >= 0; i--) if (vval & (1 << (i + 12))) vval ^= VER_POLY << i;
+      var verBits = (ver << 12) | vval;
+      for (var i = 0; i < 18; i++) {
+        var bit = (verBits >> i) & 1;
+        var r = Math.floor(i / 3), c = size - 11 + (i % 3);
+        final[r][c] = bit;
+        final[c][r] = bit;
+      }
     }
 
     return { modules: final, size: size, version: ver };
@@ -5351,11 +5358,14 @@ function renderBrandedQR(url, canvasId) {
   if (!qr) { if (wrap) wrap.style.display = 'none'; return; }
 
   var moduleCount = qr.size;
-  // Render at 2x for crisp display, CSS scales down
-  var displaySize = 140;
+  var quiet = 4; // QR spec requires 4-module white quiet zone
+  var totalModules = moduleCount + quiet * 2;
+
+  // Integer scale so each module is crisp (no fractional pixels)
   var dpr = window.devicePixelRatio || 1;
-  var renderSize = Math.round(displaySize * dpr);
-  var scale = renderSize / moduleCount;
+  var modPx = Math.max(3, Math.round(6 * dpr)); // 6 CSS-px per module
+  var renderSize = totalModules * modPx;
+  var displaySize = Math.round(renderSize / dpr);
 
   canvas.width = renderSize;
   canvas.height = renderSize;
@@ -5364,27 +5374,30 @@ function renderBrandedQR(url, canvasId) {
   if (wrap) wrap.style.display = 'flex';
 
   var ctx = canvas.getContext('2d');
-
-  // Draw QR modules -- crisp at any scale
+  // White fill (quiet zone included)
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, renderSize, renderSize);
+
+  // Draw QR modules at integer offsets
   ctx.fillStyle = '#1a1a2e';
   for (var r = 0; r < moduleCount; r++)
     for (var c = 0; c < moduleCount; c++)
       if (qr.modules[r][c])
-        ctx.fillRect(Math.floor(c * scale), Math.floor(r * scale),
-                     Math.ceil(scale), Math.ceil(scale));
+        ctx.fillRect((c + quiet) * modPx, (r + quiet) * modPx, modPx, modPx);
 
-  // Draw branded center overlay with 4 shapes
-  // Error correction H tolerates ~30% damage; our overlay is ~15%
-  var cs = Math.round(renderSize * 0.28);
-  var centerX = renderSize / 2, centerY = renderSize / 2;
+  // Branded center overlay (4 shapes in a 2x2 grid)
+  // H-level EC tolerates ~30% coverage; overlay is ~13%
+  var qrPx = moduleCount * modPx;
+  var qrOff = quiet * modPx; // offset from canvas edge to QR start
+  var cs = Math.round(qrPx * 0.26);
+  var centerX = qrOff + qrPx / 2;
+  var centerY = qrOff + qrPx / 2;
 
-  // White background rounded-rect with subtle border
-  var pad = Math.round(cs * 0.12);
+  // White background rounded-rect
+  var pad = Math.round(cs * 0.14);
   var bgSize = cs + pad * 2;
   var bgX = centerX - bgSize / 2, bgY = centerY - bgSize / 2;
-  var bgR = Math.round(bgSize * 0.18);
+  var bgR = Math.round(bgSize * 0.16);
   ctx.beginPath();
   ctx.moveTo(bgX + bgR, bgY);
   ctx.lineTo(bgX + bgSize - bgR, bgY);
@@ -5402,7 +5415,7 @@ function renderBrandedQR(url, canvasId) {
   ctx.lineWidth = Math.max(1, dpr);
   ctx.stroke();
 
-  // Read theme-aware colors from CSS variables
+  // Theme-aware shape colors
   var style = getComputedStyle(document.documentElement);
   var colors = {
     triangle: style.getPropertyValue('--shape-triangle').trim() || '#7b2d8e',
@@ -5411,17 +5424,17 @@ function renderBrandedQR(url, canvasId) {
     diamond:  style.getPropertyValue('--shape-diamond').trim()   || '#0a5940'
   };
 
-  // Layout: 2x2 grid of shapes, centered in the overlay
+  // 2x2 grid of shapes, centered
   var shapeSize = Math.round(cs * 0.38);
   var gap = Math.round(cs * 0.08);
   var gridSize = shapeSize * 2 + gap;
   var gridX = centerX - gridSize / 2;
   var gridY = centerY - gridSize / 2;
   var offsets = [
-    { x: gridX,                     y: gridY },                      // top-left: triangle
-    { x: gridX + shapeSize + gap,   y: gridY },                      // top-right: circle
-    { x: gridX,                     y: gridY + shapeSize + gap },    // bottom-left: square
-    { x: gridX + shapeSize + gap,   y: gridY + shapeSize + gap }     // bottom-right: diamond
+    { x: gridX,                   y: gridY },
+    { x: gridX + shapeSize + gap, y: gridY },
+    { x: gridX,                   y: gridY + shapeSize + gap },
+    { x: gridX + shapeSize + gap, y: gridY + shapeSize + gap }
   ];
 
   // Triangle (top-left)
@@ -5470,13 +5483,11 @@ function setJoinUrl(roomCode) {
   var fullUrl = window.location.origin + window.location.pathname + '?view=join&code=' + roomCode;
   var el = document.getElementById('join-url');
   el.textContent = fullUrl.replace(/^https?:\/\//, '');
-  // Render QR immediately with full URL
+  // QR always uses the full URL (no shortened version)
   renderBrandedQR(fullUrl, 'qr-canvas');
   shortenUrl(fullUrl, function(short) {
     hostState.shortJoinUrl = short;
     el.textContent = short.replace(/^https?:\/\//, '');
-    // Re-render QR with shortened URL (shorter = simpler QR = easier to scan)
-    renderBrandedQR(short, 'qr-canvas');
   });
 }
 

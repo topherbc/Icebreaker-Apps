@@ -1,0 +1,261 @@
+[
+  {
+    "id": "week6-inheritance-01",
+    "title": "Animal Hierarchy",
+    "week": 6,
+    "topic": "inheritance",
+    "description": "A Cat class that extends Animal and calls the parent constructor using super.",
+    "code": [
+      { "line": 1, "text": "public class Animal {" },
+      { "line": 2, "text": "  String name;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public Animal(String name) {" },
+      { "line": 5, "text": "    this.name = name;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b1", "before": "  public ", "after": " getName() {" },
+      { "line": 9, "text": "    return name;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" },
+      { "line": 12, "text": "" },
+      { "line": 13, "blankId": "b2", "before": "public class Cat ", "after": " Animal {" },
+      { "line": 14, "text": "  public Cat(String name) {" },
+      { "line": 15, "blankId": "b3", "before": "    ", "after": "(name);" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 8, "answer": "String", "altAnswers": [] },
+      { "id": "b2", "line": 13, "answer": "extends", "altAnswers": [] },
+      { "id": "b3", "line": 15, "answer": "super", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-override-01",
+    "title": "Shape Override",
+    "week": 6,
+    "topic": "@Override",
+    "description": "A Circle class that overrides the describe method from its parent Shape class.",
+    "code": [
+      { "line": 1, "text": "public class Shape {" },
+      { "line": 2, "text": "  public String describe() {" },
+      { "line": 3, "text": "    return \"I am a shape.\";" },
+      { "line": 4, "text": "  }" },
+      { "line": 5, "text": "}" },
+      { "line": 6, "text": "" },
+      { "line": 7, "blankId": "b1", "before": "public class Circle ", "after": " Shape {" },
+      { "line": 8, "blankId": "b2", "before": "  ", "after": "" },
+      { "line": 9, "text": "  public String describe() {" },
+      { "line": 10, "blankId": "b3", "before": "    ", "after": " \"I am a circle.\";" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 7, "answer": "extends", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "@Override", "altAnswers": [] },
+      { "id": "b3", "line": 10, "answer": "return", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-abstract-01",
+    "title": "Abstract Vehicle",
+    "week": 6,
+    "topic": "abstract",
+    "description": "An abstract Vehicle class with an abstract method that Truck must implement.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public ", "after": " class Vehicle {" },
+      { "line": 2, "text": "  public abstract String getType();" },
+      { "line": 3, "text": "}" },
+      { "line": 4, "text": "" },
+      { "line": 5, "blankId": "b2", "before": "public class Truck ", "after": " Vehicle {" },
+      { "line": 6, "text": "  @Override" },
+      { "line": 7, "blankId": "b3", "before": "  public ", "after": " getType() {" },
+      { "line": 8, "text": "    return \"Truck\";" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "abstract", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "extends", "altAnswers": [] },
+      { "id": "b3", "line": 7, "answer": "String", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-inheritance-02",
+    "title": "Employee Hierarchy",
+    "week": 6,
+    "topic": "inheritance",
+    "description": "A Manager class that extends Employee and adds a department field.",
+    "code": [
+      { "line": 1, "text": "public class Employee {" },
+      { "line": 2, "text": "  protected String name;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public Employee(String name) {" },
+      { "line": 5, "text": "    this.name = name;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "}" },
+      { "line": 8, "text": "" },
+      { "line": 9, "blankId": "b1", "before": "public class Manager ", "after": " Employee {" },
+      { "line": 10, "text": "  private String department;" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public Manager(String name, String department) {" },
+      { "line": 13, "blankId": "b2", "before": "    ", "after": "(name);" },
+      { "line": 14, "blankId": "b3", "before": "    ", "after": ".department = department;" },
+      { "line": 15, "text": "  }" },
+      { "line": 16, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 9, "answer": "extends", "altAnswers": [] },
+      { "id": "b2", "line": 13, "answer": "super", "altAnswers": [] },
+      { "id": "b3", "line": 14, "answer": "this", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-override-02",
+    "title": "Speak Override",
+    "week": 6,
+    "topic": "@Override",
+    "description": "A Dog class that overrides the speak method from its parent Pet class.",
+    "code": [
+      { "line": 1, "text": "public class Pet {" },
+      { "line": 2, "text": "  public String speak() {" },
+      { "line": 3, "text": "    return \"...\";" },
+      { "line": 4, "text": "  }" },
+      { "line": 5, "text": "}" },
+      { "line": 6, "text": "" },
+      { "line": 7, "blankId": "b1", "before": "public class Dog ", "after": " Pet {" },
+      { "line": 8, "blankId": "b2", "before": "  ", "after": "" },
+      { "line": 9, "blankId": "b3", "before": "  public ", "after": " speak() {" },
+      { "line": 10, "text": "    return \"Woof!\";" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 7, "answer": "extends", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "@Override", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "String", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-abstract-02",
+    "title": "Abstract Shape Area",
+    "week": 6,
+    "topic": "abstract",
+    "description": "An abstract Shape class with an abstract area method; Square provides the implementation.",
+    "code": [
+      { "line": 1, "blankId": "b1", "before": "public ", "after": " class Shape {" },
+      { "line": 2, "text": "  public abstract double area();" },
+      { "line": 3, "text": "}" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "public class Square extends Shape {" },
+      { "line": 6, "text": "  private double side;" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "  public Square(double side) {" },
+      { "line": 9, "text": "    this.side = side;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "blankId": "b2", "before": "  ", "after": "" },
+      { "line": 13, "text": "  public double area() {" },
+      { "line": 14, "blankId": "b3", "before": "    ", "after": " side * side;" },
+      { "line": 15, "text": "  }" },
+      { "line": 16, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 1, "answer": "abstract", "altAnswers": [] },
+      { "id": "b2", "line": 12, "answer": "@Override", "altAnswers": [] },
+      { "id": "b3", "line": 14, "answer": "return", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-polymorphism-01",
+    "title": "Polymorphic Print",
+    "week": 6,
+    "topic": "polymorphism",
+    "description": "A program that uses a parent type reference to hold a child object and call an overridden method.",
+    "code": [
+      { "line": 1, "text": "public class Instrument {" },
+      { "line": 2, "text": "  public String play() { return \"...\"; }" },
+      { "line": 3, "text": "}" },
+      { "line": 4, "text": "" },
+      { "line": 5, "blankId": "b1", "before": "public class Guitar ", "after": " Instrument {" },
+      { "line": 6, "text": "  @Override" },
+      { "line": 7, "text": "  public String play() { return \"Strum!\"; }" },
+      { "line": 8, "text": "}" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "public class Main {" },
+      { "line": 11, "text": "  public static void main(String[] args) {" },
+      { "line": 12, "blankId": "b2", "before": "    ", "after": " inst = new Guitar();" },
+      { "line": 13, "blankId": "b3", "before": "    System.out.println(inst.", "after": "());" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "extends", "altAnswers": [] },
+      { "id": "b2", "line": 12, "answer": "Instrument", "altAnswers": [] },
+      { "id": "b3", "line": 13, "answer": "play", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-inheritance-03",
+    "title": "Protected Access",
+    "week": 6,
+    "topic": "inheritance",
+    "description": "A child class that accesses a protected field from its parent.",
+    "code": [
+      { "line": 1, "text": "public class Vehicle {" },
+      { "line": 2, "blankId": "b1", "before": "  ", "after": " int speed;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public Vehicle(int speed) {" },
+      { "line": 5, "text": "    this.speed = speed;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "}" },
+      { "line": 8, "text": "" },
+      { "line": 9, "blankId": "b2", "before": "public class Car ", "after": " Vehicle {" },
+      { "line": 10, "text": "  public Car(int speed) {" },
+      { "line": 11, "text": "    super(speed);" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "  public void describe() {" },
+      { "line": 15, "blankId": "b3", "before": "    System.out.println(\"Speed: \" + ", "after": ");" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "protected", "altAnswers": [] },
+      { "id": "b2", "line": 9, "answer": "extends", "altAnswers": [] },
+      { "id": "b3", "line": 15, "answer": "speed", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week6-polymorphism-02",
+    "title": "Polymorphic Array",
+    "week": 6,
+    "topic": "polymorphism",
+    "description": "A program that stores different subclass objects in a parent-type array and loops through them.",
+    "code": [
+      { "line": 1, "text": "public class Food {" },
+      { "line": 2, "text": "  public String taste() { return \"bland\"; }" },
+      { "line": 3, "text": "}" },
+      { "line": 4, "text": "public class Pizza extends Food {" },
+      { "line": 5, "text": "  public String taste() { return \"savory\"; }" },
+      { "line": 6, "text": "}" },
+      { "line": 7, "text": "public class Cake extends Food {" },
+      { "line": 8, "text": "  public String taste() { return \"sweet\"; }" },
+      { "line": 9, "text": "}" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "public class Menu {" },
+      { "line": 12, "text": "  public static void main(String[] args) {" },
+      { "line": 13, "blankId": "b1", "before": "    ", "after": "[] items = { new Pizza(), new Cake() };" },
+      { "line": 14, "blankId": "b2", "before": "    for (Food f : ", "after": ") {" },
+      { "line": 15, "blankId": "b3", "before": "      System.out.println(f.", "after": "());" },
+      { "line": 16, "text": "    }" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 13, "answer": "Food", "altAnswers": [] },
+      { "id": "b2", "line": 14, "answer": "items", "altAnswers": [] },
+      { "id": "b3", "line": 15, "answer": "taste", "altAnswers": [] }
+    ]
+  }
+]

@@ -5018,7 +5018,10 @@ function csvEsc(str) {
 
 function shortenUrl(longUrl, callback) {
   var cbName = '_isgd_' + Math.random().toString(36).slice(2);
+  var reqUrl = 'https://is.gd/create.php?format=json&callback=' + cbName + '&url=' + encodeURIComponent(longUrl);
+  console.log('[shortenUrl] requesting:', reqUrl);
   var timeout = setTimeout(function() {
+    console.warn('[shortenUrl] timed out after 5s, falling back to long URL');
     cleanup();
     callback(longUrl);
   }, 5000);
@@ -5030,13 +5033,22 @@ function shortenUrl(longUrl, callback) {
   }
   window[cbName] = function(resp) {
     cleanup();
-    if (resp && resp.shorturl) { callback(resp.shorturl); }
-    else { callback(longUrl); }
+    if (resp && resp.shorturl) {
+      console.log('[shortenUrl] success:', resp.shorturl);
+      callback(resp.shorturl);
+    } else {
+      console.warn('[shortenUrl] unexpected response:', JSON.stringify(resp));
+      callback(longUrl);
+    }
   };
   var script = document.createElement('script');
   script.id = cbName;
-  script.src = 'https://is.gd/create.php?format=json&callback=' + cbName + '&url=' + encodeURIComponent(longUrl);
-  script.onerror = function() { cleanup(); callback(longUrl); };
+  script.src = reqUrl;
+  script.onerror = function(e) {
+    console.error('[shortenUrl] script load error:', e.type || e);
+    cleanup();
+    callback(longUrl);
+  };
   document.body.appendChild(script);
 }
 

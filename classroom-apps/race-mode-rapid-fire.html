@@ -5017,39 +5017,28 @@ function csvEsc(str) {
 }
 
 function shortenUrl(longUrl, callback) {
-  var cbName = '_isgd_' + Math.random().toString(36).slice(2);
-  var reqUrl = 'https://is.gd/create.php?format=json&callback=' + cbName + '&url=' + encodeURIComponent(longUrl);
-  console.log('[shortenUrl] requesting:', reqUrl);
-  var timeout = setTimeout(function() {
-    console.warn('[shortenUrl] timed out after 5s, falling back to long URL');
-    cleanup();
-    callback(longUrl);
-  }, 5000);
-  function cleanup() {
-    clearTimeout(timeout);
-    delete window[cbName];
-    var s = document.getElementById(cbName);
-    if (s) s.remove();
-  }
-  window[cbName] = function(resp) {
-    cleanup();
-    if (resp && resp.shorturl) {
-      console.log('[shortenUrl] success:', resp.shorturl);
-      callback(resp.shorturl);
-    } else {
-      console.warn('[shortenUrl] unexpected response:', JSON.stringify(resp));
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, 5000);
+  fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl), {
+    signal: controller.signal
+  })
+    .then(function(r) { return r.text(); })
+    .then(function(short) {
+      clearTimeout(timeoutId);
+      short = short.trim();
+      if (short && short.startsWith('http')) {
+        console.log('[shortenUrl] success:', short);
+        callback(short);
+      } else {
+        console.warn('[shortenUrl] unexpected response:', short);
+        callback(longUrl);
+      }
+    })
+    .catch(function(err) {
+      clearTimeout(timeoutId);
+      console.warn('[shortenUrl] failed:', err.message, '- using long URL');
       callback(longUrl);
-    }
-  };
-  var script = document.createElement('script');
-  script.id = cbName;
-  script.src = reqUrl;
-  script.onerror = function(e) {
-    console.error('[shortenUrl] script load error:', e.type || e);
-    cleanup();
-    callback(longUrl);
-  };
-  document.body.appendChild(script);
+    });
 }
 
 // ================================================================

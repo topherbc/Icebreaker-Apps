@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Interface Breach -- AccessControl.java</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='3' fill='%23f2f2f5'/><text x='3' y='23' font-family='monospace' font-size='18' font-weight='bold' fill='%23006633'>%3E_</text></svg>" id="fav">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f0f0f4;
+  --surface:     #ffffff;
+  --surface2:    #e8e8ef;
+  --surface3:    #dcdce6;
+  --border:      #c8c8d8;
+  --border-hi:   #a8a8c0;
+  --accent:      #006633;
+  --accent-glow: rgba(0,102,51,0.07);
+  --yellow:      #7a5100;
+  --yellow-bg:   rgba(122,81,0,0.06);
+  --yellow-bright: #7a5100;
+  --red:         #b01030;
+  --text:        #1c1c2e;
+  --text-mid:    #4a4a66;
+  --text-dim:    #626282;
+  --dot-open:    #c0c0d4;
+  --dot-fix:     #006633;
+  --header-h:    56px;
+  --bugbar-h:    42px;
+  --kw: #8800aa;
+  --ty: #0044bb;
+  --st: #7a5100;
+  --mt: #006633;
+  --nm: #8b3a00;
+  --an: #005588;
+  --cm: #6a6a88;
+}
+
+[data-theme="dark"] {
+  --bg:          #0b0b14;
+  --surface:     #111120;
+  --surface2:    #171728;
+  --surface3:    #1e1e32;
+  --border:      #2a2a44;
+  --border-hi:   #3a3a58;
+  --accent:      #00dd77;
+  --accent-glow: rgba(0,221,119,0.10);
+  --yellow:      #ffcc00;
+  --yellow-bg:   rgba(255,204,0,0.06);
+  --yellow-bright: #ffcc00;
+  --red:         #ff3355;
+  --text:        #dcdcf0;
+  --text-mid:    #8888aa;
+  --text-dim:    #7a7a9a;
+  --dot-open:    #2a2a44;
+  --dot-fix:     #00dd77;
+  --kw: #ff79c6;
+  --ty: #66aaff;
+  --st: #ffcc00;
+  --mt: #00dd77;
+  --nm: #ffaa44;
+  --an: #cc88ff;
+  --cm: #7a8a9a;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+  pointer-events: none; z-index: 9999;
+}
+
+/* HEADER */
+#hdr {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  display: flex; align-items: center; padding: 0 20px; gap: 16px;
+  z-index: 200;
+}
+[data-theme="dark"] #hdr { box-shadow: 0 2px 20px rgba(0,221,119,0.06); }
+
+.hdr-logo {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 15px; color: var(--accent);
+  letter-spacing: 1px; flex-shrink: 0; white-space: nowrap;
+}
+.hdr-logo::after { content: '_'; animation: blink 1s step-end infinite; margin-left: 1px; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hdr-sep { width: 1px; height: 20px; background: var(--border-hi); flex-shrink: 0; }
+
+.hdr-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--text-mid);
+  flex-shrink: 0; letter-spacing: 0.3px;
+}
+
+.hdr-ctrl { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+.cbtn {
+  height: 30px; padding: 0 14px;
+  border: 1.5px solid var(--border-hi);
+  background: var(--surface2); color: var(--text-mid);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: 0.8px;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.cbtn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.cbtn:disabled { opacity: .3; cursor: not-allowed; }
+.theme-cbtn {
+  width: 34px; height: 34px; padding: 0;
+  font-family: 'DM Sans', sans-serif; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* BUG BAR */
+#bug-bar {
+  position: fixed; top: var(--header-h); left: 0; right: 0;
+  height: var(--bugbar-h);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px; gap: 18px;
+  z-index: 150;
+}
+
+.bugs-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: var(--text-dim); letter-spacing: 2px;
+}
+
+.bugs-row { display: flex; gap: 10px; align-items: center; }
+.bug-item { display: flex; align-items: center; gap: 6px; }
+
+.bdot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--dot-open);
+  border: 1.5px solid var(--border-hi);
+  flex-shrink: 0;
+  transition: background .3s, box-shadow .3s, border-color .3s;
+}
+.bdot.fixed { background: var(--dot-fix); border-color: var(--dot-fix); outline: 3px solid var(--dot-fix); outline-offset: 2px; }
+[data-theme="dark"] .bdot.fixed { box-shadow: 0 0 7px rgba(0,221,119,.5); }
+
+.bnum {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: var(--text-dim);
+}
+
+/* LAYOUT */
+#main {
+  display: grid; grid-template-columns: 1fr 1fr;
+  height: calc(100vh - var(--header-h) - var(--bugbar-h));
+  margin-top: calc(var(--header-h) + var(--bugbar-h));
+}
+
+.panel {
+  height: calc(100vh - var(--header-h) - var(--bugbar-h));
+  overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border-hi) transparent;
+}
+.panel::-webkit-scrollbar { width: 5px; }
+.panel::-webkit-scrollbar-thumb { background: var(--border-hi); }
+
+#lpanel { border-right: 2px solid var(--border); background: var(--bg); }
+#question-panel { background: var(--surface); }
+
+/* FILE TABS */
+.file-tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+  overflow-x: auto;
+}
+.file-tabs::-webkit-scrollbar { display: none; }
+
+.ftab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 14px; height: 36px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--text-dim);
+  border: none; border-bottom: 2px solid transparent;
+  border-right: 1px solid var(--border);
+  background: transparent; cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.ftab:hover { color: var(--text-mid); background: var(--surface2); }
+.ftab.active { color: var(--yellow); border-bottom-color: var(--yellow); background: var(--yellow-bg); }
+
+.tpip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; transition: background .3s; }
+.tpip.bug   { background: var(--red); }
+.tpip.fixed { background: var(--dot-fix); }
+.tpip.none  { background: transparent; }
+
+/* CODE */
+.cpane { display: none; }
+.cpane.active { display: block; }
+
+.cblock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; line-height: 1.9; padding: 10px 0;
+}
+
+.cl { display: flex; align-items: flex-start; }
+.cl:hover:not(.bugline) { background: rgba(0,0,0,.025); }
+[data-theme="dark"] .cl:hover:not(.bugline) { background: rgba(255,255,255,.015); }
+
+.ln {
+  width: 42px; min-width: 42px;
+  text-align: right; padding-right: 14px;
+  color: var(--text-dim); font-size: 11px;
+  padding-top: 2px; user-select: none; flex-shrink: 0;
+}
+.lc { flex: 1; padding-right: 14px; white-space: pre; color: var(--text); }
+
+.cl.bugline { background: var(--yellow-bg); border-left: 3px solid var(--yellow-bright); }
+.cl.bugline .ln { color: var(--yellow); }
+.cl.bugline.resolved { background: rgba(0,102,51,.04); border-left-color: var(--dot-fix); }
+[data-theme="dark"] .cl.bugline.resolved { background: rgba(0,221,119,.04); }
+.cl.bugline.resolved .ln { color: var(--dot-fix); }
+
+.bug-inp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; line-height: 1.9;
+  background: transparent; border: none; outline: none;
+  color: var(--yellow-bright); width: 100%; padding: 0; caret-color: var(--text);
+}
+.cl.bugline.resolved .bug-inp { color: var(--dot-fix); }
+
+.fix-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px; color: var(--red);
+  padding: 0 10px; white-space: nowrap;
+  align-self: center; flex-shrink: 0;
+  letter-spacing: 0.5px; opacity: 0.75;
+}
+.cl.bugline.resolved .fix-badge { color: var(--dot-fix); opacity: 0.6; }
+.cl.bugline.resolved .fix-badge::before { content: 'FIXED'; }
+.cl.bugline:not(.resolved) .fix-badge::before { content: 'BUG'; }
+
+.kw { color: var(--kw); } .ty { color: var(--ty); } .st { color: var(--st); }
+.mt { color: var(--mt); } .nm { color: var(--nm); } .an { color: var(--an); }
+.cm { color: var(--cm); font-style: italic; }
+
+/* RIGHT PANEL */
+.sec-div {
+  position: sticky; top: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 20px;
+  display: flex; align-items: center; gap: 10px; z-index: 10;
+}
+.sec-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--yellow); letter-spacing: 1px; white-space: nowrap; }
+.sec-rule { flex: 1; height: 1px; background: var(--border); }
+
+.qblock { padding: 16px 20px; border-bottom: 1px solid var(--border); transition: background .15s; }
+.qblock:focus-within { background: var(--surface2); }
+
+.qnum { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--accent); margin-bottom: 5px; letter-spacing: 1px; }
+.qanchor { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); font-style: italic; margin-bottom: 6px; }
+.qtext { font-size: 16px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+
+.qinput {
+  width: 100%; background: var(--bg);
+  border: 1.5px solid var(--border); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.5;
+  padding: 10px 12px; resize: vertical; min-height: 72px;
+  outline: none; transition: border-color .2s;
+}
+.qinput:focus { border-color: var(--accent); }
+.qinput::placeholder { color: var(--text-dim); font-style: italic; font-size: 14px; }
+
+#ls-landing .cbtn { color: var(--text); }
+
+/* Disable font ligatures — prevents >= rendering as ≥ in code display */
+.cblock, .bug-inp {
+  font-feature-settings: "liga" 0, "calt" 0;
+  font-variant-ligatures: none;
+}
+</style>
+</head>
+<body data-theme="light">
+
+<script>
+function updateFavicon(theme) {
+  const fill  = theme === 'dark' ? '%230b0b14' : '%23f2f2f5';
+  const color = theme === 'dark' ? '%2300dd77' : '%23006633';
+  document.getElementById('fav').href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='3' fill='${fill}'/><text x='3' y='23' font-family='monospace' font-size='18' font-weight='bold' fill='${color}'>%3E_</text></svg>`;
+}
+</script>
+
+<!-- HEADER -->
+<header id="hdr">
+  <div class="hdr-logo">&gt;_ INTERFACE BREACH</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Week 7, Day 2 &nbsp;|&nbsp; Interfaces</div>
+  <div class="tb-spacer" style="flex:1"></div>
+  <div class="hdr-ctrl">
+    <button class="cbtn theme-cbtn" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">&#9728;</button>
+    <button class="cbtn" onclick="doReset()">RESET</button>
+    <button class="cbtn" id="export-btn" onclick="doExport()" disabled>EXPORT</button>
+  </div>
+</header>
+
+<!-- BUG BAR -->
+<div id="bug-bar">
+  <span class="bugs-label">BUGS</span>
+  <div class="bugs-row">
+    <div class="bug-item">
+      <div class="bdot" id="dot-1" aria-label="Bug 1: open"></div>
+      <span class="bnum">01</span>
+    </div>
+    <div class="bug-item">
+      <div class="bdot" id="dot-2" aria-label="Bug 2: open"></div>
+      <span class="bnum">02</span>
+    </div>
+    <div class="bug-item">
+      <div class="bdot" id="dot-3" aria-label="Bug 3: open"></div>
+      <span class="bnum">03</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- LEFT: tabbed code -->
+  <div class="panel" id="lpanel">
+
+    <div class="file-tabs">
+      <button class="ftab active"  id="tab-clearable"   onclick="switchTab('clearable')">
+        <span class="tpip none" id="pip-clearable"></span>Clearable.java
+      </button>
+      <button class="ftab" id="tab-loggable"   onclick="switchTab('loggable')">
+        <span class="tpip none" id="pip-loggable"></span>Loggable.java
+      </button>
+      <button class="ftab" id="tab-agent"      onclick="switchTab('agent')">
+        <span class="tpip bug"  id="pip-agent"></span>Agent.java
+      </button>
+      <button class="ftab" id="tab-accessgate" onclick="switchTab('accessgate')">
+        <span class="tpip bug"  id="pip-accessgate"></span>AccessGate.java
+      </button>
+      <button class="ftab" id="tab-main"       onclick="switchTab('main')">
+        <span class="tpip bug"  id="pip-main"></span>AccessControl.java
+      </button>
+    </div>
+
+    <!-- Clearable.java -->
+    <div class="cpane active" id="pane-clearable">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">interface</span> <span class="ty">Clearable</span> {</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc">    <span class="kw">void</span> <span class="mt">grantAccess</span>();</span></div>
+<div class="cl"><span class="ln">3</span><span class="lc">    <span class="ty">String</span> <span class="mt">getRank</span>();</span></div>
+<div class="cl"><span class="ln">4</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+    <!-- Loggable.java -->
+    <div class="cpane" id="pane-loggable">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">interface</span> <span class="ty">Loggable</span> {</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc">    <span class="kw">void</span> <span class="mt">logActivity</span>(<span class="ty">String</span> action);</span></div>
+<div class="cl"><span class="ln">3</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+    <!-- Agent.java -- Bug 1 -->
+    <div class="cpane" id="pane-agent">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">class</span> <span class="ty">Agent</span> <span class="kw">implements</span> <span class="ty">Clearable</span>, <span class="ty">Loggable</span> {</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc">    <span class="kw">private</span> <span class="ty">String</span> codename;</span></div>
+<div class="cl"><span class="ln">3</span><span class="lc">    <span class="kw">private</span> <span class="kw">int</span> clearanceLevel;</span></div>
+<div class="cl"><span class="ln">4</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">5</span><span class="lc">    <span class="ty">Agent</span>(<span class="ty">String</span> codename, <span class="kw">int</span> clearanceLevel) {</span></div>
+<div class="cl"><span class="ln">6</span><span class="lc">        <span class="kw">this</span>.codename = codename;</span></div>
+<div class="cl"><span class="ln">7</span><span class="lc">        <span class="kw">this</span>.clearanceLevel = clearanceLevel;</span></div>
+<div class="cl"><span class="ln">8</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">9</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">10</span><span class="lc">    <span class="kw">public void</span> <span class="mt">grantAccess</span>() {</span></div>
+<div class="cl"><span class="ln">11</span><span class="lc">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="st">"Access granted to "</span> + codename);</span></div>
+<div class="cl"><span class="ln">12</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">13</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">14</span><span class="lc">    <span class="kw">public</span> <span class="ty">String</span> <span class="mt">getRank</span>() {</span></div>
+<div class="cl"><span class="ln">15</span><span class="lc">        <span class="kw">return</span> <span class="st">"Level "</span> + clearanceLevel;</span></div>
+<div class="cl"><span class="ln">16</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">17</span><span class="lc"></span></div>
+<div class="cl bugline" id="cl-b1a">
+  <span class="ln">18</span>
+  <input class="bug-inp" id="bi-b1a" value="    public String logActivity(String action) {"
+         autocomplete="off" spellcheck="false" oninput="evalBug1()">
+  <span class="fix-badge" aria-hidden="true"></span>
+</div>
+<div class="cl"><span class="ln">19</span><span class="lc">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="st">"[LOG] "</span> + codename + <span class="st">": "</span> + action);</span></div>
+<div class="cl bugline" id="cl-b1b">
+  <span class="ln">20</span>
+  <input class="bug-inp" id="bi-b1b" value="        return action;"
+         autocomplete="off" spellcheck="false" oninput="evalBug1()">
+  <span class="fix-badge" aria-hidden="true"></span>
+</div>
+<div class="cl"><span class="ln">21</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">22</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">23</span><span class="lc">    <span class="kw">public</span> <span class="ty">String</span> <span class="mt">getCodename</span>() {</span></div>
+<div class="cl"><span class="ln">24</span><span class="lc">        <span class="kw">return</span> codename;</span></div>
+<div class="cl"><span class="ln">25</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">26</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+    <!-- AccessGate.java -- Bug 2 -->
+    <div class="cpane" id="pane-accessgate">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">class</span> <span class="ty">AccessGate</span> {</span></div>
+<div class="cl bugline" id="cl-b2">
+  <span class="ln">2</span>
+  <input class="bug-inp" id="bi-b2" value="    static void checkEntry(Agent agent) {"
+         autocomplete="off" spellcheck="false" oninput="evalBug2()">
+  <span class="fix-badge" aria-hidden="true"></span>
+</div>
+<div class="cl"><span class="ln">3</span><span class="lc">        agent.<span class="mt">grantAccess</span>();</span></div>
+<div class="cl"><span class="ln">4</span><span class="lc">        <span class="ty">System</span>.out.<span class="mt">println</span>(<span class="st">"Rank: "</span> + agent.<span class="mt">getRank</span>());</span></div>
+<div class="cl"><span class="ln">5</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">6</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+    <!-- AccessControl.java / main -- Bug 3 -->
+    <div class="cpane" id="pane-main">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">class</span> <span class="ty">AccessControl</span> {</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc">    <span class="kw">public static void</span> <span class="mt">main</span>(<span class="ty">String</span>[] args) {</span></div>
+<div class="cl bugline" id="cl-b3">
+  <span class="ln">3</span>
+  <input class="bug-inp" id="bi-b3" value="        Clearable agent = new Agent(&quot;PHANTOM&quot;, 3);"
+         autocomplete="off" spellcheck="false" oninput="evalBug3()">
+  <span class="fix-badge" aria-hidden="true"></span>
+</div>
+<div class="cl"><span class="ln">4</span><span class="lc">        <span class="ty">AccessGate</span>.<span class="mt">checkEntry</span>(agent);</span></div>
+<div class="cl"><span class="ln">5</span><span class="lc">        agent.<span class="mt">logActivity</span>(<span class="st">"Entered secure wing"</span>);</span></div>
+<div class="cl"><span class="ln">6</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">7</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+  </div><!-- /lpanel -->
+
+  <!-- RIGHT: questions -->
+  <div class="panel" id="question-panel">
+
+    <div class="sec-div">
+      <span class="sec-label">SECTION 1 // THE INTERFACES</span>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="qblock" id="card-q1">
+      <div class="qnum">Q1 //</div>
+      <div class="qanchor">Clearable.java and Loggable.java -- interface declarations</div>
+      <div class="qtext">Both interfaces list method signatures with no bodies. When a class uses the <code style="font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--surface2);padding:1px 5px;">implements</code> keyword with one of these, what is it promising Java? What does Java do at compile time if that promise is not kept?</div>
+      <textarea class="qinput" id="q1" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="qblock" id="card-q2">
+      <div class="qnum">Q2 //</div>
+      <div class="qanchor">Agent.java -- class declaration, line 1</div>
+      <div class="qtext">Agent implements two interfaces. What does Java require Agent to provide because of this? What happens at compile time if one method is missing?</div>
+      <textarea class="qinput" id="q2" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="sec-div">
+      <span class="sec-label">SECTION 2 // THE IMPLEMENTATION</span>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="qblock" id="card-q3">
+      <div class="qnum">Q3 //</div>
+      <div class="qanchor">Agent.java -- logActivity() signature and body, lines 18 and 20 (Bug 01)</div>
+      <div class="qtext">Open Agent.java and look at logActivity(). Compare its signature on line 18 to the one declared in Loggable. What is different, and what does that difference mean for the method body on line 20?</div>
+      <textarea class="qinput" id="q3" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="qblock" id="card-q4">
+      <div class="qnum">Q4 //</div>
+      <div class="qanchor">AccessGate.java -- checkEntry() parameter type, line 2 (Bug 02)</div>
+      <div class="qtext">The checkEntry() method takes an Agent parameter. Why is this structurally wrong given what interfaces are for? What should the parameter type be and why?</div>
+      <textarea class="qinput" id="q4" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="sec-div">
+      <span class="sec-label">SECTION 3 // THE MAIN METHOD</span>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="qblock" id="card-q5">
+      <div class="qnum">Q5 //</div>
+      <div class="qanchor">AccessControl.java -- agent declaration, line 3 (Bug 03)</div>
+      <div class="qtext">Look at how <code style="font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--surface2);padding:1px 5px;">agent</code> is declared on line 3, then look at what line 5 tries to call on it. What type is <code style="font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--surface2);padding:1px 5px;">agent</code> right now, what methods does that type know about, and why does line 5 not compile?</div>
+      <textarea class="qinput" id="q5" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="qblock" id="card-q6">
+      <div class="qnum">Q6 //</div>
+      <div class="qanchor">All files -- full program, all bugs fixed</div>
+      <div class="qtext">All three bugs fixed. Write the exact console output this program produces from top to bottom.</div>
+      <textarea class="qinput" id="q6" placeholder="Type your prediction here..." oninput="checkExport()"
+        style="min-height:100px;font-family:'JetBrains Mono',monospace;font-size:13px;"></textarea>
+    </div>
+
+    <div style="height:14px;"></div>
+
+  </div><!-- /question-panel -->
+
+</div><!-- /main -->
+
+<script>
+// ===== SOURCE OF TRUTH =====
+const SOURCES = {
+  clearable:   ['interface Clearable {','    void grantAccess();','    String getRank();','}'],
+  loggable:    ['interface Loggable {','    void logActivity(String action);','}'],
+  agent: [
+    'class Agent implements Clearable, Loggable {',
+    '    private String codename;',
+    '    private int clearanceLevel;',
+    '',
+    '    Agent(String codename, int clearanceLevel) {',
+    '        this.codename = codename;',
+    '        this.clearanceLevel = clearanceLevel;',
+    '    }',
+    '',
+    '    public void grantAccess() {',
+    '        System.out.println("Access granted to " + codename);',
+    '    }',
+    '',
+    '    public String getRank() {',
+    '        return "Level " + clearanceLevel;',
+    '    }',
+    '',
+    '    public String logActivity(String action) {',  // BUG 1 intentional
+    '        System.out.println("[LOG] " + codename + ": " + action);',
+    '        return action;',
+    '    }',
+    '',
+    '    public String getCodename() {',
+    '        return codename;',
+    '    }',
+    '}',
+  ],
+  accessgate: [
+    'class AccessGate {',
+    '    static void checkEntry(Agent agent) {',  // BUG 2 intentional
+    '        agent.grantAccess();',
+    '        System.out.println("Rank: " + agent.getRank());',
+    '    }',
+    '}',
+  ],
+  main: [
+    'class AccessControl {',
+    '    public static void main(String[] args) {',
+    '        Clearable agent = new Agent("PHANTOM", 3);',  // BUG 3 intentional
+    '        AccessGate.checkEntry(agent);',
+    '        agent.logActivity("Entered secure wing");',
+    '    }',
+    '}',
+  ],
+};
+
+// ===== TABS =====
+const ALL_TABS = ['clearable','loggable','agent','accessgate','main'];
+function switchTab(id) {
+  ALL_TABS.forEach(t => {
+    document.getElementById('tab-'  + t).classList.toggle('active', t === id);
+    document.getElementById('pane-' + t).classList.toggle('active', t === id);
+  });
+}
+
+// ===== BUG STATE (display-only dots, driven by editable lines) =====
+const bugFixed = { 1: false, 2: false, 3: false };
+
+function setFixed(n, fixed) {
+  if (bugFixed[n] === fixed) return;
+  bugFixed[n] = fixed;
+
+  const dot = document.getElementById('dot-' + n);
+  dot.classList.toggle('fixed', fixed);
+  dot.setAttribute('aria-label', 'Bug ' + n + ': ' + (fixed ? 'fixed' : 'open'));
+
+  updateSB();
+  updatePips();
+}
+
+function updateSB() {}
+
+function updatePips() {
+  document.getElementById('pip-agent').className      = 'tpip ' + (bugFixed[1] ? 'fixed' : 'bug');
+  document.getElementById('pip-accessgate').className = 'tpip ' + (bugFixed[2] ? 'fixed' : 'bug');
+  document.getElementById('pip-main').className       = 'tpip ' + (bugFixed[3] ? 'fixed' : 'bug');
+}
+
+// ===== BUG VALIDATORS =====
+let _lsBugApplying = false;
+
+// Bug 1: signature must be void AND return statement must be deleted (empty line)
+function evalBug1() {
+  const sig  = document.getElementById('bi-b1a').value.trim();
+  const ret  = document.getElementById('bi-b1b').value.trim();
+  const sigOk = /public\s+void\s+logActivity\s*\(\s*String\s+\w+\s*\)\s*\{/.test(sig);
+  const retOk = ret === '';
+  const fixed = sigOk && retOk;
+  document.getElementById('cl-b1a').classList.toggle('resolved', sigOk);
+  document.getElementById('cl-b1b').classList.toggle('resolved', retOk);
+  setFixed(1, fixed);
+  if (window.TraceLiveShare && !_lsBugApplying) {
+    const qIdx = window.TraceLiveShare.getState()?.currentQ;
+    if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    ['bi-b1a','bi-b1b'].forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp) window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: id, value: inp.value });
+    });
+  }
+}
+
+// Bug 2: checkEntry parameter must be Clearable, not Agent
+function evalBug2() {
+  const v = document.getElementById('bi-b2').value.trim();
+  const fixed = /static\s+void\s+checkEntry\s*\(\s*Clearable\s+\w+\s*\)\s*\{/.test(v);
+  document.getElementById('cl-b2').classList.toggle('resolved', fixed);
+  setFixed(2, fixed);
+  if (window.TraceLiveShare && !_lsBugApplying) {
+    const qIdx = window.TraceLiveShare.getState()?.currentQ;
+    if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    const inp = document.getElementById('bi-b2');
+    if (inp) window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: 'bi-b2', value: inp.value });
+  }
+}
+
+// Bug 3: declaration type must be Agent, not Clearable
+function evalBug3() {
+  const v = document.getElementById('bi-b3').value.trim();
+  const fixed = /^\s*Agent\s+agent\s*=\s*new\s+Agent\s*\(/.test(v);
+  document.getElementById('cl-b3').classList.toggle('resolved', fixed);
+  setFixed(3, fixed);
+  if (window.TraceLiveShare && !_lsBugApplying) {
+    const qIdx = window.TraceLiveShare.getState()?.currentQ;
+    if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    const inp = document.getElementById('bi-b3');
+    if (inp) window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: 'bi-b3', value: inp.value });
+  }
+}
+
+// ===== EXPORT GATE =====
+function checkExport() {
+  const has = [1,2,3,4,5,6].some(n => document.getElementById('q'+n).value.trim());
+  document.getElementById('export-btn').disabled = !has;
+}
+
+// ===== THEME =====
+function toggleTheme() {
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const next   = isDark ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').innerHTML = isDark ? '&#127769;' : '&#9728;';
+  updateFavicon(next);
+}
+
+// ===== RESET =====
+function doReset() {
+  if (!confirm('Reset all answers and bug states?')) return;
+
+  document.getElementById('bi-b1a').value = '    public String logActivity(String action) {';
+  document.getElementById('bi-b1b').value = '        return action;';
+  document.getElementById('bi-b2').value = '    static void checkEntry(Agent agent) {';
+  document.getElementById('bi-b3').value = '        Clearable agent = new Agent("PHANTOM", 3);';
+
+  ['cl-b1a','cl-b1b','cl-b2','cl-b3'].forEach(id => document.getElementById(id).classList.remove('resolved'));
+
+  bugFixed[1] = bugFixed[2] = bugFixed[3] = false;
+  [1,2,3].forEach(n => {
+    const dot = document.getElementById('dot-' + n);
+    dot.classList.remove('fixed');
+    dot.setAttribute('aria-label', 'Bug ' + n + ': open');
+  });
+
+  updatePips();
+  updateSB();
+  [1,2,3,4,5,6].forEach(n => { document.getElementById('q'+n).value = ''; });
+  checkExport();
+}
+
+// ===== EXPORT =====
+function doExport() {
+  const now = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const qs  = [1,2,3,4,5,6].map(n => document.getElementById('q'+n).value.trim() || '(no answer)');
+  const b1a = document.getElementById('bi-b1a').value;
+  const b1b = document.getElementById('bi-b1b').value;
+  const b2  = document.getElementById('bi-b2').value;
+  const b3  = document.getElementById('bi-b3').value;
+  const st  = n => bugFixed[n] ? 'FIXED' : 'OPEN';
+
+  let md = `# Interface Breach -- Trace Session\n**${now}**\n**Week 7, Tuesday -- Interfaces, implements, interface-typed parameters**\n\n---\n\n`;
+
+  md += `## Java Program\n\n`;
+  for (const [label, lines] of [
+    ['Clearable.java', SOURCES.clearable],
+    ['Loggable.java',  SOURCES.loggable],
+    ['Agent.java',     SOURCES.agent],
+    ['AccessGate.java', SOURCES.accessgate],
+    ['AccessControl.java (main)', SOURCES.main],
+  ]) {
+    md += `### ${label}\n\n\`\`\`java\n${lines.join('\n')}\n\`\`\`\n\n`;
+  }
+
+  md += `---\n\n## Bug Board\n\n`;
+  md += `| # | File | Location | Type | Status |\n`;
+  md += `|---|------|----------|------|--------|\n`;
+  md += `| 01 | Agent.java | logActivity() lines 18 and 20 | Return type String instead of void; orphaned return statement | ${st(1)} |\n`;
+  md += `| 02 | AccessGate.java | checkEntry() parameter, line 2 | Parameter type Agent instead of Clearable | ${st(2)} |\n`;
+  md += `| 03 | AccessControl.java | agent declaration, line 3 | Declared as Clearable instead of Agent -- logActivity() call on line 5 fails | ${st(3)} |\n\n`;
+
+  md += `### Fix Attempts\n\n`;
+  md += `**Bug 01 -- Agent.java lines 18 and 20**\n\`\`\`java\n${b1a}\n        System.out.println("[LOG] " + codename + ": " + action);\n${b1b}\n    }\n\`\`\`\n\n`;
+  md += `**Bug 02 -- AccessGate.java line 2**\n\`\`\`java\n${b2}\n\`\`\`\n\n`;
+  md += `**Bug 03 -- AccessControl.java line 3**\n\`\`\`java\n${b3}\n\`\`\`\n\n`;
+
+  md += `---\n\n`;
+
+  const sections = [
+    { label: 'Section 1 -- The Interfaces', qs: [
+      { n:1, anchor:'Clearable.java and Loggable.java -- interface declarations',
+        text:'Both interfaces list method signatures with no bodies. When a class uses the implements keyword with one of these, what is it promising Java? What does Java do at compile time if that promise is not kept?' },
+      { n:2, anchor:'Agent.java -- class declaration, line 1',
+        text:'Agent implements two interfaces. What does Java require Agent to provide because of this? What happens at compile time if one method is missing?' },
+    ]},
+    { label: 'Section 2 -- The Implementation', qs: [
+      { n:3, anchor:'Agent.java -- logActivity() signature and body, lines 18 and 20 (Bug 01)',
+        text:'Open Agent.java and look at logActivity(). Compare its signature on line 18 to the one declared in Loggable. What is different, and what does that difference mean for the method body on line 20?' },
+      { n:4, anchor:'AccessGate.java -- checkEntry() parameter type, line 2 (Bug 02)',
+        text:'The checkEntry() method takes an Agent parameter. Why is this structurally wrong given what interfaces are for? What should the parameter type be and why?' },
+    ]},
+    { label: 'Section 3 -- The Main Method', qs: [
+      { n:5, anchor:'AccessControl.java -- agent declaration, line 3 (Bug 03)',
+        text:'Look at how `agent` is declared on line 3, then look at what line 5 tries to call on it. What type is `agent` right now, what methods does that type know about, and why does line 5 not compile?' },
+      { n:6, anchor:'All files -- full program, all bugs fixed',
+        text:'All three bugs fixed. Write the exact console output this program produces from top to bottom.' },
+    ]},
+  ];
+
+  for (const sec of sections) {
+    md += `## ${sec.label}\n\n`;
+    for (const q of sec.qs) {
+      md += `**Q${q.n}** *(${q.anchor})*\n\n${q.text}\n\n> ${qs[q.n-1].replace(/\n/g,'\n> ')}\n\n`;
+    }
+  }
+
+  md += `---\n\n## AI Review Prompt\n\n`;
+  md += `> You are a Java instructor reviewing a student trace session on interfaces (Java 17, Week 7, Day 2).\n>\n`;
+  md += `> The program spans five files: Clearable and Loggable interfaces, an Agent class that implements both, an AccessGate class with a static method, and an AccessControl main class.\n>\n`;
+  md += `> Three structural bugs were present:\n`;
+  md += `> 1. Agent.java lines 18 and 20: logActivity() return type is String instead of void, and the method body has a return statement -- both must be fixed together to match the Loggable interface.\n`;
+  md += `> 2. AccessGate.java line 2: checkEntry() parameter type is Agent instead of Clearable -- defeats the interface contract and breaks polymorphic usage.\n`;
+  md += `> 3. AccessControl.java line 3: agent is declared as Clearable instead of Agent -- Clearable only declares grantAccess() and getRank(), so the logActivity() call on line 5 does not compile.\n>\n`;
+  md += `> Review the student responses above. For each question: identify what the student got right, what they missed or stated imprecisely, and one concrete follow-up question. Focus on: what an interface contract means and how Java enforces it at compile time, why return type mismatches break implementation, why interface-typed parameters are more flexible than concrete types, and what a reference type knows versus does not know about the object it holds. Be direct. Credit what is right. Do not manufacture criticism where the answer is sound.\n`;
+
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'interface-breach-trace.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+updateFavicon('light');
+
+// =====================================================================
+// TRACE ADAPTER — consumed by ../shared/trace-liveshare.js
+// =====================================================================
+window.TRACE_ADAPTER = {
+  title:         '&gt;_ Interface Breach',
+  subtitle:      'Interfaces &mdash; Week 7, Tuesday',
+  accent:        'var(--accent, #00dd77)',
+  joinBtnClass:  'cbtn',
+  soloBtnClass:  'cbtn',
+  landingVars: {
+    bg:     'var(--bg)',
+    card:   'var(--surface)',
+    border: 'var(--border)',
+    text:   'var(--text)',
+    textSub:'var(--text-mid)',
+    input:  'var(--surface2)',
+  },
+  channelPrefix: 'tdd',
+  questions: [
+    { id: 'q1', hasBug: false },
+    { id: 'q2', hasBug: false },
+    { id: 'q3', hasBug: true  },  // Bug 1
+    { id: 'q4', hasBug: true  },  // Bug 2
+    { id: 'q5', hasBug: true  },  // Bug 3
+    { id: 'q6', hasBug: false },
+  ],
+  _qToBug: [0, 0, 1, 2, 3, 0],
+  _bugInputIds: {
+    1: ['bi-b1a', 'bi-b1b'],
+    2: ['bi-b2'],
+    3: ['bi-b3'],
+  },
+  getAnswer(qid) {
+    return document.getElementById(qid)?.value || '';
+  },
+  setAnswer(qid, val) {
+    const el = document.getElementById(qid);
+    if (el) el.value = val;
+    checkExport();
+  },
+  getFixValues() {
+    const vals = {};
+    Object.values(this._bugInputIds).flat().forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp) vals[id] = inp.value;
+    });
+    return vals;
+  },
+  applyFixValue(key, val) {
+    const inp = document.getElementById(key);
+    if (!inp) return;
+    inp.value = val;
+    _lsBugApplying = true;
+    if (key === 'bi-b1a' || key === 'bi-b1b') evalBug1();
+    else if (key === 'bi-b2') evalBug2();
+    else if (key === 'bi-b3') evalBug3();
+    _lsBugApplying = false;
+    updatePips();
+    if (window.TraceLiveShare) {
+      const qIdx = window.TraceLiveShare.getState()?.currentQ;
+      if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    }
+  },
+  isDoneReady(qIdx) {
+    const q = this.questions[qIdx];
+    const textarea = document.getElementById(q.id);
+    const hasText = textarea && textarea.value.trim().length > 0;
+    if (!hasText) return false;
+    const bugN = this._qToBug[qIdx];
+    if (!bugN) return true;
+    return bugFixed[bugN] === true;
+  },
+  setEditable(qIdx, editable) {
+    const bugN = this._qToBug[qIdx];
+    if (!bugN) return;
+    (this._bugInputIds[bugN] || []).forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp && !bugFixed[bugN]) {
+        if (editable) inp.removeAttribute('disabled');
+        else inp.setAttribute('disabled', true);
+      }
+    });
+  },
+  onReset() {
+    // Reset bugFixed state
+    bugFixed[1] = false; bugFixed[2] = false; bugFixed[3] = false;
+    // Restore original (buggy) values to bug inputs
+    document.getElementById('bi-b1a').value = '    public String logActivity(String action) {';
+    document.getElementById('bi-b1b').value = '        return action;';
+    document.getElementById('bi-b2').value  = '    static void checkEntry(Agent agent) {';
+    document.getElementById('bi-b3').value  = '        Clearable agent = new Agent("PHANTOM", 3);';
+    // Remove resolved styling from code lines
+    ['cl-b1a', 'cl-b1b', 'cl-b2', 'cl-b3'].forEach(id =>
+      document.getElementById(id).classList.remove('resolved')
+    );
+    // Reset dot indicators
+    [1, 2, 3].forEach(n => {
+      const dot = document.getElementById('dot-' + n);
+      dot.classList.remove('fixed');
+      dot.setAttribute('aria-label', 'Bug ' + n + ': open');
+    });
+    updatePips();
+    updateSB();
+  },
+};
+</script>
+<script src="../shared/trace-liveshare.js"></script>
+</body>
+</html>

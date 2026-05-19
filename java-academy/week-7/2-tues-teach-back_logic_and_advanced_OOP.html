@@ -245,6 +245,35 @@ System.out.<span class="fn">println</span>(<span class="fn">max</span>(<span cla
     walkthrough: "Identify the four parts of the method signature. Trace the first call with a=14, b=27 — which return runs? Then trace the nested call on the last line step by step."
   },
   {
+    title: "Access Modifiers",
+    what: { q: "What are access modifiers? Name the three main ones and what each controls.",
+      a: `Access modifiers are keywords that control <em>which other code can see and use a field or method</em>. <code>public</code> — accessible from anywhere. <code>private</code> — accessible only within the same class. <code>protected</code> — accessible within the same class and any subclasses. Without a modifier (package-private), access is limited to the same package.` },
+    why: { q: "Why would you ever make a field private? Couldn't you just leave everything public?",
+      a: `Making fields <code>private</code> is called <strong>encapsulation</strong> — protecting internal state from unexpected changes. If <code>health</code> is public, anything anywhere could set <code>hero.health = -9999</code>. If it's private, outside code must go through a method like <code>setHealth()</code>, which can enforce rules. You control the front door instead of leaving every wall open.` },
+    how: { q: "How do getters and setters work with private fields? Write the pattern from memory.",
+      a: `Declare the field <code>private</code>. Write a <code>getX()</code> method that <code>return</code>s it — lets outside code read safely. Write a <code>setX(value)</code> method that assigns to it — add validation here. Outside code calls getter to read and setter to write, never touching the field directly. The class stays in control of its own data.` },
+    code: `<span class="kw">class</span> <span class="ty">Player</span> {
+    <span class="kw">private</span> <span class="ty">String</span> name;
+    <span class="kw">private</span> <span class="kw">int</span> health;
+
+    <span class="ty">Player</span>(<span class="ty">String</span> name, <span class="kw">int</span> health) {
+        <span class="kw">this</span>.name = name;  <span class="kw">this</span>.health = health;
+    }
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getName</span>()   { <span class="kw">return</span> name; }
+    <span class="kw">public</span> <span class="kw">int</span>    <span class="fn">getHealth</span>()  { <span class="kw">return</span> health; }
+    <span class="kw">public</span> <span class="kw">void</span>   <span class="fn">setHealth</span>(<span class="kw">int</span> h) {
+        <span class="kw">if</span> (h < <span class="nu">0</span>) h = <span class="nu">0</span>; <span class="cm">// validation</span>
+        health = h;
+    }
+}
+
+<span class="ty">Player</span> p = <span class="kw">new</span> <span class="ty">Player</span>(<span class="st">"Aldric"</span>, <span class="nu">100</span>);
+<span class="cm">// p.health = -500;  // won't compile — private!</span>
+p.<span class="fn">setHealth</span>(-<span class="nu">500</span>);
+System.out.<span class="fn">println</span>(p.<span class="fn">getHealth</span>()); <span class="cm">// 0</span>`,
+    walkthrough: "Why does the commented-out line not compile? Trace setHealth(-500): what does the if do, and what value ends up in health? What does getHealth() return and why?"
+  },
+  {
     title: "Inheritance",
     what: { q: "What is inheritance in Java? What does the 'extends' keyword actually mean?",
       a: `Inheritance is when one class (the <strong>child</strong> or subclass) takes on the fields and methods of another class (the <strong>parent</strong> or superclass). The <code>extends</code> keyword establishes that relationship. The child gets everything the parent has for free — it can also add its own members or override existing ones.` },
@@ -282,66 +311,84 @@ m.<span class="fn">castSpell</span>();   <span class="cm">// defined on Mage</sp
     walkthrough: "Which fields does Mage inherit and which are its own? Trace the constructor chain when 'new Mage(\"Sera\", 100)' is called. Which class handles takeDamage — and why?"
   },
   {
-    title: "Access Modifiers",
-    what: { q: "What are access modifiers? Name the three main ones and what each controls.",
-      a: `Access modifiers are keywords that control <em>which other code can see and use a field or method</em>. <code>public</code> — accessible from anywhere. <code>private</code> — accessible only within the same class. <code>protected</code> — accessible within the same class and any subclasses. Without a modifier (package-private), access is limited to the same package.` },
-    why: { q: "Why would you ever make a field private? Couldn't you just leave everything public?",
-      a: `Making fields <code>private</code> is called <strong>encapsulation</strong> — protecting internal state from unexpected changes. If <code>health</code> is public, anything anywhere could set <code>hero.health = -9999</code>. If it's private, outside code must go through a method like <code>setHealth()</code>, which can enforce rules. You control the front door instead of leaving every wall open.` },
-    how: { q: "How do getters and setters work with private fields? Write the pattern from memory.",
-      a: `Declare the field <code>private</code>. Write a <code>getX()</code> method that <code>return</code>s it — lets outside code read safely. Write a <code>setX(value)</code> method that assigns to it — add validation here. Outside code calls getter to read and setter to write, never touching the field directly. The class stays in control of its own data.` },
-    code: `<span class="kw">class</span> <span class="ty">Player</span> {
-    <span class="kw">private</span> <span class="ty">String</span> name;
-    <span class="kw">private</span> <span class="kw">int</span> health;
+    title: "Polymorphism",
+    what: { q: "What does polymorphism mean? What are the two things that have to be true for it to work?",
+      a: `Polymorphism means one variable type can refer to objects of many different subclasses, and the correct method runs automatically based on what the object actually is. Two things must be true: first, the subclass must <strong>extend</strong> the parent class (IS-A relationship); second, the subclass must <strong>override</strong> a method the parent defined. Without the override, there's nothing to choose between — every object just runs the same parent version.` },
+    why: { q: "Why is polymorphism useful — what would you have to write instead if Java didn't have it?",
+      a: `Without polymorphism, processing a mixed collection of objects requires checking the type of each one manually with <code>instanceof</code> and casting, then calling the right method yourself. Every time you add a new subclass, you'd have to update every <code>if/else</code> chain that handles them. With polymorphism, you just add the new class and override the method — existing loops and methods work automatically with no changes.` },
+    how: { q: "How does Java decide at runtime which version of an overridden method to call? What is @Override actually doing?",
+      a: `At runtime Java looks at the <em>actual type of the object</em> — not the declared type of the variable holding it. This is called <strong>dynamic dispatch</strong>. A <code>Hero</code> variable holding a <code>Mage</code> object will call <code>Mage</code>'s version of any overridden method. <code>@Override</code> is an annotation that tells the compiler "I intend this to override a parent method" — if the method signature doesn't exactly match one in the parent, the compiler throws an error rather than silently creating a brand new unrelated method.` },
+    code: `<span class="kw">class</span> <span class="ty">Hero</span> {
+    <span class="ty">String</span> name;
+    <span class="ty">Hero</span>(<span class="ty">String</span> name) { <span class="kw">this</span>.name = name; }
 
-    <span class="ty">Player</span>(<span class="ty">String</span> name, <span class="kw">int</span> health) {
-        <span class="kw">this</span>.name = name;  <span class="kw">this</span>.health = health;
-    }
-    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getName</span>()   { <span class="kw">return</span> name; }
-    <span class="kw">public</span> <span class="kw">int</span>    <span class="fn">getHealth</span>()  { <span class="kw">return</span> health; }
-    <span class="kw">public</span> <span class="kw">void</span>   <span class="fn">setHealth</span>(<span class="kw">int</span> h) {
-        <span class="kw">if</span> (h < <span class="nu">0</span>) h = <span class="nu">0</span>; <span class="cm">// validation</span>
-        health = h;
+    <span class="kw">void</span> <span class="fn">attack</span>() {
+        System.out.<span class="fn">println</span>(name + <span class="st">" attacks!"</span>);
     }
 }
 
-<span class="ty">Player</span> p = <span class="kw">new</span> <span class="ty">Player</span>(<span class="st">"Aldric"</span>, <span class="nu">100</span>);
-<span class="cm">// p.health = -500;  // won't compile — private!</span>
-p.<span class="fn">setHealth</span>(-<span class="nu">500</span>);
-System.out.<span class="fn">println</span>(p.<span class="fn">getHealth</span>()); <span class="cm">// 0</span>`,
-    walkthrough: "Why does the commented-out line not compile? Trace setHealth(-500): what does the if do, and what value ends up in health? What does getHealth() return and why?"
+<span class="kw">class</span> <span class="ty">Warrior</span> <span class="kw">extends</span> <span class="ty">Hero</span> {
+    <span class="ty">Warrior</span>(<span class="ty">String</span> name) { <span class="kw">super</span>(name); }
+
+    <span class="an">@Override</span>
+    <span class="kw">void</span> <span class="fn">attack</span>() {
+        System.out.<span class="fn">println</span>(name + <span class="st">" swings a sword!"</span>);
+    }
+}
+
+<span class="kw">class</span> <span class="ty">Mage</span> <span class="kw">extends</span> <span class="ty">Hero</span> {
+    <span class="ty">Mage</span>(<span class="ty">String</span> name) { <span class="kw">super</span>(name); }
+
+    <span class="an">@Override</span>
+    <span class="kw">void</span> <span class="fn">attack</span>() {
+        System.out.<span class="fn">println</span>(name + <span class="st">" casts a fireball!"</span>);
+    }
+}
+
+<span class="cm">// Hero variable — but holds different subclass objects</span>
+<span class="ty">Hero</span>[] party = { <span class="kw">new</span> <span class="ty">Warrior</span>(<span class="st">"Aldric"</span>), <span class="kw">new</span> <span class="ty">Mage</span>(<span class="st">"Sera"</span>), <span class="kw">new</span> <span class="ty">Hero</span>(<span class="st">"Finn"</span>) };
+<span class="kw">for</span> (<span class="ty">Hero</span> h : party) {
+    h.<span class="fn">attack</span>(); <span class="cm">// which version runs?</span>
+}`,
+    walkthrough: "All three objects are stored in a Hero[] array. Trace the loop: for each hero, which attack() method actually runs and why? What would happen if Warrior didn't have @Override — would the loop behave differently?"
   },
   {
     title: "Abstraction",
     what: { q: "What is abstraction in Java? What is an abstract class and what is an abstract method?",
       a: `Abstraction means hiding implementation details and exposing only what's necessary. An <code>abstract class</code> cannot be instantiated — it exists to be extended. An <code>abstract method</code> has a signature but no body — it's a promise that every subclass <em>must</em> provide its own version. Together they define a contract: "every type in this family will have this behaviour, but each implements it differently."` },
-    why: { q: "Why not just use a regular class? Why do you need the abstract keyword at all?",
-      a: `Without <code>abstract</code>, nothing stops <code>new Shape()</code> — which makes no sense (what shape is it?). The keyword makes that a compile-time error. Without an abstract method, subclasses might forget to implement <code>area()</code>. <code>abstract</code> makes the contract explicit and lets the compiler enforce it rather than hoping developers remember.` },
-    how: { q: "How does polymorphism connect to abstraction — why can you store different subclass objects in the same variable type?",
-      a: `Because every subclass IS-A version of the parent. A <code>Circle</code> is a <code>Shape</code>, so a <code>Shape</code> variable can hold a <code>Circle</code>. When you call <code>shape.area()</code>, Java looks at what the object <em>actually is at runtime</em> and calls that class's implementation. This is <strong>dynamic dispatch</strong> — one loop can work over mixed shapes through a single shared variable type.` },
-    code: `<span class="kw">abstract class</span> <span class="ty">Shape</span> {
-    <span class="ty">String</span> color;
-    <span class="ty">Shape</span>(<span class="ty">String</span> c) { color = c; }
-    <span class="kw">abstract double</span> <span class="fn">area</span>(); <span class="cm">// no body — subclass must provide</span>
-    <span class="kw">void</span> <span class="fn">describe</span>() {
-        System.out.<span class="fn">println</span>(color + <span class="st">" area="</span> + <span class="fn">area</span>());
+    why: { q: "Why not just use a regular parent class with a regular method? What does 'abstract' enforce that you can't get otherwise?",
+      a: `A regular parent class can be instantiated directly — <code>new Hero()</code> is valid even if a bare Hero makes no sense in your program. And a regular method gives subclasses a default they might silently inherit without realising. <code>abstract</code> blocks both: the class can't be instantiated, and the compiler forces every concrete subclass to provide its own implementation. You get a guarantee, not just a convention.` },
+    how: { q: "How does abstraction build on what you know about polymorphism — what does the abstract method add to @Override?",
+      a: `With a regular parent method and <code>@Override</code>, the override is optional — a subclass can skip it and just use the parent's version. With an <code>abstract</code> method, the override is <strong>mandatory</strong>: the compiler refuses to compile a concrete subclass that doesn't implement it. Abstraction takes the polymorphism pattern and makes the contract enforceable at compile time rather than relying on developers remembering to override.` },
+    code: `<span class="kw">abstract class</span> <span class="ty">Hero</span> {
+    <span class="ty">String</span> name;
+    <span class="ty">Hero</span>(<span class="ty">String</span> name) { <span class="kw">this</span>.name = name; }
+
+    <span class="kw">abstract void</span> <span class="fn">attack</span>(); <span class="cm">// no body — every subclass must provide one</span>
+
+    <span class="kw">void</span> <span class="fn">rest</span>() { <span class="cm">// concrete method — shared by all subclasses</span>
+        System.out.<span class="fn">println</span>(name + <span class="st">" rests."</span>);
     }
 }
 
-<span class="kw">class</span> <span class="ty">Circle</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
-    <span class="kw">double</span> radius;
-    <span class="ty">Circle</span>(<span class="ty">String</span> c, <span class="kw">double</span> r) { <span class="kw">super</span>(c); radius = r; }
-    <span class="an">@Override</span> <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> Math.PI * radius * radius; }
+<span class="kw">class</span> <span class="ty">Warrior</span> <span class="kw">extends</span> <span class="ty">Hero</span> {
+    <span class="ty">Warrior</span>(<span class="ty">String</span> n) { <span class="kw">super</span>(n); }
+
+    <span class="an">@Override</span>
+    <span class="kw">void</span> <span class="fn">attack</span>() { System.out.<span class="fn">println</span>(name + <span class="st">" swings a sword!"</span>); }
 }
 
-<span class="kw">class</span> <span class="ty">Rectangle</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
-    <span class="kw">double</span> w, h;
-    <span class="ty">Rectangle</span>(<span class="ty">String</span> c, <span class="kw">double</span> w, <span class="kw">double</span> h) { <span class="kw">super</span>(c); <span class="kw">this</span>.w=w; <span class="kw">this</span>.h=h; }
-    <span class="an">@Override</span> <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> w * h; }
+<span class="kw">class</span> <span class="ty">Mage</span> <span class="kw">extends</span> <span class="ty">Hero</span> {
+    <span class="ty">Mage</span>(<span class="ty">String</span> n) { <span class="kw">super</span>(n); }
+
+    <span class="an">@Override</span>
+    <span class="kw">void</span> <span class="fn">attack</span>() { System.out.<span class="fn">println</span>(name + <span class="st">" casts a fireball!"</span>); }
 }
 
-<span class="ty">Shape</span>[] shapes = { <span class="kw">new</span> <span class="ty">Circle</span>(<span class="st">"red"</span>,<span class="nu">5</span>), <span class="kw">new</span> <span class="ty">Rectangle</span>(<span class="st">"blue"</span>,<span class="nu">4</span>,<span class="nu">6</span>) };
-<span class="kw">for</span> (<span class="ty">Shape</span> s : shapes) { s.<span class="fn">describe</span>(); }`,
-    walkthrough: "Why can't you write 'new Shape(\"red\")'? What does @Override signal to the compiler? Trace the loop: for each shape, which area() method actually runs and why?"
+<span class="cm">// new Hero("Finn") — won't compile! Hero is abstract.</span>
+<span class="ty">Hero</span>[] party = { <span class="kw">new</span> <span class="ty">Warrior</span>(<span class="st">"Aldric"</span>), <span class="kw">new</span> <span class="ty">Mage</span>(<span class="st">"Sera"</span>) };
+<span class="kw">for</span> (<span class="ty">Hero</span> h : party) { h.<span class="fn">attack</span>(); h.<span class="fn">rest</span>(); }`,
+    walkthrough: "Why does the commented-out line not compile? Which method in Hero has a body and which doesn't — what's the difference? Trace the loop: for each hero, which attack() runs? Which rest() runs, and why is the answer different?"
   }
 ];
 

@@ -492,35 +492,6 @@ const patConcepts = [
       a: `Strings in Java are immutable — every <code>+</code> creates a completely new <code>String</code> object, copies all previous content into it, then adds the new part. In a loop of N iterations that's N allocations, each one longer than the last — O(N²) total work. <code>StringBuilder</code> maintains a resizable buffer and <code>append()</code> mutates it in place — O(1) per call, O(N) total.` },
     how: { q: "How do you identify the correct neutral starting value? What happens if you get it wrong?",
       a: `Ask: what would the correct answer be if the loop ran zero times? For a sum, zero items gives 0. For a product, zero items gives 1 (the multiplicative identity). If you start a sum at 1, you add a phantom unit that was never in the data. If you start a product at 0, the entire result is always 0 regardless of input. Getting the neutral value wrong corrupts every result.` }
-  },
-  {
-    title: "Short-Circuit Evaluation",
-    desc: `In a <code>&&</code> chain, Java stops as soon as it sees <code>false</code> — because false AND anything is always false. In a <code>||</code> chain, it stops at the first <code>true</code>. Operands to the right of that point are <em>never evaluated</em>. This matters for safety (null checks before method calls) and performance (cheap checks before expensive ones). Important: <code>&</code> and <code>|</code> (single character) do NOT short-circuit.`,
-    bad: `<span class="cm">// & does NOT short-circuit — isAdmin() runs even if user is null</span>
-<span class="kw">if</span> (user != <span class="kw">null</span> & user.<span class="fn">isAdmin</span>()) {
-    <span class="fn">openAdminPanel</span>();
-}
-
-<span class="cm">// loadFromDB() runs even when the cache already has it</span>
-<span class="kw">if</span> (<span class="fn">loadFromDB</span>() | cache.<span class="fn">has</span>(key)) {
-    <span class="fn">serve</span>(key);
-}`,
-    good: `<span class="cm">// && short-circuits: isAdmin() never called on null</span>
-<span class="kw">if</span> (user != <span class="kw">null</span> && user.<span class="fn">isAdmin</span>()) {
-    <span class="fn">openAdminPanel</span>();
-}
-
-<span class="cm">// || short-circuits: DB only called on a cache miss</span>
-<span class="kw">if</span> (cache.<span class="fn">has</span>(key) || <span class="fn">loadFromDB</span>()) {
-    <span class="fn">serve</span>(key);
-}`,
-    introWalkthrough: "Spot the one-character difference in each pair. What happens in the first left example when user is null? In the second example, not only the operator changed — what else was swapped, and why does that matter too?",
-    what: { q: "What does 'short-circuit' mean in && and || — when exactly does Java stop evaluating?",
-      a: `Short-circuit means Java stops evaluating a chain as soon as the outcome is certain. For <code>&&</code>: stops at the first <code>false</code>, because false AND anything is always false. For <code>||</code>: stops at the first <code>true</code>, because true OR anything is always true. Any operands to the right of that point never run.` },
-    why: { q: "Why does the order of operands in a && chain matter for both correctness and performance?",
-      a: `<strong>Correctness:</strong> if <code>user.isAdmin()</code> appears before <code>user != null</code>, Java calls a method on a potentially null reference — a NullPointerException. The null check must come first so the method call is skipped when null. <strong>Performance:</strong> put the cheapest, most-decisive check first. If a fast local variable check short-circuits the chain, an expensive DB call or network request never runs.` },
-    how: { q: "What is the practical difference between && and & in Java? Why is using & with booleans almost always a bug?",
-      a: `<code>&&</code> is the short-circuit logical AND. <code>&</code> is the bitwise AND — it always evaluates both sides. Using <code>&</code> with booleans compiles without error but silently destroys short-circuit safety: <code>user != null & user.isAdmin()</code> still calls <code>isAdmin()</code> even when user is null. It looks almost identical to the correct version — which makes it a particularly dangerous bug to miss.` }
   }
 ];
 

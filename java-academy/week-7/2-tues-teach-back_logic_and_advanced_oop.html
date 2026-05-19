@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Teach-Back — Week 2</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4C20.95 4 12 12.95 12 24c0 7.3 3.9 13.7 9.7 17.2 1.3.8 2.3 2.1 2.3 3.6V48a4 4 0 004 4h8a4 4 0 004-4v-3.2c0-1.5 1-2.8 2.3-3.6C48.1 37.7 52 31.3 52 24 52 12.95 43.05 4 32 4z' fill='%232d5a8e'/%3E%3Crect x='25' y='54' width='14' height='3' rx='1.5' fill='%232d5a8e'/%3E%3Crect x='27' y='59' width='10' height='3' rx='1.5' fill='%232d5a8e'/%3E%3Cpath d='M32 14v16M24 22l8 8 8-8' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #dddbd5;
+    --text: #1a1917;
+    --text-muted: #6b6862;
+    --accent: #2d5a8e;
+    --accent-light: #e8f0f9;
+    --accent-mid: #c2d6ef;
+    --accent2: #5a2d8e;
+    --accent2-light: #f0e8f9;
+    --accent2-mid: #d6c2ef;
+    --tag-bg: #eceae4;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-comment: #6c7086;
+    --code-keyword: #cba6f7;
+    --code-string: #a6e3a1;
+    --code-number: #fab387;
+    --code-type: #89b4fa;
+    --good-bg: #f0f8f4;
+    --good-border: #9fe1cb;
+    --good-label: #0f6e56;
+    --bad-bg: #fdf0f0;
+    --bad-border: #f09595;
+    --bad-label: #a32d2d;
+    --what-color: #2d5a8e;
+    --why-color: #7a3e9d;
+    --how-color: #1a7a5e;
+    --radius: 10px;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    line-height: 1.6;
+  }
+
+  .page { max-width: 760px; margin: 0 auto; }
+
+  /* HEADER */
+  header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 2px solid var(--border); }
+  .header-label { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+  header h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px; line-height: 1.2; }
+  .intro { font-size: 15px; color: var(--text-muted); max-width: 600px; line-height: 1.7; }
+  .how-it-works { margin-top: 20px; background: var(--accent-light); border: 1px solid var(--accent-mid); border-radius: var(--radius); padding: 16px 20px; font-size: 14px; color: var(--accent); line-height: 1.7; }
+  .how-it-works strong { font-weight: 600; }
+
+  .ei-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .ei-badge { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 20px; }
+  .ei-what { background: #dce8f7; color: var(--what-color); }
+  .ei-why  { background: #eddff7; color: var(--why-color); }
+  .ei-how  { background: #d4f0e7; color: var(--how-color); }
+
+  /* SECTION HEADERS */
+  .section-header { display: flex; align-items: center; gap: 16px; margin: 48px 0 20px; }
+  .section-pill { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; white-space: nowrap; }
+  .section-pill.oop { background: var(--accent-light);  color: var(--accent);  border: 1px solid var(--accent-mid); }
+  .section-pill.pat { background: var(--accent2-light); color: var(--accent2); border: 1px solid var(--accent2-mid); }
+  .section-line { flex: 1; height: 1.5px; background: var(--border); }
+  .section-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.7; max-width: 640px; }
+
+  /* CARD SHELL */
+  .concepts { display: flex; flex-direction: column; gap: 16px; }
+  .concept-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.15s; }
+  .concept-card.open          { border-color: var(--accent); }
+  .concept-card.open.pat-card { border-color: var(--accent2); }
+
+  .concept-header { display: flex; align-items: center; gap: 16px; padding: 20px 24px; cursor: pointer; user-select: none; transition: background 0.12s; }
+  .concept-header:hover { background: var(--tag-bg); }
+  .concept-card.open .concept-header                { background: var(--accent-light);  border-bottom: 1.5px solid var(--accent-mid); }
+  .concept-card.open.pat-card .concept-header       { background: var(--accent2-light); border-bottom: 1.5px solid var(--accent2-mid); }
+
+  .concept-num { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); width: 24px; flex-shrink: 0; }
+  .concept-card.open .concept-num          { color: var(--accent); }
+  .concept-card.open.pat-card .concept-num { color: var(--accent2); }
+
+  .concept-title { font-size: 16px; font-weight: 600; flex: 1; letter-spacing: -0.01em; }
+  .concept-tag { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 12px; flex-shrink: 0; }
+  .concept-tag.oop { background: var(--accent-light);  color: var(--accent); }
+  .concept-tag.pat { background: var(--accent2-light); color: var(--accent2); }
+
+  .chevron { width: 18px; height: 18px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+  .concept-card.open .chevron          { transform: rotate(180deg); color: var(--accent); }
+  .concept-card.open.pat-card .chevron { color: var(--accent2); }
+
+  .concept-body { display: none; padding: 24px; }
+  .concept-card.open .concept-body { display: block; }
+
+  /* EI STEPS */
+  .ei-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .ei-step { border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .ei-step-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; user-select: none; background: var(--surface); transition: background 0.12s; }
+  .ei-step-header:hover { background: var(--tag-bg); }
+  .ei-step.open .ei-step-header { border-bottom: 1.5px solid var(--border); }
+
+  .ei-step-label { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 12px; flex-shrink: 0; }
+  .ei-what-step .ei-step-label { background: #dce8f7; color: var(--what-color); }
+  .ei-why-step  .ei-step-label { background: #eddff7; color: var(--why-color); }
+  .ei-how-step  .ei-step-label { background: #d4f0e7; color: var(--how-color); }
+
+  .ei-step-question { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .ei-step-icon { font-family: var(--mono); font-size: 11px; color: var(--text-muted); transition: transform 0.2s; }
+  .ei-step.open .ei-step-icon { transform: rotate(90deg); }
+
+  .ei-step-body { display: none; padding: 14px 16px; font-size: 14px; line-height: 1.75; color: var(--text); }
+  .ei-step.open .ei-step-body { display: block; }
+  .ei-step-body code { font-family: var(--mono); font-size: 12px; background: #d6e4f5; color: #1a3a5c; padding: 1px 5px; border-radius: 3px; }
+
+  /* GENERIC REVEAL (OOP code toggle) */
+  .reveal-section { margin-bottom: 14px; }
+  .reveal-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); font-size: 13px; font-weight: 500; color: var(--accent); transition: background 0.12s, border-color 0.12s; }
+  .reveal-toggle:hover { background: var(--accent-light); border-color: var(--accent-mid); }
+  .reveal-icon { font-family: var(--mono); font-size: 11px; font-weight: 600; width: 18px; text-align: center; transition: transform 0.2s; }
+  .reveal-section.open .reveal-icon { transform: rotate(90deg); }
+  .reveal-content { display: none; margin-top: 10px; }
+  .reveal-section.open .reveal-content { display: block; }
+
+  /* CODE BLOCKS */
+  .code-wrapper { border-radius: 8px; overflow: hidden; border: 1.5px solid #313244; }
+  pre { background: var(--code-bg); padding: 20px; overflow-x: auto; margin: 0; }
+  code { font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--code-text); }
+  .kw { color: var(--code-keyword); }
+  .ty { color: var(--code-type); }
+  .st { color: var(--code-string); }
+  .nu { color: var(--code-number); }
+  .cm { color: var(--code-comment); font-style: italic; }
+  .fn { color: #f38ba8; }
+  .an { color: #fab387; }
+
+  .walkthrough-prompt { padding: 12px 16px; background: var(--tag-bg); border-radius: 8px; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* PATTERN BAD/GOOD PAIR */
+  .code-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+  .code-col-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 10px; border-radius: 6px 6px 0 0; }
+  .code-col-label.bad  { background: var(--bad-bg);  color: var(--bad-label);  border: 1.5px solid var(--bad-border);  border-bottom: none; }
+  .code-col-label.good { background: var(--good-bg); color: var(--good-label); border: 1.5px solid var(--good-border); border-bottom: none; }
+  .code-pair .code-wrapper.bad  { border-color: var(--bad-border);  border-radius: 0 0 8px 8px; }
+  .code-pair .code-wrapper.good { border-color: var(--good-border); border-radius: 0 0 8px 8px; }
+
+  /* PATTERN TWO-PHASE */
+  .pat-intro-desc { font-size: 14px; line-height: 1.75; color: var(--text); margin-bottom: 18px; }
+  .pat-intro-desc code { font-family: var(--mono); font-size: 12px; background: #d6e4f5; color: #1a3a5c; padding: 1px 5px; border-radius: 3px; }
+
+  .phase-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 0; }
+  .phase-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .phase-divider-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+
+  .unlock-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; margin-top: 14px; padding: 13px 20px;
+    background: var(--accent2-light); border: 1.5px solid var(--accent2-mid);
+    border-radius: 8px; font-family: var(--sans); font-size: 13px; font-weight: 600;
+    color: var(--accent2); cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  }
+  .unlock-btn:hover:not(:disabled) { background: #e4d5f7; border-color: #b89edd; }
+  .unlock-btn:disabled { opacity: 0.55; cursor: default; }
+  .unlock-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .pat-ei-panel { display: none; margin-top: 22px; padding-top: 22px; border-top: 1.5px solid var(--accent2-mid); }
+  .pat-ei-panel.unlocked { display: block; }
+
+  .pat-ei-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .pat-ei-header-label { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); }
+  .pat-ei-header-line { flex: 1; height: 1px; background: var(--accent2-mid); }
+
+  @media (max-width: 560px) {
+    .code-pair { grid-template-columns: 1fr; }
+    .ei-legend  { gap: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="header-label">Java Bootcamp &mdash; Week 2</div>
+    <h1>Teach-Back: OOP &amp; Logic Patterns</h1>
+    <p class="intro">Same format as last time — one person opens a section and explains in their own words, then you work through the code together. Logic patterns have two phases this week: study the introduction first, then the questions unlock.</p>
+    <div class="how-it-works">
+      <strong>OOP concepts:</strong> Three questions per card — What, Why, How — try to answer each in your own words before revealing.<br><br>
+      <strong>Logic patterns:</strong> Read the description and study both code examples together first. Once you understand what changed and why, click <em>"I've read this — start the questions"</em> to unlock the elaboration questions.
+    </div>
+    <div class="ei-legend">
+      <span class="ei-badge ei-what">WHAT &mdash; define it</span>
+      <span class="ei-badge ei-why">WHY &mdash; reason for it</span>
+      <span class="ei-badge ei-how">HOW &mdash; use it in code</span>
+    </div>
+  </header>
+
+  <div class="section-header">
+    <span class="section-pill oop">Part 1 &mdash; OOP Concepts</span>
+    <div class="section-line"></div>
+  </div>
+  <p class="section-desc">Core object-oriented ideas that build on the classes and methods you already saw. Focus on how these concepts relate — inheritance builds on classes, abstraction builds on inheritance.</p>
+  <div class="concepts" id="oop-concepts"></div>
+
+  <div class="section-header" style="margin-top:56px">
+    <span class="section-pill pat">Part 2 &mdash; Logic Patterns</span>
+    <div class="section-line"></div>
+  </div>
+  <p class="section-desc">Patterns experienced developers use instinctively but rarely name. Read the introduction and code examples together first — then unlock the questions to test your understanding.</p>
+  <div class="concepts" id="pat-concepts"></div>
+
+</div>
+<script>
+/* ── OOP DATA ── */
+const oopConcepts = [
+  {
+    title: "Methods (deeper)",
+    what: { q: "What exactly is a method? What are the four parts of a method signature?",
+      a: `A method is a named, reusable block of code that does one specific job. Every method signature has four parts: an <strong>access modifier</strong> (like <code>public</code> or <code>private</code>), a <strong>return type</strong> (the type of value it gives back, or <code>void</code> if nothing), a <strong>name</strong>, and a <strong>parameter list</strong> in parentheses. Those four parts tell you everything about how to call it and what to expect back.` },
+    why: { q: "Why do we break code into methods instead of writing everything in one place?",
+      a: `Three reasons. <strong>Reuse</strong> — write logic once, call it as many times as needed. <strong>Readability</strong> — a well-named method makes calling code read like plain English (<code>calculateTax(price)</code> is clearer than 20 lines of arithmetic inline). <strong>Maintainability</strong> — if the logic changes, you fix it in one place, not everywhere it was copied.` },
+    how: { q: "How do you write a method that takes two numbers and returns the larger one? Walk through calling it.",
+      a: `Declare the return type as <code>int</code>, name it clearly, give it two <code>int</code> parameters, and use an <code>if</code> to decide which to return. Java evaluates the arguments, hands them to the method as parameters, runs the body, and the <code>return</code> statement sends the value back to wherever the call was made.` },
+    code: `<span class="kw">static</span> <span class="kw">int</span> <span class="fn">max</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">if</span> (a > b) { <span class="kw">return</span> a; }
+    <span class="kw">return</span> b;
+}
+
+<span class="kw">int</span> result = <span class="fn">max</span>(<span class="nu">14</span>, <span class="nu">27</span>);
+System.out.<span class="fn">println</span>(result); <span class="cm">// 27</span>
+
+<span class="cm">// Methods can call other methods</span>
+System.out.<span class="fn">println</span>(<span class="fn">max</span>(<span class="fn">max</span>(<span class="nu">3</span>, <span class="nu">9</span>), <span class="nu">6</span>)); <span class="cm">// 9</span>`,
+    walkthrough: "Identify the four parts of the method signature. Trace the first call with a=14, b=27 — which return runs? Then trace the nested call on the last line step by step."
+  },
+  {
+    title: "Inheritance",
+    what: { q: "What is inheritance in Java? What does the 'extends' keyword actually mean?",
+      a: `Inheritance is when one class (the <strong>child</strong> or subclass) takes on the fields and methods of another class (the <strong>parent</strong> or superclass). The <code>extends</code> keyword establishes that relationship. The child gets everything the parent has for free — it can also add its own members or override existing ones.` },
+    why: { q: "Why is inheritance useful? What problem would you have without it?",
+      a: `Without inheritance, shared behaviour gets copy-pasted into every class that needs it. If <code>Warrior</code>, <code>Mage</code>, and <code>Rogue</code> all need <code>health</code> and <code>takeDamage()</code>, you'd write it three times. Change the logic later — update it three times. Inheritance lets you write it once in a <code>Hero</code> parent and all three share it automatically.` },
+    how: { q: "How do you use 'super' to connect a child constructor to a parent constructor? Why is that call required?",
+      a: `<code>super()</code> calls the parent constructor and must be the first line of the child constructor. It's required because the parent is responsible for initialising its own fields — the child can't do that directly. After <code>super()</code> sets up the parent's fields, the child constructor sets its own.` },
+    code: `<span class="kw">class</span> <span class="ty">Hero</span> {
+    <span class="ty">String</span> name;  <span class="kw">int</span> health;
+
+    <span class="ty">Hero</span>(<span class="ty">String</span> name, <span class="kw">int</span> health) {
+        <span class="kw">this</span>.name = name;  <span class="kw">this</span>.health = health;
+    }
+    <span class="kw">void</span> <span class="fn">takeDamage</span>(<span class="kw">int</span> amount) {
+        health -= amount;
+        System.out.<span class="fn">println</span>(name + <span class="st">" takes "</span> + amount + <span class="st">" damage"</span>);
+    }
+}
+
+<span class="kw">class</span> <span class="ty">Mage</span> <span class="kw">extends</span> <span class="ty">Hero</span> {
+    <span class="kw">int</span> mana;
+    <span class="ty">Mage</span>(<span class="ty">String</span> name, <span class="kw">int</span> mana) {
+        <span class="kw">super</span>(name, <span class="nu">80</span>); <span class="cm">// calls Hero constructor first</span>
+        <span class="kw">this</span>.mana = mana;
+    }
+    <span class="kw">void</span> <span class="fn">castSpell</span>() {
+        mana -= <span class="nu">10</span>;
+        System.out.<span class="fn">println</span>(name + <span class="st">" casts! Mana: "</span> + mana);
+    }
+}
+
+<span class="ty">Mage</span> m = <span class="kw">new</span> <span class="ty">Mage</span>(<span class="st">"Sera"</span>, <span class="nu">100</span>);
+m.<span class="fn">takeDamage</span>(<span class="nu">15</span>); <span class="cm">// inherited from Hero</span>
+m.<span class="fn">castSpell</span>();   <span class="cm">// defined on Mage</span>`,
+    walkthrough: "Which fields does Mage inherit and which are its own? Trace the constructor chain when 'new Mage(\"Sera\", 100)' is called. Which class handles takeDamage — and why?"
+  },
+  {
+    title: "Access Modifiers",
+    what: { q: "What are access modifiers? Name the three main ones and what each controls.",
+      a: `Access modifiers are keywords that control <em>which other code can see and use a field or method</em>. <code>public</code> — accessible from anywhere. <code>private</code> — accessible only within the same class. <code>protected</code> — accessible within the same class and any subclasses. Without a modifier (package-private), access is limited to the same package.` },
+    why: { q: "Why would you ever make a field private? Couldn't you just leave everything public?",
+      a: `Making fields <code>private</code> is called <strong>encapsulation</strong> — protecting internal state from unexpected changes. If <code>health</code> is public, anything anywhere could set <code>hero.health = -9999</code>. If it's private, outside code must go through a method like <code>setHealth()</code>, which can enforce rules. You control the front door instead of leaving every wall open.` },
+    how: { q: "How do getters and setters work with private fields? Write the pattern from memory.",
+      a: `Declare the field <code>private</code>. Write a <code>getX()</code> method that <code>return</code>s it — lets outside code read safely. Write a <code>setX(value)</code> method that assigns to it — add validation here. Outside code calls getter to read and setter to write, never touching the field directly. The class stays in control of its own data.` },
+    code: `<span class="kw">class</span> <span class="ty">Player</span> {
+    <span class="kw">private</span> <span class="ty">String</span> name;
+    <span class="kw">private</span> <span class="kw">int</span> health;
+
+    <span class="ty">Player</span>(<span class="ty">String</span> name, <span class="kw">int</span> health) {
+        <span class="kw">this</span>.name = name;  <span class="kw">this</span>.health = health;
+    }
+    <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getName</span>()   { <span class="kw">return</span> name; }
+    <span class="kw">public</span> <span class="kw">int</span>    <span class="fn">getHealth</span>()  { <span class="kw">return</span> health; }
+    <span class="kw">public</span> <span class="kw">void</span>   <span class="fn">setHealth</span>(<span class="kw">int</span> h) {
+        <span class="kw">if</span> (h < <span class="nu">0</span>) h = <span class="nu">0</span>; <span class="cm">// validation</span>
+        health = h;
+    }
+}
+
+<span class="ty">Player</span> p = <span class="kw">new</span> <span class="ty">Player</span>(<span class="st">"Aldric"</span>, <span class="nu">100</span>);
+<span class="cm">// p.health = -500;  // won't compile — private!</span>
+p.<span class="fn">setHealth</span>(-<span class="nu">500</span>);
+System.out.<span class="fn">println</span>(p.<span class="fn">getHealth</span>()); <span class="cm">// 0</span>`,
+    walkthrough: "Why does the commented-out line not compile? Trace setHealth(-500): what does the if do, and what value ends up in health? What does getHealth() return and why?"
+  },
+  {
+    title: "Abstraction",
+    what: { q: "What is abstraction in Java? What is an abstract class and what is an abstract method?",
+      a: `Abstraction means hiding implementation details and exposing only what's necessary. An <code>abstract class</code> cannot be instantiated — it exists to be extended. An <code>abstract method</code> has a signature but no body — it's a promise that every subclass <em>must</em> provide its own version. Together they define a contract: "every type in this family will have this behaviour, but each implements it differently."` },
+    why: { q: "Why not just use a regular class? Why do you need the abstract keyword at all?",
+      a: `Without <code>abstract</code>, nothing stops <code>new Shape()</code> — which makes no sense (what shape is it?). The keyword makes that a compile-time error. Without an abstract method, subclasses might forget to implement <code>area()</code>. <code>abstract</code> makes the contract explicit and lets the compiler enforce it rather than hoping developers remember.` },
+    how: { q: "How does polymorphism connect to abstraction — why can you store different subclass objects in the same variable type?",
+      a: `Because every subclass IS-A version of the parent. A <code>Circle</code> is a <code>Shape</code>, so a <code>Shape</code> variable can hold a <code>Circle</code>. When you call <code>shape.area()</code>, Java looks at what the object <em>actually is at runtime</em> and calls that class's implementation. This is <strong>dynamic dispatch</strong> — one loop can work over mixed shapes through a single shared variable type.` },
+    code: `<span class="kw">abstract class</span> <span class="ty">Shape</span> {
+    <span class="ty">String</span> color;
+    <span class="ty">Shape</span>(<span class="ty">String</span> c) { color = c; }
+    <span class="kw">abstract double</span> <span class="fn">area</span>(); <span class="cm">// no body — subclass must provide</span>
+    <span class="kw">void</span> <span class="fn">describe</span>() {
+        System.out.<span class="fn">println</span>(color + <span class="st">" area="</span> + <span class="fn">area</span>());
+    }
+}
+
+<span class="kw">class</span> <span class="ty">Circle</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
+    <span class="kw">double</span> radius;
+    <span class="ty">Circle</span>(<span class="ty">String</span> c, <span class="kw">double</span> r) { <span class="kw">super</span>(c); radius = r; }
+    <span class="an">@Override</span> <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> Math.PI * radius * radius; }
+}
+
+<span class="kw">class</span> <span class="ty">Rectangle</span> <span class="kw">extends</span> <span class="ty">Shape</span> {
+    <span class="kw">double</span> w, h;
+    <span class="ty">Rectangle</span>(<span class="ty">String</span> c, <span class="kw">double</span> w, <span class="kw">double</span> h) { <span class="kw">super</span>(c); <span class="kw">this</span>.w=w; <span class="kw">this</span>.h=h; }
+    <span class="an">@Override</span> <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> w * h; }
+}
+
+<span class="ty">Shape</span>[] shapes = { <span class="kw">new</span> <span class="ty">Circle</span>(<span class="st">"red"</span>,<span class="nu">5</span>), <span class="kw">new</span> <span class="ty">Rectangle</span>(<span class="st">"blue"</span>,<span class="nu">4</span>,<span class="nu">6</span>) };
+<span class="kw">for</span> (<span class="ty">Shape</span> s : shapes) { s.<span class="fn">describe</span>(); }`,
+    walkthrough: "Why can't you write 'new Shape(\"red\")'? What does @Override signal to the compiler? Trace the loop: for each shape, which area() method actually runs and why?"
+  }
+];
+
+/* ── PATTERN DATA ── */
+const patConcepts = [
+  {
+    title: "Early Return",
+    desc: `Early return means returning from a method the moment you have a definitive answer — rather than continuing through the rest of the code. When a condition is checked with <code>!= 0</code> (difference) instead of <code>== 0</code> (equality), you can exit immediately when there's something to say. Each early return removes one level of nesting from everything below it.`,
+    bad: `<span class="kw">int</span> <span class="fn">compareTo</span>(<span class="ty">Person</span> o) {
+    <span class="kw">if</span> (<span class="kw">this</span>.lastName.<span class="fn">compareTo</span>(o.lastName) == <span class="nu">0</span>) {
+        <span class="kw">if</span> (<span class="kw">this</span>.firstName.<span class="fn">compareTo</span>(o.firstName) == <span class="nu">0</span>) {
+            <span class="kw">return</span> Integer.<span class="fn">compare</span>(<span class="kw">this</span>.age, o.age);
+        } <span class="kw">else</span> {
+            <span class="kw">return</span> <span class="kw">this</span>.firstName.<span class="fn">compareTo</span>(o.firstName);
+        }
+    } <span class="kw">else</span> {
+        <span class="kw">return</span> <span class="kw">this</span>.lastName.<span class="fn">compareTo</span>(o.lastName);
+    }
+}`,
+    good: `<span class="kw">int</span> <span class="fn">compareTo</span>(<span class="ty">Person</span> o) {
+    <span class="kw">if</span> (<span class="kw">this</span>.lastName.<span class="fn">compareTo</span>(o.lastName) != <span class="nu">0</span>) {
+        <span class="kw">return</span> <span class="kw">this</span>.lastName.<span class="fn">compareTo</span>(o.lastName);
+    }
+    <span class="kw">if</span> (<span class="kw">this</span>.firstName.<span class="fn">compareTo</span>(o.firstName) != <span class="nu">0</span>) {
+        <span class="kw">return</span> <span class="kw">this</span>.firstName.<span class="fn">compareTo</span>(o.firstName);
+    }
+    <span class="kw">return</span> Integer.<span class="fn">compare</span>(<span class="kw">this</span>.age, o.age);
+}`,
+    introWalkthrough: "Count the nesting levels in each version. What condition was flipped (== vs !=)? What happened to the else blocks on the right? Where do the return statements sit in each version?",
+    what: { q: "What is the early return pattern — in your own words, without looking at the code?",
+      a: `It's the practice of returning from a method as soon as the outcome is certain, rather than continuing and returning at the very end. Once you know the answer, give it back immediately. You don't wait for the rest of the method to finish.` },
+    why: { q: "Why does deep nesting make code harder to read and reason about?",
+      a: `Every level of nesting is an open condition the reader has to hold in their head while reading further. At three levels deep, you're mentally tracking: "inside this if, AND inside this else, AND inside this if." Flat code means each line only depends on the fact that none of the earlier returns fired — the reader can think about one condition at a time.` },
+    how: { q: "How do you spot a method that should use early return? What's the tell-tale code shape?",
+      a: `Look for an <code>else</code> block that contains the main logic, or an <code>if</code> whose body is much longer than its <code>else</code>. That's inverted — the short case should exit early and the long case fall through. Also look for conditions using <code>== 0</code> where flipping to <code>!= 0</code> would let you return immediately and drop the else entirely.` }
+  },
+  {
+    title: "Guard Clause",
+    desc: `A guard clause is an early return placed specifically at the <em>top</em> of a function to validate preconditions before any real work begins. Every check for null, invalid state, or missing permissions lives at the entrance. Everything below the guards can assume the input is valid — no defensive checks scattered throughout the method.`,
+    bad: `<span class="kw">void</span> <span class="fn">processOrder</span>(<span class="ty">Order</span> order, <span class="ty">User</span> user) {
+    <span class="kw">if</span> (order != <span class="kw">null</span>) {
+        <span class="kw">if</span> (user != <span class="kw">null</span>) {
+            <span class="kw">if</span> (user.<span class="fn">isActive</span>()) {
+                <span class="cm">// real work is three levels deep</span>
+                <span class="fn">chargePayment</span>(order, user);
+                <span class="fn">sendConfirmation</span>(user);
+            }
+        }
+    }
+}`,
+    good: `<span class="kw">void</span> <span class="fn">processOrder</span>(<span class="ty">Order</span> order, <span class="ty">User</span> user) {
+    <span class="kw">if</span> (order == <span class="kw">null</span>)    <span class="kw">return</span>;
+    <span class="kw">if</span> (user  == <span class="kw">null</span>)    <span class="kw">return</span>;
+    <span class="kw">if</span> (!user.<span class="fn">isActive</span>()) <span class="kw">return</span>;
+
+    <span class="cm">// real work at base level — input is guaranteed valid</span>
+    <span class="fn">chargePayment</span>(order, user);
+    <span class="fn">sendConfirmation</span>(user);
+}`,
+    introWalkthrough: "How many levels deep is the real work in the left version? What changed in each condition on the right? What would adding a fourth validation check look like in each version?",
+    what: { q: "What is a guard clause, and how does it differ from early return in general?",
+      a: `A guard clause is a specific kind of early return — one that lives at the very top of a function to validate inputs before anything else runs. While early return can appear anywhere mid-logic, guard clauses are always at the entrance. They're not about decision-making; they're about rejecting invalid input before the real work begins.` },
+    why: { q: "Why is it better to reject invalid input at the top of a method rather than wrapping the work in an if block?",
+      a: `Wrapping work in <code>if (valid) { ... }</code> pushes the real logic deeper and creates an invisible else that does nothing — a hidden path. Guard clauses make each rejection case explicit and readable at the top, then let the main work run without any nesting. Adding a new validation rule also becomes trivial: add one line at the top without touching anything below.` },
+    how: { q: "How do you mechanically convert a nested validation chain into guard clauses?",
+      a: `Take each <code>if (valid) { ... }</code> wrapper, flip the condition to its opposite (<code>if (!valid)</code>), add an immediate <code>return</code>, and delete the enclosing curly braces from around the main logic. Repeat for each layer. The main work ends up at the base indentation level, and each validation is a short two-line block at the top.` }
+  },
+  {
+    title: "Invert the Condition",
+    desc: `When the <code>else</code> branch is shorter than the <code>if</code> branch, the structure is backwards. Flipping the condition puts the short exceptional case first with an early exit — letting the main logic run at the base level without an <code>else</code>. The logic is identical; only the shape of the code changes.`,
+    bad: `<span class="ty">String</span> <span class="fn">getTitle</span>(<span class="ty">Book</span> book) {
+    <span class="kw">if</span> (book != <span class="kw">null</span> && !book.<span class="fn">getTitle</span>().<span class="fn">isEmpty</span>()) {
+        <span class="cm">// main logic buried inside the if</span>
+        <span class="ty">String</span> t = book.<span class="fn">getTitle</span>().<span class="fn">trim</span>();
+        <span class="kw">return</span> t.<span class="fn">substring</span>(<span class="nu">0</span>,<span class="nu">1</span>).<span class="fn">toUpperCase</span>() + t.<span class="fn">substring</span>(<span class="nu">1</span>);
+    } <span class="kw">else</span> {
+        <span class="kw">return</span> <span class="st">"Untitled"</span>;
+    }
+}`,
+    good: `<span class="ty">String</span> <span class="fn">getTitle</span>(<span class="ty">Book</span> book) {
+    <span class="kw">if</span> (book == <span class="kw">null</span> || book.<span class="fn">getTitle</span>().<span class="fn">isEmpty</span>()) {
+        <span class="kw">return</span> <span class="st">"Untitled"</span>; <span class="cm">// short case exits first</span>
+    }
+    <span class="cm">// main logic at base level</span>
+    <span class="ty">String</span> t = book.<span class="fn">getTitle</span>().<span class="fn">trim</span>();
+    <span class="kw">return</span> t.<span class="fn">substring</span>(<span class="nu">0</span>,<span class="nu">1</span>).<span class="fn">toUpperCase</span>() + t.<span class="fn">substring</span>(<span class="nu">1</span>);
+}`,
+    introWalkthrough: "Which branch is longer in the left version — the if or the else? What changed in the condition (look at the operators)? Where is the main logic in each version?",
+    what: { q: "What does 'invert the condition' mean as a pattern — is it just adding a ! or is there more to it?",
+      a: `It's more than adding a <code>!</code>. It's recognising that when the else branch is shorter than the if branch, the code is structured backwards. You flip which case gets the top-level path: the short exceptional case exits early, and the main logic falls through without needing an else at all. The logic is unchanged — only the structure is corrected.` },
+    why: { q: "Why does having the main logic inside the if branch make code harder to follow?",
+      a: `Readers expect the primary path to run straight through. If the main logic is inside an <code>if</code>, the reader has to hold that condition open in their head while reading a long block — waiting for the <code>else</code> at the end. Flipping it lets the reader close the exceptional case immediately and read the main logic with nothing held open.` },
+    how: { q: "How do you decide which branch is 'main' and which is 'exceptional'?",
+      a: `Ask: which branch is longer? Which handles an unusual, invalid, or edge case? The short branch should exit early. Also check the condition itself — if it's testing for a problem (<code>== null</code>, <code>isEmpty()</code>, <code>!isValid()</code>), the if-body should handle and exit that problem, not wrap the happy path inside it.` }
+  },
+  {
+    title: "Sentinel Value",
+    desc: `A sentinel value is a special value that means "not found" or "no result yet" — eliminating a separate boolean flag. <code>-1</code> as a "not found" index is the classic example: valid indices are 0 or greater, so <code>-1</code> can never be confused with a real result. One variable carries both the result and the status.`,
+    bad: `<span class="cm">// Two variables that must always be kept in sync</span>
+<span class="kw">boolean</span> found = <span class="kw">false</span>;
+<span class="kw">int</span> foundIndex = <span class="nu">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i < arr.length; i++) {
+    <span class="kw">if</span> (arr[i] == target) {
+        found = <span class="kw">true</span>;
+        foundIndex = i;
+        <span class="kw">break</span>;
+    }
+}
+<span class="kw">if</span> (found) { <span class="fn">use</span>(foundIndex); }`,
+    good: `<span class="cm">// -1 IS the "not found" signal — one variable, two jobs</span>
+<span class="kw">int</span> index = -<span class="nu">1</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i < arr.length; i++) {
+    <span class="kw">if</span> (arr[i] == target) {
+        index = i;
+        <span class="kw">break</span>;
+    }
+}
+<span class="kw">if</span> (index != -<span class="nu">1</span>) { <span class="fn">use</span>(index); }`,
+    introWalkthrough: "What are the two variables in the left version? What replaces them on the right? What does index equal if target is never found? Why couldn't 0 be used as the sentinel here?",
+    what: { q: "What is a sentinel value in your own words? Give one example you've seen in Java already.",
+      a: `A sentinel is a special value that signals a status — most commonly "not found" — so a second boolean flag isn't needed. The value itself carries both the result and the status in one variable. <code>-1</code> from <code>String.indexOf()</code> when a character isn't present is the classic Java example. <code>null</code> for an object reference that hasn't been assigned is another.` },
+    why: { q: "Why are two variables that always change together a problem?",
+      a: `Two variables that must stay in sync are a maintenance hazard — they can get out of step during a refactor, or a future developer might update one and forget the other. The reader also has to understand both variables and their relationship. One sentinel variable doing both jobs means less state to track and fewer places for bugs to hide.` },
+    how: { q: "How do you choose the right sentinel value? When does -1 work, and when doesn't it?",
+      a: `A sentinel must be a value that can <em>never</em> be a valid result. <code>-1</code> works for an index because valid indices start at 0. For object references, <code>null</code> works because a real object is never null. For a field like age where every integer might be valid, a sentinel integer won't work — you'd need the wrapper type <code>Integer</code> (instead of <code>int</code>) so that <code>null</code> can serve as the sentinel.` }
+  },
+  {
+    title: "Accumulator",
+    desc: `An accumulator is a variable initialised to a <strong>neutral value</strong> before a loop, updated each iteration to fold in the current item, and used after the loop as the final result. The neutral value is the identity for the operation: <code>0</code> for sums, <code>1</code> for products. For building strings, a <code>StringBuilder</code> is the right accumulator — using <code>+</code> in a loop creates a new <code>String</code> object on every single iteration.`,
+    bad: `<span class="cm">// + creates a brand-new String object every iteration</span>
+<span class="ty">String</span> result = <span class="st">""</span>;
+<span class="kw">for</span> (<span class="ty">String</span> word : words) {
+    result = result + word + <span class="st">" "</span>;
+    <span class="cm">// for 100 words: 100 new String objects allocated</span>
+}`,
+    good: `<span class="cm">// StringBuilder is the accumulator — append mutates in place</span>
+<span class="ty">StringBuilder</span> sb = <span class="kw">new</span> <span class="ty">StringBuilder</span>();
+<span class="kw">for</span> (<span class="ty">String</span> word : words) {
+    sb.<span class="fn">append</span>(word).<span class="fn">append</span>(<span class="st">" "</span>);
+}
+<span class="ty">String</span> result = sb.<span class="fn">toString</span>();`,
+    introWalkthrough: "What is the accumulator in each version and what is its starting (neutral) value? How many String objects does the left version create for a 100-word list? What does toString() do at the end of the right version?",
+    what: { q: "What are the three parts of the accumulator pattern?",
+      a: `First, <strong>initialise</strong> to a neutral value before the loop — whatever the answer would be for zero items. Second, <strong>update</strong> the accumulator each iteration by folding in the current item. Third, <strong>use</strong> the accumulator after the loop — it now holds the final result. The neutral starting value is 0 for a sum, 1 for a product, empty for a collection.` },
+    why: { q: "Why does string concatenation with + inside a loop perform poorly, even though it looks simple?",
+      a: `Strings in Java are immutable — every <code>+</code> creates a completely new <code>String</code> object, copies all previous content into it, then adds the new part. In a loop of N iterations that's N allocations, each one longer than the last — O(N²) total work. <code>StringBuilder</code> maintains a resizable buffer and <code>append()</code> mutates it in place — O(1) per call, O(N) total.` },
+    how: { q: "How do you identify the correct neutral starting value? What happens if you get it wrong?",
+      a: `Ask: what would the correct answer be if the loop ran zero times? For a sum, zero items gives 0. For a product, zero items gives 1 (the multiplicative identity). If you start a sum at 1, you add a phantom unit that was never in the data. If you start a product at 0, the entire result is always 0 regardless of input. Getting the neutral value wrong corrupts every result.` }
+  },
+  {
+    title: "Short-Circuit Evaluation",
+    desc: `In a <code>&&</code> chain, Java stops as soon as it sees <code>false</code> — because false AND anything is always false. In a <code>||</code> chain, it stops at the first <code>true</code>. Operands to the right of that point are <em>never evaluated</em>. This matters for safety (null checks before method calls) and performance (cheap checks before expensive ones). Important: <code>&</code> and <code>|</code> (single character) do NOT short-circuit.`,
+    bad: `<span class="cm">// & does NOT short-circuit — isAdmin() runs even if user is null</span>
+<span class="kw">if</span> (user != <span class="kw">null</span> & user.<span class="fn">isAdmin</span>()) {
+    <span class="fn">openAdminPanel</span>();
+}
+
+<span class="cm">// loadFromDB() runs even when the cache already has it</span>
+<span class="kw">if</span> (<span class="fn">loadFromDB</span>() | cache.<span class="fn">has</span>(key)) {
+    <span class="fn">serve</span>(key);
+}`,
+    good: `<span class="cm">// && short-circuits: isAdmin() never called on null</span>
+<span class="kw">if</span> (user != <span class="kw">null</span> && user.<span class="fn">isAdmin</span>()) {
+    <span class="fn">openAdminPanel</span>();
+}
+
+<span class="cm">// || short-circuits: DB only called on a cache miss</span>
+<span class="kw">if</span> (cache.<span class="fn">has</span>(key) || <span class="fn">loadFromDB</span>()) {
+    <span class="fn">serve</span>(key);
+}`,
+    introWalkthrough: "Spot the one-character difference in each pair. What happens in the first left example when user is null? In the second example, not only the operator changed — what else was swapped, and why does that matter too?",
+    what: { q: "What does 'short-circuit' mean in && and || — when exactly does Java stop evaluating?",
+      a: `Short-circuit means Java stops evaluating a chain as soon as the outcome is certain. For <code>&&</code>: stops at the first <code>false</code>, because false AND anything is always false. For <code>||</code>: stops at the first <code>true</code>, because true OR anything is always true. Any operands to the right of that point never run.` },
+    why: { q: "Why does the order of operands in a && chain matter for both correctness and performance?",
+      a: `<strong>Correctness:</strong> if <code>user.isAdmin()</code> appears before <code>user != null</code>, Java calls a method on a potentially null reference — a NullPointerException. The null check must come first so the method call is skipped when null. <strong>Performance:</strong> put the cheapest, most-decisive check first. If a fast local variable check short-circuits the chain, an expensive DB call or network request never runs.` },
+    how: { q: "What is the practical difference between && and & in Java? Why is using & with booleans almost always a bug?",
+      a: `<code>&&</code> is the short-circuit logical AND. <code>&</code> is the bitwise AND — it always evaluates both sides. Using <code>&</code> with booleans compiles without error but silently destroys short-circuit safety: <code>user != null & user.isAdmin()</code> still calls <code>isAdmin()</code> even when user is null. It looks almost identical to the correct version — which makes it a particularly dangerous bug to miss.` }
+  }
+];
+
+/* ── RENDER ── */
+function eiStep(id, type, label, q, a) {
+  return `<div class="ei-step ei-${type}-step" id="${id}">
+    <div class="ei-step-header" onclick="toggleEI('${id}')">
+      <span class="ei-step-label">${label}</span>
+      <span class="ei-step-question">${q}</span>
+      <span class="ei-step-icon">▶</span>
+    </div>
+    <div class="ei-step-body">${a}</div>
+  </div>`;
+}
+
+function buildOOP(data, containerId) {
+  const c = document.getElementById(containerId);
+  data.forEach((concept, idx) => {
+    const id = `oop-card-${idx}`;
+    const el = document.createElement('div');
+    el.className = 'concept-card';
+    el.id = id;
+    el.innerHTML = `
+      <div class="concept-header" onclick="toggleCard('${id}')">
+        <span class="concept-num">${String(idx+1).padStart(2,'0')}</span>
+        <span class="concept-title">${concept.title}</span>
+        <span class="concept-tag oop">OOP</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="concept-body">
+        <div class="ei-steps">
+          ${eiStep(`oop-${idx}-what`,'what','WHAT',concept.what.q,concept.what.a)}
+          ${eiStep(`oop-${idx}-why`, 'why', 'WHY', concept.why.q, concept.why.a)}
+          ${eiStep(`oop-${idx}-how`, 'how', 'HOW', concept.how.q, concept.how.a)}
+        </div>
+        <div class="reveal-section" id="code-oop-${idx}">
+          <div class="reveal-toggle" onclick="toggleReveal('code-oop-${idx}')">
+            <span class="reveal-icon">▶</span> Reveal code
+          </div>
+          <div class="reveal-content">
+            <div class="walkthrough-prompt" style="margin-bottom:10px">Walk through each line with your partner before reading the prompt below.</div>
+            <div class="code-wrapper"><pre><code>${concept.code}</code></pre></div>
+            <div class="walkthrough-prompt" style="margin-top:10px">${concept.walkthrough}</div>
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(el);
+  });
+}
+
+function buildPat(data, containerId) {
+  const c = document.getElementById(containerId);
+  data.forEach((concept, idx) => {
+    const cardId  = `pat-card-${idx}`;
+    const panelId = `pat-ei-panel-${idx}`;
+    const btnId   = `pat-unlock-btn-${idx}`;
+    const el = document.createElement('div');
+    el.className = 'concept-card pat-card';
+    el.id = cardId;
+    el.innerHTML = `
+      <div class="concept-header" onclick="toggleCard('${cardId}')">
+        <span class="concept-num">${String(idx+1).padStart(2,'0')}</span>
+        <span class="concept-title">${concept.title}</span>
+        <span class="concept-tag pat">pattern</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="concept-body">
+
+        <p class="pat-intro-desc">${concept.desc}</p>
+
+        <div class="code-pair">
+          <div>
+            <div class="code-col-label bad">Without the pattern</div>
+            <div class="code-wrapper bad"><pre><code>${concept.bad}</code></pre></div>
+          </div>
+          <div>
+            <div class="code-col-label good">With the pattern</div>
+            <div class="code-wrapper good"><pre><code>${concept.good}</code></pre></div>
+          </div>
+        </div>
+        <div class="walkthrough-prompt" style="margin-top:10px">${concept.introWalkthrough}</div>
+
+        <div class="phase-divider">
+          <div class="phase-divider-line"></div>
+          <span class="phase-divider-label">When you're ready</span>
+          <div class="phase-divider-line"></div>
+        </div>
+
+        <button class="unlock-btn" id="${btnId}" onclick="unlockEI('${panelId}','${btnId}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+          I've read this — start the questions
+        </button>
+
+        <div class="pat-ei-panel" id="${panelId}">
+          <div class="pat-ei-header">
+            <span class="pat-ei-header-label">Elaboration questions</span>
+            <div class="pat-ei-header-line"></div>
+          </div>
+          <div class="ei-steps">
+            ${eiStep(`pat-${idx}-what`,'what','WHAT',concept.what.q,concept.what.a)}
+            ${eiStep(`pat-${idx}-why`, 'why', 'WHY', concept.why.q, concept.why.a)}
+            ${eiStep(`pat-${idx}-how`, 'how', 'HOW', concept.how.q, concept.how.a)}
+          </div>
+        </div>
+
+      </div>`;
+    c.appendChild(el);
+  });
+}
+
+function toggleCard(id)   { document.getElementById(id).classList.toggle('open'); }
+function toggleReveal(id) { document.getElementById(id).classList.toggle('open'); }
+function toggleEI(id)     { document.getElementById(id).classList.toggle('open'); }
+
+function unlockEI(panelId, btnId) {
+  const panel = document.getElementById(panelId);
+  const btn   = document.getElementById(btnId);
+  panel.classList.add('unlocked');
+  btn.disabled = true;
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+    Questions unlocked — try to answer before revealing`;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+buildOOP(oopConcepts, 'oop-concepts');
+buildPat(patConcepts, 'pat-concepts');
+</script>
+</body>
+</html>

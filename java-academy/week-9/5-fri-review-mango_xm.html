@@ -1206,7 +1206,7 @@ const STATIONS = [
         // Q1: Fill in the blank
         format: "fill-in-the-blank",
         text: "Fill in the blank to return unique song titles:",
-        code: "SELECT /* ___ */ song_title\nFROM songs;",
+        code: "SELECT /* ___ */\n       song_title\nFROM songs;",
         blank: "DISTINCT",
         blankPlaceholder: "keyword",
         answer: "DISTINCT",
@@ -1242,7 +1242,7 @@ const STATIONS = [
       {
         format: "fill-in-the-blank",
         text: "Fill in the blank to sort songs by title from A to Z:",
-        code: "SELECT song_title\nFROM songs\n/* ___ */ song_title ASC;",
+        code: "SELECT song_title\nFROM songs\n/* ___ */\n  song_title ASC;",
         blank: "ORDER BY",
         blankPlaceholder: "keyword(s)",
         answer: "ORDER BY",
@@ -1310,7 +1310,7 @@ const STATIONS = [
         // Q2: Fill in the blank
         format: "fill-in-the-blank",
         text: "Fill in the blank to filter groups that have more than 50 total plays:",
-        code: "SELECT artist_id,\n       SUM(play_count) AS total_plays\nFROM songs\nGROUP BY artist_id\n/* ___ */ SUM(play_count) > 50;",
+        code: "SELECT artist_id,\n       SUM(play_count) AS total_plays\nFROM songs\nGROUP BY artist_id\n/* ___ */\n  SUM(play_count) > 50;",
         blank: "HAVING",
         blankPlaceholder: "keyword",
         answer: "HAVING",
@@ -1345,7 +1345,7 @@ const STATIONS = [
       {
         format: "fill-in-the-blank",
         text: "Fill in the blank to get the highest play count across all songs:",
-        code: "SELECT /* ___ */(play_count)\nFROM songs;",
+        code: "SELECT /* ___ */ (play_count)\nFROM songs;",
         blank: "MAX",
         blankPlaceholder: "function",
         answer: "MAX",
@@ -1441,7 +1441,7 @@ const STATIONS = [
       {
         format: "fill-in-the-blank",
         text: "Fill in the blank to get all songs, including songs with no matching artist:",
-        code: "SELECT songs.song_title,\n       artists.name\nFROM songs\n/* ___ */ artists\n  ON songs.artist_id = artists.id;",
+        code: "SELECT songs.song_title,\n       artists.name\nFROM songs\n/* ___ */\n  artists ON songs.artist_id = artists.id;",
         blank: "LEFT JOIN",
         blankPlaceholder: "join type",
         answer: "LEFT JOIN",
@@ -1496,7 +1496,7 @@ const STATIONS = [
         // Q2: Fill in the blank
         format: "fill-in-the-blank",
         text: "Fill in the blank with the correct return type:",
-        code: 'PreparedStatement ps = conn.prepareStatement(\n  "SELECT * FROM songs WHERE genre = ?"\n);\nps.setString(1, genre);\n/* ___ */ rs = ps.executeQuery();',
+        code: 'PreparedStatement ps = conn.prepareStatement(\n  "SELECT *\n   FROM songs\n   WHERE genre = ?"\n);\nps.setString(1, genre);\n/* ___ */ rs = ps.executeQuery();',
         blank: "ResultSet",
         blankPlaceholder: "return type",
         answer: "ResultSet",
@@ -1508,7 +1508,7 @@ const STATIONS = [
         text: "Match each JDBC concept to its description.",
         items: [
           { id: "dnd-j-a", label: "DriverManager.getConnection()" },
-          { id: "dnd-j-b", label: "PreparedStatement ?" },
+          { id: "dnd-j-b", label: "?" },
           { id: "dnd-j-c", label: "executeUpdate()" }
         ],
         targets: [
@@ -1542,7 +1542,7 @@ const STATIONS = [
       {
         format: "code-trace",
         text: "What does this code do?",
-        code: `String sql = "INSERT INTO songs (title, genre) VALUES (?, ?)";\nPreparedStatement ps = conn.prepareStatement(sql);\nps.setString(1, "Sunrise");\nps.setString(2, "pop");\nps.executeUpdate();`,
+        code: `String sql =\n  "INSERT INTO songs (title, genre)\n   VALUES (?, ?)";\nPreparedStatement ps = conn.prepareStatement(sql);\nps.setString(1, "Sunrise");\nps.setString(2, "pop");\nps.executeUpdate();`,
         options: [
           "Selects all songs with the title Sunrise",
           "Inserts a new song with title Sunrise and genre pop into the songs table",

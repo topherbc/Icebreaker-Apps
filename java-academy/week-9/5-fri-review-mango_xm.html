@@ -1206,17 +1206,17 @@ const STATIONS = [
         // Q1: Fill in the blank
         format: "fill-in-the-blank",
         text: "Fill in the blank to return unique song titles:",
-        code: "SELECT /* ___ */ song_title FROM songs;",
+        code: "SELECT /* ___ */ song_title\nFROM songs;",
         blank: "DISTINCT",
         blankPlaceholder: "keyword",
         answer: "DISTINCT",
-        answerNote: "DISTINCT eliminates duplicate values in the result. Without it, every row -- including duplicates -- is returned."
+        answerNote: "DISTINCT eliminates duplicate values in the result. Without it, every row, including duplicates, is returned."
       },
       {
         // Q2: Code trace
         format: "code-trace",
         text: "What does this query return?",
-        code: `SELECT song_title, play_count\nFROM songs\nWHERE genre = 'jazz'\nORDER BY play_count DESC\nLIMIT 3;`,
+        code: `SELECT song_title,\n       play_count\nFROM songs\nWHERE genre = 'jazz'\nORDER BY play_count DESC\nLIMIT 3;`,
         options: [
           "All songs from the songs table, sorted alphabetically",
           "The 3 most-played jazz songs, sorted highest play count first",
@@ -1231,13 +1231,60 @@ const STATIONS = [
         format: "multiple-choice",
         text: "Which clause controls how many rows are returned by a SELECT query?",
         options: [
-          "WHERE -- filters rows by a condition",
-          "ORDER BY -- sorts the result set",
-          "LIMIT -- caps the number of rows returned",
-          "DISTINCT -- removes duplicate rows"
+          "WHERE: filters rows by a condition",
+          "ORDER BY: sorts the result set",
+          "LIMIT: caps the number of rows returned",
+          "DISTINCT: removes duplicate rows"
         ],
         correctIndex: 2,
         answer: "LIMIT caps the number of rows the query returns. WHERE, ORDER BY, and DISTINCT do not control row count directly."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to sort songs by title from A to Z:",
+        code: "SELECT song_title\nFROM songs\n/* ___ */ song_title ASC;",
+        blank: "ORDER BY",
+        blankPlaceholder: "keyword(s)",
+        answer: "ORDER BY",
+        answerNote: "ORDER BY sorts the result set by the specified column. ASC is ascending (A to Z, lowest to highest) and is the default if omitted."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT DISTINCT genre\nFROM songs;`,
+        options: [
+          "Every row in the songs table",
+          "One row for each unique genre in the songs table",
+          "The genre column renamed to DISTINCT",
+          "All genres, including duplicates"
+        ],
+        correctIndex: 1,
+        answer: "DISTINCT removes duplicate values. This returns one row per unique genre, no matter how many songs share that genre."
+      },
+      {
+        format: "multiple-choice",
+        text: "What does the WHERE clause do in a SELECT statement?",
+        options: [
+          "Chooses which columns to display",
+          "Filters which rows are included in the result",
+          "Sorts the result set",
+          "Groups rows together for aggregation"
+        ],
+        correctIndex: 1,
+        answer: "WHERE filters rows based on a condition. Only rows that satisfy the condition are included in the result."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT song_title\nFROM songs\nWHERE play_count > 100\nORDER BY song_title ASC;`,
+        options: [
+          "All songs sorted by play count",
+          "Songs with more than 100 plays, sorted alphabetically by title",
+          "The first 100 songs in the table",
+          "Songs sorted alphabetically, then filtered by play count"
+        ],
+        correctIndex: 1,
+        answer: "WHERE play_count > 100 filters to only songs played more than 100 times. ORDER BY song_title ASC sorts the filtered results alphabetically."
       }
     ]
   },
@@ -1254,7 +1301,7 @@ const STATIONS = [
           "The number of distinct values in the first column",
           "The total number of rows in the result set",
           "The number of non-NULL values in the first column",
-          "It causes an error -- COUNT requires GROUP BY"
+          "It causes an error. COUNT requires GROUP BY"
         ],
         correctIndex: 1,
         answer: "COUNT(*) counts every row in the result, including rows with NULL values in any column. GROUP BY is not required."
@@ -1263,17 +1310,17 @@ const STATIONS = [
         // Q2: Fill in the blank
         format: "fill-in-the-blank",
         text: "Fill in the blank to filter groups that have more than 50 total plays:",
-        code: "SELECT artist_id, SUM(play_count) AS total_plays\nFROM songs\nGROUP BY artist_id\n/* ___ */ SUM(play_count) > 50;",
+        code: "SELECT artist_id,\n       SUM(play_count) AS total_plays\nFROM songs\nGROUP BY artist_id\n/* ___ */ SUM(play_count) > 50;",
         blank: "HAVING",
         blankPlaceholder: "keyword",
         answer: "HAVING",
-        answerNote: "HAVING filters after grouping and aggregation. WHERE runs before GROUP BY -- you cannot use WHERE to filter on an aggregate result like SUM(play_count)."
+        answerNote: "HAVING filters after grouping and aggregation. WHERE runs before GROUP BY, so you cannot use WHERE to filter on an aggregate result like SUM(play_count)."
       },
       {
         // Q3: Code trace
         format: "code-trace",
         text: "What does this query produce one row for?",
-        code: `SELECT album_id, AVG(duration_seconds) AS avg_duration\nFROM songs\nGROUP BY album_id;`,
+        code: `SELECT album_id,\n       AVG(duration_seconds) AS avg_duration\nFROM songs\nGROUP BY album_id;`,
         options: [
           "One row for every song in the songs table",
           "One row for the song with the longest duration",
@@ -1282,6 +1329,52 @@ const STATIONS = [
         ],
         correctIndex: 2,
         answer: "GROUP BY album_id collapses all songs that share the same album_id into one group. AVG(duration_seconds) computes the average for each group."
+      },
+      {
+        format: "multiple-choice",
+        text: "What is the difference between COUNT(*) and COUNT(column_name)?",
+        options: [
+          "There is no difference, they always return the same number",
+          "COUNT(*) counts all rows. COUNT(column_name) counts only rows where that column is not NULL",
+          "COUNT(*) is faster. COUNT(column_name) is slower but more accurate",
+          "COUNT(*) counts columns. COUNT(column_name) counts rows"
+        ],
+        correctIndex: 1,
+        answer: "COUNT(*) counts every row regardless of NULL values. COUNT(column_name) only counts rows where the specified column is not NULL."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to get the highest play count across all songs:",
+        code: "SELECT /* ___ */(play_count)\nFROM songs;",
+        blank: "MAX",
+        blankPlaceholder: "function",
+        answer: "MAX",
+        answerNote: "MAX returns the largest value in a column. MIN returns the smallest. Both work on numeric, date, and text columns."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT genre,\n       COUNT(*) AS song_count\nFROM songs\nGROUP BY genre\nHAVING COUNT(*) > 5;`,
+        options: [
+          "All genres and their song counts",
+          "Only genres that have more than 5 songs, with their counts",
+          "The first 5 genres in the table",
+          "All songs that belong to more than 5 genres"
+        ],
+        correctIndex: 1,
+        answer: "GROUP BY genre groups songs by genre. HAVING COUNT(*) > 5 filters out any genre group with 5 or fewer songs. Only genres with more than 5 songs appear in the result."
+      },
+      {
+        format: "multiple-choice",
+        text: "Can you use a column alias defined in SELECT inside a WHERE clause?",
+        options: [
+          "Yes, aliases are available everywhere in the query",
+          "No, WHERE runs before SELECT, so the alias does not exist yet",
+          "Only if the alias uses the AS keyword",
+          "Only in MySQL, not in other databases"
+        ],
+        correctIndex: 1,
+        answer: "WHERE filters rows before SELECT assigns aliases. To filter on an alias that uses an aggregate, use HAVING instead."
       }
     ]
   },
@@ -1307,7 +1400,7 @@ const STATIONS = [
         // Q2: Code trace
         format: "code-trace",
         text: "What does this JOIN query produce?",
-        code: `SELECT songs.song_title, artists.name\nFROM songs\nINNER JOIN artists ON songs.artist_id = artists.id;`,
+        code: `SELECT songs.song_title,\n       artists.name\nFROM songs\nINNER JOIN artists\n  ON songs.artist_id = artists.id;`,
         options: [
           "All songs, with NULL for artist name if no artist is found",
           "All artists, whether or not they have songs",
@@ -1320,18 +1413,64 @@ const STATIONS = [
       {
         // Q3: Drag and drop
         format: "drag-and-drop",
-        text: "Match each subquery placement to what it returns.",
+        text: "Match each subquery placement to what it does.",
         items: [
           { id: "dnd-a", label: "Subquery in WHERE" },
           { id: "dnd-b", label: "Subquery in FROM" },
-          { id: "dnd-c", label: "Scalar subquery in SELECT" }
+          { id: "dnd-c", label: "Subquery in SELECT" }
         ],
         targets: [
           { id: "tgt-a", label: "Acts as a temporary table the outer query selects from", matchId: "dnd-b" },
-          { id: "tgt-b", label: "Returns one value per outer row as a computed column", matchId: "dnd-c" },
+          { id: "tgt-b", label: "Returns one value per row as a computed column", matchId: "dnd-c" },
           { id: "tgt-c", label: "Returns a value or list used to filter rows", matchId: "dnd-a" }
         ],
-        answer: "WHERE: filters using a returned value or list. FROM: produces a derived table. SELECT: returns exactly one scalar value per row."
+        answer: "WHERE: filters using a returned value or list. FROM: produces a temporary table. SELECT: returns one value per row as a column."
+      },
+      {
+        format: "multiple-choice",
+        text: "What does the ON clause specify in a JOIN?",
+        options: [
+          "Which table is the left table and which is the right",
+          "The condition that determines which rows from each table are matched",
+          "The number of rows to return",
+          "Which columns to display in the result"
+        ],
+        correctIndex: 1,
+        answer: "ON specifies the join condition. The database compares the columns in the ON clause to determine which rows from each table match and should be combined."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to get all songs, including songs with no matching artist:",
+        code: "SELECT songs.song_title,\n       artists.name\nFROM songs\n/* ___ */ artists\n  ON songs.artist_id = artists.id;",
+        blank: "LEFT JOIN",
+        blankPlaceholder: "join type",
+        answer: "LEFT JOIN",
+        answerNote: "LEFT JOIN keeps all rows from the left table (songs) even when there is no matching row in the right table (artists). Unmatched columns are filled with NULL."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT song_title\nFROM songs\nWHERE artist_id IN (\n  SELECT id\n  FROM artists\n  WHERE genre = 'rock'\n);`,
+        options: [
+          "All songs and all rock artists",
+          "Only songs by artists whose genre is rock",
+          "All artists who have songs",
+          "All songs, with a column showing if the artist is rock"
+        ],
+        correctIndex: 1,
+        answer: "The subquery finds all artist IDs where the genre is rock. The outer query returns songs whose artist_id is in that list."
+      },
+      {
+        format: "multiple-choice",
+        text: "What value fills the right-side columns when a LEFT JOIN finds no match?",
+        options: [
+          "0",
+          "An empty string",
+          "NULL",
+          "The value from the previous row"
+        ],
+        correctIndex: 2,
+        answer: "NULL. When a LEFT JOIN has no matching row on the right side, all columns from the right table are filled with NULL."
       }
     ]
   },
@@ -1378,6 +1517,52 @@ const STATIONS = [
           { id: "tgt-j-c", label: "Opens a connection to the database using a URL, username, and password", matchId: "dnd-j-a" }
         ],
         answer: "getConnection() opens the database connection. ? is the parameter placeholder that prevents injection. executeUpdate() handles write operations and returns affected row count."
+      },
+      {
+        format: "multiple-choice",
+        text: "Why should you use PreparedStatement instead of concatenating user input into a SQL string?",
+        options: [
+          "PreparedStatement runs faster in all cases",
+          "Concatenation does not support SELECT queries",
+          "PreparedStatement prevents SQL injection by separating SQL structure from data",
+          "PreparedStatement automatically creates tables if they do not exist"
+        ],
+        correctIndex: 2,
+        answer: "PreparedStatement uses parameterized queries. The database treats parameter values as data, not as SQL code, so injected input cannot change the query structure."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to iterate through query results:",
+        code: "ResultSet rs = ps.executeQuery();\nwhile (rs./* ___ */()) {\n  String title = rs.getString(\"song_title\");\n}",
+        blank: "next",
+        blankPlaceholder: "method",
+        answer: "next",
+        answerNote: "rs.next() advances the cursor to the next row in the ResultSet. It returns true if there is another row, false when all rows have been read."
+      },
+      {
+        format: "code-trace",
+        text: "What does this code do?",
+        code: `String sql = "INSERT INTO songs (title, genre) VALUES (?, ?)";\nPreparedStatement ps = conn.prepareStatement(sql);\nps.setString(1, "Sunrise");\nps.setString(2, "pop");\nps.executeUpdate();`,
+        options: [
+          "Selects all songs with the title Sunrise",
+          "Inserts a new song with title Sunrise and genre pop into the songs table",
+          "Updates all pop songs to have the title Sunrise",
+          "Deletes the song Sunrise from the songs table"
+        ],
+        correctIndex: 1,
+        answer: "This prepares an INSERT statement with two placeholders, sets them to Sunrise and pop, then executes the insert. executeUpdate() is used for INSERT, UPDATE, and DELETE."
+      },
+      {
+        format: "multiple-choice",
+        text: "What does executeQuery() return?",
+        options: [
+          "The number of rows affected",
+          "A boolean indicating success or failure",
+          "A ResultSet containing the rows from the query",
+          "A String with the raw SQL output"
+        ],
+        correctIndex: 2,
+        answer: "executeQuery() returns a ResultSet, which is a cursor over the rows returned by a SELECT query. You iterate through it with rs.next() and read columns with getter methods."
       }
     ]
   }
@@ -1410,9 +1595,13 @@ function initSession(n) {
   state.listenerCount = n;
   state.activeStation = null;
 
-  // questionsPerStation = floor(min(n,12)/4) capped at 3
-  const total = Math.min(n, 12);
-  const qps = Math.min(3, Math.floor(total / 4)) || 1;
+  // Total questions = enough for every student to answer at least once
+  // 6-12 students: 12 questions (3 per station)
+  // 13+: one question per student, distributed across 4 stations
+  const totalNeeded = Math.max(12, n);
+  const stationCount = STATIONS.length;
+  const basePerStation = Math.floor(totalNeeded / stationCount);
+  let remainder = totalNeeded - basePerStation * stationCount;
 
   // Shuffle a global listener index pool
   const allListeners = fisherYates(Array.from({length: n}, (_, i) => i + 1));
@@ -1420,6 +1609,9 @@ function initSession(n) {
 
   state.stationState = STATIONS.map((station, si) => {
     const slots = [];
+    // Distribute remainder across first stations
+    let qps = basePerStation + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder--;
     const questionCount = Math.min(qps, station.questions.length);
     for (let q = 0; q < questionCount; q++) {
       slots.push(allListeners[listenerCursor % allListeners.length]);
@@ -1658,7 +1850,7 @@ function renderQuestion() {
   const station = STATIONS[si];
   const ss = state.stationState[si];
 
-  stationLabel.textContent = `MANGO ${station.freq} -- ${station.name}`;
+  stationLabel.textContent = `MANGO ${station.freq} | ${station.name}`;
 
   if (ss.cleared) {
     idle.classList.remove('hidden');
@@ -1680,8 +1872,11 @@ function renderQuestion() {
   const listenerNum = ss.listenerSlots[qi];
   const q = station.questions[qi];
 
-  // Listener badge
-  listenerBadge.innerHTML = `Listener <strong>${listenerNum}</strong> of ${state.listenerCount} on this station`;
+  // Listener badge: show global progress
+  const answered = state.stationState.reduce((sum, s) => s.cleared ? sum + s.listenerSlots.length : sum + s.questionIdx, 0);
+  const totalQuestions = state.stationState.reduce((sum, s) => sum + s.listenerSlots.length, 0);
+  const remaining = totalQuestions - answered;
+  listenerBadge.innerHTML = `<strong>${answered}</strong> answered, <strong>${remaining}</strong> remaining`;
 
   // Format tag
   const formatTag = document.createElement('div');

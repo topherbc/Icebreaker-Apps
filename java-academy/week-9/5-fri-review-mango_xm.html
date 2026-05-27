@@ -1872,8 +1872,10 @@ function renderQuestion() {
   const listenerNum = ss.listenerSlots[qi];
   const q = station.questions[qi];
 
-  // Listener badge
-  listenerBadge.innerHTML = `Listener <strong>${listenerNum}</strong> of ${state.listenerCount}`;
+  // Listener badge: global count across all stations
+  const globalCurrent = state.stationState.reduce((sum, s, i) => i === si ? sum : s.cleared ? sum + s.listenerSlots.length : sum + s.questionIdx, 0) + qi + 1;
+  const globalTotal = state.stationState.reduce((sum, s) => sum + s.listenerSlots.length, 0);
+  listenerBadge.innerHTML = `Listener <strong>${globalCurrent}</strong> of ${globalTotal}`;
 
   // Format tag
   const formatTag = document.createElement('div');

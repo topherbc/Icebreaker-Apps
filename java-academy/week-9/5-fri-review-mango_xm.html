@@ -1872,11 +1872,8 @@ function renderQuestion() {
   const listenerNum = ss.listenerSlots[qi];
   const q = station.questions[qi];
 
-  // Listener badge: show global progress
-  const answered = state.stationState.reduce((sum, s) => s.cleared ? sum + s.listenerSlots.length : sum + s.questionIdx, 0);
-  const totalQuestions = state.stationState.reduce((sum, s) => sum + s.listenerSlots.length, 0);
-  const remaining = totalQuestions - answered;
-  listenerBadge.innerHTML = `<strong>${answered}</strong> answered, <strong>${remaining}</strong> remaining`;
+  // Listener badge
+  listenerBadge.innerHTML = `Listener <strong>${listenerNum}</strong> of ${state.listenerCount}`;
 
   // Format tag
   const formatTag = document.createElement('div');

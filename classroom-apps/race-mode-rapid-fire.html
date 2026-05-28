@@ -3783,13 +3783,15 @@ function renderHostShapes(q, isReveal) {
 function renderTallyBars(q) {
   var el = document.getElementById('answer-tally');
   var maxH = 50;
+  // Hide player answer distribution until 5 seconds remain so players can't be influenced
+  var showTally = hostState.timerRemaining <= 5 || hostState.gameStatus === 'reveal';
   var maxCount = Math.max(1, Math.max.apply(null, Object.values(hostState.answerTally).concat([1])));
   el.innerHTML = q.answers.map(function(a, i) {
-    var count = hostState.answerTally[a.id] || 0;
-    var h = Math.max(8, (count / maxCount) * maxH);
+    var count = showTally ? (hostState.answerTally[a.id] || 0) : 0;
+    var h = showTally ? Math.max(8, (count / maxCount) * maxH) : 8;
     var shape = a.shape || SHAPES[i];
     var bg = 'var(--shape-' + shape + ')';
-    return '<div class="tally-bar" style="height:'+h+'px; background:'+bg+';">'+count+'</div>';
+    return '<div class="tally-bar" style="height:'+h+'px; background:'+bg+';">'+(showTally ? count : '')+'</div>';
   }).join('');
 }
 
@@ -3815,6 +3817,11 @@ function startTimer() {
     if (hostState.isPaused) return;
     hostState.timerRemaining--;
     updateTimerDisplay();
+    // Reveal answer tally bars at 5 seconds remaining
+    if (hostState.timerRemaining === 5) {
+      var q = hostState.liveQuiz.questions[hostState.currentQuestionIndex];
+      if (q) renderTallyBars(q);
+    }
     // Tick sound for last 5 seconds
     if (hostState.timerRemaining <= 5 && hostState.timerRemaining > 0) {
       playTick(5 - hostState.timerRemaining);
@@ -3882,7 +3889,7 @@ function skipQuestion() {
     correctAnswerIds: correctIds,
     explanation: '',
     tally: hostState.answerTally,
-    rankings: ranked.slice(0, 10)
+    rankings: ranked
   });
   advanceQuestion();
 }
@@ -3915,6 +3922,18 @@ function handleStudentAnswer(data) {
 
   hostState.answeredThisRound++;
   updateAnsweredCount();
+
+  // If all connected players have answered and more than 5 seconds remain,
+  // start a 5-second countdown to reveal
+  var connectedCount = Object.values(hostState.players).filter(function(p) { return !p.disconnected; }).length;
+  if (hostState.answeredThisRound >= connectedCount && hostState.timerRemaining > 5) {
+    hostState.timerRemaining = 5;
+    updateTimerDisplay();
+    // Notify students to sync their timers
+    hostState.gameChannel.publish('question:resume', { timerRemaining: 5 });
+  }
+
+  // Render tally bars after potential timer update so they show when timer <= 5
   renderTallyBars(q);
 }
 
@@ -3979,23 +3998,27 @@ function revealAnswer() {
     expEl.innerHTML = '<div class="explanation-box">' + escHtml(q.explanation) + '</div>';
   }
 
+  // Re-render tally bars now that we're in reveal (makes them visible if they were hidden)
+  renderTallyBars(q);
+
   // Add next button to tally area
   var tallyEl = document.getElementById('answer-tally');
   tallyEl.innerHTML += '<button class="btn-primary" onclick="advanceQuestion()" style="margin-left:16px;">Next &#9654;</button>';
 
-  // Broadcast reveal
+  // Broadcast reveal (send all rankings so every student gets authoritative score)
   hostState.gameChannel.publish('question:reveal', {
     correctAnswerIds: correctIds,
     explanation: q.explanation || '',
     tally: hostState.answerTally,
-    rankings: ranked.slice(0, 10),
+    rankings: ranked,
     scoringEnabled: scoringOn
   });
 }
 
 function computeRankings() {
   var arr = Object.values(hostState.players).map(function(p) {
-    return { name: p.name, score: p.score, id: p.id, streak: p.streak, emoji: p.emoji || '' };
+    var ans = p.answers[hostState.currentQuestionIndex];
+    return { name: p.name, score: p.score, id: p.id, streak: p.streak, emoji: p.emoji || '', earned: ans ? (ans.earned || 0) : 0 };
   });
   arr.sort(function(a, b) { return b.score - a.score; });
   arr.forEach(function(p, i) {
@@ -4725,6 +4748,7 @@ function studentSelectAnswer(answerId) {
     // Single select -- submit immediately
     studentState.selectedAnswerIds = [answerId];
     studentState.hasSubmitted = true;
+    studentState.submittedTimeRemaining = studentState.timerRemaining;
     playClick();
 
     // Visual feedback
@@ -4749,6 +4773,7 @@ function studentSelectAnswer(answerId) {
 function studentSubmitMulti() {
   if (studentState.hasSubmitted || studentState.selectedAnswerIds.length === 0) return;
   studentState.hasSubmitted = true;
+  studentState.submittedTimeRemaining = studentState.timerRemaining;
   playClick();
 
   document.querySelectorAll('.student-shape-btn').forEach(function(btn) {
@@ -4816,9 +4841,8 @@ function showStudentFeedback(data) {
     isCorrect = myAnswer.length === 1 && correctIds.indexOf(myAnswer[0]) >= 0;
   }
 
-  // Save score before this round so we can derive earned from host data
+  // Use host-authoritative earned and score when available
   var q = studentState.currentQuestion;
-  var scoreBeforeRound = studentState.score;
   var earned = 0;
 
   if (isCorrect && myAnswer.length > 0) {
@@ -4829,22 +4853,20 @@ function showStudentFeedback(data) {
     if (myAnswer.length > 0) playWrong();
   }
 
-  // Use host-authoritative score and rank when available
   var rankings = data.rankings || [];
   var myRanking = rankings.find(function(r) { return r.name === studentState.name; });
   if (myRanking) {
     studentState.rank = myRanking.rank;
-    earned = myRanking.score - scoreBeforeRound;
-    if (earned < 0) earned = 0;
+    earned = myRanking.earned || 0;
     studentState.score = myRanking.score;
   } else if (isCorrect) {
-    // Fallback: local calculation if not in rankings (shouldn't happen normally)
+    // Fallback: local calculation if not in rankings
     var basePoints = q.points || 1000;
     if (q.pointsMode === 'double') basePoints *= 2;
     if (q.pointsMode === 'none') basePoints = 0;
     var speedMult = 1;
-    if (q.speedBonus !== false) {
-      speedMult = Math.max(0.5, Math.min(1, studentState.timerRemaining / q.timer));
+    if (q.speedBonus) {
+      speedMult = Math.max(0.5, Math.min(1, (studentState.submittedTimeRemaining || 0) / q.timer));
     }
     earned = Math.round(basePoints * speedMult);
     studentState.score += earned;

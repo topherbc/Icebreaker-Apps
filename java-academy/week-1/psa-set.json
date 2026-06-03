@@ -1,0 +1,286 @@
+{
+  "id": "week-1",
+  "title": "Programming Basics",
+  "labels": [
+    { "id": "input",       "name": "Input",       "desc": "Data coming in from a user or external source",                                        "example": "Scanner sc = new Scanner(System.in);\nString name = sc.nextLine();" },
+    { "id": "output",      "name": "Output",      "desc": "Something printed or displayed to the user",                                           "example": "System.out.println(\"Result: \" + value);" },
+    { "id": "variable",    "name": "Variable",    "desc": "A named holder for a single value — one piece of data",                                 "example": "double salary = 55000.00;" },
+    { "id": "condition",   "name": "Condition",   "desc": "A decision point — code takes a different path based on a value",                       "example": "if (score > 70) {\n    // execute this block\n}" },
+    { "id": "array",       "name": "Array",       "desc": "A fixed-size collection holding multiple values of the same type",                      "example": "int[] scores = {85, 62, 91, 70, 77};" },
+    { "id": "loop",        "name": "Loop",        "desc": "Something that repeats — going through each item, or running until a condition changes", "example": "for (int i = 0; i < scores.length; i++) {\n    // process scores[i]\n}" },
+    { "id": "computation", "name": "Computation", "desc": "A calculation that produces a result — math, comparisons, or derived values",           "example": "double grossPay = hours * payRate;" }
+  ],
+  "prompts": [
+    {
+      "title": "Salary Comparison",
+      "statement": "Bob and David need to know whose annual salary is higher.",
+      "expectedTags": [
+        {
+          "phrase": "Bob and David",
+          "labels": ["variable"],
+          "explanation": "Two people are named, which implies two separate salary values that need to be stored — one for each person.",
+          "codeSnippets": {
+            "variable": "double bobSalary = 55000.00;\ndouble davidSalary = 62500.00;"
+          }
+        },
+        {
+          "phrase": "need to know",
+          "labels": ["output"],
+          "explanation": "Someone is waiting for a result to be communicated to them — that is the intent behind output. Whenever a problem says someone needs to know or find out something, the program must print or display the answer.",
+          "codeSnippets": {
+            "output": "System.out.println(\"Higher salary: $\" + higherSalary);"
+          }
+        },
+        {
+          "phrase": "whose annual salary is higher",
+          "labels": ["variable", "condition"],
+          "explanation": "A comparison must be made to determine which value is greater — that is a decision point. The result of that comparison also needs to be held until it can be shown.",
+          "codeSnippets": {
+            "variable": "double higherSalary;",
+            "condition": "if (bobSalary > davidSalary) {\n    higherSalary = bobSalary;\n} else {\n    higherSalary = davidSalary;\n}"
+          }
+        }
+      ],
+      "code": "double bobSalary = 55000.00;\ndouble davidSalary = 62500.00;\ndouble higherSalary;\nif (bobSalary > davidSalary) {\n    higherSalary = bobSalary;\n} else {\n    higherSalary = davidSalary;\n}\nSystem.out.println(\"Higher salary: $\" + higherSalary);"
+    },
+    {
+      "title": "Sandwich Shop Pricing",
+      "statement": "A sandwich shop needs to let a customer know what they owe based on their order size and whether they qualify for a discount.",
+      "expectedTags": [
+        {
+          "phrase": "needs to let a customer know",
+          "labels": ["output"],
+          "explanation": "The shop must communicate a result to the customer — this phrase signals that output is required before anything else is considered.",
+          "codeSnippets": {
+            "output": "System.out.printf(\"Your total: $%.2f%n\", price);"
+          }
+        },
+        {
+          "phrase": "their order size",
+          "labels": ["input", "variable"],
+          "explanation": "The size needs to be provided by or for the customer — it is external data that varies per transaction and drives the base price.",
+          "codeSnippets": {
+            "input": "System.out.print(\"Size (regular/large): \");\nString size = scanner.nextLine();",
+            "variable": "String size = scanner.nextLine();"
+          }
+        },
+        {
+          "phrase": "whether they qualify for a discount",
+          "labels": ["condition"],
+          "explanation": "A decision point — the final amount owed changes depending on whether an eligibility factor is met.",
+          "codeSnippets": {
+            "condition": "if (age <= 17 || age >= 65) {\n    price *= 0.90;\n}"
+          }
+        },
+        {
+          "phrase": "what they owe",
+          "labels": ["computation", "output"],
+          "explanation": "A price needs to be derived from the size and discount eligibility. This phrase tells us what the output contains — the calculated amount.",
+          "codeSnippets": {
+            "computation": "double price = size.equalsIgnoreCase(\"regular\") ? 5.45 : 8.95;",
+            "output": "System.out.printf(\"Your total: $%.2f%n\", price);"
+          }
+        }
+      ],
+      "code": "Scanner scanner = new Scanner(System.in);\nSystem.out.print(\"Size (regular/large): \");\nString size = scanner.nextLine();\ndouble price = size.equalsIgnoreCase(\"regular\") ? 5.45 : 8.95;\nSystem.out.print(\"Your age: \");\nint age = scanner.nextInt();\nif (age <= 17 || age >= 65) {\n    price *= 0.90;\n}\nSystem.out.printf(\"Your total: $%.2f%n\", price);"
+    },
+    {
+      "title": "Gross Pay Calculator",
+      "statement": "An employee needs to be shown their total pay for the week after entering their hours worked and pay rate.",
+      "expectedTags": [
+        {
+          "phrase": "after entering their hours worked and pay rate",
+          "labels": ["input"],
+          "explanation": "Two values need to come from the user — hours worked and pay rate are provided externally, not known in advance by the program.",
+          "codeSnippets": {
+            "input": "System.out.print(\"Hours worked: \");\ndouble hours = scanner.nextDouble();\nSystem.out.print(\"Pay rate: \");\ndouble payRate = scanner.nextDouble();"
+          }
+        },
+        {
+          "phrase": "total pay for the week",
+          "labels": ["variable", "computation"],
+          "explanation": "A value needs to be derived by multiplying hours by rate — it must be calculated and held until it can be shown.",
+          "codeSnippets": {
+            "variable": "double grossPay = hours * payRate;",
+            "computation": "double grossPay = hours * payRate;"
+          }
+        },
+        {
+          "phrase": "needs to be shown",
+          "labels": ["output"],
+          "explanation": "The calculated result needs to be communicated back — someone is waiting to see it.",
+          "codeSnippets": {
+            "output": "System.out.printf(\"%s's gross pay: $%.2f%n\", name, grossPay);"
+          }
+        }
+      ],
+      "code": "Scanner scanner = new Scanner(System.in);\nSystem.out.print(\"Name: \");\nString name = scanner.nextLine();\nSystem.out.print(\"Hours worked: \");\ndouble hours = scanner.nextDouble();\nSystem.out.print(\"Pay rate: \");\ndouble payRate = scanner.nextDouble();\ndouble grossPay = hours * payRate;\nSystem.out.printf(\"%s's gross pay: $%.2f%n\", name, grossPay);"
+    },
+    {
+      "title": "Filter Exam Scores",
+      "statement": "A teacher wants to see which students in her class scored above the passing threshold.",
+      "expectedTags": [
+        {
+          "phrase": "which students in her class",
+          "labels": ["array", "loop"],
+          "explanation": "Multiple students of the same type all need to be examined — a collection that must be iterated over to check each one.",
+          "codeSnippets": {
+            "array": "int[] scores = {85, 62, 91, 70, 77};",
+            "loop": "for (int i = 0; i < scores.length; i++) {\n    // check each score\n}"
+          }
+        },
+        {
+          "phrase": "scored above the passing threshold",
+          "labels": ["variable", "condition"],
+          "explanation": "Each score needs to be held as it is examined — a decision is then made per student based on whether that value meets the threshold.",
+          "codeSnippets": {
+            "variable": "int passCount = 0;",
+            "condition": "if (scores[i] > 70) {\n    passCount++;\n}"
+          }
+        },
+        {
+          "phrase": "wants to see",
+          "labels": ["output"],
+          "explanation": "The qualifying students need to be surfaced and reported back to the teacher.",
+          "codeSnippets": {
+            "output": "System.out.println(\"Passing score: \" + scores[i]);\nSystem.out.println(\"Students who passed: \" + passCount);"
+          }
+        }
+      ],
+      "code": "int[] scores = {85, 62, 91, 70, 77};\nint passCount = 0;\nfor (int i = 0; i < scores.length; i++) {\n    if (scores[i] > 70) {\n        System.out.println(\"Passing score: \" + scores[i]);\n        passCount++;\n    }\n}\nSystem.out.println(\"Students who passed: \" + passCount);"
+    },
+    {
+      "title": "Student Test Average",
+      "statement": "A student wants to know their average score across all of the tests they have taken this term.",
+      "expectedTags": [
+        {
+          "phrase": "wants to know",
+          "labels": ["output"],
+          "explanation": "The student is waiting for a result to be communicated — this phrase signals that output is required. Recognizing this intent early tells you the program must print or display the final answer.",
+          "codeSnippets": {
+            "output": "System.out.printf(\"%s's average: %.1f%n\", studentName, average);"
+          }
+        },
+        {
+          "phrase": "all of the tests they have taken",
+          "labels": ["array", "loop"],
+          "explanation": "Multiple items of the same type all need to be processed — a collection that must be iterated to accumulate a running total.",
+          "codeSnippets": {
+            "array": "double[] scores = {88.0, 76.5, 92.0};",
+            "loop": "for (int i = 0; i < scores.length; i++) {\n    total += scores[i];\n}"
+          }
+        },
+        {
+          "phrase": "average score",
+          "labels": ["variable", "computation", "output"],
+          "explanation": "A total must be accumulated and divided by the count — the derived result needs to be held. This phrase also describes what the output contains: the calculated average.",
+          "codeSnippets": {
+            "variable": "double average = total / scores.length;",
+            "computation": "double average = total / scores.length;",
+            "output": "System.out.printf(\"%s's average: %.1f%n\", studentName, average);"
+          }
+        }
+      ],
+      "code": "String studentName = \"Alex\";\ndouble[] scores = {88.0, 76.5, 92.0};\ndouble total = 0;\nfor (int i = 0; i < scores.length; i++) {\n    total += scores[i];\n}\ndouble average = total / scores.length;\nSystem.out.printf(\"%s's average: %.1f%n\", studentName, average);"
+    },
+    {
+      "title": "Find the Area of a Circle",
+      "statement": "A designer wants to know how much area a circle will cover given its radius.",
+      "expectedTags": [
+        {
+          "phrase": "wants to know",
+          "labels": ["output"],
+          "explanation": "The designer is waiting for a result to be communicated — this is the output intent. The program must display the answer once it is calculated.",
+          "codeSnippets": {
+            "output": "System.out.printf(\"Area of circle: %.4f%n\", area);"
+          }
+        },
+        {
+          "phrase": "given its radius",
+          "labels": ["input", "variable"],
+          "explanation": "A specific value needs to be provided — the radius is external data that the entire calculation depends on.",
+          "codeSnippets": {
+            "input": "double radius = 7.25;",
+            "variable": "double radius = 7.25;"
+          }
+        },
+        {
+          "phrase": "how much area a circle will cover",
+          "labels": ["computation", "output"],
+          "explanation": "A value needs to be derived mathematically from the radius. This phrase also describes what the output contains — the calculated area.",
+          "codeSnippets": {
+            "computation": "double area = Math.PI * radius * radius;",
+            "output": "System.out.printf(\"Area of circle: %.4f%n\", area);"
+          }
+        }
+      ],
+      "code": "double radius = 7.25;\ndouble area = Math.PI * radius * radius;\nSystem.out.printf(\"Area of circle: %.4f%n\", area);"
+    },
+    {
+      "title": "Find the Distance Between Points",
+      "statement": "A mapping tool needs to report the straight-line distance between two locations on a grid.",
+      "expectedTags": [
+        {
+          "phrase": "needs to report",
+          "labels": ["output"],
+          "explanation": "The tool must communicate a result — 'report' is a direct output signal. The program needs to print or display the answer when it is ready.",
+          "codeSnippets": {
+            "output": "System.out.printf(\"Distance: %.4f%n\", distance);"
+          }
+        },
+        {
+          "phrase": "two locations on a grid",
+          "labels": ["input", "variable"],
+          "explanation": "Each location requires x and y coordinates — four values that must be provided and stored to represent the two points.",
+          "codeSnippets": {
+            "input": "double x1 = 3.0, y1 = 4.0;\ndouble x2 = 7.0, y2 = 9.0;",
+            "variable": "double x1 = 3.0, y1 = 4.0;\ndouble x2 = 7.0, y2 = 9.0;"
+          }
+        },
+        {
+          "phrase": "straight-line distance",
+          "labels": ["computation", "output"],
+          "explanation": "A value needs to be derived mathematically from the coordinate data using the distance formula. This phrase also describes what the output contains — the calculated distance.",
+          "codeSnippets": {
+            "computation": "double distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));",
+            "output": "System.out.printf(\"Distance: %.4f%n\", distance);"
+          }
+        }
+      ],
+      "code": "double x1 = 3.0, y1 = 4.0;\ndouble x2 = 7.0, y2 = 9.0;\ndouble distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));\nSystem.out.printf(\"Distance: %.4f%n\", distance);"
+    },
+    {
+      "title": "Count the Days to Minutes",
+      "statement": "A countdown app needs to let the user know how many minutes are in a given number of days.",
+      "expectedTags": [
+        {
+          "phrase": "a given number of days",
+          "labels": ["input", "variable"],
+          "explanation": "A number of days needs to be provided — it is the starting value the entire calculation depends on.",
+          "codeSnippets": {
+            "input": "int days = 24;",
+            "variable": "int days = 24;"
+          }
+        },
+        {
+          "phrase": "how many minutes are in",
+          "labels": ["variable", "computation"],
+          "explanation": "A derived value needs to be calculated through multiple steps — days to hours, then hours to minutes — and held until it can be shown.",
+          "codeSnippets": {
+            "variable": "int totalHours = days * hoursPerDay;\nint totalMinutes = totalHours * minutesPerHour;",
+            "computation": "int totalHours = days * hoursPerDay;\nint totalMinutes = totalHours * minutesPerHour;"
+          }
+        },
+        {
+          "phrase": "let the user know",
+          "labels": ["output"],
+          "explanation": "The calculated total needs to be communicated back — the user is waiting to see the result.",
+          "codeSnippets": {
+            "output": "System.out.println(\"Minutes in 24 days: \" + totalMinutes);"
+          }
+        }
+      ],
+      "code": "int days = 24;\nint hoursPerDay = 24;\nint minutesPerHour = 60;\nint totalHours = days * hoursPerDay;\nint totalMinutes = totalHours * minutesPerHour;\nSystem.out.println(\"Minutes in 24 days: \" + totalMinutes);"
+    }
+  ]
+}

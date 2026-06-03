@@ -1,0 +1,6 @@
+[
+  { "id": "week-1", "title": "Variables & Conditions", "path": "../java-academy/week-1/icp-set.json" },
+  { "id": "week-2", "title": "Core Java", "path": "../java-academy/week-2/icp-set.json" },
+  { "id": "week-3", "title": "IO and Collections", "path": "../java-academy/week-3/icp-set.json" },
+  { "id": "week-5", "title": "Object Oriented Programming", "path": "../java-academy/week-5/icp-set.json" }
+]

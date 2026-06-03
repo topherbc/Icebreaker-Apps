@@ -1,0 +1,372 @@
+/*
+  Stepper module: Math / Multiplying with decimals
+  Visual type: decimal-product
+  TEMPLATE NOTE: no em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Pedagogical approach:
+  The central difficulty students have is not the arithmetic -- it is not knowing
+  what multiplying by a decimal MEANS. The three scenarios build this understanding:
+    1. Establish the meaning: x 0.1 = take 1/10 of = 10% of (simplest case)
+    2. Generalize: x 0.3 = take 30% of each piece (partial products framed as percentages)
+    3. Both factors < 1: result is SMALLER than either -- "percentage of a percentage"
+*/
+STEPPER_REGISTRY.register("math/multiplying-decimals", {
+
+  label: 'Multiplying with decimals',
+
+  panelConfig: {
+    visual: { title: 'Partial products' },
+    stack: false,
+    heap:  false,
+    custom: false,
+    editableInputs: [
+      { id: 'a', label: 'a', type: 'decimal', defaultVal: '1' },
+      { id: 'b', label: 'b', type: 'decimal', defaultVal: '0.1' },
+    ],
+    legend: [
+      { color:'#1a4f8a', border:'#9dc0e8', label:'Ones place' },
+      { color:'#095e40', border:'#90d4b8', label:'Tenths place' },
+      { color:'#3d3490', border:'#b0a8e0', label:'Hundredths place' },
+    ]
+  },
+
+  // All three scenarios share the same 3-line code structure
+  getCodeLines(scenIdx, params) {
+    if (!params) return null;
+    return [
+      { code: [['tok-op','a = '],['tok-num', String(params.a)]] },
+      { code: [['tok-op','b = '],['tok-num', String(params.b)]] },
+      { code: [['tok-op','result = a * b']] },
+    ];
+  },
+
+  scenarios: [
+
+    // ----------------------------------------------------------------
+    // Scenario 1 -- 1 x 0.1
+    // Central question: what does multiplying by a decimal MEAN?
+    // Core concept: x 0.1 = take 1/10 of = 10% of = divide by 10
+    // Lines:
+    //   0: a = 1
+    //   1: b = 0.1
+    //   2: result = a * b
+    // ----------------------------------------------------------------
+    {
+      label: '1 x 0.1',
+      lines: [
+        { code: [['tok-op','a = '],['tok-num','1']] },
+        { code: [['tok-op','b = '],['tok-num','0.1']] },
+        { code: [['tok-op','result = a * b']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: {
+            type: 'decimal-product',
+            a: '1', b: '0.1',
+            aDecomp: [ { label:'1', cls:'ones' } ],
+            bDecomp: [ { label:'0.1', cls:'tenths' } ],
+            showDecomp: false,
+            partials: [
+              { desc:'1 x 0.1', value:'0.1', state:'dim' },
+            ],
+            totalState: 'dim', totalValue: '0.1', placementNote: null, meaningNote: null,
+          },
+          expl: { label:'a = 1', text:'We start with <hi>1</hi> whole. The goal is to understand what multiplying by <hi>0.1</hi> actually does -- not just how to compute it, but what it means.' }
+        },
+        {
+          line: 1,
+          visual: {
+            type: 'decimal-product',
+            a: '1', b: '0.1',
+            aDecomp: [ { label:'1', cls:'ones' } ],
+            bDecomp: [ { label:'0.1', cls:'tenths' } ],
+            showDecomp: false,
+            partials: [
+              { desc:'1 x 0.1', value:'0.1', state:'dim' },
+            ],
+            totalState: 'dim', totalValue: '0.1', placementNote: null,
+            meaningNote: '\u00d7 0.1 means: take 1 out of every 10 equal pieces (= 10% of)',
+          },
+          expl: { label:'What 0.1 means', text:'<hi>0.1 is not a small version of 1</hi>. It means one-tenth -- take any number, split it into 10 equal pieces, and keep 1 piece. Written as a fraction: <hi>0.1 = 1/10 = 10%</hi>.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '1', b: '0.1',
+            aDecomp: [ { label:'1', cls:'ones' } ],
+            bDecomp: [ { label:'0.1', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.1', value:'0.1', state:'active' },
+            ],
+            totalState: 'dim', totalValue: '0.1', placementNote: null,
+            meaningNote: '\u00d7 0.1 means: take 1 out of every 10 equal pieces (= 10% of)',
+          },
+          expl: { label:'Apply it: 10% of 1', text:'Split 1 into 10 equal slices. Take 1 slice. Each slice is <hi>1/10 = 0.1</hi>. So <hi>1 x 0.1 = 0.1</hi>. We took one-tenth of 1, and got one-tenth.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '1', b: '0.1',
+            aDecomp: [ { label:'1', cls:'ones' } ],
+            bDecomp: [ { label:'0.1', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.1', value:'0.1', state:'done' },
+            ],
+            totalState: 'active', totalValue: '0.1', placementNote: null,
+            meaningNote: '\u00d7 0.1 means: take 1 out of every 10 equal pieces (= 10% of)',
+          },
+          expl: { label:'Result: the decimal shifted left', text:'<hi>1 x 0.1 = 0.1</hi>. The decimal point moved one place to the left. Multiplying by 0.1 is the same as dividing by 10. x 0.01 = divide by 100. x 0.001 = divide by 1000.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '1', b: '0.1',
+            aDecomp: [ { label:'1', cls:'ones' } ],
+            bDecomp: [ { label:'0.1', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.1', value:'0.1', state:'done' },
+            ],
+            totalState: 'done', totalValue: '0.1',
+            placementNote: '1 has 0 decimal places, 0.1 has 1 decimal place -- 0 + 1 = 1 decimal place. 1 x 1 = 1 -- place 1 from right: 0.1',
+            meaningNote: '\u00d7 0.1 means: take 1 out of every 10 equal pieces (= 10% of)',
+          },
+          expl: { label:'The shortcut explained', text:'Count decimal places: 1 has 0, 0.1 has 1, total <hi>1 place</hi>. Multiply ignoring decimals: 1 x 1 = 1. Place 1 decimal from right: <hi>0.1</hi>. The shortcut works because of the meaning -- each decimal place represents one more division by 10.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 2 -- 1.2 x 0.3
+    // Core concept: x 0.3 = take 30% of. Use partial products to take
+    // 30% of each place-value piece of 1.2 separately.
+    // Lines:
+    //   0: a = 1.2
+    //   1: b = 0.3
+    //   2: result = a * b
+    // ----------------------------------------------------------------
+    {
+      label: '1.2 x 0.3',
+      lines: [
+        { code: [['tok-op','a = '],['tok-num','1.2']] },
+        { code: [['tok-op','b = '],['tok-num','0.3']] },
+        { code: [['tok-op','result = a * b']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: {
+            type: 'decimal-product',
+            a: '1.2', b: '0.3',
+            aDecomp: [ { label:'1', cls:'ones' }, { label:'0.2', cls:'tenths' } ],
+            bDecomp: [ { label:'0.3', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.3',   value:'0.3',  state:'dim' },
+              { desc:'0.2 x 0.3', value:'0.06', state:'dim' },
+            ],
+            totalState: 'dim', totalValue: '0.36', placementNote: null,
+            meaningNote: '\u00d7 0.3 means: take 3 out of every 10 equal pieces (= 30% of)',
+          },
+          expl: { label:'a = 1.2 -- break it apart', text:'<hi>1.2</hi> = <hi>1</hi> (ones) + <hi>0.2</hi> (tenths). We need 30% of each piece separately, then add the results. This is what partial products does.' }
+        },
+        {
+          line: 1,
+          visual: {
+            type: 'decimal-product',
+            a: '1.2', b: '0.3',
+            aDecomp: [ { label:'1', cls:'ones' }, { label:'0.2', cls:'tenths' } ],
+            bDecomp: [ { label:'0.3', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.3',   value:'0.3',  state:'dim' },
+              { desc:'0.2 x 0.3', value:'0.06', state:'dim' },
+            ],
+            totalState: 'dim', totalValue: '0.36', placementNote: null,
+            meaningNote: '\u00d7 0.3 means: take 3 out of every 10 equal pieces (= 30% of)',
+          },
+          expl: { label:'b = 0.3 = 30%', text:'<hi>0.3 = 3/10 = 30%</hi>. We are asking: what is 30% of 1.2? Easier than it looks -- take 30% of the ones piece, then 30% of the tenths piece, then add.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '1.2', b: '0.3',
+            aDecomp: [ { label:'1', cls:'ones' }, { label:'0.2', cls:'tenths' } ],
+            bDecomp: [ { label:'0.3', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.3',   value:'0.3',  state:'active' },
+              { desc:'0.2 x 0.3', value:'0.06', state:'dim' },
+            ],
+            totalState: 'dim', totalValue: '0.36', placementNote: null,
+            meaningNote: '\u00d7 0.3 means: take 3 out of every 10 equal pieces (= 30% of)',
+          },
+          expl: { label:'30% of 1 = 0.3', text:'<hi>1 x 0.3 = 0.3</hi>. Take 30% of the ones piece: split 1 into 10 equal parts and take 3. Three-tenths of one is three-tenths. Ones x tenths stays in tenths.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '1.2', b: '0.3',
+            aDecomp: [ { label:'1', cls:'ones' }, { label:'0.2', cls:'tenths' } ],
+            bDecomp: [ { label:'0.3', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.3',   value:'0.3',  state:'done' },
+              { desc:'0.2 x 0.3', value:'0.06', state:'active' },
+            ],
+            totalState: 'dim', totalValue: '0.36', placementNote: null,
+            meaningNote: '\u00d7 0.3 means: take 3 out of every 10 equal pieces (= 30% of)',
+          },
+          expl: { label:'30% of 0.2 = 0.06', text:'<hi>0.2 x 0.3 = 0.06</hi>. Now 30% of the tenths piece: 2 tenths x 3 tenths. Think: 2 x 3 = 6, then count decimal places: 1 + 1 = 2. Result lands in hundredths: <hi>0.06</hi>.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '1.2', b: '0.3',
+            aDecomp: [ { label:'1', cls:'ones' }, { label:'0.2', cls:'tenths' } ],
+            bDecomp: [ { label:'0.3', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.3',   value:'0.3',  state:'done' },
+              { desc:'0.2 x 0.3', value:'0.06', state:'done' },
+            ],
+            totalState: 'active', totalValue: '0.36', placementNote: null,
+            meaningNote: '\u00d7 0.3 means: take 3 out of every 10 equal pieces (= 30% of)',
+          },
+          expl: { label:'Add: 30% of 1.2 = 0.36', text:'<hi>0.3 + 0.06 = 0.36</hi>. That is 30% of 1.2. Check: 10% of 1.2 would be 0.12, so 30% should be three times that: 0.12 x 3 = 0.36. Confirmed.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '1.2', b: '0.3',
+            aDecomp: [ { label:'1', cls:'ones' }, { label:'0.2', cls:'tenths' } ],
+            bDecomp: [ { label:'0.3', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'1 x 0.3',   value:'0.3',  state:'done' },
+              { desc:'0.2 x 0.3', value:'0.06', state:'done' },
+            ],
+            totalState: 'done', totalValue: '0.36',
+            placementNote: '1.2 has 1 decimal place, 0.3 has 1 decimal place -- 1 + 1 = 2 decimal places. 12 x 3 = 36 -- place 2 from right: 0.36',
+            meaningNote: '\u00d7 0.3 means: take 3 out of every 10 equal pieces (= 30% of)',
+          },
+          expl: { label:'Shortcut -- why it works', text:'Ignore decimals: <hi>12 x 3 = 36</hi>. Count places: 1 + 1 = 2. Place them: <hi>0.36</hi>. The partial-products method shows WHY this works -- each decimal place is one more division by 10, and the place counts add because you are combining two such divisions.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 3 -- 0.4 x 0.5
+    // Core concept: when both factors are less than 1, the product is
+    // SMALLER than either. This is the result students find most confusing.
+    // 0.4 x 0.5 = 40% of 50% = 20% of 1 = 0.20
+    // Lines:
+    //   0: a = 0.4
+    //   1: b = 0.5
+    //   2: result = a * b
+    // ----------------------------------------------------------------
+    {
+      label: '0.4 x 0.5',
+      lines: [
+        { code: [['tok-op','a = '],['tok-num','0.4']] },
+        { code: [['tok-op','b = '],['tok-num','0.5']] },
+        { code: [['tok-op','result = a * b']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: {
+            type: 'decimal-product',
+            a: '0.4', b: '0.5',
+            aDecomp: [ { label:'0.4', cls:'tenths' } ],
+            bDecomp: [ { label:'0.5', cls:'tenths' } ],
+            showDecomp: false,
+            partials: [
+              { desc:'0.4 x 0.5', value:'0.20', state:'dim' },
+            ],
+            totalState: 'dim', totalValue: '0.20', placementNote: null,
+            meaningNote: '\u00d7 0.5 means: take 5 out of every 10 equal pieces (= 50% of = half of)',
+          },
+          expl: { label:'a = 0.4 = 40%', text:'<hi>a = 0.4 = 4/10 = 40%</hi>. We do not even have a full 1 here. We have 40% of one. Now we will multiply it by 0.5. Think: what is 50% of 40%?' }
+        },
+        {
+          line: 1,
+          visual: {
+            type: 'decimal-product',
+            a: '0.4', b: '0.5',
+            aDecomp: [ { label:'0.4', cls:'tenths' } ],
+            bDecomp: [ { label:'0.5', cls:'tenths' } ],
+            showDecomp: false,
+            partials: [
+              { desc:'0.4 x 0.5', value:'0.20', state:'dim' },
+            ],
+            totalState: 'dim', totalValue: '0.20', placementNote: null,
+            meaningNote: '\u00d7 0.5 means: take 5 out of every 10 equal pieces (= 50% of = half of)',
+          },
+          expl: { label:'b = 0.5 = half', text:'<hi>0.5 = 5/10 = 50% = one half</hi>. Multiplying by 0.5 is the same as dividing by 2. We want half of 0.4. Half of 4 tenths is 2 tenths. So the result should be 0.2.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '0.4', b: '0.5',
+            aDecomp: [ { label:'0.4', cls:'tenths' } ],
+            bDecomp: [ { label:'0.5', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'0.4 x 0.5', value:'0.20', state:'active' },
+            ],
+            totalState: 'dim', totalValue: '0.20', placementNote: null,
+            meaningNote: '\u00d7 0.5 means: take 5 out of every 10 equal pieces (= 50% of = half of)',
+          },
+          expl: { label:'tenths x tenths = hundredths', text:'<hi>0.4 x 0.5</hi>: four-tenths times five-tenths. Ignore decimals: 4 x 5 = 20. Count decimal places: 1 + 1 = 2. Result: <hi>0.20</hi>. Tenths x tenths always land in hundredths -- two levels of ten-splitting.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '0.4', b: '0.5',
+            aDecomp: [ { label:'0.4', cls:'tenths' } ],
+            bDecomp: [ { label:'0.5', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'0.4 x 0.5', value:'0.20', state:'done' },
+            ],
+            totalState: 'active', totalValue: '0.20', placementNote: null,
+            meaningNote: '\u00d7 0.5 means: take 5 out of every 10 equal pieces (= 50% of = half of)',
+          },
+          expl: { label:'Result is smaller than both factors', text:'<hi>0.4 x 0.5 = 0.20</hi>. The answer is smaller than 0.4 AND smaller than 0.5. This is not a mistake. You took 50% of something that was already only 40% of 1. 50% of 40% = 20%. When both factors are less than 1, multiplication shrinks.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'decimal-product',
+            a: '0.4', b: '0.5',
+            aDecomp: [ { label:'0.4', cls:'tenths' } ],
+            bDecomp: [ { label:'0.5', cls:'tenths' } ],
+            showDecomp: true,
+            partials: [
+              { desc:'0.4 x 0.5', value:'0.20', state:'done' },
+            ],
+            totalState: 'done', totalValue: '0.20',
+            placementNote: '0.4 has 1 decimal place, 0.5 has 1 decimal place -- 1 + 1 = 2 decimal places. 4 x 5 = 20 -- place 2 from right: 0.20',
+            meaningNote: '\u00d7 0.5 means: take 5 out of every 10 equal pieces (= 50% of = half of)',
+          },
+          expl: { label:'The pattern to remember', text:'<hi>Whole x decimal</hi>: result is smaller than the whole (e.g. 3 x 0.4 = 1.2). <hi>Decimal x decimal</hi>: result is smaller than both (e.g. 0.4 x 0.5 = 0.20). The more decimal places in the factors, the smaller the product relative to the factors.' }
+        },
+      ]
+    },
+
+  ]
+
+});

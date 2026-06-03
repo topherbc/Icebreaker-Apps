@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<!-- =====================================================================
+  TRACE APP TEMPLATE
+  Based on Week 5 Island Logic (gold standard).
+
+  HOW TO USE:
+  1. Search for every FILL: comment and replace each one.
+  2. Fill the THEME BLOCK (Step 1 in <style>) with your palette.
+  3. Fill the DATA BLOCK (in <script>) with your CODE, questions, metadata.
+  4. Run the anti-spoiler checklist from SPEC.md before publishing.
+
+  STEP-BY-STEP:
+    Step 1 -- Theme: :root variables, dark/light overrides, favicon SVG
+    Step 2 -- Java program: CODE array
+    Step 3 -- Questions: HTML q-cards in #question-panel
+    Step 4 -- Data: Q_META, BUG_META, Q_TO_BUG, FIX_DIV mappings
+    Step 5 -- Export: AI review prompt text, download filename
+    Step 6 -- Live Share: TRACE_ADAPTER.appId and questions list
+
+  CRITICAL RULES (from SPEC.md):
+  - Light mode is always default. FOUC script must default to 'light'.
+  - No em dashes anywhere -- use -- instead of \u2014.
+  - Viewport meta tag width=1080 is required.
+  - All bugs must be structural, not business logic. See SPEC.md §9.1.
+  - Each bug line appears exactly once in the CODE array (no plain + bug duplicate).
+  - Q_META labels must be neutral -- never "Bug X fix".
+  - No fix field in BUG_META.
+  - Press Start 2P (if used) restricted to display headers only.
+===================================================================== -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+
+<!-- FILL: Page title -- "{Scenario Name} -- Debug & Trace Session" -->
+<title>Score Tracker -- Debug &amp; Trace Session</title>
+
+<!-- FILL: Favicon -- inline SVG, 32x32 viewBox, theme-relevant symbol.
+     Format: data:image/svg+xml,<svg ...>  (no quotes around data URI value)
+     See SPEC.md §8 for favicon design guidelines. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%231e5f74'/><polygon points='16,5 28,27 4,27' fill='none' stroke='%23f0c040' stroke-width='2.5'/><line x1='16' y1='12' x2='16' y2='20' stroke='%23f0c040' stroke-width='2'/><circle cx='16' cy='23' r='1.5' fill='%23f0c040'/></svg>">
+
+<!-- FOUC prevention: always default to light mode.
+     Do NOT use prefers-color-scheme as fallback -- it can default to dark
+     on student machines, which causes contrast problems over video share. -->
+<script>(function(){
+  var t = localStorage.getItem('trace-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();</script>
+
+<!-- FILL: Google Fonts -- always include DM Sans; add one display font and
+     one code font. Max two import families beyond DM Sans. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=DM+Sans:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================================
+   STEP 1 -- THEME BLOCK
+   Replace every hex value marked FILL.
+   Do not change property names -- only the hex/rgba values.
+
+   WCAG AA verification -- fill in after choosing palette.
+   Format: description -- ratio -- PASS/FAIL
+   Check both light mode AND dark mode combinations.
+   /*
+     WCAG AA verification:
+       code-text (#e8f4ea) on code-bg (#0f2a1e)    -- 11.3:1  PASS
+       line-num  (#7aad8a) on code-bg (#0f2a1e)    --  4.6:1  PASS  (large mono)
+       text      (#2c1a06) on bg      (#fff8ee)    -- 14.1:1  PASS
+       text      (#2c1a06) on surface (#fffbf5)    -- 13.9:1  PASS
+       topbar-text (#fff8ee) on accent-1 (#1e5f74) --  9.8:1  PASS
+       export btn (#1a1208) on accent-2 (#f0c040)  -- 11.8:1  PASS
+       reset text (#fff8ee) on accent-3 (#c94b2b)  --  5.2:1  PASS
+   */
+===================================================================== */
+:root {
+  /* -- Page surfaces ----------------------------------------- FILL -- */
+  --bg:              #fff8ee;   /* page background                      */
+  --surface:         #fffbf5;   /* card background                      */
+  --surface-2:       #f5ede0;   /* input field background               */
+  --code-bg:         #0f2a1e;   /* code panel (almost always very dark) */
+  --code-text:       #e8f4ea;   /* default code text                    */
+  --line-num:        #7aad8a;   /* line number color                    */
+
+  /* -- Typography ---------------------------------------------------- */
+  --text:            #2c1a06;   /* primary body text                    */
+  --text-mid:        #5a3e1b;   /* secondary / label text               */
+  --text-dim:        #8a6840;   /* muted / placeholder text             */
+
+  /* -- Accents ------------------------------------------------------- */
+  --accent-1:        #1e5f74;   /* topbar, q-number badges, links       */
+  --accent-1-dark:   #164a5b;   /* hover / darker accent-1              */
+  --accent-2:        #f0c040;   /* export button                        */
+  --accent-2-text:   #1a1208;   /* export button label (on accent-2)    */
+  --accent-3:        #c94b2b;   /* reset button, bug-found indicator    */
+  --accent-3-dark:   #a33822;   /* hover / darker accent-3              */
+
+  /* -- Borders ------------------------------------------------------- */
+  --border:          #e8d5b0;   /* default border / divider rule        */
+  --border-strong:   #1e4a2e;   /* code panel right border              */
+
+  /* -- Bug system ---------------------------------------------------- */
+  --bug-dot-idle:    #ccc;      /* dot default (no state)               */
+  --bug-dot-border:  #aaa;      /* dot border default                   */
+  --bug-found:       var(--accent-3);
+  --bug-found-dark:  var(--accent-3-dark);
+  --bug-fixed:       #3aae5c;
+  --bug-fixed-dark:  #2a8e4c;
+  --fix-row-bg:      #1a3a28;   /* highlighted row bg for bug line      */
+  --fix-correct-bg:  #c8f0d8;   /* correct-answer input background      */
+  --fix-correct-text:#1e4f3a;   /* correct-answer input text            */
+
+  /* -- Syntax token colors (dark code bg) ---------------------------- */
+  --syn-kw:          #7dd3b8;   /* keywords                             */
+  --syn-ty:          #a8d8b0;   /* types                                */
+  --syn-str:         #f0c075;   /* string literals                      */
+  --syn-num:         #f5a97a;   /* numeric literals                     */
+  --syn-cm:          #6a9a7a;   /* comments                             */
+  --syn-mth:         #b8ddc8;   /* method calls                         */
+
+  /* -- Shape --------------------------------------------------------- */
+  /* FILL: 0px = angular/sharp, 10-12px = rounded */
+  --radius-card:     10px;
+  --radius-btn:      6px;
+  --shadow:          rgba(26,18,8,0.12);
+}
+
+/* =====================================================================
+   RESET & BASE
+===================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { color-scheme: light dark; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* =====================================================================
+   TOPBAR
+===================================================================== */
+#topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--accent-1);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 14px;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.28);
+}
+
+/* FILL: Display font (Barlow Condensed, Share Tech Mono, Anton...) */
+#topbar h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 25px;
+  letter-spacing: 0.04em;
+  color: var(--bg);
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.top-btn {
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: 0 15px;
+  height: 40px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#export-btn {
+  background: var(--accent-2);
+  color: var(--accent-2-text);
+}
+#export-btn:hover:not(:disabled) { filter: brightness(0.9); }
+#export-btn:disabled { opacity: 0.38; cursor: default; }
+
+#btn-reset {
+  background: var(--accent-3);
+  color: #fff;
+}
+#btn-reset:hover { background: var(--accent-3-dark); }
+
+.btn-theme {
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: 0;
+  width: 40px; height: 40px;
+  background: var(--accent-1-dark);
+  color: var(--bg);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.btn-theme:hover { filter: brightness(1.2); }
+.btn-theme:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+
+/* =====================================================================
+   BUG TRACKER BAR
+===================================================================== */
+.bug-bar {
+  position: fixed;
+  top: 56px; left: 0; right: 0;
+  z-index: 90;
+  background: var(--surface);
+  border-bottom: 1.5px solid var(--border);
+  padding: 0 20px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.bug-bar-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-3);
+  flex-shrink: 0;
+}
+
+.bug-dots { display: flex; gap: 18px; align-items: center; }
+.bug-dot-wrap { display: flex; align-items: center; gap: 7px; }
+
+.bug-dot {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--bug-dot-idle);
+  border: 2px solid var(--bug-dot-border);
+  flex-shrink: 0;
+  transition: background 0.35s, border-color 0.35s;
+}
+.bug-dot.found { background: var(--bug-found); border-color: var(--bug-found-dark); }
+.bug-dot.fixed { background: var(--bug-fixed); border-color: var(--bug-fixed-dark); }
+
+.bug-dot-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.bug-dot.found + .bug-dot-label { font-weight: 700; color: var(--text); }
+.bug-dot.fixed + .bug-dot-label { font-weight: 700; color: var(--bug-fixed); }
+
+/* =====================================================================
+   LAYOUT
+===================================================================== */
+#layout {
+  display: flex;
+  height: 100vh;
+  padding-top: 104px; /* 56 topbar + 48 bug bar */
+}
+
+/* =====================================================================
+   CODE PANEL (LEFT -- single file mode)
+   For multi-tab mode, see the commented section after this block.
+===================================================================== */
+#code-panel {
+  width: 60%;        /* use 50% for multi-tab */
+  flex-shrink: 0;
+  background: var(--code-bg);
+  overflow-y: auto;
+  border-right: 3px solid var(--border-strong);
+}
+
+#code-header {
+  background: color-mix(in srgb, var(--code-bg) 70%, black);
+  padding: 11px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 2px solid var(--border-strong);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.filename {
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  color: var(--syn-ty);
+}
+
+.lang-badge {
+  background: var(--accent-1);
+  color: var(--bg);
+  font-size: 11px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.edit-hint {
+  font-size: 12px;
+  color: var(--syn-cm);
+  font-style: italic;
+}
+
+/* Mac traffic-light dots (decorative) */
+.mac-dots { display: flex; gap: 6px; margin-left: auto; }
+.mac-dots span {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  display: block;
+}
+
+#code-body { padding: 14px 0 48px; overflow-x: auto; }
+
+/* Code table (single-file mode) */
+table.code-table { border-collapse: collapse; width: 100%; min-width: 460px; }
+
+td.ln {
+  width: 48px;
+  padding: 2px 12px 2px 16px;
+  text-align: right;
+  color: var(--line-num);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  user-select: none;
+  border-right: 1px solid var(--border-strong);
+  vertical-align: middle;
+}
+
+td.code {
+  padding: 2px 20px 2px 16px;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  color: var(--code-text);
+  white-space: pre;
+  vertical-align: middle;
+}
+
+/* Bug rows */
+tr.bug-row { background: var(--fix-row-bg); }
+tr.bug-row td.ln {
+  color: var(--syn-str);
+  border-left: 3px solid var(--syn-str);
+}
+
+/* Editable input on bug line */
+.bug-input {
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  color: var(--code-text);
+  background: transparent;
+  border: 1.5px dashed var(--bug-fixed);
+  border-radius: 4px;
+  padding: 2px 8px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  white-space: pre;
+  transition: border-color 0.15s, background 0.25s, color 0.25s;
+}
+.bug-input:focus { border-color: var(--accent-2); border-style: solid; }
+.bug-input.correct {
+  background: var(--fix-correct-bg);
+  color: var(--fix-correct-text);
+  border: 2px solid var(--bug-fixed);
+  border-style: solid;
+}
+
+/* Syntax token classes */
+.kw  { color: var(--syn-kw); }
+.ty  { color: var(--syn-ty); }
+.str { color: var(--syn-str); }
+.num { color: var(--syn-num); }
+.cm  { color: var(--syn-cm); font-style: italic; }
+.mth { color: var(--syn-mth); }
+
+/*
+  =====================================================================
+  MULTI-TAB ADDITIONS (uncomment and add to HTML when using tabbed mode)
+
+  .file-tabs {
+    display: flex;
+    overflow-x: auto;
+    background: color-mix(in srgb, var(--code-bg) 80%, black);
+    border-bottom: 1px solid var(--border-strong);
+    flex-shrink: 0;
+  }
+  .file-tab {
+    padding: 10px 16px 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-right: 1px solid var(--border-strong);
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: color 0.15s;
+  }
+  .file-tab.active {
+    color: var(--accent-2);
+    border-bottom-color: var(--accent-2);
+    background: rgba(255,255,255,0.03);
+  }
+  .tab-bug-pip {
+    width: 6px; height: 6px;
+    border-radius: 0;
+    background: var(--text-dim);
+    transition: background 0.3s;
+  }
+  .tab-bug-pip.has-identified { background: var(--bug-found); }
+  .tab-bug-pip.all-fixed      { background: var(--bug-fixed); }
+  .tab-bug-pip.no-bug         { opacity: 0; pointer-events: none; }
+
+  .code-pane { display: none; }
+  .code-pane.active { display: block; }
+  .code-block { padding: 14px 0 48px; overflow-x: auto; }
+
+  .code-line {
+    display: flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 20px 0 0;
+  }
+  .line-num {
+    width: 48px; min-width: 48px;
+    padding: 0 12px 0 16px;
+    text-align: right;
+    color: var(--line-num);
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    user-select: none;
+    border-right: 1px solid var(--border-strong);
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+  .line-content {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    color: var(--code-text);
+    white-space: pre;
+  }
+  .code-line.editable { background: var(--fix-row-bg); }
+  .code-line.editable .line-num {
+    color: var(--syn-str);
+    border-left: 3px solid var(--syn-str);
+  }
+  .line-edit {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    background: transparent;
+    border: 1.5px dashed var(--bug-fixed);
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: var(--code-text);
+    flex: 1;
+    outline: none;
+  }
+  .line-edit:focus { border-style: solid; border-color: var(--accent-2); }
+  .code-line.editable.fixed { border-left-color: var(--bug-fixed); }
+  .code-line.editable.fixed .line-edit {
+    color: var(--fix-correct-text);
+    background: var(--fix-correct-bg);
+    border-color: var(--bug-fixed);
+  }
+  .bug-callout {
+    font-size: 11px;
+    color: var(--accent-3);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-left: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  =====================================================================
+*/
+
+/* =====================================================================
+   QUESTION PANEL (RIGHT)
+===================================================================== */
+#question-panel {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  padding: 18px 16px 48px;
+  display: flex;
+  flex-direction: column;
+}
+
+#q-panel-header { margin-bottom: 14px; }
+
+#q-panel-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-1);
+  line-height: 1.1;
+}
+
+#q-panel-header p {
+  font-size: 14px;
+  color: var(--text-mid);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* Section divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 11px;
+  padding: 4px 0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+}
+.section-divider::before, .section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.sdlabel {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* Question card */
+.q-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 14px 15px 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.q-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+
+.q-number {
+  background: var(--accent-1);
+  color: var(--bg);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.q-anchor {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'Fira Code', monospace;
+  margin-bottom: 2px;
+}
+
+.q-text {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.q-text code {
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  background: var(--surface-2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--text-mid);
+}
+
+.q-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-btn);
+  padding: 8px 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  color: var(--text);
+  resize: vertical;
+  min-height: 48px;
+  margin-top: 7px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.q-input:focus { border-color: var(--accent-1); }
+.q-input::placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+
+/* Fix prompt (hidden until bug question is answered) */
+.fix-prompt {
+  display: none;
+  margin-top: 8px;
+  background: var(--fix-row-bg);
+  border: 1.5px dashed var(--bug-fixed);
+  border-radius: 7px;
+  padding: 9px 13px;
+}
+.fix-prompt.shown {
+  display: block;
+  animation: fadeSlide 0.22s ease;
+}
+.fix-prompt-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-3);
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================================================================
+   STEP 1B -- DARK MODE OVERRIDES
+   FILL: adjust these values to match your theme's dark variant.
+   Keep the property names; only change the hex/rgba values.
+===================================================================== */
+html[data-theme="dark"] { color-scheme: dark; }
+html[data-theme="dark"] body               { background: #121a0f; }
+html[data-theme="dark"] #topbar            { background: var(--accent-1-dark); }
+html[data-theme="dark"] .bug-bar           { background: #1c2a1c; border-bottom-color: #2a4a30; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+html[data-theme="dark"] .bug-dot           { background: #3a5a40; border-color: #2a4a30; }
+html[data-theme="dark"] .bug-dot-label     { color: var(--line-num); }
+html[data-theme="dark"] .bug-dot.found + .bug-dot-label { color: var(--code-text); }
+html[data-theme="dark"] .bug-dot.fixed + .bug-dot-label { color: var(--bug-fixed); }
+html[data-theme="dark"] #question-panel    { background: #121a0f; }
+html[data-theme="dark"] #q-panel-header h2 { color: var(--syn-ty); }
+html[data-theme="dark"] #q-panel-header p  { color: var(--line-num); }
+html[data-theme="dark"] .section-divider  { background: #121a0f; }
+html[data-theme="dark"] .section-divider::before,
+html[data-theme="dark"] .section-divider::after { background: #2a4a30; }
+html[data-theme="dark"] .sdlabel          { color: var(--line-num); }
+html[data-theme="dark"] .q-card           { background: #1c2a1c; border-color: #2a4a30; }
+html[data-theme="dark"] .q-number         { background: var(--accent-1-dark); }
+html[data-theme="dark"] .q-anchor         { color: var(--line-num); }
+html[data-theme="dark"] .q-text           { color: var(--code-text); }
+html[data-theme="dark"] .q-text code      { background: var(--code-bg); color: var(--accent-2); }
+html[data-theme="dark"] .q-input          { background: #162010; border-color: #2a4a30; color: var(--code-text); }
+html[data-theme="dark"] .q-input::placeholder { color: var(--line-num); }
+html[data-theme="dark"] .q-input:focus    { border-color: var(--accent-1); }
+html[data-theme="dark"] .fix-prompt       { background: var(--fix-row-bg); border-color: var(--bug-fixed); }
+html[data-theme="dark"] .btn-theme        { background: var(--accent-1); }
+
+/* =====================================================================
+   STEP 1C -- LIGHT MODE CODE PANEL OVERRIDES
+   The code panel is always dark by default (--code-bg). In light mode
+   we give it a lighter tint so it still reads as code but is not jarring.
+   FILL: adjust hex values to complement your light-mode palette.
+===================================================================== */
+html[data-theme="light"] #code-panel        { background: #f0f8f2; border-right-color: var(--border); }
+html[data-theme="light"] #code-header       { background: #e0f0e8; border-bottom-color: #b8d8c0; }
+html[data-theme="light"] .filename          { color: #1e4f3a; }
+html[data-theme="light"] #code-body         { background: #f0f8f2; }
+html[data-theme="light"] td.ln              { color: #4a8060; border-right-color: #b8d8c0; }
+html[data-theme="light"] td.code            { color: #1a3a22; }
+html[data-theme="light"] .kw                { color: #005c80; }
+html[data-theme="light"] .ty                { color: #2a6040; }
+html[data-theme="light"] .str               { color: #8a5800; }
+html[data-theme="light"] .num               { color: #8a4000; }
+html[data-theme="light"] .cm                { color: #4a7a5a; }
+html[data-theme="light"] tr.bug-row         { background: #fef6e4; }
+html[data-theme="light"] tr.bug-row td.ln   { color: #9a5800; border-left-color: #d4a000; }
+html[data-theme="light"] .bug-input         { color: #1a3a22; border-color: #2d6a4f; }
+html[data-theme="light"] .bug-input.correct { background: var(--fix-correct-bg); color: var(--fix-correct-text); }
+
+/* Disable font ligatures — prevents >= rendering as ≥ in code display */
+td.code, .bug-input {
+  font-feature-settings: "liga" 0, "calt" 0;
+  font-variant-ligatures: none;
+}
+</style>
+</head>
+<body>
+
+<!-- =====================================================================
+   TOPBAR
+   FILL: emoji + scenario name in <h1>
+   No em dashes in copy -- use -- instead.
+===================================================================== -->
+<div id="topbar" role="banner">
+  <!-- FILL: emoji and title e.g. "Score Tracker" -->
+  <h1>&#128202; Score Tracker</h1>
+  <span class="subtitle">Debug &amp; Trace Session</span>
+  <div style="flex:1"></div>
+  <button class="btn-theme" id="theme-toggle"
+    onclick="toggleTheme()"
+    aria-label="Switch to dark mode">
+    <span id="theme-icon" aria-hidden="true">&#127769;</span>
+  </button>
+  <button class="top-btn" id="export-btn"
+    onclick="exportMarkdown()" disabled>
+    &#11015; Export
+  </button>
+  <button class="top-btn" id="btn-reset"
+    onclick="resetAll()"
+    aria-label="Reset all inputs and bug fixes">
+    &#8635; Reset
+  </button>
+</div>
+
+<!-- =====================================================================
+   BUG TRACKER BAR
+   FILL: add/remove .bug-dot-wrap entries to match your bug count.
+   Labels should be neutral area names -- NOT bug descriptions.
+   NEVER use "Bug X fix" or any phrasing that reveals the fix.
+   See SPEC.md §9 and §10 (Anti-Spoiler Rules).
+===================================================================== -->
+<div class="bug-bar" role="region" aria-label="Bug tracker">
+  <span class="bug-bar-label">Bug Tracker</span>
+  <div class="bug-dots" role="list">
+
+    <!-- FILL: one block per bug. Label = neutral area name, not bug type. -->
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-1"
+        aria-label="Bug 1 status: not yet identified"></div>
+      <span class="bug-dot-label">Score check</span>
+    </div>
+
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-2"
+        aria-label="Bug 2 status: not yet identified"></div>
+      <span class="bug-dot-label">Output line</span>
+    </div>
+
+    <!-- Add more .bug-dot-wrap blocks as needed -->
+
+  </div>
+</div>
+
+<!-- =====================================================================
+   MAIN LAYOUT
+===================================================================== -->
+<div id="layout">
+
+  <!-- ==================================================================
+       CODE PANEL -- SINGLE FILE MODE
+       FILL: filename in .filename span
+       The table is populated by buildCode() from the CODE array in JS.
+
+       CRITICAL: Each bug line must appear exactly ONCE in the CODE array.
+       Do not add a plain { t: '...' } entry AND a bug entry for the same
+       line. The bug entry IS the line -- duplicating it causes the line
+       to render twice.
+
+       MULTI-TAB ALTERNATIVE: Replace the entire #code-panel div with
+       the tab structure shown in the CSS comments above (search for
+       "MULTI-TAB ADDITIONS") and write code lines directly as HTML.
+  ================================================================== -->
+  <div id="code-panel" aria-label="Java source code">
+    <div id="code-header">
+      <!-- FILL: Java filename -->
+      <span class="filename">ScoreTracker.java</span>
+      <span class="lang-badge">Java 17</span>
+      <span class="edit-hint">-- bug lines become editable after you write a prediction</span>
+      <div class="mac-dots">
+        <span style="background:#e05c4b"></span>
+        <span style="background:#d4a017"></span>
+        <span style="background:#4a9e5c"></span>
+      </div>
+    </div>
+    <div id="code-body">
+      <table class="code-table" id="code-table"></table>
+    </div>
+  </div><!-- /code-panel -->
+
+  <!-- ==================================================================
+       QUESTION PANEL
+       FILL: q-panel-header h2 and p text
+       FILL: section divider labels (neutral, no bug names, no "Bug X fix")
+       FILL: question cards -- text, anchors, placeholders
+       FILL: fix-prompt div ids and text (one per bug-hunt question)
+       See SPEC.md §7 for question writing rules.
+       No em dashes in any copy -- use -- instead.
+  ================================================================== -->
+  <div id="question-panel" aria-label="Trace questions">
+
+    <div id="q-panel-header">
+      <!-- FILL: panel title and sub-tagline -->
+      <h2>Senior Dev Review</h2>
+      <p>Read the code. Commit to a prediction. Then fix it.</p>
+    </div>
+
+    <!-- Section divider -- neutral label, no bug descriptions -->
+    <div class="section-divider"><span class="sdlabel">Variables</span></div>
+
+    <!-- Q1: Pure trace -- no bug hunting -->
+    <div class="q-card" id="card-q1">
+      <div class="q-card-header">
+        <div class="q-number">1</div>
+        <div class="q-meta">
+          <!-- FILL: line reference -->
+          <div class="q-anchor">Lines 1-3</div>
+          <!-- FILL: trace question, no spoilers -->
+          <div class="q-text">
+            What values are assigned to <code>playerName</code>,
+            <code>score</code>, and <code>threshold</code> on lines 1-3?
+          </div>
+        </div>
+      </div>
+      <!-- FILL: placeholder -- describe the linguistic form of expected answer -->
+      <textarea class="q-input" id="q1"
+        placeholder="Write each variable name and its value..."
+        aria-label="Question 1 answer"></textarea>
+    </div>
+
+    <!-- Section divider -->
+    <div class="section-divider"><span class="sdlabel">Score check</span></div>
+
+    <!-- Q2: Trace the condition -->
+    <div class="q-card" id="card-q2">
+      <div class="q-card-header">
+        <div class="q-number">2</div>
+        <div class="q-meta">
+          <div class="q-anchor">Line 5</div>
+          <div class="q-text">
+            Trace line 5. With the values from Q1, what does the condition
+            evaluate to? Which branch of the if/else runs?
+          </div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q2"
+        placeholder="State true or false, then explain which branch runs and why..."
+        aria-label="Question 2 answer"></textarea>
+      <!-- Fix prompt appears after this question is answered -->
+      <div class="fix-prompt" id="fix-b1">
+        <!-- FILL: name the line number -- do NOT say how to fix it -->
+        <div class="fix-prompt-label">Found it? Fix the condition on line 5 in the code panel.</div>
+      </div>
+    </div>
+
+    <!-- Section divider -->
+    <div class="section-divider"><span class="sdlabel">Program output</span></div>
+
+    <!-- Q3: Program output -->
+    <div class="q-card" id="card-q3">
+      <div class="q-card-header">
+        <div class="q-number">3</div>
+        <div class="q-meta">
+          <div class="q-anchor">Lines 6-9</div>
+          <div class="q-text">
+            Based on the branch that runs, what does the program print?
+            Write the exact output, line by line.
+          </div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q3"
+        placeholder="Write the expected console output line by line..."
+        aria-label="Question 3 answer"></textarea>
+    </div>
+
+    <!-- Section divider -->
+    <div class="section-divider"><span class="sdlabel">Output line</span></div>
+
+    <!-- Q4: Bug-hunt question -- unlocks the editable bug line -->
+    <div class="q-card" id="card-q4">
+      <div class="q-card-header">
+        <div class="q-number">4</div>
+        <div class="q-meta">
+          <div class="q-anchor">Line 11</div>
+          <!-- FILL: describe BEHAVIOR and INTENT -- never name the fix -->
+          <div class="q-text">
+            Bug Hunt: Line 11 is supposed to print the player's name alongside
+            their score, but the output is wrong. Trace what it actually prints
+            and describe what needs to change.
+          </div>
+        </div>
+      </div>
+      <!-- FILL: placeholder describes expected answer form, not the fix -->
+      <textarea class="q-input" id="q4"
+        placeholder="Describe what the line prints vs. what it should print..."
+        aria-label="Question 4 answer"></textarea>
+      <div class="fix-prompt" id="fix-b2">
+        <div class="fix-prompt-label">Found it? Fix line 11 in the code panel.</div>
+      </div>
+    </div>
+
+    <!-- Add more q-card / section-divider blocks as needed -->
+    <!-- Total: 5-8 questions recommended (see SPEC.md §7.3 Rule 5) -->
+
+  </div><!-- /question-panel -->
+</div><!-- /layout -->
+
+<script>
+/* =====================================================================
+   STEP 2 -- CODE DATA
+   Fill in the CODE array with the Java program lines.
+   - Plain line:  { t: 'code here' }
+   - Blank line:  { t: '' }
+   - Bug line:    { t: 'buggy code', bugId: 'b1', dotId: 'dot-1',
+                    fixes: ['correct line', 'correct line with trailing space'] }
+
+   CRITICAL: Each bug line appears exactly ONCE in this array.
+   Do not add a plain line AND a bug entry for the same code.
+   The bug entry IS the rendered line.
+
+   bugId must match an entry in BUG_META below.
+   dotId must match the id of a .bug-dot element in the HTML above.
+   fixes: include the canonical correct answer and 1-2 whitespace variants.
+
+   All bugs must be structural -- wrong regardless of input or intent.
+   Never use business logic bugs. See SPEC.md §9.1.
+
+   See SPEC.md §6.1 for full details.
+===================================================================== */
+const CODE = [
+  /* FILL: Java program lines -- each { t: '...' } is one line */
+  { t: 'String playerName = "Alex";'                              },
+  { t: 'int score = 75;'                                          },
+  { t: 'int threshold = 80;'                                      },
+  { t: ''                                                         },
+  /* BUG 1: structural -- > excludes the boundary value, making the
+     condition wrong for any input where score == threshold.
+     This is not a business logic bug -- >= is structurally required
+     for an inclusive threshold check. */
+  { t: 'if (score > threshold) {',
+    bugId: 'b1', dotId: 'dot-1',
+    fixes: [
+      'if (score >= threshold) {',
+      'if (score >= threshold) { ',
+    ]
+  },
+  { t: '    System.out.println("Result: PASS");'                  },
+  { t: '} else {'                                                 },
+  { t: '    System.out.println("Result: FAIL");'                  },
+  { t: '}'                                                        },
+  { t: ''                                                         },
+  /* BUG 2: structural -- uses score instead of playerName,
+     producing output that omits the variable the line is clearly
+     trying to reference. Wrong regardless of what the program intends. */
+  { t: 'System.out.println("Player: " + score);',
+    bugId: 'b2', dotId: 'dot-2',
+    fixes: [
+      'System.out.println(playerName + " scored: " + score);',
+      'System.out.println(playerName + " scored: " + score); ',
+    ]
+  },
+];
+
+/* FILL: Map question id -> bug id for questions that unlock bug editing */
+const Q_TO_BUG = {
+  q2: 'b1',   /* answering Q2 unlocks bug line b1 */
+  q4: 'b2',   /* answering Q4 unlocks bug line b2 */
+};
+
+/* FILL: Map bug id -> fix-prompt div id */
+const FIX_DIV = {
+  b1: 'fix-b1',
+  b2: 'fix-b2',
+};
+
+/* All question ids (in order) */
+const ALL_QS = ['q1','q2','q3','q4'];   /* FILL: add/remove to match your questions */
+
+const fixed = new Set();
+
+/* =====================================================================
+   SYNTAX HIGHLIGHTER
+   Comment extraction prevents class="cm" from appearing as visible text.
+   Extend keyword/type lists as needed for your program.
+===================================================================== */
+function hi(raw) {
+  let s = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  const cmSlots = [];
+  s = s.replace(/(\/\/[^\n]*)$/gm, (m) => {
+    cmSlots.push(m);
+    return `\x00CM${cmSlots.length - 1}\x00`;
+  });
+  s = s.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+  s = s.replace(/\b(\d+)\b(?![^<]*<\/span>)/g, '<span class="num">$1</span>');
+  for (const kw of ['public','static','void','class','if','else','return',
+      'new','boolean','this','true','false','extends','implements',
+      'abstract','interface','super','for','while']) {
+    s = s.replace(new RegExp(`\\b${kw}\\b(?![^<]*<\\/span>)`, 'g'),
+      `<span class="kw">${kw}</span>`);
+  }
+  for (const ty of ['String','int','boolean','System','ArrayList',
+      'HashMap','Scanner','Object','double','float','char']) {
+    s = s.replace(new RegExp(`\\b${ty}\\b(?![^<]*<\\/span>)`, 'g'),
+      `<span class="ty">${ty}</span>`);
+  }
+  s = s.replace(/\b([a-z][a-zA-Z0-9_]*)(?=\()(?![^<]*<\/span>)/g,
+    '<span class="mth">$1</span>');
+  s = s.replace(/\x00CM(\d+)\x00/g, (_, i) =>
+    `<span class="cm">${cmSlots[i]}</span>`);
+  return s;
+}
+
+/* =====================================================================
+   BUILD CODE TABLE
+===================================================================== */
+function buildCode() {
+  const table = document.getElementById('code-table');
+  CODE.forEach((line, i) => {
+    const tr  = document.createElement('tr');
+    const tdL = document.createElement('td');
+    const tdC = document.createElement('td');
+    tdL.className = 'ln';
+    tdC.className = 'code';
+    tdL.textContent = i + 1;
+
+    if (line.bugId) {
+      tr.classList.add('bug-row');
+      tr.id  = 'brow-' + line.bugId + '-' + i;
+      tdC.id = 'bcell-' + line.bugId + '-' + i;
+      tdC.innerHTML = hi(line.t);
+      tdC.dataset.lineIdx = i;
+    } else {
+      tdC.innerHTML = line.t ? hi(line.t) : '\u00a0';
+    }
+
+    tr.appendChild(tdL);
+    tr.appendChild(tdC);
+    table.appendChild(tr);
+  });
+}
+
+/* =====================================================================
+   ACTIVATE EDITABLE BUG INPUT
+===================================================================== */
+function activateBugLines(bugId) {
+  CODE.forEach((line, i) => {
+    if (line.bugId !== bugId) return;
+    const cell = document.getElementById('bcell-' + bugId + '-' + i);
+    if (!cell || cell.querySelector('input')) return;
+
+    cell.innerHTML = '';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'bug-input';
+    inp.value = line.t;
+    inp.setAttribute('aria-label', `Fix the bug on line ${i + 1}`);
+    inp.setAttribute('autocomplete', 'off');
+    inp.setAttribute('autocorrect', 'off');
+    inp.setAttribute('autocapitalize', 'off');
+    inp.setAttribute('spellcheck', 'false');
+    inp.addEventListener('input', () => checkFix(bugId, inp, line));
+    cell.appendChild(inp);
+  });
+}
+
+/* =====================================================================
+   FIX VALIDATION
+===================================================================== */
+function norm(s) { return s.trim().replace(/\s+/g, ' '); }
+
+function checkFix(bugId, inp, lineData) {
+  const correct = lineData.fixes.some(f => norm(inp.value) === norm(f));
+  const dot = document.getElementById(lineData.dotId);
+
+  if (correct && !fixed.has(bugId)) {
+    fixed.add(bugId);
+    inp.classList.add('correct');
+    inp.setAttribute('readonly', true);
+    if (dot) { dot.classList.remove('found'); dot.classList.add('fixed'); }
+    dot?.setAttribute('aria-label', `Bug ${bugId.slice(1)} status: fixed`);
+  } else if (!correct && fixed.has(bugId)) {
+    fixed.delete(bugId);
+    inp.classList.remove('correct');
+    inp.removeAttribute('readonly');
+    if (dot) { dot.classList.remove('fixed'); dot.classList.add('found'); }
+    dot?.setAttribute('aria-label', `Bug ${bugId.slice(1)} status: identified, not yet fixed`);
+  }
+
+  if (window.TraceLiveShare) {
+    window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: bugId, value: inp.value });
+  }
+  updateExportEnabled();
+}
+
+/* =====================================================================
+   QUESTION SYNC
+===================================================================== */
+function syncQuestion(qid) {
+  const el = document.getElementById(qid);
+  if (!el) return;
+  const bugId = Q_TO_BUG[qid];
+  if (bugId && el.value.trim().length >= 10) {
+    const fp = document.getElementById(FIX_DIV[bugId]);
+    if (fp && !fp.classList.contains('shown')) fp.classList.add('shown');
+    activateBugLines(bugId);
+    const dot = document.getElementById('dot-' + bugId.slice(1));
+    if (dot && !dot.classList.contains('found') && !dot.classList.contains('fixed')) {
+      dot.classList.add('found');
+      dot.setAttribute('aria-label', `Bug ${bugId.slice(1)} status: identified`);
+    }
+  }
+}
+
+/* =====================================================================
+   EXPORT ENABLED STATE
+===================================================================== */
+function updateExportEnabled() {
+  const allAnswered = ALL_QS.every(id => {
+    const el = document.getElementById(id);
+    return el && el.value.trim().length > 0;
+  });
+  document.getElementById('export-btn').disabled = !allAnswered;
+}
+
+/* Wire up all question textareas */
+ALL_QS.forEach(qid => {
+  const el = document.getElementById(qid);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    syncQuestion(qid);
+    updateExportEnabled();
+    if (window.TraceLiveShare) {
+      window.TraceLiveShare.syncBroadcast({ type: 'answer-update', qid, value: el.value });
+    }
+  });
+});
+
+/* =====================================================================
+   RESET
+===================================================================== */
+function resetAll() {
+  fixed.clear();
+
+  ALL_QS.forEach(qid => {
+    const el = document.getElementById(qid);
+    if (el) el.value = '';
+  });
+
+  document.querySelectorAll('.bug-dot').forEach(d => {
+    d.classList.remove('found', 'fixed');
+  });
+  document.querySelectorAll('.fix-prompt').forEach(fp =>
+    fp.classList.remove('shown')
+  );
+
+  CODE.forEach((line, i) => {
+    if (!line.bugId) return;
+    const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+    if (cell) cell.innerHTML = hi(line.t);
+  });
+
+  updateExportEnabled();
+  window.TraceLiveShare?.reset();
+
+  const firstQ = document.getElementById(ALL_QS[0]);
+  if (firstQ && !firstQ.disabled) firstQ.focus();
+}
+
+/* =====================================================================
+   STEP 3 -- QUESTION & BUG METADATA
+   FILL: Q_META labels -- neutral, no bug descriptions, no "Bug X fix"
+   FILL: BUG_META -- neutral labels, NO fix field
+   See SPEC.md §7.1 and §9.2.
+===================================================================== */
+const Q_META = [
+  /* FILL: { id, anchor, label }
+     Labels must NOT reveal bug types. Never use "Bug X fix" as a label. */
+  { id: 'q1', anchor: 'Lines 1-3', label: 'Variable values'      },
+  { id: 'q2', anchor: 'Line 5',    label: 'Condition evaluation'  },
+  { id: 'q3', anchor: 'Lines 6-9', label: 'Program output'        },
+  { id: 'q4', anchor: 'Line 11',   label: 'Output line'           },
+];
+
+const BUG_META = [
+  /* FILL: { bugId, line, label, original }
+     label = 'Bug 1', 'Bug 2', etc.
+     NO fix field -- storing the correct answer here is an anti-spoiler
+     violation. See SPEC.md §9.2. */
+  { bugId: 'b1', line: 5,  label: 'Bug 1', original: 'if (score > threshold) {'             },
+  { bugId: 'b2', line: 11, label: 'Bug 2', original: 'System.out.println("Player: " + score);' },
+];
+
+/* =====================================================================
+   STEP 4 -- EXPORT
+   FILL: title, filename, AI review prompt.
+   No em dashes (\u2014) anywhere in export strings -- use -- instead.
+===================================================================== */
+function exportMarkdown() {
+  const out = [];
+
+  /* Header -- no em dashes */
+  /* FILL: scenario name and topic */
+  out.push('# Score Tracker -- Debug & Trace Session');
+  out.push('');
+  /* FILL: week number, day, Java topic */
+  out.push('**Week X, Thursday | Topic: if/else, comparison operators**');
+  out.push('');
+
+  /* Live-share room line (only if in a room) */
+  const _ls = window.TraceLiveShare?.getState?.();
+  if (_ls?.mode === 'room' && _ls.roomCode) {
+    const owners = (_ls.questionOwners || [])
+      .map((o, i) => `Q${i + 1}: ${o || 'unanswered'}`).join(' - ');
+    out.push(`**Room: ${_ls.roomCode} | Cohort ${_ls.cohort} | ${owners}**`);
+    out.push('');
+  }
+
+  /* Bug board */
+  out.push('## Bug Board');
+  out.push('');
+  out.push('| # | Line | Label | Status |');
+  out.push('|---|------|-------|--------|');
+  BUG_META.forEach((b, i) => {
+    const status = fixed.has(b.bugId) ? 'FIXED' : 'OPEN';
+    out.push(`| ${i + 1} | ${b.line} | ${b.label} | ${status} |`);
+  });
+  out.push('');
+
+  /* Trace answers -- no em dashes */
+  out.push('## Trace Answers');
+  out.push('');
+  Q_META.forEach((q, i) => {
+    const el  = document.getElementById(q.id);
+    const ans = el ? el.value.trim() : '';
+    out.push(`### Q${i + 1} -- ${q.label} (${q.anchor})`);
+    out.push('');
+    out.push(ans || '_(no answer entered)_');
+    out.push('');
+  });
+
+  /* Code snapshot */
+  out.push('## Code Snapshot');
+  out.push('');
+  out.push('```java');
+  CODE.forEach((line, i) => {
+    if (!line.bugId) { out.push(line.t); return; }
+    const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+    const inp  = cell?.querySelector('input.bug-input');
+    out.push(inp ? inp.value : line.t);
+  });
+  out.push('```');
+  out.push('');
+
+  /* AI review prompt */
+  out.push('## AI Review Prompt');
+  out.push('');
+  out.push('> Paste the code snapshot above into Claude or ChatGPT, then send:');
+  out.push('');
+  /* FILL: customise for this session's Java topic -- no em dashes */
+  out.push(
+`I am a Java bootcamp student working on if/else statements and comparison operators.
+
+The code above contains bugs I traced in a debugging session. Please:
+
+1. For each of my trace answers, tell me what I got right and what I missed.
+   Only flag genuine misconceptions -- do not manufacture criticism.
+
+2. For any blank answers, give the correct answer and explain why it matters.
+
+3. For each bug: explain in plain terms what went wrong, why Java behaves that way,
+   and what the fix achieves.
+
+4. Close with 2-3 follow-up questions that push me one level deeper than what
+   this session covered.
+
+Be accurate first. Credit what is right, then address genuine gaps.`
+  );
+  out.push('');
+  out.push('---');
+  /* FILL: app name in footer line -- no em dashes */
+  out.push('_Generated by Score Tracker Debug & Trace Session_');
+
+  /* Download */
+  const blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  /* FILL: download filename -- kebab-case scenario name */
+  a.download = 'score-tracker-trace.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* =====================================================================
+   THEME TOGGLE
+   Light mode is always the default. Moon icon shown in light mode.
+===================================================================== */
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark'
+    ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('trace-theme', next);
+  document.getElementById('theme-icon').textContent = next === 'dark' ? '\u2600' : '\uD83C\uDF19';
+  document.getElementById('theme-toggle').setAttribute('aria-label',
+    next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+}
+
+/* Sync icon with initial theme on load */
+(function() {
+  const t = document.documentElement.getAttribute('data-theme') || 'light';
+  const icon = document.getElementById('theme-icon');
+  const btn  = document.getElementById('theme-toggle');
+  if (icon) icon.textContent = t === 'dark' ? '\u2600' : '\uD83C\uDF19';
+  if (btn)  btn.setAttribute('aria-label',
+    t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+})();
+
+/* =====================================================================
+   STEP 5 -- TRACE ADAPTER (Live Share interface)
+   FILL: appId -- must be unique across all trace apps.
+   Convention: w{week}{day}-trace  e.g. w1thur, w5thur, w6tue
+===================================================================== */
+window.TRACE_ADAPTER = {
+  /* FILL: unique app id */
+  appId: 'wXday-trace',
+
+  /* FILL: scenario name and subtitle -- no em dashes */
+  title:    'Score Tracker',
+  subtitle: 'Debug & Trace -- Week X, Thursday',
+
+  accent:        'var(--accent-1, #1e5f74)',
+  joinBtnClass:  'top-btn',
+  soloBtnClass:  'top-btn',
+  channelPrefix: 'trc',
+
+  /* FILL: one entry per question, hasBug: true if answering this
+     question unlocks a bug line */
+  questions: [
+    { id: 'q1', hasBug: false },
+    { id: 'q2', hasBug: true  },  /* b1 */
+    { id: 'q3', hasBug: false },
+    { id: 'q4', hasBug: true  },  /* b2 */
+  ],
+
+  getAnswer(qid)     { return document.getElementById(qid)?.value || ''; },
+
+  setAnswer(qid, val) {
+    const el = document.getElementById(qid);
+    if (!el) return;
+    el.value = val;
+    syncQuestion(qid);
+    updateExportEnabled();
+  },
+
+  getFixValues() {
+    const vals = {};
+    BUG_META.forEach(b => {
+      CODE.forEach((line, i) => {
+        if (line.bugId !== b.bugId) return;
+        const cell = document.getElementById('bcell-' + b.bugId + '-' + i);
+        const inp  = cell?.querySelector('input.bug-input');
+        if (inp) vals[b.bugId] = inp.value;
+      });
+    });
+    return vals;
+  },
+
+  applyFixValue(key, val) {
+    activateBugLines(key);
+    CODE.forEach((line, i) => {
+      if (line.bugId !== key) return;
+      const cell = document.getElementById('bcell-' + key + '-' + i);
+      const inp  = cell?.querySelector('input.bug-input');
+      if (!inp) return;
+      inp.value = val;
+      checkFix(key, inp, line);
+    });
+  },
+
+  isDoneReady(qIdx) {
+    const q       = this.questions[qIdx];
+    const el      = document.getElementById(q.id);
+    const hasText = el && el.value.trim().length > 0;
+    if (!hasText) return false;
+    const bugId   = Q_TO_BUG[q.id];
+    return bugId ? fixed.has(bugId) : true;
+  },
+
+  setEditable(qIdx, editable) {
+    const q     = this.questions[qIdx];
+    const bugId = Q_TO_BUG[q.id];
+    if (!bugId) return;
+    CODE.forEach((line, i) => {
+      if (line.bugId !== bugId) return;
+      const cell = document.getElementById('bcell-' + bugId + '-' + i);
+      const inp  = cell?.querySelector('input.bug-input');
+      if (!inp || inp.classList.contains('correct')) return;
+      if (editable) inp.removeAttribute('disabled');
+      else inp.setAttribute('disabled', true);
+    });
+  },
+
+  onReset() {
+    fixed.clear();
+    Object.values(FIX_DIV).forEach(id => {
+      document.getElementById(id)?.classList.remove('shown');
+    });
+    CODE.forEach((line, i) => {
+      if (!line.bugId) return;
+      const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+      if (cell) cell.innerHTML = hi(line.t);
+    });
+    document.querySelectorAll('.bug-dot').forEach(d => {
+      d.classList.remove('found', 'fixed');
+    });
+    updateExportEnabled();
+  },
+};
+
+/* =====================================================================
+   INIT
+===================================================================== */
+buildCode();
+updateExportEnabled();
+</script>
+
+<!-- Live Share script -- path relative to this file's location -->
+<script src="../../shared/trace-liveshare.js"></script>
+</body>
+</html>

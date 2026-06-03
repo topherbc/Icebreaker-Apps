@@ -1,0 +1,124 @@
+/*
+  Python 3 -- Conditions
+  if, elif, else
+  No em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Line index comments mark each scenario's 0-based line numbers
+  (blank lines are not counted).
+*/
+STEPPER_REGISTRY.register("python-3/conditions", {
+  label: 'Conditions',
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: false,
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+  scenarios: [
+
+    /* ------------------------------------------------------------------ */
+    /*  1. Simple if (condition true)                                       */
+    /*                                                                      */
+    /*  0  score = 85                                                       */
+    /*  1  if score >= 60:                                                  */
+    /*  2      print("You passed!")                                         */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Simple if',
+      lines: [
+        { code: [['tok-op','score = '],['tok-num','85']] },
+        { code: [['tok-kw','if '],['tok-op','score >= '],['tok-num','60'],['tok-op',':']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"You passed!"'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'score',v:'85',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable assigned', text:'<hi>score = 85</hi> creates a variable and assigns it <hi>85</hi>.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'score',v:'85',fresh:false,cls:false}],active:true}],
+          expl:{label:'Condition: true', text:'Python evaluates <hi>score >= 60</hi>. 85 >= 60 is true -- the indented block runs.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'score',v:'85',fresh:false,cls:false}],active:true}],
+          expl:{label:'Inside the if block', text:'The condition was true, so execution enters the indented block. <hi>print("You passed!")</hi> runs.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'score',v:'85',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'The if block is done. There is nothing more to run after it.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  2. if / else (condition false -- takes the else branch)             */
+    /*                                                                      */
+    /*  0  score = 45                                                       */
+    /*  1  if score >= 60:                                                  */
+    /*  2      print("You passed!")                                         */
+    /*  3  else:                                                            */
+    /*  4      print("Try again.")                                          */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'if / else',
+      lines: [
+        { code: [['tok-op','score = '],['tok-num','45']] },
+        { code: [['tok-kw','if '],['tok-op','score >= '],['tok-num','60'],['tok-op',':']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"You passed!"'],['tok-op',')']] },
+        { code: [['tok-kw','else'],['tok-op',':']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"Try again."'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'score',v:'45',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable assigned', text:'<hi>score = 45</hi> creates a variable and assigns it <hi>45</hi>.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'Condition: false', text:'Python evaluates <hi>score >= 60</hi>. 45 >= 60 is false -- the if block is skipped entirely.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'else branch', text:'Because the condition was false, execution jumps to the <hi>else</hi> branch. Its body will run instead.'} },
+        { line:4, stack:[{name:'<module>',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'Inside else block', text:'<hi>print("Try again.")</hi> runs. Exactly one branch always executes -- either if or else, never both.'} },
+        { line:4, stack:[{name:'<module>',vars:[{n:'score',v:'45',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'The if/else is done. There is nothing more to run.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  3. if / elif / else chain (score = 75, matches third condition)     */
+    /*                                                                      */
+    /*  0  score = 75                                                       */
+    /*  1  if score >= 90:                                                  */
+    /*  2      print("A")                                                   */
+    /*  3  elif score >= 80:                                                */
+    /*  4      print("B")                                                   */
+    /*  5  elif score >= 70:                                                */
+    /*  6      print("C")                                                   */
+    /*  7  else:                                                            */
+    /*  8      print("F")                                                   */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'if / elif / else',
+      lines: [
+        { code: [['tok-op','score = '],['tok-num','75']] },
+        { code: [['tok-kw','if '],['tok-op','score >= '],['tok-num','90'],['tok-op',':']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"A"'],['tok-op',')']] },
+        { code: [['tok-kw','elif '],['tok-op','score >= '],['tok-num','80'],['tok-op',':']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"B"'],['tok-op',')']] },
+        { code: [['tok-kw','elif '],['tok-op','score >= '],['tok-num','70'],['tok-op',':']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"C"'],['tok-op',')']] },
+        { code: [['tok-kw','else'],['tok-op',':']] },
+        { code: [['','    '],['tok-meth','print'],['tok-op','('],['tok-str','"F"'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'score',v:'75',fresh:true,cls:false}],active:true}],
+          expl:{label:'Variable assigned', text:'<hi>score = 75</hi> creates a variable and assigns it <hi>75</hi>.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'First check: false', text:'Python evaluates <hi>score >= 90</hi>. 75 >= 90 is false -- skip this branch and try the next condition.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Second check: false', text:'Python evaluates <hi>score >= 80</hi>. 75 >= 80 is also false -- move on to the next condition.'} },
+        { line:5, stack:[{name:'<module>',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Third check: true', text:'Python evaluates <hi>score >= 70</hi>. 75 >= 70 is true -- this branch matches and will run.'} },
+        { line:6, stack:[{name:'<module>',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Matched branch runs', text:'<hi>print("C")</hi> executes. The remaining elif and else blocks are all skipped -- only one branch ever runs in an if/elif/else chain.'} },
+        { line:6, stack:[{name:'<module>',vars:[{n:'score',v:'75',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'The chain is done. The else block is never evaluated -- a match was already found.'} },
+      ]
+    },
+
+  ]
+});

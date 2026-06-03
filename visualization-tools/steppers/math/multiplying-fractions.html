@@ -1,0 +1,194 @@
+/*
+  Stepper module: Math / Multiplying fractions
+  Visual type: fraction-grid
+  TEMPLATE NOTE: no em dashes anywhere -- use plain hyphens or rewrite the sentence.
+*/
+STEPPER_REGISTRY.register("math/multiplying-fractions", {
+
+  label: 'Multiplying with fractions',
+
+  panelConfig: {
+    visual: { title: 'Area model' },
+    stack: false,
+    heap:  false,
+    custom: false,
+    editableInputs: [
+      { id: 'a', type: 'fraction', label: 'a', defaultVal: { n: 2, d: 3 }, min: 1, max: 12 },
+      { id: 'b', type: 'fraction', label: 'b', defaultVal: { n: 3, d: 4 }, min: 1, max: 12 },
+    ],
+    legend: [
+      { color:'#fdf0e0', border:'#e8c070', label:'Shaded (numerator product)' },
+      { color:'#eceae6', border:'#d4d1cc', label:'Unshaded (rest of grid)' },
+    ]
+  },
+
+  // Returns updated code lines when the user edits values (scenario 0 only)
+  getCodeLines(scenIdx, params) {
+    if (scenIdx !== 0 || !params?.a) return null;
+    const { a, b } = params;
+    return [
+      { code: [['tok-op','a = '],['tok-num', `${a.n}/${a.d}`]] },
+      { code: [['tok-op','b = '],['tok-num', `${b.n}/${b.d}`]] },
+      { code: [['tok-op','result = a * b']] },
+    ];
+  },
+
+  scenarios: [
+
+    // ----------------------------------------------------------------
+    // Scenario 1 -- 2/3 x 3/4
+    // Grid: 3 rows (denom of a) x 4 cols (denom of b)
+    //   Shaded: top-left 2 rows x 3 cols = 6 cells
+    //   Total:  12 cells
+    //   Result: 6/12 = 1/2
+    // Lines:
+    //   0: a = 2/3
+    //   1: b = 3/4
+    //   2: result = a * b
+    // ----------------------------------------------------------------
+    {
+      label: '2/3 x 3/4',
+      lines: [
+        { code: [['tok-op','a = '],['tok-num','2'],['tok-op','/'],['tok-num','3']] },
+        { code: [['tok-op','b = '],['tok-num','3'],['tok-op','/'],['tok-num','4']] },
+        { code: [['tok-op','result = a * b']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: { type:'fraction-grid', a:{n:2,d:3}, b:{n:3,d:4}, showGrid:false, shadedCells:0, highlightNew:false, showResult:false, result:{n:6,d:12,simplified:'1/2'} },
+          expl: { label:'First fraction', text:'<hi>a = 2/3</hi>. Two out of every three equal parts. The denominator 3 will become the number of rows in our grid.' }
+        },
+        {
+          line: 1,
+          visual: { type:'fraction-grid', a:{n:2,d:3}, b:{n:3,d:4}, showGrid:false, shadedCells:0, highlightNew:false, showResult:false, result:{n:6,d:12,simplified:'1/2'} },
+          expl: { label:'Second fraction', text:'<hi>b = 3/4</hi>. Three out of every four equal parts. The denominator 4 will become the number of columns in our grid.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:2,d:3}, b:{n:3,d:4}, showGrid:true, shadedCells:0, highlightNew:false, showResult:false, result:{n:6,d:12,simplified:'1/2'} },
+          expl: { label:'Build the grid', text:'The grid is <hi>3 rows x 4 columns = 12 cells</hi>. Each cell represents 1/12 of the whole. This is the denominator product: <hi>3 x 4 = 12</hi>.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:2,d:3}, b:{n:3,d:4}, showGrid:true, shadedCells:3, highlightNew:true, showResult:false, result:{n:6,d:12,simplified:'1/2'} },
+          expl: { label:'Shade row 1', text:'The top 2 rows represent 2/3. The left 3 columns represent 3/4. Start shading the intersection -- the top-left block.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:2,d:3}, b:{n:3,d:4}, showGrid:true, shadedCells:6, highlightNew:true, showResult:false, result:{n:6,d:12,simplified:'1/2'} },
+          expl: { label:'Shade row 2', text:'Two full rows of 3 columns each are now shaded. That is <hi>2 x 3 = 6 cells</hi>. This is the numerator product.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:2,d:3}, b:{n:3,d:4}, showGrid:true, shadedCells:6, highlightNew:false, showResult:true, result:{n:6,d:12,simplified:'1/2'} },
+          expl: { label:'Result: 6/12 = 1/2', text:'<hi>6</hi> shaded cells out of <hi>12</hi> total gives <hi>6/12</hi>. Numerators multiplied: 2 x 3 = 6. Denominators multiplied: 3 x 4 = 12. Simplified: <hi>1/2</hi>.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 2 -- 1/2 x 1/3
+    // Grid: 2 rows x 3 cols = 6 total
+    //   Shaded: top-left 1x1 = 1 cell
+    //   Result: 1/6
+    // Lines:
+    //   0: a = 1/2
+    //   1: b = 1/3
+    //   2: result = a * b
+    // ----------------------------------------------------------------
+    {
+      label: '1/2 x 1/3',
+      lines: [
+        { code: [['tok-op','a = '],['tok-num','1'],['tok-op','/'],['tok-num','2']] },
+        { code: [['tok-op','b = '],['tok-num','1'],['tok-op','/'],['tok-num','3']] },
+        { code: [['tok-op','result = a * b']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: { type:'fraction-grid', a:{n:1,d:2}, b:{n:1,d:3}, showGrid:false, shadedCells:0, highlightNew:false, showResult:false, result:{n:1,d:6,simplified:'1/6'} },
+          expl: { label:'a = 1/2', text:'<hi>a = 1/2</hi>. Exactly half. The grid will have 2 rows.' }
+        },
+        {
+          line: 1,
+          visual: { type:'fraction-grid', a:{n:1,d:2}, b:{n:1,d:3}, showGrid:false, shadedCells:0, highlightNew:false, showResult:false, result:{n:1,d:6,simplified:'1/6'} },
+          expl: { label:'b = 1/3', text:'<hi>b = 1/3</hi>. One third. The grid will have 3 columns.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:1,d:2}, b:{n:1,d:3}, showGrid:true, shadedCells:0, highlightNew:false, showResult:false, result:{n:1,d:6,simplified:'1/6'} },
+          expl: { label:'Build the grid', text:'<hi>2 rows x 3 columns = 6 cells</hi>. Each cell is 1/6 of the whole.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:1,d:2}, b:{n:1,d:3}, showGrid:true, shadedCells:1, highlightNew:true, showResult:false, result:{n:1,d:6,simplified:'1/6'} },
+          expl: { label:'The intersection', text:'1/2 covers the top 1 row. 1/3 covers the left 1 column. Their intersection is just <hi>1 cell</hi> -- the top-left corner.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:1,d:2}, b:{n:1,d:3}, showGrid:true, shadedCells:1, highlightNew:false, showResult:true, result:{n:1,d:6,simplified:'1/6'} },
+          expl: { label:'Result: 1/6', text:'<hi>1</hi> shaded cell out of <hi>6</hi> total: <hi>1/6</hi>. Numerators: 1 x 1 = 1. Denominators: 2 x 3 = 6. Multiplying fractions splits the whole into more pieces, making the result smaller.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 3 -- 3/4 x 2/5
+    // Grid: 4 rows x 5 cols = 20 total
+    //   Shaded: top-left 3x2 = 6 cells
+    //   Result: 6/20 = 3/10
+    // Lines:
+    //   0: a = 3/4
+    //   1: b = 2/5
+    //   2: result = a * b
+    // ----------------------------------------------------------------
+    {
+      label: '3/4 x 2/5',
+      lines: [
+        { code: [['tok-op','a = '],['tok-num','3'],['tok-op','/'],['tok-num','4']] },
+        { code: [['tok-op','b = '],['tok-num','2'],['tok-op','/'],['tok-num','5']] },
+        { code: [['tok-op','result = a * b']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: { type:'fraction-grid', a:{n:3,d:4}, b:{n:2,d:5}, showGrid:false, shadedCells:0, highlightNew:false, showResult:false, result:{n:6,d:20,simplified:'3/10'} },
+          expl: { label:'a = 3/4', text:'<hi>a = 3/4</hi>. Three of four equal parts. The grid will have 4 rows.' }
+        },
+        {
+          line: 1,
+          visual: { type:'fraction-grid', a:{n:3,d:4}, b:{n:2,d:5}, showGrid:false, shadedCells:0, highlightNew:false, showResult:false, result:{n:6,d:20,simplified:'3/10'} },
+          expl: { label:'b = 2/5', text:'<hi>b = 2/5</hi>. Two of five equal parts. The grid will have 5 columns.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:3,d:4}, b:{n:2,d:5}, showGrid:true, shadedCells:0, highlightNew:false, showResult:false, result:{n:6,d:20,simplified:'3/10'} },
+          expl: { label:'Build the grid', text:'<hi>4 rows x 5 columns = 20 cells</hi>. Each cell is 1/20. The denominator product 4 x 5 = 20 gives the total pieces.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:3,d:4}, b:{n:2,d:5}, showGrid:true, shadedCells:2, highlightNew:true, showResult:false, result:{n:6,d:20,simplified:'3/10'} },
+          expl: { label:'Shade row 1', text:'First row of the intersection: 2 cells (matching the numerator of b).' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:3,d:4}, b:{n:2,d:5}, showGrid:true, shadedCells:4, highlightNew:true, showResult:false, result:{n:6,d:20,simplified:'3/10'} },
+          expl: { label:'Shade row 2', text:'Second row: 2 more cells. Running total: <hi>4</hi>.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:3,d:4}, b:{n:2,d:5}, showGrid:true, shadedCells:6, highlightNew:true, showResult:false, result:{n:6,d:20,simplified:'3/10'} },
+          expl: { label:'Shade row 3', text:'Third row: 2 more cells. That is all 3 rows of the 3/4 covered. Total shaded: <hi>3 x 2 = 6</hi>.' }
+        },
+        {
+          line: 2,
+          visual: { type:'fraction-grid', a:{n:3,d:4}, b:{n:2,d:5}, showGrid:true, shadedCells:6, highlightNew:false, showResult:true, result:{n:6,d:20,simplified:'3/10'} },
+          expl: { label:'Result: 6/20 = 3/10', text:'<hi>6</hi> shaded cells out of <hi>20</hi> = <hi>6/20</hi>. Simplified: <hi>3/10</hi>. The rule: multiply the numerators, multiply the denominators, then simplify.' }
+        },
+      ]
+    },
+
+  ]
+
+});

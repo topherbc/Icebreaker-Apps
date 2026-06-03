@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Polymorphism Arena -- Pixel Forge Studios</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0a1a'/><rect x='4' y='4' width='8' height='8' fill='%2300ff99'/><rect x='12' y='4' width='8' height='8' fill='%2300ff99'/><rect x='20' y='4' width='8' height='8' fill='%2300ff99'/><rect x='4' y='12' width='8' height='8' fill='%2300ff99'/><rect x='20' y='12' width='8' height='8' fill='%2300ff99'/><rect x='4' y='20' width='8' height='8' fill='%2300ff99'/><rect x='12' y='20' width='8' height='8' fill='%2300ff99'/><rect x='20' y='20' width='8' height='8' fill='%2300ff99'/></svg>">
+<script>(function(){var t=localStorage.getItem('pf-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ===== TOKENS ===== */
+:root {
+  --bg:          #0a0a1a;
+  --surface:     #0f0f22;
+  --surface2:    #161628;
+  --surface3:    #1c1c35;
+  --border:      #252540;
+  --border-hi:   #353560;
+
+  --accent:      #00ff99;
+  --accent-glow: rgba(0,255,153,0.14);
+
+  --yellow:      #ffe600;
+  --yellow-bg:   rgba(255,230,0,0.07);
+  --red:         #ff4466;
+
+  --text:        #e4e4f0;
+  --text-mid:    #8888aa;
+  --text-dim:    #8080a8;
+
+  --dot-open:    #252540;
+  --dot-flag:    #ffe600;
+  --dot-fix:     #00ff99;
+
+  --header-h:    58px;
+  --bugbar-h:    44px;
+  /* syntax */
+  --kw: #ff79c6;
+  --ty: #44aaff;
+  --st: #ffe600;
+  --mt: #00ff99;
+  --nm: #ffaa44;
+  --an: #cc88ff;
+}
+
+[data-theme="light"] {
+  --bg:          #f2f2fa;
+  --surface:     #ffffff;
+  --surface2:    #eeeef8;
+  --surface3:    #e4e4f0;
+  --border:      #d0d0e8;
+  --border-hi:   #b0b0d0;
+
+  --accent:      #007744;
+  --accent-glow: rgba(0,119,68,0.08);
+
+  --yellow:      #996600;
+  --yellow-bg:   rgba(153,102,0,0.07);
+  --red:         #cc1133;
+
+  --text:        #1a1a2e;
+  --text-mid:    #555577;
+  --text-dim:    #606080;
+
+  --dot-open:    #ccccdd;
+  --dot-flag:    #996600;
+  --dot-fix:     #007744;
+
+  --kw: #aa1177;
+  --ty: #1155bb;
+  --st: #886600;
+  --mt: #006633;
+  --nm: #995500;
+  --an: #7722aa;
+}
+
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; font-size: 18px; background: var(--bg); color: var(--text); overflow: hidden; line-height: 1.6; }
+
+/* very faint scanlines, dark only */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 5px, rgba(0,0,0,0.02) 5px, rgba(0,0,0,0.02) 6px);
+  pointer-events: none; z-index: 9999;
+}
+[data-theme="light"] body::after { display: none; }
+
+/* ===== HEADER ===== */
+#hdr {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  display: flex; align-items: center; padding: 0 22px; gap: 18px;
+  z-index: 200;
+  box-shadow: 0 2px 24px rgba(0,255,153,0.08);
+}
+[data-theme="light"] #hdr { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+
+.hdr-logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px; color: var(--accent);
+  text-shadow: 0 0 14px rgba(0,255,153,0.35);
+  line-height: 1; flex-shrink: 0;
+}
+[data-theme="light"] .hdr-logo { text-shadow: none; }
+
+.hdr-sep { width: 1px; height: 22px; background: var(--border-hi); flex-shrink: 0; }
+
+.hdr-sub { font-size: 13px; font-weight: 500; color: var(--text-mid); flex-shrink: 0; }
+
+/* header controls push right */
+.hdr-ctrl { margin-left: auto; }
+
+/* bug dots cluster */
+.hdr-bugs { display: flex; align-items: center; gap: 14px; }
+
+/* ===== BUG BAR ===== */
+#bug-bar {
+  position: fixed; top: var(--header-h); left: 0; right: 0;
+  height: var(--bugbar-h);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 22px;
+  z-index: 150;
+}
+
+.bugs-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: var(--text-dim); letter-spacing: 1.5px;
+}
+
+.bugs-row { display: flex; gap: 10px; align-items: center; }
+
+.bug-item { display: flex; align-items: center; gap: 6px; }
+
+.bdot {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--dot-open); border: 2px solid var(--border-hi);
+  position: relative; flex-shrink: 0;
+  transition: background .22s, box-shadow .22s, border-color .22s;
+}
+.bdot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bdot.flagged { background: var(--dot-flag); border-color: var(--dot-flag); box-shadow: 0 0 8px rgba(255,230,0,.4); outline: 2px dashed var(--dot-flag); outline-offset: 2px; }
+.bdot.fixed   { background: var(--dot-fix);  border-color: var(--dot-fix);  box-shadow: 0 0 8px rgba(0,255,153,.4); outline: 3px solid var(--dot-fix); outline-offset: 2px; }
+[data-theme="light"] .bdot.flagged,
+[data-theme="light"] .bdot.fixed { box-shadow: none; }
+[data-theme="light"] .bdot.flagged { outline-color: var(--dot-flag); }
+[data-theme="light"] .bdot.fixed   { outline-color: var(--dot-fix); }
+
+.bdot::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%);
+  background: var(--surface3); border: 1px solid var(--border-hi);
+  color: var(--text-mid); font-family: 'DM Sans', sans-serif; font-size: 12px;
+  padding: 4px 8px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 300;
+}
+.bdot:hover::after { opacity: 1; }
+
+.bnum { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--text-dim); }
+
+/* dot legend */
+.dot-legend { display: flex; gap: 12px; align-items: center; border-left: 1px solid var(--border); padding-left: 14px; }
+.dl-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-dim); }
+.dl-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* header controls */
+.hdr-ctrl { display: flex; gap: 8px; }
+
+.cbtn {
+  height: 32px; padding: 0 14px;
+  border: 1.5px solid var(--border-hi); background: var(--surface2);
+  color: var(--text-mid);
+  font-family: 'Press Start 2P', monospace; font-size: 7px; letter-spacing: .5px;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.cbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.cbtn:disabled { opacity: .3; cursor: not-allowed; }
+.cbtn:disabled:hover { border-color: var(--border-hi); color: var(--text-mid); background: var(--surface2); }
+.theme-cbtn { width: 32px; padding: 0; font-size: 15px; font-family: 'DM Sans', sans-serif; }
+
+/* ===== LAYOUT ===== */
+#main {
+  display: grid; grid-template-columns: 1fr 1fr;
+  height: calc(100vh - var(--header-h) - var(--bugbar-h));
+  margin-top: calc(var(--header-h) + var(--bugbar-h));
+}
+
+.panel {
+  height: calc(100vh - var(--header-h) - var(--bugbar-h));
+  overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-hi) transparent;
+}
+.panel::-webkit-scrollbar { width: 5px; }
+.panel::-webkit-scrollbar-thumb { background: var(--border-hi); }
+
+#lpanel { border-right: 2px solid var(--border); background: var(--bg); }
+#question-panel { background: var(--surface); }
+
+/* ===== FILE TABS ===== */
+.file-tabs {
+  display: flex; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+
+.ftab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 16px; height: 38px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--text-dim); border: none;
+  border-bottom: 2px solid transparent; border-right: 1px solid var(--border);
+  background: transparent; cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s; white-space: nowrap;
+}
+.ftab:hover { color: var(--text-mid); background: rgba(255,255,255,.025); }
+[data-theme="light"] .ftab:hover { background: rgba(0,0,0,.028); }
+.ftab.active { color: var(--yellow); border-bottom-color: var(--yellow); background: var(--yellow-bg); }
+
+.tpip { width: 6px; height: 6px; border-radius: 50%; background: var(--border-hi); flex-shrink: 0; transition: background .2s, box-shadow .2s; }
+.tpip.bug   { background: var(--red);      box-shadow: 0 0 5px rgba(255,68,102,.5); }
+.tpip.fixed { background: var(--dot-fix);  box-shadow: 0 0 5px rgba(0,255,153,.5); }
+.tpip.none  { opacity: 0; pointer-events: none; }
+[data-theme="light"] .tpip.bug,
+[data-theme="light"] .tpip.fixed { box-shadow: none; }
+
+/* ===== CODE PANE ===== */
+.cpane { display: none; }
+.cpane.active { display: block; }
+
+.cblock {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.85; padding: 12px 0;
+}
+
+.cl { display: flex; align-items: flex-start; }
+.cl:hover { background: rgba(255,255,255,.02); }
+[data-theme="light"] .cl:hover { background: rgba(0,0,0,.025); }
+
+.ln {
+  width: 44px; min-width: 44px; text-align: right; padding-right: 14px;
+  color: var(--text-dim); font-size: 11px; padding-top: 2px;
+  user-select: none; flex-shrink: 0;
+}
+.lc { flex: 1; padding-right: 14px; white-space: pre; color: var(--text); }
+
+/* bug lines */
+.cl.bugline { background: var(--yellow-bg); border-left: 3px solid var(--yellow); }
+.cl.bugline .ln { color: var(--yellow); }
+.cl.bugline.resolved { background: rgba(0,255,153,.04); border-left-color: var(--dot-fix); }
+.cl.bugline.resolved .ln { color: var(--dot-fix); }
+
+.bug-inp {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.85;
+  background: transparent; border: none; outline: none;
+  color: var(--yellow); width: 100%; padding: 0; caret-color: var(--text);
+}
+.cl.bugline.resolved .bug-inp { color: var(--dot-fix); }
+
+.fix-badge {
+  font-family: 'Press Start 2P', monospace; font-size: 6px; color: var(--red);
+  padding: 0 10px; white-space: nowrap; align-self: center;
+  flex-shrink: 0; letter-spacing: .5px; opacity: .8;
+}
+.cl.bugline.resolved .fix-badge { color: var(--dot-fix); }
+
+/* syntax */
+.kw { color: var(--kw); } .ty { color: var(--ty); } .st { color: var(--st); }
+.mt { color: var(--mt); } .nm { color: var(--nm); } .an { color: var(--an); }
+
+/* ===== RIGHT PANEL ===== */
+.sec-div {
+  position: sticky; top: 0; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 9px 20px; display: flex; align-items: center; gap: 10px; z-index: 10;
+}
+.sec-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--yellow); letter-spacing: .8px; }
+.sec-rule  { flex: 1; height: 1px; background: var(--border); }
+
+.qblock {
+  padding: 16px 20px; border-bottom: 1px solid var(--border); transition: background .15s;
+}
+.qblock:focus-within { background: var(--surface2); }
+
+.qnum    { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--accent); margin-bottom: 6px; }
+.qanchor { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); font-style: italic; margin-bottom: 6px; }
+.qtext   { font-size: 16px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+
+.qinput {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 15px; line-height: 1.5; padding: 10px 12px;
+  resize: vertical; min-height: 74px; outline: none; transition: border-color .2s;
+}
+[data-theme="light"] .qinput { background: var(--surface2); }
+.qinput:focus { border-color: var(--accent); }
+.qinput::placeholder { color: var(--text-dim); font-style: italic; }
+
+/* Disable font ligatures — prevents >= rendering as ≥ in code display */
+.cblock, .bug-inp {
+  font-feature-settings: "liga" 0, "calt" 0;
+  font-variant-ligatures: none;
+}
+
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- HEADER -->
+<header id="hdr">
+  <div class="hdr-logo">POLYMORPHISM ARENA</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Pixel Forge Studios &mdash; Week 6, Day 4 &mdash; Abstract Classes &amp; Downcasting</div>
+
+  <div class="tb-spacer" style="flex:1"></div>
+  <div class="hdr-ctrl">
+    <button class="cbtn theme-cbtn" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">&#9728;</button>
+    <button class="cbtn" id="export-btn" onclick="doExport()" disabled>EXPORT</button>
+  </div>
+</header>
+
+<!-- BUG BAR -->
+<div id="bug-bar">
+  <div class="hdr-bugs">
+    <span class="bugs-label">BUGS</span>
+    <div class="bugs-row">
+      <div class="bug-item">
+        <div class="bdot" id="dot-1" tabindex="0" role="button"
+          data-state="open" 
+           aria-label="Bug 1 status: open"></div>
+        <span class="bnum">01</span>
+      </div>
+      <div class="bug-item">
+        <div class="bdot" id="dot-2" tabindex="0" role="button"
+          data-state="open" 
+          aria-label="Bug 2 status: open"></div>
+        <span class="bnum">02</span>
+      </div>
+      <div class="bug-item">
+        <div class="bdot" id="dot-3" tabindex="0" role="button"
+          data-state="open" 
+          aria-label="Bug 3 status: open"></div>
+        <span class="bnum">03</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- LEFT: tabbed code -->
+  <div class="panel" id="lpanel">
+
+    <div class="file-tabs">
+      <button class="ftab active" id="tab-fighter" onclick="switchTab('fighter')">
+        <span class="tpip bug" id="pip-fighter"></span>Fighter.java
+      </button>
+      <button class="ftab" id="tab-mage" onclick="switchTab('mage')">
+        <span class="tpip none" id="pip-mage"></span>Mage.java
+      </button>
+      <button class="ftab" id="tab-brawler" onclick="switchTab('brawler')">
+        <span class="tpip bug" id="pip-brawler"></span>Brawler.java
+      </button>
+      <button class="ftab" id="tab-arena" onclick="switchTab('arena')">
+        <span class="tpip bug" id="pip-arena"></span>Arena.java
+      </button>
+    </div>
+
+    <!-- Fighter.java -->
+    <div class="cpane active" id="pane-fighter">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">abstract class</span> <span class="ty">Fighter</span> {</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc">    <span class="kw">protected</span> <span class="ty">String</span> name;</span></div>
+<div class="cl"><span class="ln">3</span><span class="lc">    <span class="kw">protected</span> <span class="kw">int</span> power;</span></div>
+<div class="cl"><span class="ln">4</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">5</span><span class="lc">    <span class="ty">Fighter</span>(<span class="ty">String</span> name, <span class="kw">int</span> power) {</span></div>
+<div class="cl"><span class="ln">6</span><span class="lc">        <span class="kw">this</span>.name = name;</span></div>
+<div class="cl"><span class="ln">7</span><span class="lc">        <span class="kw">this</span>.power = power;</span></div>
+<div class="cl"><span class="ln">8</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">9</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">10</span><span class="lc">    <span class="ty">String</span> <span class="mt">getStats</span>() {</span></div>
+<div class="cl"><span class="ln">11</span><span class="lc">        <span class="kw">return</span> <span class="st">"["</span> + name + <span class="st">"] Power: "</span> + power;</span></div>
+<div class="cl"><span class="ln">12</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">13</span><span class="lc"></span></div>
+<div class="cl bugline" id="cl-b1a">
+  <span class="ln">14</span>
+  <input class="bug-inp" id="bi-b1a" value="    abstract void attack() {" autocomplete="off" spellcheck="false" oninput="evalBug1()">
+  <span class="fix-badge">FIX IT</span>
+</div>
+<div class="cl bugline" id="cl-b1b">
+  <span class="ln">15</span>
+  <input class="bug-inp" id="bi-b1b" value="    }" autocomplete="off" spellcheck="false" oninput="evalBug1()">
+  <span class="fix-badge"></span>
+</div>
+<div class="cl"><span class="ln">16</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+    <!-- Mage.java -->
+    <div class="cpane" id="pane-mage">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">class</span> <span class="ty">Mage</span> <span class="kw">extends</span> <span class="ty">Fighter</span> {</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc">    <span class="ty">Mage</span>(<span class="ty">String</span> name, <span class="kw">int</span> power) {</span></div>
+<div class="cl"><span class="ln">3</span><span class="lc">        <span class="kw">super</span>(name, power);</span></div>
+<div class="cl"><span class="ln">4</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">5</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">6</span><span class="lc">    <span class="an">@Override</span></span></div>
+<div class="cl"><span class="ln">7</span><span class="lc">    <span class="kw">void</span> <span class="mt">attack</span>() {</span></div>
+<div class="cl"><span class="ln">8</span><span class="lc">        <span class="ty">System</span>.out.<span class="mt">println</span>(name + <span class="st">" casts a spell for "</span> + power + <span class="st">" damage!"</span>);</span></div>
+<div class="cl"><span class="ln">9</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">10</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">11</span><span class="lc">    <span class="kw">void</span> <span class="mt">castShield</span>() {</span></div>
+<div class="cl"><span class="ln">12</span><span class="lc">        <span class="ty">System</span>.out.<span class="mt">println</span>(name + <span class="st">" raises a magic shield!"</span>);</span></div>
+<div class="cl"><span class="ln">13</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">14</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+    <!-- Brawler.java -->
+    <div class="cpane" id="pane-brawler">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">class</span> <span class="ty">Brawler</span> <span class="kw">extends</span> <span class="ty">Fighter</span> {</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc">    <span class="ty">Brawler</span>(<span class="ty">String</span> name, <span class="kw">int</span> power) {</span></div>
+<div class="cl"><span class="ln">3</span><span class="lc">        <span class="kw">super</span>(name, power);</span></div>
+<div class="cl"><span class="ln">4</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">5</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">6</span><span class="lc">    <span class="an">@Override</span></span></div>
+<div class="cl"><span class="ln">7</span><span class="lc">    <span class="kw">void</span> <span class="mt">attack</span>() {</span></div>
+<div class="cl"><span class="ln">8</span><span class="lc">        <span class="ty">System</span>.out.<span class="mt">println</span>(name + <span class="st">" delivers a crushing blow for "</span> + power + <span class="st">" damage!"</span>);</span></div>
+<div class="cl"><span class="ln">9</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">10</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">11</span><span class="lc">    <span class="kw">void</span> <span class="mt">chargeUp</span>() {</span></div>
+<div class="cl bugline" id="cl-b2">
+  <span class="ln">12</span>
+  <input class="bug-inp" id="bi-b2" value="        Fighter fighter = new Fighter(&quot;temp&quot;, 0);" autocomplete="off" spellcheck="false" oninput="evalBug2()">
+  <span class="fix-badge">FIX IT</span>
+</div>
+<div class="cl"><span class="ln">13</span><span class="lc">        <span class="ty">System</span>.out.<span class="mt">println</span>(name + <span class="st">" charges up for next round!"</span>);</span></div>
+<div class="cl"><span class="ln">14</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">15</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+    <!-- Arena.java -->
+    <div class="cpane" id="pane-arena">
+      <div class="cblock">
+<div class="cl"><span class="ln">1</span><span class="lc"><span class="kw">import</span> java.util.ArrayList;</span></div>
+<div class="cl"><span class="ln">2</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">3</span><span class="lc"><span class="kw">class</span> <span class="ty">PolymorphismArena</span> {</span></div>
+<div class="cl"><span class="ln">4</span><span class="lc">    <span class="kw">public static void</span> <span class="mt">main</span>(<span class="ty">String</span>[] args) {</span></div>
+<div class="cl"><span class="ln">5</span><span class="lc">        <span class="ty">ArrayList</span>&lt;<span class="ty">Fighter</span>&gt; roster = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();</span></div>
+<div class="cl"><span class="ln">6</span><span class="lc">        roster.<span class="mt">add</span>(<span class="kw">new</span> <span class="ty">Mage</span>(<span class="st">"Syra"</span>, <span class="nm">85</span>));</span></div>
+<div class="cl"><span class="ln">7</span><span class="lc">        roster.<span class="mt">add</span>(<span class="kw">new</span> <span class="ty">Brawler</span>(<span class="st">"Krag"</span>, <span class="nm">70</span>));</span></div>
+<div class="cl"><span class="ln">8</span><span class="lc">        roster.<span class="mt">add</span>(<span class="kw">new</span> <span class="ty">Mage</span>(<span class="st">"Vel"</span>, <span class="nm">60</span>));</span></div>
+<div class="cl"><span class="ln">9</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">10</span><span class="lc">        <span class="kw">for</span> (<span class="ty">Fighter</span> f : roster) {</span></div>
+<div class="cl"><span class="ln">11</span><span class="lc">            <span class="ty">System</span>.out.<span class="mt">println</span>(f.<span class="mt">getStats</span>());</span></div>
+<div class="cl"><span class="ln">12</span><span class="lc">            f.<span class="mt">attack</span>();</span></div>
+<div class="cl"><span class="ln">13</span><span class="lc">        }</span></div>
+<div class="cl"><span class="ln">14</span><span class="lc"></span></div>
+<div class="cl"><span class="ln">15</span><span class="lc">        <span class="ty">Fighter</span> first = roster.<span class="mt">get</span>(<span class="nm">0</span>);</span></div>
+<div class="cl bugline" id="cl-b3">
+  <span class="ln">16</span>
+  <input class="bug-inp" id="bi-b3" value="        ((Brawler) first).castShield();" autocomplete="off" spellcheck="false" oninput="evalBug3()">
+  <span class="fix-badge">FIX IT</span>
+</div>
+<div class="cl"><span class="ln">17</span><span class="lc">    }</span></div>
+<div class="cl"><span class="ln">18</span><span class="lc">}</span></div>
+      </div>
+    </div>
+
+  </div><!-- /lpanel -->
+
+  <!-- RIGHT: questions -->
+  <div class="panel" id="question-panel">
+
+    <!-- Section 1 -->
+    <div class="sec-div">
+      <span class="sec-label">Section 1 &mdash; The Abstract Class</span>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="qblock" id="card-q1">
+      <div class="qnum">Q1</div>
+      <div class="qanchor">Fighter.java &mdash; class declaration</div>
+      <div class="qtext">Fighter is declared abstract and has a method also declared abstract. What are the two things you cannot do with an abstract class, and what must every concrete subclass do because of that abstract method?</div>
+      <textarea class="qinput" id="q1" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="qblock" id="card-q2">
+      <div class="qnum">Q2</div>
+      <div class="qanchor">Fighter.java &mdash; attack() declaration, lines 14&ndash;15 (Bug 1)</div>
+      <div class="qtext">Read the attack() method in Fighter carefully. There is a structural problem with how it is written. What is it, and why does Java not allow it?</div>
+      <textarea class="qinput" id="q2" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="sec-div">
+      <span class="sec-label">Section 2 &mdash; The Subclasses</span>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="qblock" id="card-q3">
+      <div class="qnum">Q3</div>
+      <div class="qanchor">Mage.java and Brawler.java &mdash; attack() implementations</div>
+      <div class="qtext">Both Mage and Brawler implement attack(). What would happen if one of them did not &mdash; what would Java force you to do or not do?</div>
+      <textarea class="qinput" id="q3" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="qblock" id="card-q4">
+      <div class="qnum">Q4</div>
+      <div class="qanchor">Brawler.java &mdash; chargeUp() body, line 12 (Bug 2)</div>
+      <div class="qtext">Look at what chargeUp() does inside its body. There is a structural error here that has nothing to do with what the method is supposed to accomplish. What is it?</div>
+      <textarea class="qinput" id="q4" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="sec-div">
+      <span class="sec-label">Section 3 &mdash; Polymorphism and Downcasting</span>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="qblock" id="card-q5">
+      <div class="qnum">Q5</div>
+      <div class="qanchor">Arena.java &mdash; for-each loop, lines 10&ndash;13</div>
+      <div class="qtext">The roster holds Mage and Brawler objects but the loop variable is typed as Fighter. When attack() is called on each element &mdash; which version runs for each fighter? Walk through your reasoning step by step.</div>
+      <textarea class="qinput" id="q5" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="qblock" id="card-q6">
+      <div class="qnum">Q6</div>
+      <div class="qanchor">Arena.java &mdash; downcast on line 16 (Bug 3)</div>
+      <div class="qtext">Find the downcast on line 16. There is a structural bug here. Identify it and explain exactly why it fails at runtime even though it compiles.</div>
+      <textarea class="qinput" id="q6" placeholder="Type your prediction here..." oninput="checkExport()"></textarea>
+    </div>
+
+    <div class="qblock" id="card-q7">
+      <div class="qnum">Q7</div>
+      <div class="qanchor">Arena.java &mdash; full program, all files</div>
+      <div class="qtext">Once all three bugs are fixed, write the exact console output this program produces from top to bottom.</div>
+      <textarea class="qinput" id="q7" placeholder="Type your prediction here..." oninput="checkExport()" style="min-height:140px;font-family:'JetBrains Mono',monospace;font-size:13px;"></textarea>
+    </div>
+
+    <div style="height:14px;"></div>
+
+  </div><!-- /question-panel -->
+
+</div><!-- /main -->
+
+<script>
+// ===== SOURCE OF TRUTH: clean Java per file =====
+const SOURCES = {
+  fighter: [
+    'abstract class Fighter {',
+    '    protected String name;',
+    '    protected int power;',
+    '',
+    '    Fighter(String name, int power) {',
+    '        this.name = name;',
+    '        this.power = power;',
+    '    }',
+    '',
+    '    String getStats() {',
+    '        return "[" + name + "] Power: " + power;',
+    '    }',
+    '',
+    '    abstract void attack() {',   // BUG 1 -- intentional
+    '    }',                           // BUG 1 -- intentional
+    '}',
+  ],
+  mage: [
+    'class Mage extends Fighter {',
+    '    Mage(String name, int power) {',
+    '        super(name, power);',
+    '    }',
+    '',
+    '    @Override',
+    '    void attack() {',
+    '        System.out.println(name + " casts a spell for " + power + " damage!");',
+    '    }',
+    '',
+    '    void castShield() {',
+    '        System.out.println(name + " raises a magic shield!");',
+    '    }',
+    '}',
+  ],
+  brawler: [
+    'class Brawler extends Fighter {',
+    '    Brawler(String name, int power) {',
+    '        super(name, power);',
+    '    }',
+    '',
+    '    @Override',
+    '    void attack() {',
+    '        System.out.println(name + " delivers a crushing blow for " + power + " damage!");',
+    '    }',
+    '',
+    '    void chargeUp() {',
+    '        Fighter fighter = new Fighter("temp", 0);',  // BUG 2 -- intentional
+    '        System.out.println(name + " charges up for next round!");',
+    '    }',
+    '}',
+  ],
+  arena: [
+    'import java.util.ArrayList;',
+    '',
+    'class PolymorphismArena {',
+    '    public static void main(String[] args) {',
+    '        ArrayList<Fighter> roster = new ArrayList<>();',
+    '        roster.add(new Mage("Syra", 85));',
+    '        roster.add(new Brawler("Krag", 70));',
+    '        roster.add(new Mage("Vel", 60));',
+    '',
+    '        for (Fighter f : roster) {',
+    '            System.out.println(f.getStats());',
+    '            f.attack();',
+    '        }',
+    '',
+    '        Fighter first = roster.get(0);',
+    '        ((Brawler) first).castShield();',       // BUG 3 -- intentional
+    '    }',
+    '}',
+  ],
+};
+
+// ===== TABS =====
+const TABS = ['fighter','mage','brawler','arena'];
+function switchTab(id) {
+  TABS.forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === id);
+    document.getElementById('pane-' + t).classList.toggle('active', t === id);
+  });
+}
+
+// ===== DOT CYCLING =====
+const DOT_STATES = ['open','flagged','fixed'];
+function cycleDot(n) {
+  const dot = document.getElementById('dot-' + n);
+  const cur = dot.getAttribute('data-state');
+  const next = DOT_STATES[(DOT_STATES.indexOf(cur) + 1) % 3];
+  dot.setAttribute('data-state', next);
+  dot.className = 'bdot' + (next !== 'open' ? ' ' + next : '');
+  dot.setAttribute('aria-label', 'Bug ' + n + ' status: ' + next);
+  updateSB();
+}
+function dotKey(e, n) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cycleDot(n); } }
+function updateSB() {}
+
+// ===== BUG VALIDATORS =====
+let _lsBugApplying = false;
+
+// Bug 1: abstract method must have NO body -- just a semicolon on line 14, line 15 blank/gone
+function evalBug1() {
+  const a = document.getElementById('bi-b1a').value.trim();
+  const b = document.getElementById('bi-b1b').value.trim();
+  const fixed = /abstract\s+void\s+attack\s*\(\s*\)\s*;/.test(a) && b === '';
+  ['cl-b1a','cl-b1b'].forEach(id => document.getElementById(id).classList.toggle('resolved', fixed));
+  setPip('fighter', fixed);
+  if (window.TraceLiveShare && !_lsBugApplying) {
+    const qIdx = window.TraceLiveShare.getState()?.currentQ;
+    if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    ['bi-b1a','bi-b1b'].forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp) window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: id, value: inp.value });
+    });
+  }
+}
+
+// Bug 2: new Fighter(...) must be removed -- line should be empty or not contain "new Fighter"
+function evalBug2() {
+  const v = document.getElementById('bi-b2').value.trim();
+  const fixed = v === '';
+  document.getElementById('cl-b2').classList.toggle('resolved', fixed);
+  setPip('brawler', fixed);
+  if (window.TraceLiveShare && !_lsBugApplying) {
+    const qIdx = window.TraceLiveShare.getState()?.currentQ;
+    if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    const inp = document.getElementById('bi-b2');
+    if (inp) window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: 'bi-b2', value: inp.value });
+  }
+}
+
+// Bug 3: cast must be to Mage (not Brawler), calling castShield()
+function evalBug3() {
+  const v = document.getElementById('bi-b3').value.trim();
+  const fixed = /\(\s*\(\s*Mage\s*\)\s*first\s*\)\s*\.\s*castShield\s*\(\s*\)\s*;/.test(v);
+  document.getElementById('cl-b3').classList.toggle('resolved', fixed);
+  setPip('arena', fixed);
+  if (window.TraceLiveShare && !_lsBugApplying) {
+    const qIdx = window.TraceLiveShare.getState()?.currentQ;
+    if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    const inp = document.getElementById('bi-b3');
+    if (inp) window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey: 'bi-b3', value: inp.value });
+  }
+}
+
+function setPip(tab, fixed) {
+  const pip = document.getElementById('pip-' + tab);
+  if (pip) pip.className = fixed ? 'tpip fixed' : 'tpip bug';
+}
+
+// ===== EXPORT GATING =====
+function checkExport() {
+  const hasQ = [1,2,3,4,5,6,7].some(n => document.getElementById('q'+n).value.trim());
+  document.getElementById('export-btn').disabled = !hasQ;
+}
+
+// ===== THEME =====
+function toggleTheme() {
+  const dark = document.body.getAttribute('data-theme') === 'dark';
+  document.body.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('theme-btn').innerHTML = dark ? '&#127769;' : '&#9728;';
+}
+
+// ===== EXPORT =====
+function dotLabel(n) { return document.getElementById('dot-'+n).getAttribute('data-state').toUpperCase(); }
+
+function getFixAttempt(bugId) {
+  // Read current value from the code pane input
+  const map = { 1: ['bi-b1a','bi-b1b'], 2: ['bi-b2'], 3: ['bi-b3'] };
+  return map[bugId].map(id => document.getElementById(id).value).join('\n');
+}
+
+function doExport() {
+  const now = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const qs  = [1,2,3,4,5,6,7].map(n => document.getElementById('q'+n).value.trim() || '(no answer)');
+
+  let md = '';
+  md += `# Polymorphism Arena -- Trace Session\n`;
+  md += `**${now}**\n`;
+  md += `**Week 6, Thursday -- Abstract Classes, Polymorphism, Downcasting**\n\n`;
+  md += `---\n\n`;
+
+  // ---- Full source: all four files ----
+  md += `## Java Program\n\n`;
+  for (const [fname, lines] of [
+    ['Fighter.java',          SOURCES.fighter],
+    ['Mage.java',             SOURCES.mage],
+    ['Brawler.java',          SOURCES.brawler],
+    ['PolymorphismArena.java (Arena.java)', SOURCES.arena],
+  ]) {
+    md += `### ${fname}\n\n`;
+    md += '```java\n';
+    md += lines.join('\n') + '\n';
+    md += '```\n\n';
+  }
+
+  // ---- Bug board ----
+  md += `---\n\n## Bug Board\n\n`;
+  md += `| # | File | Location | Type | Dot Status |\n`;
+  md += `|---|------|----------|------|------------|\n`;
+  md += `| 01 | Fighter.java | Lines 14-15 | Abstract method with body (syntax) | ${dotLabel(1)} |\n`;
+  md += `| 02 | Brawler.java | Line 12 | Instantiation of abstract class | ${dotLabel(2)} |\n`;
+  md += `| 03 | Arena.java   | Line 16 | Wrong downcast target type | ${dotLabel(3)} |\n\n`;
+
+  // ---- Fix attempts (from code pane inputs) ----
+  md += `### Fix Attempts\n\n`;
+  md += `**Bug 01 -- Fighter.java lines 14-15**\n`;
+  md += '```java\n' + getFixAttempt(1) + '\n```\n\n';
+  md += `**Bug 02 -- Brawler.java line 12**\n`;
+  md += '```java\n' + getFixAttempt(2) + '\n```\n\n';
+  md += `**Bug 03 -- Arena.java line 16**\n`;
+  md += '```java\n' + getFixAttempt(3) + '\n```\n\n';
+
+  // ---- Questions ----
+  md += `---\n\n`;
+
+  const sections = [
+    { label: 'Section 1 -- The Abstract Class', qs: [0,1] },
+    { label: 'Section 2 -- The Subclasses',      qs: [2,3] },
+    { label: 'Section 3 -- Polymorphism and Downcasting', qs: [4,5,6] },
+  ];
+  const qtexts = [
+    'Fighter is declared abstract and has a method also declared abstract. What are the two things you cannot do with an abstract class, and what must every concrete subclass do because of that abstract method?',
+    'Read the attack() method in Fighter carefully. There is a structural problem with how it is written. What is it, and why does Java not allow it?',
+    'Both Mage and Brawler implement attack(). What would happen if one of them did not -- what would Java force you to do or not do?',
+    'Look at what chargeUp() does inside its body. There is a structural error here that has nothing to do with what the method is supposed to accomplish. What is it?',
+    'The roster holds Mage and Brawler objects but the loop variable is typed as Fighter. When attack() is called on each element -- which version runs for each fighter? Walk through your reasoning step by step.',
+    'Find the downcast on line 16. There is a structural bug here. Identify it and explain exactly why it fails at runtime even though it compiles.',
+    'Once all three bugs are fixed, write the exact console output this program produces from top to bottom.',
+  ];
+  const qanchors = [
+    'Fighter.java -- class declaration',
+    'Fighter.java -- attack() declaration, lines 14-15 (Bug 1)',
+    'Mage.java and Brawler.java -- attack() implementations',
+    'Brawler.java -- chargeUp() body, line 12 (Bug 2)',
+    'Arena.java -- for-each loop, lines 10-13',
+    'Arena.java -- downcast on line 16 (Bug 3)',
+    'Arena.java -- full program, all files',
+  ];
+
+  for (const sec of sections) {
+    md += `## ${sec.label}\n\n`;
+    for (const qi of sec.qs) {
+      md += `**Q${qi+1}** *(${qanchors[qi]})*\n\n`;
+      md += `${qtexts[qi]}\n\n`;
+      md += `> ${qs[qi].replace(/\n/g, '\n> ')}\n\n`;
+    }
+  }
+
+  // ---- AI Review Prompt ----
+  md += `---\n\n## AI Review Prompt\n\n`;
+  md += `> You are a Java instructor reviewing a student trace session on abstract classes, polymorphism, and downcasting (Java 17, Week 6).\n`;
+  md += `>\n`;
+  md += `> The program is PolymorphismArena -- an abstract Fighter class with Mage and Brawler subclasses. The main method builds an ArrayList<Fighter>, adds Mage and Brawler instances, loops over the roster calling getStats() and attack() polymorphically, then downcasts the first element to access a subclass-specific method.\n`;
+  md += `>\n`;
+  md += `> Three structural bugs were present:\n`;
+  md += `> 1. Fighter.java lines 14-15: abstract method attack() has a body with curly braces -- abstract methods cannot have a body.\n`;
+  md += `> 2. Brawler.java line 12: chargeUp() attempts to instantiate Fighter directly with new Fighter() -- abstract classes cannot be instantiated.\n`;
+  md += `> 3. Arena.java line 16: the downcast casts first (which holds a Mage) to Brawler -- this compiles but throws ClassCastException at runtime.\n`;
+  md += `>\n`;
+  md += `> Review the student responses above. For each bug and question: identify what the student got right, what they missed or stated imprecisely, and one concrete follow-up question to deepen understanding. Focus on: what abstract means at both class and method level, how Java enforces the abstract method contract, why abstract classes cannot be instantiated, how polymorphic dispatch works at runtime versus compile-time type checking, and why an incorrect downcast throws ClassCastException rather than a compile error. Be direct. Credit what is right. Do not manufacture criticism where the answer is sound.\n`;
+
+  const blob = new Blob([md], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'polymorphism-arena-trace.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// =====================================================================
+// TRACE ADAPTER — consumed by ../shared/trace-liveshare.js
+// =====================================================================
+window.TRACE_ADAPTER = {
+  title:         'Polymorphism Arena',
+  subtitle:      'Abstract Classes &amp; Downcasting &mdash; Week 6, Thursday',
+  accent:        'var(--accent, #00ff99)',
+  joinBtnClass:  'cbtn',
+  soloBtnClass:  'cbtn',
+  landingVars: {
+    bg:     'var(--bg)',
+    card:   'var(--surface)',
+    border: 'var(--border)',
+    text:   'var(--text)',
+    textSub:'var(--text-mid)',
+    input:  'var(--surface2)',
+  },
+  channelPrefix: 'tdd',
+  questions: [
+    { id: 'q1', hasBug: false },
+    { id: 'q2', hasBug: true  },  // Bug 1
+    { id: 'q3', hasBug: false },
+    { id: 'q4', hasBug: true  },  // Bug 2
+    { id: 'q5', hasBug: false },
+    { id: 'q6', hasBug: true  },  // Bug 3
+    { id: 'q7', hasBug: false },
+  ],
+  // Map question index (0-based) to bug number (1-based): 0 = no bug
+  _qToBug: [0, 1, 0, 2, 0, 3, 0],
+  // The actual <input> element IDs for each bug
+  _bugInputIds: {
+    1: ['bi-b1a', 'bi-b1b'],
+    2: ['bi-b2'],
+    3: ['bi-b3'],
+  },
+  // Original buggy values for reset
+  _bugOriginals: {
+    'bi-b1a': '    abstract void attack() {',
+    'bi-b1b': '    }',
+    'bi-b2':  '        Fighter fighter = new Fighter("temp", 0);',
+    'bi-b3':  '        ((Brawler) first).castShield();',
+  },
+  // Container div IDs that carry the 'resolved' class
+  _bugContainerIds: {
+    1: ['cl-b1a', 'cl-b1b'],
+    2: ['cl-b2'],
+    3: ['cl-b3'],
+  },
+  _isBugFixed(bugN) {
+    // A bug is fixed when all its container divs have the 'resolved' class
+    return (this._bugContainerIds[bugN] || []).every(id => {
+      const el = document.getElementById(id);
+      return el && el.classList.contains('resolved');
+    });
+  },
+  getAnswer(qid) {
+    return document.getElementById(qid)?.value || '';
+  },
+  setAnswer(qid, val) {
+    const el = document.getElementById(qid);
+    if (el) el.value = val;
+    checkExport();
+  },
+  getFixValues() {
+    const vals = {};
+    [1, 2, 3].forEach(bugN => {
+      (this._bugInputIds[bugN] || []).forEach(id => {
+        const inp = document.getElementById(id);
+        if (inp) vals[id] = inp.value;
+      });
+    });
+    return vals;
+  },
+  applyFixValue(key, val) {
+    const inp = document.getElementById(key);
+    if (!inp) return;
+    inp.value = val;
+    _lsBugApplying = true;
+    // Fire the relevant eval function so resolved class and pip update
+    [1, 2, 3].forEach(bugN => {
+      if ((this._bugInputIds[bugN] || []).includes(key)) {
+        const evalFn = [null, evalBug1, evalBug2, evalBug3][bugN];
+        if (evalFn) evalFn();
+        // Sync dot state
+        const fixed = this._isBugFixed(bugN);
+        const dot = document.getElementById('dot-' + bugN);
+        if (dot) {
+          const state = fixed ? 'fixed' : 'flagged';
+          dot.setAttribute('data-state', state);
+          dot.className = 'bdot ' + state;
+          dot.setAttribute('aria-label', 'Bug ' + bugN + ' status: ' + state);
+          updateSB();
+        }
+      }
+    });
+    _lsBugApplying = false;
+    if (window.TraceLiveShare) {
+      const qIdx = window.TraceLiveShare.getState()?.currentQ;
+      if (qIdx != null) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    }
+  },
+  isDoneReady(qIdx) {
+    const q = this.questions[qIdx];
+    const textarea = document.getElementById(q.id);
+    const hasText = textarea && textarea.value.trim().length > 0;
+    if (!hasText) return false;
+    const bugN = this._qToBug[qIdx];
+    if (!bugN) return true;
+    return this._isBugFixed(bugN);
+  },
+  setEditable(qIdx, editable) {
+    const bugN = this._qToBug[qIdx];
+    if (!bugN) return;
+    if (this._isBugFixed(bugN)) return; // already fixed, leave alone
+    (this._bugInputIds[bugN] || []).forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp) {
+        if (editable) inp.removeAttribute('disabled');
+        else inp.setAttribute('disabled', true);
+      }
+    });
+  },
+  onReset() {
+    // Reset all bug inputs to their original buggy values
+    Object.entries(this._bugOriginals).forEach(([id, val]) => {
+      const inp = document.getElementById(id);
+      if (inp) inp.value = val;
+    });
+    // Remove 'resolved' class from all bug container divs
+    [1, 2, 3].forEach(bugN => {
+      (this._bugContainerIds[bugN] || []).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('resolved');
+      });
+    });
+    // Reset all dots to 'open'
+    [1, 2, 3].forEach(n => {
+      const dot = document.getElementById('dot-' + n);
+      if (dot) {
+        dot.setAttribute('data-state', 'open');
+        dot.className = 'bdot';
+        dot.setAttribute('aria-label', 'Bug ' + n + ' status: open');
+      }
+    });
+    // Reset tab pips to bug state for tabs that have bugs
+    setPip('fighter', false);
+    setPip('brawler', false);
+    setPip('arena', false);
+    updateSB();
+  },
+};
+</script>
+<script src="../shared/trace-liveshare.js"></script>
+</body>
+</html>

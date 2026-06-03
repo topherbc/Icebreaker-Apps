@@ -1,0 +1,125 @@
+/*
+  STEPPER MODULE TEMPLATE
+  =======================
+  HOW TO USE THIS FILE:
+
+  1. Copy it into the right language directory and rename it.
+       steppers/java-17/your-topic.html
+
+  2. Update the register() call id to match your file path (without extension):
+       STEPPER_REGISTRY.register("java-17/your-topic", { ... })
+
+  3. In stepper.html, add two things:
+
+     a) A <script src="..."> tag in the MODULE SCRIPTS section:
+          <script src="steppers/java-17/your-topic.html"></script>
+
+     b) An entry in the MANIFEST object:
+          'Java 17': [
+            { label: 'Your topic label', id: 'java-17/your-topic' },
+          ]
+
+  This file must contain ONLY raw JavaScript -- no <!DOCTYPE>, no HTML tags,
+  no <script> wrapper. It is loaded via <script src="..."> and executed directly.
+  Works on file:// locally and on GitHub Pages identically.
+
+  TEMPLATE NOTE: no em dashes anywhere -- use plain hyphens or rewrite the sentence.
+*/
+STEPPER_REGISTRY.register("language-version/topic-name", {
+
+  /* Display name shown in the topic dropdown */
+  label: '[Topic label]',
+
+  /*
+    PANEL CONFIG
+    Declare which right-panel sections this module uses.
+
+    stack:  true | false   -- call stack section
+    heap:   true | false   -- objects in memory section
+    custom: { title, emptyText } | false  -- concept-specific panel
+    legend: [ { color, border, label } ]  -- bottom legend entries
+
+    Use these exact colors so legend swatches match what the wrapper renders:
+      Currently running frame:   color '#1d5799'  border '#9dc0e8'
+      Paused, waiting:           color '#68655f'  border '#d4d1cc'
+      Just assigned (amber):     color '#a0540a'  border '#e8c070'
+      Holding a value (teal):    color '#095e40'  border '#90d4b8'
+      Reference / pointer:       color '#3d3490'  border '#b0a8e0'
+      Object instance (heap):    color '#3d3490'  border '#b0a8e0'
+      Active object (orange):    color '#a0540a'  border '#e8c070'
+  */
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: false,
+    /* custom: { title: 'Scope chain', emptyText: 'no scopes yet' }, */
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#68655f', border:'#d4d1cc', label:'Paused, waiting to resume' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+
+  /*
+    SCENARIOS
+    Each scenario is one tab in the scenario bar.
+
+    LINE shapes:
+      { code: [ [cssClass, text], ... ] }
+      { blank: true }
+
+    Token CSS classes -- use weight/style, not color alone, to differentiate:
+      tok-kw    keyword              bold, purple
+      tok-type  type name            bold, teal
+      tok-meth  method/function      bold, blue
+      tok-cls   class name           bold, purple, underlined
+      tok-str   string literal       normal, dark red
+      tok-num   numeric literal      semibold, orange
+      tok-cmt   comment              italic, muted
+      tok-op    operators/plain text normal, muted -- use when nothing else fits
+      tok-field instance field       italic, purple (no underline)
+      tok-dec   decorator            italic, teal
+      tok-self  self or this         italic + semibold, purple
+      ''        unstyled             use for indentation and spacing
+
+    STEP shapes:
+      line:   number          0-indexed active line (blank lines not counted)
+      stack:  Frame[]         call stack state; [] = empty
+      heap:   HeapObj[]       omit or [] if heap is false
+      custom: CustomItem[]    omit or [] if custom is false
+      expl:   { label, text } label is 2-4 word heading; text uses <hi>code</hi>
+
+    FRAME:   { name, active, vars: [ { n, v, fresh, cls } ] }
+    HEAPOBJ: { id, type, ref, active, fields: [ { n, v, fresh } ] }
+    CUSTOM:  { name, tag, rows: [ { k, v, fresh } ] }
+
+    Set fresh: true only on the step where a value changes.
+    Set it back to false on every subsequent step.
+
+    See stepper-spec.md for the full reference.
+  */
+  scenarios: [
+    {
+      label: "Scenario 1",
+      lines: [
+        { code: [['tok-cmt','// replace with your code']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          stack: [],
+          /* heap:   [],  -- include if heap is true */
+          /* custom: [],  -- include if custom is defined */
+          expl: {
+            label: 'Replace this step',
+            text:  'Describe what is happening at this line. Use <hi>code</hi> for inline code highlights.'
+          }
+        },
+      ]
+    },
+
+    /* Copy and add more scenarios as needed */
+  ]
+
+});

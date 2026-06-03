@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spurious Correlations Mad Lib</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+  :root {
+    --ink: #1a1a2e; --paper: #f5f0e8; --accent: #c84b31; --gold: #d4a843; --muted: #7a7060; --highlight: #fff3cd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif;
+    min-height: 100vh; padding: 24px 16px 48px;
+    background-image: radial-gradient(circle at 20% 50%, rgba(196,75,49,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(212,168,67,0.06) 0%, transparent 40%);
+  }
+  .masthead { text-align: center; margin-bottom: 32px; border-bottom: 2px solid var(--ink); padding-bottom: 20px; }
+  .masthead .eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 6vw, 52px); line-height: 1.1; }
+  h1 em { color: var(--accent); font-style: italic; }
+  .subtitle { font-size: 13px; color: var(--muted); margin-top: 8px; font-family: 'DM Mono', monospace; }
+  .card { background: white; border: 1.5px solid var(--ink); border-radius: 2px; padding: 28px; max-width: 720px; margin: 0 auto 24px; box-shadow: 4px 4px 0 var(--ink); }
+  .card h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .step-badge { background: var(--ink); color: var(--paper); font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 2px; }
+  .scenario-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 560px) { .scenario-picker { grid-template-columns: repeat(2, 1fr); } }
+  .scenario-btn { border: 1.5px solid var(--ink); background: var(--paper); padding: 14px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 13px; text-align: center; border-radius: 2px; transition: all 0.15s; line-height: 1.4; font-weight: 500; }
+  .scenario-btn:hover { background: var(--ink); color: var(--paper); }
+  .scenario-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 520px) { .fields-grid { grid-template-columns: 1fr; } }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+  input[type="text"], input[type="number"] { border: 1.5px solid #ccc; border-radius: 2px; padding: 9px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); background: var(--paper); transition: border-color 0.15s; width: 100%; }
+  input:focus { outline: none; border-color: var(--accent); background: white; }
+  input.filled { background: white; border-color: var(--gold); }
+  .hint { font-size: 11px; color: var(--muted); font-style: italic; }
+  .generate-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 2px; font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic; cursor: pointer; transition: all 0.15s; box-shadow: 3px 3px 0 #8b3522; margin-top: 14px; }
+  .generate-btn:hover { background: #b04028; transform: translate(1px,1px); box-shadow: 2px 2px 0 #8b3522; }
+  .generate-btn:disabled { background: #ccc; box-shadow: 3px 3px 0 #999; cursor: not-allowed; }
+  #result-card { display: none; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .result-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .result-label::after { content:''; flex:1; height:1px; background:#ddd; }
+  .headline { font-family: 'Playfair Display', serif; font-size: clamp(18px, 3.5vw, 26px); line-height: 1.4; margin-bottom: 16px; }
+  .story-text { font-size: 15px; line-height: 1.8; color: #333; margin-bottom: 20px; }
+  .story-text .fw, .headline .fw { background: var(--highlight); color: var(--accent); font-weight: 500; padding: 0 3px; border-radius: 2px; }
+  .headline .fw { background: transparent; border-bottom: 2px solid var(--accent); padding: 0; }
+  .real-correlation { background: var(--paper); border: 1.5px solid var(--ink); border-radius: 2px; padding: 14px 18px; margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
+  .real-correlation strong { font-family: 'Playfair Display', serif; font-size: 15px; display: block; margin-bottom: 4px; }
+  .lesson-box { border-left: 3px solid var(--gold); padding: 12px 16px; background: rgba(212,168,67,0.08); font-size: 13px; color: #555; line-height: 1.6; }
+  .lesson-box strong { color: var(--ink); font-weight: 500; }
+  .reset-btn { width: 100%; padding: 10px; background: transparent; color: var(--muted); border: 1.5px solid #ccc; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.1em; cursor: pointer; transition: all 0.15s; margin-top: 16px; }
+  .reset-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .source-note { text-align: center; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 8px; }
+  .source-note a { color: var(--accent); }
+  .progress-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 16px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; transition: background 0.2s; }
+  .dot.filled { background: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="eyebrow">Weekly Team Icebreaker · Book Club Edition</div>
+  <h1>Spurious <em>Correlations</em><br>Mad Lib</h1>
+  <div class="subtitle">correlation ≠ causation · but it's always funny</div>
+</div>
+
+<div class="card" id="step1-card">
+  <h2><span class="step-badge">01</span> Pick a Mad Lib</h2>
+  <div class="scenario-picker" id="scenario-picker">
+    <button class="scenario-btn" data-idx="0">Mad Lib 1</button>
+    <button class="scenario-btn" data-idx="1">Mad Lib 2</button>
+    <button class="scenario-btn" data-idx="2">Mad Lib 3</button>
+    <button class="scenario-btn" data-idx="3">Mad Lib 4</button>
+    <button class="scenario-btn" data-idx="4">Mad Lib 5</button>
+    <button class="scenario-btn" data-idx="5">Mad Lib 6</button>
+  </div>
+</div>
+
+<div class="card" id="step2-card">
+  <h2><span class="step-badge">02</span> Fill In the Blanks</h2>
+  <div class="progress-dots" id="progress-dots"></div>
+  <div class="fields-grid" id="fields-grid"></div>
+  <button class="generate-btn" id="gen-btn" disabled onclick="generate()">Reveal the Correlation →</button>
+</div>
+
+<div class="card" id="result-card">
+  <div class="result-label">The Result</div>
+  <div class="headline" id="result-headline"></div>
+  <div class="story-text" id="result-story"></div>
+  <div class="real-correlation" id="real-correlation"></div>
+  <div class="lesson-box">
+    🧠 <strong>The takeaway:</strong> Our brains are wired to find patterns—even in noise. High correlation tells you two things move together. It tells you <strong>nothing</strong> about why. Always ask: <em>what's the mechanism?</em>
+  </div>
+  <button class="reset-btn" onclick="reset()">↩ Try Another One</button>
+</div>
+
+<div class="source-note">
+  Real correlations from <a href="https://www.tylervigen.com/spurious-correlations" target="_blank">tylervigen.com/spurious-correlations</a> · inspired by <em>Understanding How We Learn</em>
+</div>
+
+<script>
+const scenarios = [
+  {
+    fields: [
+      { key: "number", label: "A number between 1 and 10", hint: "", placeholder: "e.g., 7", type: "number" },
+      { key: "death", label: "A weird cause of death", hint: "the weirder the better", placeholder: "e.g., spontaneous yodeling" },
+      { key: "food", label: "Your favorite food", hint: "", placeholder: "e.g., mozzarella sticks" },
+    ],
+    headline: (f) => `Studies show that for every <span class="fw">${f.number}</span> pounds of <span class="fw">${f.food}</span> consumed per American, deaths by <span class="fw">${f.death}</span> increase by a statistically significant margin.`,
+    story: (f) => `Researchers poring over two decades of data noticed that as Americans ate more <span class="fw">${f.food}</span>, deaths by <span class="fw">${f.death}</span> climbed right alongside it. The two lines on the chart are nearly identical. <strong>95% correlated (which sounds very scientific and means almost nothing here).</strong>`,
+    real: `<strong>The real correlation:</strong> Per capita cheese consumption tracks almost perfectly with deaths by bedsheet tangling. r = 0.947. It's real data. The lines match. And yet — cheese does not tangle bedsheets.`,
+  },
+  {
+    fields: [
+      { key: "celebrity", label: "A celebrity you find annoying", hint: "", placeholder: "e.g., Nicolas Cage" },
+      { key: "number", label: "A number between 1 and 10", hint: "", placeholder: "e.g., 3", type: "number" },
+      { key: "place", label: "A place you'd never expect to drown", hint: "", placeholder: "e.g., a ball pit" },
+    ],
+    headline: (f) => `Each year <span class="fw">${f.celebrity}</span> appears in <span class="fw">${f.number}</span> more films, drownings in <span class="fw">${f.place}</span> rise accordingly.`,
+    story: (f) => `Nobody asked for this information. And yet, the data is clear: more <span class="fw">${f.celebrity}</span> movies means more people drowning in <span class="fw">${f.place}</span>. Should we be concerned? Should <span class="fw">${f.celebrity}</span> retire for public safety? <strong>95% correlated (which sounds very scientific and means almost nothing here).</strong>`,
+    real: `<strong>The real correlation:</strong> Nicolas Cage films per year correlates with swimming pool drownings. r = 0.666. This one is so famous it's been cited in statistics textbooks as a cautionary tale about finding patterns in noise.`,
+  },
+  {
+    fields: [
+      { key: "job", label: "A job title", hint: "", placeholder: "e.g., astronaut" },
+      { key: "activity", label: "A mundane daily activity", hint: "", placeholder: "e.g., flossing their teeth" },
+      { key: "number", label: "A percentage (1–100)", hint: "", placeholder: "e.g., 42", type: "number" },
+    ],
+    headline: (f) => `As the number of <span class="fw">${f.job}</span>s in the world declined by <span class="fw">${f.number}</span>%, fewer people remembered to <span class="fw">${f.activity}</span>.`,
+    story: (f) => `A stunning finding: <span class="fw">${f.job}</span> employment and the frequency of <span class="fw">${f.activity}</span> are moving in lockstep. As one falls, so does the other. Are <span class="fw">${f.job}</span>s secretly responsible for reminding us all to <span class="fw">${f.activity}</span>? <strong>95% correlated (which sounds very scientific and means almost nothing here).</strong>`,
+    real: `<strong>The real correlation:</strong> Global pirate attacks and Google searches for "download Firefox" declined together from 2009–2022. r = 0.931. Both were just trends of the same era. No pirates were involved in browser selection.`,
+  },
+  {
+    fields: [
+      { key: "villain", label: "A villain from a movie", hint: "", placeholder: "e.g., Thanos" },
+      { key: "number", label: "A percentage (1–100)", hint: "", placeholder: "e.g., 63", type: "number" },
+      { key: "tech", label: "A technology you still use", hint: "", placeholder: "e.g., Internet Explorer" },
+    ],
+    headline: (f) => `As global pirate attacks dropped by <span class="fw">${f.number}</span>%, usage of <span class="fw">${f.tech}</span> fell in perfect tandem. Experts suspect <span class="fw">${f.villain}</span> was behind both.`,
+    story: (f) => `The evidence is damning. Every year pirates terrorized fewer ships, fewer people opened <span class="fw">${f.tech}</span>. Coincidence? Or is <span class="fw">${f.villain}</span> quietly pulling strings from somewhere? We may never know. <strong>95% correlated (which sounds very scientific and means almost nothing here).</strong>`,
+    real: `<strong>The real correlation:</strong> Global pirate attacks and Internet Explorer usage declined together between 2004–2011. r = 0.988 — one of the highest spurious correlations ever recorded. Both were simply fading relics of the same decade.`,
+  },
+  {
+    fields: [
+      { key: "competition", label: "A competition you'd be terrible at", hint: "", placeholder: "e.g., the National Spelling Bee" },
+      { key: "number", label: "A number between 1 and 20", hint: "", placeholder: "e.g., 8", type: "number" },
+      { key: "insect", label: "An insect", hint: "", placeholder: "e.g., a rogue moth" },
+    ],
+    headline: (f) => `For every additional word correctly spelled in <span class="fw">${f.competition}</span>, <span class="fw">${f.number}</span> more Americans were killed by <span class="fw">${f.insect}</span>.`,
+    story: (f) => `The smarter the spellers, the deadlier the <span class="fw">${f.insect}</span>. Every correctly spelled word in <span class="fw">${f.competition}</span> correlates with another fatality. Should we stop holding spelling competitions? Should we be afraid of <span class="fw">${f.insect}</span>? <strong>95% correlated (which sounds very scientific and means almost nothing here).</strong>`,
+    real: `<strong>The real correlation:</strong> The number of letters in the winning Scripps National Spelling Bee word correlates with deaths by venomous spiders. r = 0.803. Both are just small numbers that wobble year to year — enough to look related if you squint.`,
+  },
+  {
+    fields: [
+      { key: "food2", label: "A food you eat too much of", hint: "", placeholder: "e.g., mozzarella sticks" },
+      { key: "major", label: "A college major", hint: "", placeholder: "e.g., civil engineering" },
+      { key: "number", label: "A number between 1 and 50", hint: "", placeholder: "e.g., 12", type: "number" },
+    ],
+    headline: (f) => `Every year Americans consumed <span class="fw">${f.number}</span> more pounds of <span class="fw">${f.food2}</span>, <span class="fw">${f.major}</span> degrees awarded in the US climbed in lockstep.`,
+    story: (f) => `What are <span class="fw">${f.major}</span> graduates eating? Every extra pound of <span class="fw">${f.food2}</span> consumed nationally produced another graduating class. Or perhaps the graduates are eating their way through <span class="fw">${f.food2}</span> in celebration. Either way: <strong>95% correlated (which sounds very scientific and means almost nothing here).</strong>`,
+    real: `<strong>The real correlation:</strong> Mozzarella cheese consumption and civil engineering doctorates awarded in the US. r = 0.959. Both grew steadily through the 2000s for completely unrelated economic reasons. The data had no idea.`,
+  },
+];
+
+let selectedIdx = null;
+let fieldValues = {};
+
+function selectScenario(idx) {
+  selectedIdx = idx;
+  fieldValues = {};
+  document.querySelectorAll('.scenario-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  renderFields();
+}
+
+function renderFields() {
+  const s = scenarios[selectedIdx];
+  const grid = document.getElementById('fields-grid');
+  const dots = document.getElementById('progress-dots');
+  grid.innerHTML = '';
+  dots.innerHTML = '';
+  s.fields.forEach((f, i) => {
+    dots.innerHTML += `<div class="dot" id="dot-${i}"></div>`;
+    const group = document.createElement('div');
+    group.className = 'field-group';
+    group.innerHTML = `
+      <label>${f.label}</label>
+      ${f.hint ? `<div class="hint">${f.hint}</div>` : ''}
+      <input type="${f.type || 'text'}" placeholder="${f.placeholder}" data-key="${f.key}" data-dotidx="${i}" oninput="onInput(this)">
+    `;
+    grid.appendChild(group);
+  });
+  checkReady();
+}
+
+function onInput(el) {
+  fieldValues[el.getAttribute('data-key')] = el.value.trim();
+  el.classList.toggle('filled', el.value.trim().length > 0);
+  const d = document.getElementById(`dot-${el.getAttribute('data-dotidx')}`);
+  if (d) d.classList.toggle('filled', el.value.trim().length > 0);
+  checkReady();
+}
+
+function checkReady() {
+  if (selectedIdx === null) return;
+  const allFilled = scenarios[selectedIdx].fields.every(f => fieldValues[f.key] && fieldValues[f.key].length > 0);
+  document.getElementById('gen-btn').disabled = !allFilled;
+}
+
+function generate() {
+  const s = scenarios[selectedIdx];
+  document.getElementById('result-headline').innerHTML = s.headline(fieldValues);
+  document.getElementById('result-story').innerHTML = s.story(fieldValues);
+  document.getElementById('real-correlation').innerHTML = s.real;
+  const rc = document.getElementById('result-card');
+  rc.style.display = 'block';
+  rc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  document.getElementById('result-card').style.display = 'none';
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fields-grid').innerHTML = '';
+  document.getElementById('progress-dots').innerHTML = '';
+  document.getElementById('gen-btn').disabled = true;
+  selectedIdx = null;
+  fieldValues = {};
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.scenario-btn').forEach(btn => {
+  btn.addEventListener('click', () => selectScenario(parseInt(btn.getAttribute('data-idx'))));
+});
+</script>
+</body>
+</html>

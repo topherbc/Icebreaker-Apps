@@ -1,0 +1,8 @@
+[
+  { "id": "week-1", "title": "Variables & Conditions",      "path": "../java-academy/week-1/fib-set.json" },
+  { "id": "week-2", "title": "Loops & Classes",             "path": "../java-academy/week-2/fib-set.json" },
+  { "id": "week-3", "title": "Arrays & Collections",        "path": "../java-academy/week-3/fib-set.json" },
+  { "id": "week-5", "title": "Strings & OOP",               "path": "../java-academy/week-5/fib-set.json" },
+  { "id": "week-6", "title": "OOP & Inheritance",           "path": "../java-academy/week-6/fib-set.json" },
+  { "id": "week-7", "title": "Inheritance & Interfaces",    "path": "../java-academy/week-7/fib-set.json" }
+]

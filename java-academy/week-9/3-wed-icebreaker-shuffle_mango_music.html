@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mango Music</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23e8765a'/><stop offset='1' stop-color='%23c2621a'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g)'/><circle cx='50' cy='50' r='28' fill='%23faf6f1'/><circle cx='50' cy='50' r='8' fill='url(%23g)'/></svg>">
+<style>
+  :root {
+    --bg:          #faf6f1;
+    --bg2:         #f4ede3;
+    --bg3:         #ece3d8;
+    --bg-sidebar:  #221812;
+    --surface:     #e5d9ca;
+    --surface2:    #d9ccbb;
+    --border:      rgba(110,70,30,0.12);
+    --border-md:   rgba(110,70,30,0.22);
+    --terra:       #c05a3a;
+    --terra-dk:    #a04830;
+    --terra-lt:    #d4734e;
+    --terra-pale:  rgba(192,90,58,0.10);
+    --grad-a:      #d4734e;
+    --grad-b:      #c2621a;
+    --grad-c:      #9b6fa8;
+    --grad-d:      #5b7fa6;
+    --grad-e:      #6e8f62;
+    --text:        #1e1209;
+    --text-2:      #3d2510;
+    --muted:       #8a6040;
+    --muted-lt:    #8c5830;
+    --sidebar-text:   rgba(255,235,210,0.65);
+    --sidebar-active: #faf6f1;
+    --played-text: #7a5c3c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    min-height: 100vh;
+    overflow: hidden;
+    line-height: 1.6;
+  }
+
+  /* ============================================================
+     LOAD SCREEN
+  ============================================================ */
+  #load-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 80% 55% at 30% 60%, rgba(155,111,168,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 75% 30%, rgba(91,127,166,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% 50%, rgba(192,90,58,0.08) 0%, transparent 70%),
+      var(--bg);
+  }
+
+  #load-screen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(192,90,58,0.055) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .load-vinyl {
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      #1e1209 0deg 8deg, #361a0a 8deg 16deg, #1e1209 16deg 24deg, #3a1e0c 24deg 32deg,
+      #1e1209 32deg 40deg, #3a1e0c 40deg 48deg, #1e1209 48deg 56deg, #3a1e0c 56deg 64deg,
+      #1e1209 64deg 72deg, #3a1e0c 72deg 80deg, #1e1209 80deg 88deg, #3a1e0c 88deg 96deg,
+      #1e1209 96deg 104deg, #3a1e0c 104deg 112deg, #1e1209 112deg 120deg, #3a1e0c 120deg 128deg,
+      #1e1209 128deg 136deg, #3a1e0c 136deg 144deg, #1e1209 144deg 152deg, #3a1e0c 152deg 160deg,
+      #1e1209 160deg 168deg, #3a1e0c 168deg 176deg, #1e1209 176deg 184deg, #3a1e0c 184deg 192deg,
+      #1e1209 192deg 200deg, #3a1e0c 200deg 208deg, #1e1209 208deg 216deg, #3a1e0c 216deg 224deg,
+      #1e1209 224deg 232deg, #3a1e0c 232deg 240deg, #1e1209 240deg 248deg, #3a1e0c 248deg 256deg,
+      #1e1209 256deg 264deg, #3a1e0c 264deg 272deg, #1e1209 272deg 280deg, #3a1e0c 280deg 360deg
+    );
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    animation: spin 7s linear infinite;
+    margin-bottom: 38px; flex-shrink: 0;
+  }
+
+  .load-vinyl::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: conic-gradient(from 180deg, var(--grad-a), var(--grad-c), var(--grad-d), var(--grad-e), var(--grad-b), var(--grad-a));
+    z-index: -1;
+  }
+
+  .load-vinyl-inner {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 16px rgba(212,115,78,0.5);
+  }
+
+  .load-vinyl-hole { width: 12px; height: 12px; border-radius: 50%; background: var(--bg); }
+
+  @keyframes spin        { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+  @keyframes counter-spin{ from { transform: rotate(0deg);   } to { transform: rotate(-360deg); } }
+
+  .load-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 56px; color: var(--text);
+    letter-spacing: -0.5px; line-height: 1;
+    margin-bottom: 8px; text-align: center;
+  }
+
+  .load-subtitle {
+    font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, var(--grad-a), var(--grad-c), var(--grad-d));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 52px; text-align: center;
+  }
+
+  .load-form {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 18px; width: 320px;
+  }
+
+  .load-label { font-size: 18px; color: var(--text-2); font-weight: 500; text-align: center; }
+
+  .load-input {
+    width: 110px; text-align: center;
+    background: white; border: 2px solid var(--border-md);
+    border-radius: 10px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 28px; font-weight: 700;
+    padding: 10px; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .load-input:focus { border-color: var(--terra); box-shadow: 0 0 0 3px var(--terra-pale); }
+
+  .load-btn {
+    background: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 100%);
+    color: white; border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700;
+    padding: 14px 40px; min-height: 52px; cursor: pointer;
+    transition: opacity .15s, transform .1s, box-shadow .15s; width: 100%;
+    box-shadow: 0 4px 20px rgba(192,90,58,0.22);
+  }
+
+  .load-btn:hover  { opacity: .9; box-shadow: 0 6px 24px rgba(192,90,58,0.32); }
+  .load-btn:active { transform: scale(.98); }
+
+  /* ============================================================
+     MAIN SCREEN
+  ============================================================ */
+  #main-screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
+
+  .top-bar {
+    display: flex; align-items: center;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0; height: 52px;
+  }
+
+  .top-bar-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 20px; width: 200px; flex-shrink: 0;
+  }
+
+  .top-bar-vinyl {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: conic-gradient(from 0deg,#1e1209 0deg 20deg,#3a1e0c 20deg 40deg,#1e1209 40deg 60deg,#3a1e0c 60deg 360deg);
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+
+  .top-bar-vinyl::before {
+    content: '';
+    position: absolute; inset: -2px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--grad-a), var(--grad-c), var(--grad-d), var(--grad-b));
+    z-index: -1;
+  }
+
+  .top-bar-vinyl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--grad-b); }
+  .top-bar-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--sidebar-active); }
+  .top-bar-center { flex: 1; }
+
+  .top-bar-right {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 20px; flex-shrink: 0;
+  }
+
+  .progress-badge {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 13px; color: var(--sidebar-text); font-weight: 500; white-space: nowrap;
+  }
+
+  .progress-badge strong {
+    background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* ============================================================
+     THREE COLUMNS -- widths driven by JS via inline flex-basis
+  ============================================================ */
+  .main-content {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    user-select: none;
+  }
+
+  /* Columns sized via flex-basis set by JS */
+  .sidebar       { min-width: 120px; max-width: 360px; flex-shrink: 0; }
+  .playlist-col  { flex: 1 1 0; min-width: 160px; overflow: hidden; }
+  .now-playing-col { flex-shrink: 0; min-width: 240px; max-width: 700px; overflow: hidden; }
+
+  /* Resize handles */
+  .resize-handle {
+    flex: 0 0 5px;
+    cursor: col-resize;
+    position: relative;
+    z-index: 10;
+    background: transparent;
+  }
+
+  .resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 1px; right: 1px;
+    background: var(--border);
+    transition: background .15s;
+  }
+
+  .resize-handle:hover::after,
+  .resize-handle.dragging::after {
+    background: linear-gradient(to bottom, var(--grad-a), var(--grad-c), var(--grad-d));
+  }
+
+  /* ============================================================
+     SIDEBAR
+  ============================================================ */
+  .sidebar {
+    background: var(--bg-sidebar);
+    display: flex; flex-direction: column;
+    overflow: hidden; min-height: 0;
+    padding: 16px 0;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(255,235,210,0.30);
+    padding: 14px 20px 5px;
+  }
+
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 20px;
+    font-size: 14px; font-weight: 500; color: var(--sidebar-text);
+    cursor: default; position: relative;
+    transition: background .12s, color .12s;
+  }
+
+  .sidebar-item.active { color: var(--sidebar-active); background: rgba(255,255,255,0.07); }
+
+  .sidebar-item.active::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(to bottom, var(--grad-a), var(--grad-c));
+    border-radius: 0 2px 2px 0;
+  }
+
+  .sidebar-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.65; }
+  .sidebar-item.active svg { opacity: 1; }
+
+  .sidebar-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .sidebar-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 0; }
+
+  /* ============================================================
+     PLAYLIST (center)
+  ============================================================ */
+  .playlist-col {
+    display: flex; flex-direction: column;
+    overflow: hidden; min-height: 0;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+  }
+
+  .play-next-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px 10px 24px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0; gap: 12px;
+  }
+
+  .playlist-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--text);
+    flex: 1;
+  }
+
+  /* ---- SPINNING PLAY BUTTON ---- */
+  /*
+    The button itself spins (conic gradient ring rotates).
+    The SVG inside counter-spins at the exact same rate to stay upright.
+    Key: both use the same duration + timing-function.
+    spin goes 0->360, counter-spin goes 0->-360.
+    They cancel perfectly -- the SVG appears stationary.
+  */
+  .play-top-btn {
+    /* Square hit area that becomes a circle */
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    /* The spinning conic gradient IS the button background */
+    background: conic-gradient(
+      from 0deg,
+      var(--grad-a) 0deg,
+      var(--grad-c) 90deg,
+      var(--grad-d) 180deg,
+      var(--grad-e) 270deg,
+      var(--grad-b) 315deg,
+      var(--grad-a) 360deg
+    );
+    box-shadow: 0 2px 14px rgba(192,90,58,0.28);
+    animation: spin 4s linear infinite;
+    transition: box-shadow .15s, opacity .15s;
+  }
+
+  .play-top-btn:hover    { box-shadow: 0 4px 20px rgba(192,90,58,0.45); opacity: .92; }
+  .play-top-btn:disabled {
+    background: var(--surface);
+    animation: none;
+    box-shadow: none;
+    cursor: default;
+    opacity: 1;
+  }
+
+  /* Inner circle: sits in the center, does NOT rotate (it's a child but
+     we counter-rotate it so it stays put) */
+  .play-btn-inner {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    /* Counter-rotate at same speed/timing to cancel parent spin */
+    animation: counter-spin 4s linear infinite;
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .play-top-btn:disabled .play-btn-inner {
+    animation: none;
+  }
+
+  .play-btn-inner svg {
+    width: 16px; height: 16px;
+    /* nudge triangle optically center */
+    margin-left: 2px;
+  }
+
+  /* Disabled state: grey triangle */
+  .play-top-btn:disabled .play-btn-inner svg { color: var(--played-text); }
+
+  /* Shuffle button */
+  .shuffle-btn {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
+    /* put it on the dark sidebar so it reads -- but it's in the playlist bar which is light */
+    background: var(--bg3); border: 1px solid var(--border-md);
+    border-radius: 7px; color: var(--text-2);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 7px 14px; min-height: 36px;
+    cursor: pointer; display: flex; align-items: center; gap: 7px;
+    transition: background .15s, border-color .15s;
+    white-space: nowrap;
+  }
+
+  .shuffle-btn:hover { background: var(--surface2); border-color: var(--terra); color: var(--terra-dk); }
+  .shuffle-btn.is-shuffling { opacity: 0.5; pointer-events: none; }
+  .shuffle-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* Track list */
+  .playlist-scroll { flex: 1; overflow-y: auto; }
+  .playlist-scroll::-webkit-scrollbar { width: 4px; }
+  .playlist-scroll::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+  #track-list-container { position: relative; }
+
+  .played-header {
+    padding: 10px 24px 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--muted-lt);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .track-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 54px;
+    align-items: center;
+    padding: 13px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    will-change: transform, opacity;
+  }
+
+  .track-row.active-track { background: #f0e8de; }
+  .track-row.active-track .track-title-cell { color: var(--terra-dk); font-weight: 600; }
+
+  .track-num { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted-lt); text-align: center; }
+
+  .track-title-cell {
+    font-size: 17px; font-weight: 500; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding: 0 10px;
+  }
+
+  .track-duration { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted-lt); text-align: right; }
+
+  .track-row.played-row .track-title-cell,
+  .track-row.played-row .track-num,
+  .track-row.played-row .track-duration { color: var(--played-text); }
+
+  /* ============================================================
+     NOW PLAYING (right)
+  ============================================================ */
+  .now-playing-col {
+    background: var(--bg2);
+    display: flex; flex-direction: column;
+    overflow: hidden; min-height: 0;
+  }
+
+  .np-header {
+    padding: 16px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .np-header-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted-lt); margin-bottom: 5px;
+  }
+
+  .np-track-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 21px; color: var(--text); line-height: 1.2;
+  }
+
+  /* Full-width polychrome waveform */
+  .waveform-container {
+    width: 100%; flex-shrink: 0;
+    background: linear-gradient(180deg, var(--bg3) 0%, var(--bg2) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+    position: relative; overflow: hidden;
+  }
+
+  .waveform-container::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg,
+      rgba(212,115,78,0.07) 0%,
+      rgba(155,111,168,0.07) 40%,
+      rgba(91,127,166,0.07) 70%,
+      rgba(194,98,26,0.07) 100%
+    );
+    pointer-events: none;
+  }
+
+  .waveform {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    padding: 0 12px;
+  }
+
+  .waveform-bar {
+    flex: 1;
+    border-radius: 2px;
+    margin: 0 1px;
+    animation: wave 1.6s ease-in-out infinite;
+  }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.22); opacity: 0.30; }
+    50%       { transform: scaleY(1);   opacity: 0.85; }
+  }
+
+  .waveform-container.idle .waveform-bar {
+    animation: none;
+    transform: scaleY(0.28);
+    opacity: 0.18;
+  }
+
+  .now-playing-inner {
+    flex: 1; overflow-y: auto;
+    padding: 22px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+
+  .now-playing-inner::-webkit-scrollbar { width: 4px; }
+  .now-playing-inner::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+  .np-empty {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px; color: var(--muted-lt); text-align: center;
+    padding: 40px 20px; min-height: 160px;
+  }
+
+  .np-empty-icon { font-size: 26px; opacity: 0.35; }
+  .np-empty p { font-size: 16px; line-height: 1.5; }
+
+  .np-card { display: flex; flex-direction: column; gap: 18px; }
+  .np-divider { height: 1px; background: var(--border); }
+
+  .np-question-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted-lt); margin-bottom: 8px;
+  }
+
+  .np-question-text { font-size: 19px; color: var(--text); line-height: 1.65; font-weight: 500; white-space: pre-line; }
+
+  .np-answer-area { display: flex; flex-direction: column; gap: 8px; }
+  .np-slot-label  { font-size: 13px; color: var(--terra); font-weight: 600; }
+
+  .np-input {
+    background: white; border: 2px solid var(--border-md); border-radius: 8px;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 18px; padding: 10px 14px; outline: none;
+    transition: border-color .2s, box-shadow .2s; width: 100%;
+  }
+
+  .np-input:focus { border-color: var(--terra); box-shadow: 0 0 0 3px var(--terra-pale); }
+  .np-input::placeholder { color: var(--played-text); }
+
+  .reveal-btn {
+    background: var(--bg3); border: 1px solid var(--border-md); border-radius: 8px;
+    color: var(--text-2); font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; padding: 12px 16px; min-height: 48px;
+    cursor: pointer; transition: background .15s, border-color .15s;
+    width: 100%; display: flex; align-items: center; gap: 9px;
+  }
+
+  .reveal-btn:hover { background: var(--surface); border-color: var(--terra); }
+  .reveal-btn svg   { width: 17px; height: 17px; flex-shrink: 0; color: var(--terra); }
+
+  .reveal-answer {
+    background: white;
+    border-left: 3px solid var(--terra);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px; font-size: 16px; color: var(--text); line-height: 1.55;
+    margin-top: 6px; white-space: pre-line;
+  }
+
+  .mark-played-btn {
+    background: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 100%);
+    border: none; border-radius: 10px;
+    color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 700; padding: 13px 20px; min-height: 52px;
+    cursor: pointer; transition: opacity .15s, box-shadow .15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 3px 14px rgba(192,90,58,0.22);
+  }
+
+  .mark-played-btn:hover { opacity: .9; box-shadow: 0 5px 18px rgba(192,90,58,0.32); }
+  .mark-played-btn svg   { width: 19px; height: 19px; flex-shrink: 0; }
+
+  /* ============================================================
+     FINALE -- Spotify Wrapped-style full-screen card deck
+  ============================================================ */
+  #finale-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: #0d0a08;
+    overflow: hidden;
+  }
+
+  /* Card viewer: one card visible at a time, full viewport */
+  .finale-deck {
+    width: 100%; height: 100%;
+    position: relative;
+  }
+
+  /* Individual card */
+  .wcard {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 60px 48px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .wcard.active {
+    opacity: 1; transform: translateX(0); pointer-events: auto;
+  }
+
+  .wcard.exit-left {
+    opacity: 0; transform: translateX(-60px);
+  }
+
+  /* Card background gradients -- one per palette */
+  .wcard-bg-a { background: linear-gradient(135deg, #3d1a0a 0%, #7a3520 50%, #c2621a 100%); }
+  .wcard-bg-b { background: linear-gradient(135deg, #1a0d2e 0%, #4a2070 50%, #9b6fa8 100%); }
+  .wcard-bg-c { background: linear-gradient(135deg, #0a1a2e 0%, #1e4a70 50%, #5b7fa6 100%); }
+  .wcard-bg-d { background: linear-gradient(135deg, #0a1e14 0%, #1e5a38 50%, #6e8f62 100%); }
+  .wcard-bg-e { background: linear-gradient(135deg, #1e1400 0%, #5a4000 50%, #c2a04a 100%); }
+  .wcard-bg-f { background: linear-gradient(150deg, #2e0a1a 0%, #7a2050 50%, #d4734e 100%); }
+  .wcard-bg-intro { background: linear-gradient(135deg, #0d0a08 0%, #221812 60%, #3d1a0a 100%); }
+  .wcard-bg-outro { background: radial-gradient(ellipse 90% 70% at 50% 50%, #3d1a0a, #0d0a08); }
+
+  /* Per-card prismatic em gradient — avoids each card's dominant hue */
+  /* bg-a (warm orange): cool side — purple→blue→teal */
+  .wcard-bg-a { --em-grad: linear-gradient(90deg, var(--grad-c), var(--grad-d), var(--grad-e)); }
+  /* bg-b (purple): warm opposite side — terra→gold→teal */
+  .wcard-bg-b { --em-grad: linear-gradient(90deg, var(--grad-a), var(--grad-b), var(--grad-e)); }
+  /* bg-c (blue): warm through purple — terra→purple→gold */
+  .wcard-bg-c { --em-grad: linear-gradient(90deg, var(--grad-a), var(--grad-c), var(--grad-e)); }
+  /* bg-d (green): warm-to-cool skipping green — terra→purple→blue */
+  .wcard-bg-d { --em-grad: linear-gradient(90deg, var(--grad-a), var(--grad-c), var(--grad-d)); }
+  /* bg-e (gold/amber): cool side — purple→blue→teal */
+  .wcard-bg-e { --em-grad: linear-gradient(90deg, var(--grad-c), var(--grad-d), var(--grad-e)); }
+  /* bg-f (terra/orange-red): cool side — purple→blue→teal */
+  .wcard-bg-f { --em-grad: linear-gradient(90deg, var(--grad-c), var(--grad-d), var(--grad-e)); }
+  /* bg-intro (near-black brown): same as load-subtitle — terra→purple→blue */
+  .wcard-bg-intro { --em-grad: linear-gradient(90deg, var(--grad-a), var(--grad-c), var(--grad-d)); }
+
+  /* Noise texture overlay for depth */
+  .wcard::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    pointer-events: none; opacity: 0.5;
+  }
+
+  .wcard-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase; color: rgba(255,255,255,0.55);
+    margin-bottom: 28px; position: relative;
+  }
+
+  .wcard-big {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 6vw, 72px);
+    color: white; line-height: 1.1;
+    margin-bottom: 24px; position: relative;
+    text-shadow: 0 4px 32px rgba(0,0,0,0.4);
+  }
+
+  .wcard-big em {
+    font-style: italic;
+    background: var(--em-grad, linear-gradient(90deg, var(--grad-a), var(--grad-c), var(--grad-d)));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .wcard-sub {
+    font-size: 18px; color: rgba(255,255,255,0.72); line-height: 1.6;
+    max-width: 520px; position: relative;
+  }
+
+  /* Particle canvas fills the card */
+  .wcard canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    display: block;
+  }
+
+  /* Large decorative number / stat */
+  .wcard-stat {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(80px, 16vw, 160px); font-weight: 400;
+    line-height: 1; color: rgba(255,255,255,0.12);
+    position: absolute; bottom: -20px; right: 40px;
+    pointer-events: none; user-select: none;
+  }
+
+  /* Intro card — muted vinyl decoration (bottom-right corner)
+     Same structure as .load-vinyl, scaled up and dimmed with opacity */
+  .wcard-vinyl-deco {
+    position: absolute; bottom: -90px; right: -90px;
+    width: 340px; height: 340px; border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      #1e1209 0deg 8deg, #361a0a 8deg 16deg, #1e1209 16deg 24deg, #3a1e0c 24deg 32deg,
+      #1e1209 32deg 40deg, #3a1e0c 40deg 48deg, #1e1209 48deg 56deg, #3a1e0c 56deg 64deg,
+      #1e1209 64deg 72deg, #3a1e0c 72deg 80deg, #1e1209 80deg 88deg, #3a1e0c 88deg 96deg,
+      #1e1209 96deg 104deg, #3a1e0c 104deg 112deg, #1e1209 112deg 120deg, #3a1e0c 120deg 128deg,
+      #1e1209 128deg 136deg, #3a1e0c 136deg 144deg, #1e1209 144deg 152deg, #3a1e0c 152deg 160deg,
+      #1e1209 160deg 168deg, #3a1e0c 168deg 176deg, #1e1209 176deg 184deg, #3a1e0c 184deg 192deg,
+      #1e1209 192deg 200deg, #3a1e0c 200deg 208deg, #1e1209 208deg 216deg, #3a1e0c 216deg 224deg,
+      #1e1209 224deg 232deg, #3a1e0c 232deg 240deg, #1e1209 240deg 248deg, #3a1e0c 248deg 256deg,
+      #1e1209 256deg 264deg, #3a1e0c 264deg 272deg, #1e1209 272deg 280deg, #3a1e0c 280deg 360deg
+    );
+    opacity: 0.42;
+    animation: spin 28s linear infinite;
+    position: absolute; display: flex; align-items: center; justify-content: center;
+    pointer-events: none; user-select: none;
+  }
+  .wcard-vinyl-deco::before {
+    content: ''; position: absolute; inset: -14px; border-radius: 50%;
+    background: conic-gradient(from 180deg, var(--grad-a), var(--grad-c), var(--grad-d), var(--grad-e), var(--grad-b), var(--grad-a));
+    z-index: -1;
+  }
+  .wcard-vinyl-deco-inner {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wcard-vinyl-deco-hole {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #0d0a08;
+  }
+
+  /* Intro card logo */
+  .wcard-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: rgba(255,255,255,0.9);
+    letter-spacing: -0.5px; margin-bottom: 12px; position: relative;
+  }
+
+  .wcard-logo span {
+    background: linear-gradient(90deg, var(--grad-a), var(--grad-c), var(--grad-d));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* Navigation dots */
+  .finale-nav {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 20px; z-index: 110;
+  }
+
+  .finale-dots {
+    display: flex; gap: 7px; align-items: center;
+  }
+
+  .finale-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: background .2s, transform .2s;
+  }
+
+  .finale-dot.active { background: white; transform: scale(1.4); }
+
+  .finale-nav-btn {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%; width: 44px; height: 44px;
+    color: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+    font-size: 18px; line-height: 1;
+  }
+
+  .finale-nav-btn:hover { background: rgba(255,255,255,0.22); }
+  .finale-nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+  .start-over-btn {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px; color: white;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    padding: 10px 24px; min-height: 44px; cursor: pointer;
+    transition: background .15s;
+  }
+
+  .start-over-btn:hover { background: rgba(255,255,255,0.22); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- LOAD SCREEN -->
+<div id="load-screen">
+  <div class="load-vinyl">
+    <div class="load-vinyl-inner"><div class="load-vinyl-hole"></div></div>
+  </div>
+  <h1 class="load-title">Mango Music</h1>
+  <p class="load-subtitle">Today's Session Playlist</p>
+  <div class="load-form">
+    <label class="load-label" for="student-count">How many listeners today?</label>
+    <input class="load-input" type="number" id="student-count" value="25" min="6" max="30" inputmode="numeric">
+    <button class="load-btn" id="build-btn">Build Playlist</button>
+  </div>
+</div>
+
+<!-- MAIN SCREEN -->
+<div id="main-screen">
+  <div class="top-bar">
+    <div class="top-bar-brand">
+      <div class="top-bar-vinyl"><div class="top-bar-vinyl-dot"></div></div>
+      <span class="top-bar-title">Mango Music</span>
+    </div>
+    <div class="top-bar-center"></div>
+    <div class="top-bar-right">
+      <div class="progress-badge"><strong id="remaining-count">--</strong> tracks remaining</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section-label">Library</div>
+      <div class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Home
+      </div>
+      <div class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Browse
+      </div>
+      <div class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        My Songs
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Playlists</div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot" style="background:linear-gradient(135deg,#d4734e,#c2621a)"></div>
+        Chill Beats
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot" style="background:linear-gradient(135deg,#6e8f62,#4a7a55)"></div>
+        Pineapple's Picks
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot" style="background:linear-gradient(135deg,#5b7fa6,#3d6490)"></div>
+        Fruity Cuts
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot" style="background:linear-gradient(135deg,#9b6fa8,#7a4f8a)"></div>
+        Mangoes Picks
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot" style="background:linear-gradient(135deg,#c2a04a,#a07828)"></div>
+        Late Night
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Recent</div>
+      <div class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        History
+      </div>
+      <div class="sidebar-item">
+        <svg id="liked-songs-btn" style="cursor:pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Liked Songs
+      </div>
+    </div>
+
+    <div class="resize-handle" id="handle-left"></div>
+    <!-- Playlist (center) -->
+    <div class="playlist-col">
+      <div class="play-next-bar">
+        <span class="playlist-heading">Session Playlist</span>
+        <!-- Spinning ring button: outer spins, inner counter-spins so triangle stays upright -->
+        <button class="play-top-btn" id="play-top-btn" disabled aria-label="Play next track">
+          <div class="play-btn-inner">
+            <svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--terra-dk)">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </div>
+        </button>
+        <button class="shuffle-btn" id="shuffle-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8"/>
+            <polyline points="4 20 9 20 9 15"/>
+            <path d="M21 3 9 15M4 4l5 5M15 15l6 5"/>
+          </svg>
+          Shuffle
+        </button>
+      </div>
+      <div class="playlist-scroll">
+        <div id="track-list-container"></div>
+      </div>
+    </div>
+
+    <div class="resize-handle" id="handle-right"></div>
+    <!-- Now Playing (right) -->
+    <div class="now-playing-col">
+      <div class="np-header">
+        <div class="np-header-label">Now Playing</div>
+        <div class="np-track-title" id="np-track-title">--</div>
+      </div>
+      <div class="waveform-container idle" id="waveform-container">
+        <div class="waveform" id="waveform"></div>
+      </div>
+      <div class="now-playing-inner" id="now-playing-area">
+        <div class="np-empty" id="np-empty">
+          <div class="np-empty-icon">&#9654;</div>
+          <p>Hit Play to load the first track</p>
+        </div>
+        <div class="np-card hidden" id="np-card">
+          <div>
+            <div class="np-question-label">Question</div>
+            <div class="np-question-text" id="np-question"></div>
+          </div>
+          <div class="np-answer-area hidden" id="np-fun-area">
+            <div class="np-slot-label" id="np-slot-label"></div>
+            <input class="np-input" id="np-answer-input" type="text" placeholder="Type the answer here...">
+          </div>
+          <div class="hidden" id="np-tech-area">
+            <button class="reveal-btn" id="reveal-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              Reveal Answer
+            </button>
+            <div class="reveal-answer hidden" id="reveal-answer-box"></div>
+          </div>
+          <div class="np-divider"></div>
+          <button class="mark-played-btn" id="mark-played-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Mark as Played
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FINALE -->
+<div id="finale-overlay">
+  <div class="finale-deck" id="finale-deck">
+    <!-- Cards injected by JS -->
+  </div>
+  <!-- Nav: prev / dots / next + start over -->
+  <div class="finale-nav">
+    <button class="finale-nav-btn" id="finale-prev" disabled>&#8592;</button>
+    <div class="finale-dots" id="finale-dots"></div>
+    <button class="finale-nav-btn" id="finale-next">&#8594;</button>
+    <button class="start-over-btn" id="start-over-btn">Start Over</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// WAVEFORM -- polychrome gradient bars
+// ============================================================
+(function buildWaveform() {
+  const wf    = document.getElementById('waveform');
+  const N     = 36;
+  const stops = [
+    [212,115,78],[190,100,140],[155,111,168],
+    [91,127,166],[110,150,140],[194,156,60],[212,115,78],
+  ];
+  function lerp(t) {
+    const seg = t*(stops.length-1), i = Math.min(Math.floor(seg),stops.length-2), f = seg-i;
+    const a = stops[i], b = stops[i+1];
+    return `rgb(${Math.round(a[0]+(b[0]-a[0])*f)},${Math.round(a[1]+(b[1]-a[1])*f)},${Math.round(a[2]+(b[2]-a[2])*f)})`;
+  }
+  const baseH = [28,42,62,80,55,90,38,72,50,84,44,66,32,78,52,88,60,96,
+                 96,60,88,52,78,32,66,44,84,50,72,38,90,55,80,62,42,28];
+  for (let i = 0; i < N; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'waveform-bar';
+    bar.style.height        = baseH[i] + '%';
+    bar.style.background    = lerp(i/(N-1));
+    bar.style.animationDelay = (Math.random()*1.4).toFixed(2) + 's';
+    wf.appendChild(bar);
+  }
+})();
+
+// ============================================================
+// DATA
+// ============================================================
+const FUN_QUESTIONS = [
+  {q:"What song do you have completely memorized without ever once trying to learn it?",                                                slot:"memorized_song",   label:"a song you know by heart", pair:0,title:"Absorbed By Osmosis",   duration:"3:18"},
+  {q:"What artist do you think is genuinely overrated?\n\nYou will defend this take.",                                                    slot:"overrated_artist", label:"an overrated artist",      pair:0,title:"Unpopular Opinion",     duration:"2:07"},
+  {q:"What song do you always skip but have never once deleted?",                                                                      slot:"skip_not_delete",  label:"a kept but skipped song",  pair:1,title:"Too Personal to Remove",duration:"4:01"},
+  {q:"What song do you associate with a specific place so strongly that hearing it teleports you back there?",                         slot:"place_song",       label:"a place song",             pair:1,title:"Smell of That Room",    duration:"3:44"},
+  {q:"What song would you delete from existence if you could?\n\nNot because it is bad, but because you are just completely done with it.", slot:"delete_song",  label:"a song to erase",          pair:2,title:"The Last Straw",        duration:"1:58"},
+  {q:"What is the worst live music experience you have ever had?\n\nConcert, recital, talent show, anything.",                            slot:"worst_show",       label:"a live music disaster",    pair:2,title:"You Had to Be There",   duration:"2:33"},
+  {q:"What song would you be embarrassed to admit you have cried to?",                                                                 slot:"cry_song",         label:"a cry song",               pair:3,title:"No I Was Not Crying",   duration:"3:55"},
+  {q:"What song do you love that you would never play in front of anyone you are trying to impress?",                                  slot:"private_song",     label:"a private song",           pair:3,title:"Aux Cord Never",        duration:"4:22"},
+  {q:"What song has a music video so bad it actually made you like the song less?",                                                    slot:"ruined_by_video",  label:"a ruined song",            pair:4,title:"Should Have Just Listened",duration:"2:48"},
+  {q:"What is a deeply uncool song you genuinely love and are not embarrassed about?",                                                 slot:"guilty_pleasure",  label:"a guilty pleasure",        pair:4,title:"Proudly Uncool",        duration:"3:14"},
+  {q:"What is a song you have loved that you would recommend, that would hurt if someone did not enjoy it?",                            slot:"snubbed_track",    label:"a vulnerable recommendation", pair:5,title:"Nobody Believed Me",    duration:"2:44"},
+  {q:"If this cohort had an official anthem, what would you nominate and why?",                                                        slot:"cohort_anthem",    label:"a cohort anthem",          pair:5,title:"Cohort Classics",       duration:"3:37"},
+];
+
+const TECH_QUESTIONS = [
+  {q:"When you write a SELECT statement, does SELECT choose rows or columns from the result?",answer:"SELECT chooses columns. The WHERE clause is what filters rows. SELECT determines which columns appear in the output, while WHERE determines which rows are included.",title:"Rows vs Columns",duration:"1:30"},
+  {q:"You have a songs table and an artists table. What column would you most likely join them on?",answer:"A foreign key on songs referencing the primary key on artists.\n\nTypically artist_id on songs joined to id on artists.",title:"Where Two Tables Meet",duration:"0:45"},
+  {q:"A subquery appears inside a WHERE clause. What does it return that the outer query uses?",answer:"The subquery returns a value or set of values. The outer query uses these to filter rows.\n\nA single value for an equality check, or a list for an IN condition.",title:"The Answer Inside the Answer",duration:"1:15"},
+  {q:"Fill in the blank: SELECT * FROM songs ___ artists ON songs.artist_id = artists.id",answer:"JOIN or INNER JOIN. Both produce the same result.\n\nRows where artist_id on songs matches id on artists.",title:"One Missing Word",duration:"0:33"},
+  {q:"What is a table alias in SQL, and what is the common convention for naming them?",answer:"A table alias is a short name you give a table using AS (or just a space) so you can reference it more concisely.\n\nThe convention is to use the first letter or a short abbreviation of the table name, like s for songs or a for artists.",title:"Short Names, Big Clarity",duration:"1:02"},
+  {q:"What is the difference between filtering with WHERE and filtering with HAVING?",answer:"WHERE filters rows before any grouping or aggregation. HAVING filters groups after GROUP BY.\n\nIt operates on aggregated results while WHERE operates on individual rows.",title:"Before and After the Count",duration:"1:48"},
+  {q:"Can a subquery appear in a SELECT clause? What would it return there?",answer:"Yes. A subquery in a SELECT clause is a scalar subquery.\n\nIt must return exactly one row and one column. That value becomes a computed column in each result row.",title:"One Truth Per Row",duration:"1:22"},
+  {q:"In a JOIN, what does the ON keyword specify?",answer:"ON specifies the join condition.\n\nThe columns from each table the database uses to match rows. Rows where the ON condition is true are included in the result.",title:"The Condition for Meeting",duration:"0:51"},
+  {q:"You want every song from the songs table, even if it has no matching row in the plays table. Which JOIN type do you use?",answer:"A LEFT JOIN with songs as the left table.\n\nAll songs are returned regardless of whether they appear in plays, with NULL for plays columns when there is no match.",title:"Every Song, With or Without",duration:"1:10"},
+  {q:"What is a subquery in SQL?",answer:"A subquery is a query nested inside another query, typically within a WHERE, FROM, or SELECT clause.\n\nIt runs first and its result is used by the outer query to filter, compute, or provide data.",title:"A Query Within a Query",duration:"2:05"},
+  {q:"You want all artists who have never had a song played. Would you use a JOIN or a subquery? Describe your approach.",answer:"Either works. Subquery: SELECT * FROM artists WHERE id NOT IN (SELECT artist_id FROM plays). JOIN: LEFT JOIN plays and filter WHERE plays.id IS NULL.",title:"Songs Nobody Heard",duration:"2:18"},
+  {q:"What does SELECT DISTINCT do in a query that uses a JOIN?",answer:"DISTINCT removes duplicate rows. In a JOIN that produces multiple rows for one record, DISTINCT collapses them.\n\nUseful when you want unique values from one side of the join.",title:"No Two the Same",duration:"1:33"},
+  {q:"In a SELECT statement, what does the FROM clause tell the database?",answer:"FROM specifies which table (or tables) the data comes from.\n\nThere is no limit to how many tables you can include. You can join as many as you need.",title:"Where It All Comes From",duration:"1:55"},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let tracks=[],upNextOrder=[],playedOrder=[],savedAnswers={},currentTrack=null,shuffling=false;
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fisherYates(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function buildPlaylist(n){
+  const fp=fisherYates([...FUN_QUESTIONS]),tp=fisherYates([...TECH_QUESTIONS]);
+  const fs=Math.min(FUN_QUESTIONS.length,n),tot=Math.min(n*2,FUN_QUESTIONS.length+TECH_QUESTIONS.length),ts=tot-fs;
+  return fisherYates([...fp.slice(0,fs).map(q=>({...q,type:'fun',played:false})),...tp.slice(0,ts).map(q=>({...q,type:'tech',played:false}))]);
+}
+
+function renderPlaylist(){
+  const c=document.getElementById('track-list-container');
+  c.innerHTML='';
+  upNextOrder.forEach((tIdx,pos)=>{
+    const t=tracks[tIdx],row=document.createElement('div');
+    row.className='track-row'+(tIdx===currentTrack?' active-track':'');
+    row.dataset.tIdx=String(tIdx);
+    row.innerHTML=`<div class="track-num">${pos+1}</div><div class="track-title-cell">${escHtml(t.title)}</div><div class="track-duration">${t.duration}</div>`;
+    c.appendChild(row);
+  });
+  if(playedOrder.length>0){
+    const hdr=document.createElement('div');hdr.className='played-header';hdr.textContent='Played';c.appendChild(hdr);
+    playedOrder.forEach(tIdx=>{
+      const t=tracks[tIdx],row=document.createElement('div');
+      row.className='track-row played-row';
+      row.style.cursor='pointer';
+      row.innerHTML=`<div class="track-num">&#10003;</div><div class="track-title-cell">${escHtml(t.title)}</div><div class="track-duration">${t.duration}</div>`;
+      row.addEventListener('click',()=>{ if(currentTrack!==null)return; loadTrack(tIdx); });
+      c.appendChild(row);
+    });
+  }
+  document.getElementById('remaining-count').textContent=upNextOrder.length;
+  document.getElementById('play-top-btn').disabled=(upNextOrder.length===0||currentTrack!==null);
+}
+
+// ============================================================
+// SHUFFLE -- pure visible FLIP
+// Rows stay fully visible throughout. Each one slides from its
+// current screen position to its new position -- no blanking.
+// ============================================================
+function doShuffle(){
+  if(shuffling||upNextOrder.length<2)return;
+  shuffling=true;
+  document.getElementById('shuffle-btn').classList.add('is-shuffling');
+
+  const c=document.getElementById('track-list-container');
+  const rows=Array.from(c.querySelectorAll('.track-row:not(.played-row)'));
+
+  // Step 1 -- snapshot every row's current screen position
+  const beforeMap={};
+  rows.forEach(r=>{beforeMap[r.dataset.tIdx]=r.getBoundingClientRect();});
+
+  // Step 2 -- reorder data and redraw DOM (rows are now in new order,
+  //           but we haven't animated yet so they visually "jumped")
+  upNextOrder=fisherYates(upNextOrder);
+  renderPlaylist();
+
+  // Step 3 -- for each row in its new DOM position, calculate where it
+  //           CAME FROM, snap it there instantly, then animate to 0,0
+  const newRows=Array.from(c.querySelectorAll('.track-row:not(.played-row)'));
+  const FLY=2080;
+
+  // Count how many rows are actually animating; finish() when all done.
+  // Hard timeout ensures the flag always clears even if transitionend misfires.
+  let pending=0;
+  let finished=false;
+
+  function finish(){
+    if(finished) return;
+    finished=true;
+    shuffling=false;
+    document.getElementById('shuffle-btn').classList.remove('is-shuffling');
+  }
+
+  // Compute maxDy once up front
+  const maxDy=Math.max(1,...newRows.map(r=>{
+    const b=beforeMap[r.dataset.tIdx];
+    const a=r.getBoundingClientRect();
+    return b ? Math.abs(b.top-a.top) : 0;
+  }));
+
+  newRows.forEach((row)=>{
+    const before=beforeMap[row.dataset.tIdx];
+    const after=row.getBoundingClientRect();
+    const dy=before ? before.top - after.top : 0;
+
+    if(Math.abs(dy)<1) return; // row didn't move, skip
+
+    pending++;
+
+    row.style.transition='none';
+    row.style.transform=`translateY(${dy}px)`;
+    row.style.zIndex=dy < 0 ? '2' : '1';
+    row.getBoundingClientRect(); // force reflow
+
+    const absDy=Math.abs(dy);
+    const delay=Math.round((1-(absDy/maxDy))*320);
+
+    row.style.transition=`transform ${FLY}ms cubic-bezier(0.25,1,0.5,1) ${delay}ms`;
+    row.style.transform='translateY(0)';
+
+    row.addEventListener('transitionend',()=>{
+      row.style.transition='';
+      row.style.transform='';
+      row.style.zIndex='';
+      pending--;
+      if(pending<=0) finish();
+    },{once:true});
+  });
+
+  // If no rows needed animating, finish immediately
+  if(pending===0) finish();
+
+  // Hard safety net: always release the lock after max animation time
+  setTimeout(finish, FLY + 400);
+}
+
+function loadTrack(tIdx){
+  currentTrack=tIdx;const t=tracks[tIdx];
+  document.getElementById('np-track-title').textContent=t.title;
+  document.getElementById('np-question').textContent=t.q;
+  document.getElementById('np-empty').classList.add('hidden');
+  document.getElementById('np-card').classList.remove('hidden');
+  document.getElementById('waveform-container').classList.remove('idle');
+  if(t.type==='fun'){
+    document.getElementById('np-fun-area').classList.remove('hidden');
+    document.getElementById('np-tech-area').classList.add('hidden');
+    document.getElementById('np-slot-label').textContent=`This answer will be used as: ${t.label}`;
+    document.getElementById('np-answer-input').value=savedAnswers[t.slot]||'';
+  }else{
+    document.getElementById('np-fun-area').classList.add('hidden');
+    document.getElementById('np-tech-area').classList.remove('hidden');
+    document.getElementById('reveal-btn').classList.remove('hidden');
+    document.getElementById('reveal-answer-box').classList.add('hidden');
+    document.getElementById('reveal-answer-box').innerHTML='';
+  }
+  document.getElementById('now-playing-area').scrollTop=0;
+  renderPlaylist();
+}
+
+function markPlayed(){
+  if(currentTrack===null)return;
+  const t=tracks[currentTrack];
+  if(t.type==='fun'){const val=document.getElementById('np-answer-input').value.trim();if(val)savedAnswers[t.slot]=val;}
+  t.played=true;upNextOrder=upNextOrder.filter(i=>i!==currentTrack);playedOrder.push(currentTrack);currentTrack=null;
+  document.getElementById('np-card').classList.add('hidden');
+  document.getElementById('np-empty').classList.remove('hidden');
+  document.getElementById('np-track-title').textContent='--';
+  document.getElementById('waveform-container').classList.add('idle');
+  renderPlaylist();
+  if(upNextOrder.length===0)setTimeout(showFinale,400);
+}
+
+function has(slot){return savedAnswers[slot]&&savedAnswers[slot].trim();}
+function esc(v){return escHtml(savedAnswers[v]||'');}
+
+// ============================================================
+// FINALE -- Wrapped-style card deck
+// ============================================================
+let particleAnimId = null;
+
+function runParticleField(canvas) {
+  canvas.width  = canvas.offsetWidth  || window.innerWidth;
+  canvas.height = canvas.offsetHeight || window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const CX = W / 2, CY = H / 2;
+  const R  = Math.hypot(CX, CY) * 0.90; // 90% of half-diagonal
+
+  // Mango palette — same stops as the rest of the app
+  const stops = [
+    [212,115,78],[190,100,140],[155,111,168],
+    [91,127,166],[110,150,140],[194,156,60],[212,115,78],
+  ];
+  function lerpColor(v) {
+    const p = ((v % 1) + 1) % 1;
+    const seg = p * (stops.length - 1);
+    const i = Math.min(Math.floor(seg), stops.length - 2);
+    const f = seg - i;
+    const a = stops[i], b = stops[i+1];
+    return [
+      Math.round(a[0]+(b[0]-a[0])*f),
+      Math.round(a[1]+(b[1]-a[1])*f),
+      Math.round(a[2]+(b[2]-a[2])*f),
+    ];
+  }
+
+  function strHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  }
+
+  // 6-fold rotational symmetry (hexagonal — richest kaleidoscope look)
+  const FOLD = 6;
+
+  const vals = Object.values(savedAnswers).filter(v => v && v.trim());
+
+  // Shape configs: [tipFrac, lenFrac, widFrac, speedBase, type, morphAmp, morphFreq, morphMode]
+  // morphAmp:  how much to morph (0=none, 0.4=±40%)
+  // morphFreq: speed of morph cycle relative to t
+  // morphMode: 0=uniform  1=len-only (extends/retracts)  2=width-only (fattens/thins)
+  const CONFIGS = [
+    // Outer layer
+    [0.02, 1.05, 0.32, 0.28, 1,  0.38, 0.55, 2],  // teardrop blooms wider
+    [0.04, 0.88, 0.10, 0.32, 2,  0.45, 0.40, 1],  // spindle extends like a tendril
+    [0.03, 1.10, 0.24, 0.25, 0,  0.06, 1.10, 0],  // large petal barely breathes
+    [0.05, 0.62, 0.28, 0.36, 1,  0.50, 0.70, 0],  // fat teardrop pulses uniformly
+    [0.02, 0.95, 0.08, 0.30, 3,  0.05, 0.90, 1],  // lozenge mostly steady
+    // Mid layer
+    [0.15, 0.56, 0.20, 0.50, 0,  0.35, 0.80, 2],  // chunky petal fattens
+    [0.18, 0.35, 0.26, 0.56, 1,  0.05, 1.20, 0],  // stubby teardrop barely moves
+    [0.12, 0.60, 0.07, 0.46, 2,  0.55, 0.60, 1],  // thin spindle stretches a lot
+    [0.20, 0.48, 0.16, 0.62, 3,  0.40, 0.95, 2],  // lozenge widens/narrows
+    // Inner layer
+    [0.03, 0.26, 0.10, 0.86, 0,  0.50, 1.30, 0],  // small petal pulses hard
+    [0.04, 0.16, 0.03, 0.93, 2,  0.06, 0.70, 1],  // hairline barely moves
+    [0.02, 0.30, 0.14, 0.80, 1,  0.42, 1.00, 2],  // inner teardrop blooms
+  ];
+
+  const shapes = CONFIGS.map((cfg, i) => {
+    const isAnchor = i < vals.length;
+    const h = isAnchor ? strHash(vals[i]) : strHash('shp' + i * 6421);
+    const [tipF, lenF, widF, spd, type, morphAmp, morphFreq, morphMode] = cfg;
+    return {
+      tipR:       R * tipF,
+      len:        R * lenF,
+      halfW:      R * widF,
+      angle:      (h & 0x3ff) / 1023 * Math.PI * 2,
+      speed:      (spd + (h >> 10 & 0x1f) / 200) * (i % 2 === 0 ? 1 : -1),
+      phase:      (h >> 8  & 0xff) / 255 * Math.PI * 2,
+      colorBase:  i / (CONFIGS.length - 1),
+      colorDrift: (0.018 + (h >> 22 & 0xf) / 350) * (i % 3 === 0 ? -1 : 1),
+      alpha: i < 5  ? (0.20 + (h >> 20 & 0xf) / 70)
+           : i < 9  ? (0.22 + (h >> 20 & 0xf) / 65)
+           :          (0.30 + (h >> 20 & 0xf) / 55),
+      type, morphAmp, morphFreq, morphMode,
+    };
+  });
+
+  ctx.fillStyle = '#0d0a08';
+  ctx.fillRect(0, 0, W, H);
+
+  let t = 0;
+
+  // Petal pointing in +x direction from origin, tip at (tipR, 0)
+  function petalPath(tipR, len, halfW, type) {
+    ctx.beginPath();
+    const x0 = tipR, x1 = tipR + len;
+    if (type === 0) {
+      // Classic pointed petal
+      ctx.moveTo(x0, 0);
+      ctx.bezierCurveTo(x0 + len*0.30, -halfW*0.9, x0 + len*0.65, -halfW,      x1, 0);
+      ctx.bezierCurveTo(x0 + len*0.65,  halfW,     x0 + len*0.30,  halfW*0.9, x0, 0);
+    } else if (type === 1) {
+      // Wide rounded teardrop
+      ctx.moveTo(x0, 0);
+      ctx.bezierCurveTo(x0 + len*0.18, -halfW*1.2, x0 + len*0.55, -halfW*1.2, x1, 0);
+      ctx.bezierCurveTo(x0 + len*0.55,  halfW*1.2, x0 + len*0.18,  halfW*1.2, x0, 0);
+    } else if (type === 2) {
+      // Narrow spindle
+      ctx.moveTo(x0, 0);
+      ctx.bezierCurveTo(x0 + len*0.35, -halfW*0.62, x0 + len*0.65, -halfW*0.62, x1, 0);
+      ctx.bezierCurveTo(x0 + len*0.65,  halfW*0.62, x0 + len*0.35,  halfW*0.62, x0, 0);
+    } else {
+      // Lozenge — straight-edged diamond, sharp contrast to the bezier shapes
+      ctx.moveTo(x0, 0);
+      ctx.lineTo(x0 + len * 0.38, -halfW);
+      ctx.lineTo(x1, 0);
+      ctx.lineTo(x0 + len * 0.38,  halfW);
+    }
+    ctx.closePath();
+  }
+
+  function draw() {
+    // Moderate fade — shapes leave soft trails without smearing
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = '#0d0a08';
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    t += 0.0055; // stately pace — full rotations take 15–45 sec
+
+    for (const sh of shapes) {
+      const [r, g, b] = lerpColor(sh.colorBase + t * sh.colorDrift);
+      // Per-shape morph: some stretch, some bloat, some pulse uniformly
+      const m    = Math.sin(t * sh.morphFreq + sh.phase) * sh.morphAmp;
+      const lenM = sh.morphMode === 2 ? sh.len   : sh.len   * (1 + m);
+      const widM = sh.morphMode === 1 ? sh.halfW : sh.halfW * (1 + m);
+      const ang  = sh.angle + t * sh.speed;
+
+      for (let f = 0; f < FOLD; f++) {
+        ctx.save();
+        ctx.translate(CX, CY);
+        ctx.rotate(ang + (f / FOLD) * Math.PI * 2);
+        petalPath(sh.tipR, lenM, widM, sh.type);
+        ctx.fillStyle = `rgba(${r},${g},${b},${sh.alpha})`;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    particleAnimId = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function buildCards(){
+  const cards=[];
+
+  // Intro
+  cards.push({bg:'wcard-bg-intro',
+    eyebrow:'Mango Music Mapped',
+    big:`Your Cohort,<br><em>Mapped.</em>`,
+    sub:`${playedOrder.length} tracks; ${playedOrder.length} answers;`,
+    vinyl:true});
+
+  // Answer pool -- eyebrow + big answer only, no commentary
+  const pool=[
+    has('memorized_song')  &&{bg:'wcard-bg-a',eyebrow:'Every Word. Unprompted.',      big:`<em>${esc('memorized_song')}</em>`},
+    has('overrated_artist')&&{bg:'wcard-bg-b',eyebrow:'The Take Has Landed',           big:`<em>${esc('overrated_artist')}</em>`},
+    has('skip_not_delete') &&{bg:'wcard-bg-c',eyebrow:'The Undeletable Skip',          big:`<em>${esc('skip_not_delete')}</em>`},
+    has('place_song')      &&{bg:'wcard-bg-d',eyebrow:'Teleportation Device',          big:`<em>${esc('place_song')}</em>`},
+    has('delete_song')     &&{bg:'wcard-bg-e',eyebrow:'Respectfully, Done.',           big:`<em>${esc('delete_song')}</em>`},
+    has('worst_show')      &&{bg:'wcard-bg-f',eyebrow:'A Lesson Was Learned',          big:`<em>${esc('worst_show')}</em>`},
+    has('cry_song')        &&{bg:'wcard-bg-a',eyebrow:'Absolutely Not Crying',         big:`<em>${esc('cry_song')}</em>`},
+    has('private_song')    &&{bg:'wcard-bg-b',eyebrow:'Aux Cord: Closed',              big:`<em>${esc('private_song')}</em>`},
+    has('ruined_by_video') &&{bg:'wcard-bg-c',eyebrow:'Vision Damage',                 big:`<em>${esc('ruined_by_video')}</em>`},
+    has('guilty_pleasure') &&{bg:'wcard-bg-d',eyebrow:'Zero Guilt. Full Send.',        big:`<em>${esc('guilty_pleasure')}</em>`},
+    has('snubbed_track')   &&{bg:'wcard-bg-e',eyebrow:"No They Didn't.",               big:`<em>${esc('snubbed_track')}</em>`},
+    has('cohort_anthem')   &&{bg:'wcard-bg-f',eyebrow:'Official. Binding. Permanent.', big:`<em>${esc('cohort_anthem')}</em>`},
+  ].filter(Boolean);
+
+  [...pool].sort(()=>Math.random()-0.5).slice(0,2).forEach(c=>cards.push(c));
+
+  // Particle visualizer closer
+  cards.push({bg:'wcard-bg-outro', particle:true});
+
+  return cards;
+}
+
+let finaleCards=[], finaleIdx=0;
+
+function renderFinaleCard(idx){
+  if(particleAnimId){cancelAnimationFrame(particleAnimId);particleAnimId=null;}
+
+  const deck=document.getElementById('finale-deck');
+  const dots=document.getElementById('finale-dots');
+  const prev=document.getElementById('finale-prev');
+  const next=document.getElementById('finale-next');
+
+  const allCards=Array.from(deck.querySelectorAll('.wcard'));
+  allCards.forEach((c,i)=>{
+    if(i===idx){
+      c.classList.remove('exit-left');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        c.classList.add('active');
+        if(c._startParticles) setTimeout(c._startParticles, 450);
+      }));
+    } else {
+      c.classList.remove('active');
+      c.classList.add('exit-left');
+    }
+  });
+
+  Array.from(dots.querySelectorAll('.finale-dot')).forEach((d,i)=>d.classList.toggle('active',i===idx));
+  prev.disabled=idx===0;
+  next.textContent=idx===finaleCards.length-1?'\u2713':'\u2192';
+  next.disabled=false;
+}
+
+function showFinale(){
+  if(particleAnimId){cancelAnimationFrame(particleAnimId);particleAnimId=null;}
+  finaleCards=buildCards();
+  finaleIdx=0;
+  const deck=document.getElementById('finale-deck');
+  const dots=document.getElementById('finale-dots');
+  deck.innerHTML='';dots.innerHTML='';
+
+  finaleCards.forEach((c)=>{
+    const div=document.createElement('div');
+    div.className=`wcard ${c.bg}`;
+    if(c.particle){
+      const canvas=document.createElement('canvas');
+      div.appendChild(canvas);
+      div._startParticles=()=>runParticleField(canvas);
+    } else {
+      const vinylHtml = c.vinyl ? `<div class="wcard-vinyl-deco"><div class="wcard-vinyl-deco-inner"><div class="wcard-vinyl-deco-hole"></div></div></div>` : '';
+      const statHtml  = c.stat  ? `<div class="wcard-stat">${escHtml(c.stat)}</div>` : '';
+      div.innerHTML=`<div class="wcard-eyebrow">${escHtml(c.eyebrow)}</div><div class="wcard-big">${c.big}</div>${c.sub?`<div class="wcard-sub">${escHtml(c.sub)}</div>`:''}${vinylHtml}${statHtml}`;
+    }
+    deck.appendChild(div);
+    const dot=document.createElement('div');dot.className='finale-dot';dots.appendChild(dot);
+  });
+
+  document.getElementById('finale-overlay').style.display='block';
+  renderFinaleCard(0);
+}
+
+document.getElementById('finale-prev').addEventListener('click',()=>{if(finaleIdx>0){finaleIdx--;renderFinaleCard(finaleIdx);}});
+document.getElementById('finale-next').addEventListener('click',()=>{if(finaleIdx<finaleCards.length-1){finaleIdx++;renderFinaleCard(finaleIdx);}});
+
+// ── Secret dev shortcut ──────────────────────────────────────────────────────
+// Clicking "Liked Songs" in the sidebar skips straight to the finale with
+// randomised fake answers so the graphic can be tested quickly.
+document.getElementById('liked-songs-btn').addEventListener('click', () => {
+  const fakePool = {
+    memorized_song:   ['Mr. Brightside','Bohemian Rhapsody','All Star','Sandstorm','Africa','Wonderwall'],
+    overrated_artist: ['Jelly Roll','Coldplay','The Chainsmokers','Wiz Kalifa','Post Malone','Billie Eilish'],
+    skip_not_delete:  ['My Heart Will Go On','Hotel California','American Pie','Stairway to Heaven','Free Bird'],
+    place_song:       ['Sunflower','Golden Hour','dreams','Clair de Lune','Midnight City','Vienna'],
+    delete_song:      ['Baby Shark','Despacito','Shape of You','Happy','Gangnam Style','Call Me Maybe'],
+    worst_show:       ['middle school talent show','rain-soaked outdoor festival','high school band concert'],
+    cry_song:         ['Fix You','The Night Will Always Win','Comptine d\'un Autre Été','Landslide','The Show'],
+    private_song:     ['Barbie Girl','Mambo No. 5','Who Let the Dogs Out','Never Gonna Give You Up','Tubthumping'],
+    ruined_by_video:  ['Thriller','Gangnam Style','Take On Me','November Rain','Wrecking Ball'],
+    guilty_pleasure:  ['Dancing Queen','Sk8er Boi','Party in the USA','All the Small Things','MMMBop'],
+    snubbed_track:    ['Redbone','Tame Impala - The Less I Know','Rex Orange County - Corduroy','Sufjan Stevens'],
+    cohort_anthem:    ['We Are the Champions','Don\'t Stop Believin\'','Livin\' on a Prayer','Eye of the Tiger'],
+  };
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  Object.keys(fakePool).forEach(slot => { savedAnswers[slot] = pick(fakePool[slot]); });
+  // Make sure main-screen is visible (finale sits on top)
+  document.getElementById('load-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'flex';
+  showFinale();
+});
+
+document.getElementById('student-count').addEventListener('blur',function(){let v=parseInt(this.value,10);if(isNaN(v)||v<6)v=6;if(v>30)v=30;this.value=v;});
+
+document.getElementById('build-btn').addEventListener('click',()=>{
+  const n=parseInt(document.getElementById('student-count').value,10)||25;
+  tracks=buildPlaylist(n);upNextOrder=tracks.map((_,i)=>i);playedOrder=[];savedAnswers={};currentTrack=null;shuffling=false;
+  document.getElementById('load-screen').style.display='none';
+  document.getElementById('main-screen').style.display='flex';
+  renderPlaylist();
+});
+
+document.getElementById('play-top-btn').addEventListener('click',()=>{if(upNextOrder.length===0||currentTrack!==null)return;loadTrack(upNextOrder[0]);});
+document.getElementById('shuffle-btn').addEventListener('click',doShuffle);
+document.getElementById('reveal-btn').addEventListener('click',function(){if(currentTrack===null)return;const box=document.getElementById('reveal-answer-box');box.innerHTML=escHtml(tracks[currentTrack].answer);box.classList.remove('hidden');this.classList.add('hidden');});
+document.getElementById('mark-played-btn').addEventListener('click',markPlayed);
+document.getElementById('start-over-btn').addEventListener('click',()=>{
+  if(particleAnimId){cancelAnimationFrame(particleAnimId);particleAnimId=null;}
+  document.getElementById('finale-overlay').style.display='none';
+  document.getElementById('main-screen').style.display='none';
+  document.getElementById('load-screen').style.display='flex';
+  tracks=[];upNextOrder=[];playedOrder=[];savedAnswers={};currentTrack=null;shuffling=false;
+  document.getElementById('np-card').classList.add('hidden');
+  document.getElementById('np-empty').classList.remove('hidden');
+  document.getElementById('np-track-title').textContent='--';
+  document.getElementById('waveform-container').classList.add('idle');
+});
+
+// ============================================================
+// COLUMN RESIZE
+// Two handles: left (sidebar | playlist) and right (playlist | now-playing)
+// ============================================================
+(function initResize() {
+  const content  = document.querySelector('.main-content');
+  const sidebar  = document.querySelector('.sidebar');
+  const playlist = document.querySelector('.playlist-col');
+  const nowPlay  = document.querySelector('.now-playing-col');
+  const handleL  = document.getElementById('handle-left');
+  const handleR  = document.getElementById('handle-right');
+
+  // Set initial sizes
+  sidebar.style.flexBasis  = '200px';
+  nowPlay.style.flexBasis  = '420px';
+
+  function makeDragger(handle, onDrag) {
+    handle.addEventListener('mousedown', e => {
+      e.preventDefault();
+      handle.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+
+      const onMove = ev => onDrag(ev.clientX);
+      const onUp   = () => {
+        handle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup',   onUp);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup',   onUp);
+    });
+  }
+
+  // Left handle: dragging left/right changes sidebar width
+  let startXL, startSidebarW;
+  handleL.addEventListener('mousedown', e => { startXL = e.clientX; startSidebarW = sidebar.getBoundingClientRect().width; });
+  makeDragger(handleL, clientX => {
+    const delta = clientX - startXL;
+    const newW  = Math.min(360, Math.max(120, startSidebarW + delta));
+    sidebar.style.flexBasis = newW + 'px';
+  });
+
+  // Right handle: dragging changes now-playing width (grows/shrinks from right)
+  let startXR, startNpW;
+  handleR.addEventListener('mousedown', e => { startXR = e.clientX; startNpW = nowPlay.getBoundingClientRect().width; });
+  makeDragger(handleR, clientX => {
+    const delta = startXR - clientX;  // rightward drag = larger now-playing
+    const newW  = Math.min(700, Math.max(240, startNpW + delta));
+    nowPlay.style.flexBasis = newW + 'px';
+  });
+})();
+</script>
+</body>
+</html>

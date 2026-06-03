@@ -1,0 +1,242 @@
+[
+  {
+    "id": "week5-oop-01",
+    "title": "Student Constructor",
+    "week": 5,
+    "topic": "constructors",
+    "description": "A Student class with a constructor that sets the name using the this keyword.",
+    "code": [
+      { "line": 1, "text": "public class Student {" },
+      { "line": 2, "blankId": "b1", "before": "  ", "after": " String name;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public Student(String name) {" },
+      { "line": 5, "blankId": "b2", "before": "    ", "after": ".name = name;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b3", "before": "  public String ", "after": "() {" },
+      { "line": 9, "text": "    return name;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "private", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "this", "altAnswers": [] },
+      { "id": "b3", "line": 8, "answer": "getName", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-oop-02",
+    "title": "Bank Account",
+    "week": 5,
+    "topic": "getters",
+    "description": "A BankAccount class with a private balance and a getter method to access it.",
+    "code": [
+      { "line": 1, "text": "public class BankAccount {" },
+      { "line": 2, "text": "  private double balance;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public BankAccount(double balance) {" },
+      { "line": 5, "text": "    this.balance = balance;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b1", "before": "  ", "after": " double getBalance() {" },
+      { "line": 9, "blankId": "b2", "before": "    ", "after": " balance;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "blankId": "b3", "before": "  public ", "after": " deposit(double amount) {" },
+      { "line": 13, "text": "    balance = balance + amount;" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 8, "answer": "public", "altAnswers": [] },
+      { "id": "b2", "line": 9, "answer": "return", "altAnswers": [] },
+      { "id": "b3", "line": 12, "answer": "void", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-oop-03",
+    "title": "Rectangle",
+    "week": 5,
+    "topic": "constructors",
+    "description": "A Rectangle class that stores width and height and calculates the area.",
+    "code": [
+      { "line": 1, "text": "public class Rectangle {" },
+      { "line": 2, "text": "  private int width;" },
+      { "line": 3, "text": "  private int height;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "blankId": "b1", "before": "  public ", "after": "(int width, int height) {" },
+      { "line": 6, "blankId": "b2", "before": "    ", "after": ".width = width;" },
+      { "line": 7, "text": "    this.height = height;" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "  public int getArea() {" },
+      { "line": 11, "blankId": "b3", "before": "    ", "after": " width * height;" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "Rectangle", "altAnswers": [] },
+      { "id": "b2", "line": 6, "answer": "this", "altAnswers": [] },
+      { "id": "b3", "line": 11, "answer": "return", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-strings-01",
+    "title": "String Length Check",
+    "week": 5,
+    "topic": "Strings",
+    "description": "A program that checks if a password is long enough using String methods.",
+    "code": [
+      { "line": 1, "text": "public class PasswordCheck {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String password = \"hello123\";" },
+      { "line": 4, "blankId": "b1", "before": "    if (password.", "after": "() >= 8) {" },
+      { "line": 5, "text": "      System.out.println(\"Password accepted.\");" },
+      { "line": 6, "text": "    } else {" },
+      { "line": 7, "blankId": "b2", "before": "      System.out.", "after": "(\"Too short!\");" },
+      { "line": 8, "text": "    }" },
+      { "line": 9, "blankId": "b3", "before": "    String upper = password.", "after": "();" },
+      { "line": 10, "text": "    System.out.println(upper);" },
+      { "line": 11, "text": "  }" },
+      { "line": 12, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "length", "altAnswers": [] },
+      { "id": "b2", "line": 7, "answer": "println", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "toUpperCase", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-strings-02",
+    "title": "Substring Extraction",
+    "week": 5,
+    "topic": "Strings",
+    "description": "A program that extracts and compares parts of a String.",
+    "code": [
+      { "line": 1, "text": "public class SubstringDemo {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String email = \"user@example.com\";" },
+      { "line": 4, "blankId": "b1", "before": "    int atIndex = email.", "after": "(\"@\");" },
+      { "line": 5, "blankId": "b2", "before": "    String user = email.", "after": "(0, atIndex);" },
+      { "line": 6, "blankId": "b3", "before": "    String domain = email.substring(atIndex ", "after": " 1);" },
+      { "line": 7, "text": "    System.out.println(\"User: \" + user);" },
+      { "line": 8, "text": "    System.out.println(\"Domain: \" + domain);" },
+      { "line": 9, "text": "  }" },
+      { "line": 10, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 4, "answer": "indexOf", "altAnswers": [] },
+      { "id": "b2", "line": 5, "answer": "substring", "altAnswers": [] },
+      { "id": "b3", "line": 6, "answer": "+", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-oop-04",
+    "title": "ToString Override",
+    "week": 5,
+    "topic": "toString",
+    "description": "A Product class that overrides toString to display a readable summary.",
+    "code": [
+      { "line": 1, "text": "public class Product {" },
+      { "line": 2, "text": "  private String name;" },
+      { "line": 3, "text": "  private double price;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "  public Product(String name, double price) {" },
+      { "line": 6, "text": "    this.name = name;" },
+      { "line": 7, "text": "    this.price = price;" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "blankId": "b1", "before": "  ", "after": "" },
+      { "line": 11, "blankId": "b2", "before": "  public ", "after": " toString() {" },
+      { "line": 12, "blankId": "b3", "before": "    ", "after": " name + \": $\" + price;" },
+      { "line": 13, "text": "  }" },
+      { "line": 14, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 10, "answer": "@Override", "altAnswers": [] },
+      { "id": "b2", "line": 11, "answer": "String", "altAnswers": [] },
+      { "id": "b3", "line": 12, "answer": "return", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-oop-05",
+    "title": "Setter Method",
+    "week": 5,
+    "topic": "encapsulation",
+    "description": "A Person class with a private age field and a setter that validates input.",
+    "code": [
+      { "line": 1, "text": "public class Person {" },
+      { "line": 2, "blankId": "b1", "before": "  ", "after": " int age;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "blankId": "b2", "before": "  public ", "after": " setAge(int age) {" },
+      { "line": 5, "text": "    if (age >= 0) {" },
+      { "line": 6, "blankId": "b3", "before": "      ", "after": ".age = age;" },
+      { "line": 7, "text": "    }" },
+      { "line": 8, "text": "  }" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "  public int getAge() {" },
+      { "line": 11, "text": "    return age;" },
+      { "line": 12, "text": "  }" },
+      { "line": 13, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "private", "altAnswers": [] },
+      { "id": "b2", "line": 4, "answer": "void", "altAnswers": [] },
+      { "id": "b3", "line": 6, "answer": "this", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-strings-03",
+    "title": "String Equality",
+    "week": 5,
+    "topic": "Strings",
+    "description": "A program that demonstrates the correct way to compare Strings in Java.",
+    "code": [
+      { "line": 1, "text": "public class StringCompare {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String a = \"hello\";" },
+      { "line": 4, "text": "    String b = new String(\"hello\");" },
+      { "line": 5, "blankId": "b1", "before": "    if (a.", "after": "(b)) {" },
+      { "line": 6, "text": "      System.out.println(\"Same content\");" },
+      { "line": 7, "text": "    }" },
+      { "line": 8, "blankId": "b2", "before": "    String greeting = \"Hello World\".", "after": "();" },
+      { "line": 9, "blankId": "b3", "before": "    System.out.", "after": "(greeting);" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 5, "answer": "equals", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "toLowerCase", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "println", "altAnswers": [] }
+    ]
+  },
+  {
+    "id": "week5-oop-06",
+    "title": "Counter Class",
+    "week": 5,
+    "topic": "encapsulation",
+    "description": "A Counter class with methods to increment, get, and reset the count.",
+    "code": [
+      { "line": 1, "text": "public class Counter {" },
+      { "line": 2, "blankId": "b1", "before": "  ", "after": " int count = 0;" },
+      { "line": 3, "text": "" },
+      { "line": 4, "text": "  public void increment() {" },
+      { "line": 5, "text": "    count++;" },
+      { "line": 6, "text": "  }" },
+      { "line": 7, "text": "" },
+      { "line": 8, "blankId": "b2", "before": "  public ", "after": " getCount() {" },
+      { "line": 9, "blankId": "b3", "before": "    ", "after": " count;" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "  public void reset() {" },
+      { "line": 13, "text": "    count = 0;" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "}" }
+    ],
+    "blanks": [
+      { "id": "b1", "line": 2, "answer": "private", "altAnswers": [] },
+      { "id": "b2", "line": 8, "answer": "int", "altAnswers": [] },
+      { "id": "b3", "line": 9, "answer": "return", "altAnswers": [] }
+    ]
+  }
+]

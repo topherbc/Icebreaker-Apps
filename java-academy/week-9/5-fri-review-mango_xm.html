@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mango XM</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%231e0e18'/><text y='68' x='50' text-anchor='middle' font-size='54' font-family='serif' fill='%23fde8c0'>&#x25C6;</text><text y='88' x='50' text-anchor='middle' font-size='16' font-family='monospace' font-weight='bold' fill='%23d4734e'>XM</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CSS VARIABLES -- Mango Music palette adapted for radio/broadcast
+============================================================ */
+:root {
+  --bg:           #faf6f1;
+  --bg2:          #f2ebe0;
+  --bg3:          #e8ddd0;
+  --surface:      #ddd0be;
+  --surface2:     #cfc0a8;
+  --border:       rgba(110,60,20,0.13);
+  --border-md:    rgba(110,60,20,0.24);
+
+  --purple-deep:  #1a0d2e;
+  --purple-mid:   #3d1f5e;
+  --purple:       #6b3fa0;
+  --purple-lt:    #9b6fa8;
+  --purple-pale:  rgba(107,63,160,0.10);
+
+  --orange:       #c05a3a;
+  --orange-dk:    #a04830;
+  --orange-lt:    #d4734e;
+  --orange-grad-a:#d4734e;
+  --orange-grad-b:#c2621a;
+  --orange-pale:  rgba(192,90,58,0.10);
+
+  --cream:        #faf6f1;
+  --cream-dk:     #f0e8da;
+
+  --text:         #1e1209;
+  --text-2:       #3d2510;
+  --muted:        #8a6040;
+  --muted-lt:     #8c5830;
+
+  --radio-face:   #221015;
+  --radio-face2:  #2e1820;
+  --radio-knob:   #3a2230;
+  --display-bg:   #0a0508;
+  --display-on:   #fde8c0;
+  --display-muted:rgba(253,232,192,0.35);
+  --signal-green: #5aaa6a;
+  --static-color: rgba(253,232,192,0.18);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  min-height: 100vh;
+  overflow: hidden;
+  height: 100vh;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   LOAD SCREEN
+============================================================ */
+#load-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 60%, rgba(107,63,160,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 75% 35%, rgba(192,90,58,0.10) 0%, transparent 60%),
+    var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+#load-screen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(155,111,168,0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.load-radio-icon {
+  width: 120px;
+  height: 72px;
+  border-radius: 12px;
+  background: var(--radio-face);
+  border: 2px solid var(--radio-knob);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 36px;
+  box-shadow: 0 8px 32px rgba(26,13,46,0.4), 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.load-radio-icon::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 24px;
+  border-radius: 4px;
+  background: var(--display-bg);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 0 12px rgba(253,232,192,0.2), inset 0 0 8px rgba(0,0,0,0.6);
+}
+
+.load-radio-icon::after {
+  content: '88.1';
+  position: absolute;
+  left: 10px; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  color: var(--display-on);
+  text-shadow: 0 0 8px rgba(253,232,192,0.8);
+  letter-spacing: 1px;
+  animation: freq-flash 2s ease-in-out infinite;
+}
+
+@keyframes freq-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.load-radio-dots {
+  position: absolute;
+  right: 10px; top: 50%; transform: translateY(-50%);
+  display: flex; gap: 5px;
+}
+
+.load-radio-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--radio-knob);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.load-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 64px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.load-title span {
+  background: linear-gradient(135deg, var(--orange-grad-a), var(--purple-lt));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.load-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.load-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 300px;
+}
+
+.load-label {
+  font-size: 17px;
+  color: var(--text-2);
+  font-weight: 500;
+  text-align: center;
+}
+
+.load-input {
+  width: 100px;
+  text-align: center;
+  background: white;
+  border: 2px solid var(--border-md);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  padding: 10px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.load-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px var(--purple-pale);
+}
+
+.load-btn {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 14px 40px;
+  min-height: 52px;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(107,63,160,0.30);
+}
+
+.load-btn:hover { opacity: 0.9; box-shadow: 0 6px 24px rgba(107,63,160,0.40); }
+.load-btn:active { transform: scale(0.98); }
+
+/* ============================================================
+   RADIO SCREEN LAYOUT
+============================================================ */
+#radio-screen {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg2);
+}
+
+/* ============================================================
+   ZONE 1: RADIO FACE  -- two rows
+============================================================ */
+.radio-face {
+  background: linear-gradient(180deg, #2a1420 0%, #1e0e18 100%);
+  border-bottom: 3px solid rgba(0,0,0,0.6);
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+/* Subtle top sheen */
+.radio-face::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Screw corners */
+.radio-face::after {
+  content: '';
+  position: absolute;
+  top: 9px; left: 9px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #5a3a48, #2e1820);
+  box-shadow:
+    calc(100vw - 25px) 0 0 0 #2e1820,
+    0 0 0 1px rgba(255,255,255,0.07),
+    calc(100vw - 25px) 0 0 1px rgba(255,255,255,0.07);
+  z-index: 1;
+}
+
+/* Row 1: brand + waveform + preset buttons */
+.radio-top-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 14px 24px 10px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Brand */
+.radio-brand {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding-right: 20px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  margin-right: 20px;
+  min-width: 110px;
+}
+
+.radio-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--display-on);
+  text-shadow: 0 0 20px rgba(253,232,192,0.35);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.radio-brand-sub {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: rgba(253,232,192,0.30);
+}
+
+/* Waveform display -- full flex-1 center */
+.radio-waveform-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.radio-now-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.radio-now-freq {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--display-on);
+  text-shadow: 0 0 14px rgba(253,232,192,0.6);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.radio-now-fm {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: rgba(253,232,192,0.30);
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+.radio-now-station {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(253,232,192,0.65);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  align-self: flex-end;
+  margin-bottom: 1px;
+  padding-left: 6px;
+}
+
+/* Animated waveform bars -- same polychrome approach as Mango Music reference */
+.radio-waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  padding: 0 4px;
+}
+
+.radio-waveform-bar {
+  flex: 1;
+  border-radius: 2px;
+  animation: rf-wave 1.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes rf-wave {
+  0%, 100% { transform: scaleY(0.18); opacity: 0.28; }
+  50%       { transform: scaleY(1);   opacity: 0.90; }
+}
+
+.radio-waveform.idle .radio-waveform-bar {
+  animation: none;
+  transform: scaleY(0.20);
+  opacity: 0.15;
+}
+
+/* Preset buttons -- wide, clear, with station name */
+.radio-presets {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-left: 20px;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  margin-left: 4px;
+}
+
+.preset-btn {
+  width: 130px;
+  min-height: 80px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 12px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+  text-align: left;
+}
+
+.preset-btn:hover {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.preset-btn.active-preset {
+  background: linear-gradient(135deg, rgba(61,31,94,0.8), rgba(107,63,160,0.6));
+  border-color: rgba(155,111,168,0.65);
+  box-shadow: 0 0 18px rgba(107,63,160,0.35), inset 0 0 12px rgba(107,63,160,0.15);
+}
+
+.preset-btn.cleared-preset {
+  background: linear-gradient(135deg, rgba(26,58,32,0.7), rgba(31,74,40,0.6));
+  border-color: rgba(90,170,106,0.45);
+  cursor: default;
+}
+
+.preset-btn.cleared-preset:hover {
+  background: linear-gradient(135deg, rgba(26,58,32,0.7), rgba(31,74,40,0.6));
+  border-color: rgba(90,170,106,0.45);
+}
+
+/* Active dot on top-right corner of active preset */
+.preset-btn.active-preset::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 7px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--purple-lt);
+  box-shadow: 0 0 6px var(--purple-lt);
+}
+
+.preset-btn.cleared-preset::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 7px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--signal-green);
+  box-shadow: 0 0 6px var(--signal-green);
+}
+
+.preset-freq-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(253,232,192,0.40);
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.preset-btn.active-preset .preset-freq-label {
+  color: rgba(253,232,192,0.75);
+}
+
+.preset-btn.cleared-preset .preset-freq-label {
+  color: rgba(90,170,106,0.75);
+}
+
+.preset-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(253,232,192,0.70);
+  line-height: 1.2;
+}
+
+.preset-btn.active-preset .preset-name {
+  color: rgba(253,232,192,0.95);
+}
+
+.preset-btn.cleared-preset .preset-name {
+  color: rgba(90,170,106,0.9);
+}
+
+.preset-status-text {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(253,232,192,0.25);
+}
+
+.preset-btn.active-preset .preset-status-text {
+  color: rgba(155,111,168,0.9);
+}
+
+.preset-btn.cleared-preset .preset-status-text {
+  color: var(--signal-green);
+}
+
+/* ============================================================
+   ROW 2: FREQUENCY BAND DIAL
+============================================================ */
+.radio-dial-row {
+  position: relative;
+  z-index: 2;
+  padding: 0 24px 14px;
+}
+
+.radio-dial-wrap {
+  background: var(--display-bg);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 2px 12px rgba(0,0,0,0.6), inset 0 0 4px rgba(0,0,0,0.4);
+  position: relative;
+  height: 65px;
+  overflow: hidden;
+}
+
+/* Amber glow overlay on dial */
+.radio-dial-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(253,232,192,0.04) 0%,
+    rgba(253,232,192,0.02) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* The SVG dial is injected by JS */
+#dial-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: relative;
+  z-index: 2;
+}
+
+/* Needle -- vertical red line with triangle top */
+.dial-needle {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #ff6040 0%, rgba(255,96,64,0.4) 100%);
+  transform: translateX(-50%);
+  z-index: 4;
+  transition: left 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+  pointer-events: none;
+}
+
+.dial-needle::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #ff6040;
+}
+
+/* Edge fade vignette on dial */
+.radio-dial-wrap::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    rgba(10,5,8,0.7) 0%,
+    transparent 8%,
+    transparent 92%,
+    rgba(10,5,8,0.7) 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ============================================================
+   ZONE 2: BROADCAST PANEL
+============================================================ */
+.broadcast-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.broadcast-header {
+  background: var(--cream-dk);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.broadcast-station-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.broadcast-listener-badge {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: 20px;
+  padding: 5px 16px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.broadcast-listener-badge strong {
+  color: var(--orange);
+  margin: 0 2px;
+}
+
+.broadcast-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.broadcast-body::-webkit-scrollbar { width: 4px; }
+.broadcast-body::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+.broadcast-idle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted-lt);
+  text-align: center;
+  min-height: 200px;
+}
+
+.broadcast-idle-icon {
+  font-size: 40px;
+  opacity: 0.25;
+  line-height: 1;
+}
+
+.broadcast-idle p {
+  font-size: 17px;
+  color: var(--muted-lt);
+}
+
+/* Question display */
+.q-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-bottom: 8px;
+}
+
+.q-format-tag {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.q-text {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Code block */
+.q-code {
+  background: #1a1008;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--display-on);
+  line-height: 1.7;
+  overflow-x: auto;
+  margin-top: 4px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+}
+
+.q-code-blank {
+  display: inline-block;
+  min-width: 80px;
+  border-bottom: 2px solid var(--orange-lt);
+  background: rgba(212,115,78,0.08);
+  border-radius: 2px;
+  padding: 0 4px;
+  margin: 0 2px;
+  vertical-align: baseline;
+}
+
+.q-code-blank input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--display-on);
+  width: 100%;
+  min-width: 80px;
+  caret-color: var(--orange-lt);
+}
+
+/* Multiple choice / code trace options */
+.mc-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mc-btn {
+  background: var(--cream-dk);
+  border: 2px solid var(--border-md);
+  border-radius: 10px;
+  padding: 14px 18px;
+  min-height: 64px;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.45;
+  transition: background 0.12s, border-color 0.12s;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.mc-btn:hover {
+  background: var(--bg3);
+  border-color: var(--purple-lt);
+}
+
+.mc-letter {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.mc-btn.revealed-correct {
+  background: #e8f5ea;
+  border-color: var(--signal-green);
+}
+
+.mc-btn.revealed-correct .mc-letter {
+  background: var(--signal-green);
+  color: white;
+}
+
+.mc-btn.revealed-correct::after {
+  content: ' [correct]';
+  font-size: 13px;
+  font-weight: 700;
+  color: #2a6a38;
+}
+
+/* Fill in blank section */
+.fitb-code-container {
+  position: relative;
+}
+
+/* Drag and drop */
+.dnd-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.dnd-col-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-bottom: 8px;
+}
+
+.dnd-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dnd-draggable {
+  background: var(--surface);
+  border: 2px solid var(--border-md);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: grab;
+  user-select: none;
+  transition: background 0.12s, border-color 0.12s, opacity 0.12s, transform 0.1s;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dnd-draggable:hover {
+  background: var(--bg3);
+  border-color: var(--purple-lt);
+  transform: translateY(-1px);
+}
+
+.dnd-draggable.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.dnd-draggable.matched {
+  background: #e8f5ea;
+  border-color: var(--signal-green);
+  cursor: default;
+}
+
+.dnd-draggable.matched:hover {
+  transform: none;
+}
+
+.dnd-drag-handle {
+  color: var(--muted-lt);
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.dnd-targets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dnd-target {
+  background: white;
+  border: 2px dashed var(--border-md);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-height: 48px;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.4;
+  transition: border-color 0.12s, background 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dnd-target.drag-over {
+  border-color: var(--purple);
+  background: var(--purple-pale);
+}
+
+.dnd-target.matched {
+  border-style: solid;
+  border-color: var(--signal-green);
+  background: #e8f5ea;
+}
+
+.dnd-target-label {
+  font-style: italic;
+  color: var(--muted-lt);
+  font-size: 14px;
+}
+
+.dnd-matched-chip {
+  background: #3a8a4a;
+  color: white;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dnd-check {
+  color: var(--signal-green);
+  font-size: 16px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Reveal and answer buttons */
+.reveal-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.reveal-btn {
+  background: var(--bg3);
+  border: 1.5px solid var(--border-md);
+  border-radius: 10px;
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 22px;
+  min-height: 48px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reveal-btn:hover {
+  background: var(--surface);
+  border-color: var(--orange-lt);
+}
+
+.answer-box {
+  background: white;
+  border-left: 4px solid var(--orange-lt);
+  border-radius: 0 10px 10px 0;
+  padding: 16px 20px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.answer-box-code {
+  background: #1a1008;
+  border-left: 4px solid var(--orange-lt);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  color: var(--display-on);
+  line-height: 1.7;
+}
+
+.next-btn {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 28px;
+  min-height: 52px;
+  cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 3px 14px rgba(107,63,160,0.28);
+  align-self: flex-start;
+}
+
+.next-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 5px 18px rgba(107,63,160,0.38);
+}
+
+/* ============================================================
+   COMPLETION SCREEN
+============================================================ */
+#completion-screen {
+  display: none;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--radio-face) 0%, var(--purple-deep) 50%, #0d0508 100%);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.completion-screen-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(90,170,106,0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.completion-signal {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 52px;
+  margin-bottom: 12px;
+}
+
+.completion-signal span {
+  display: block;
+  width: 10px;
+  border-radius: 3px;
+  background: var(--signal-green);
+  box-shadow: 0 0 12px rgba(90,170,106,0.6);
+}
+
+.completion-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--display-on);
+  text-shadow: 0 0 30px rgba(253,232,192,0.3);
+  line-height: 1.1;
+}
+
+.completion-sub {
+  font-size: 18px;
+  color: rgba(253,232,192,0.55);
+  font-style: italic;
+}
+
+.retune-btn {
+  background: linear-gradient(135deg, var(--orange-grad-a), var(--orange-grad-b));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 16px 44px;
+  min-height: 56px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(192,90,58,0.30);
+}
+
+.retune-btn:hover { opacity: 0.9; box-shadow: 0 6px 24px rgba(192,90,58,0.40); }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOAD SCREEN
+============================================================ -->
+<div id="load-screen">
+  <div class="load-radio-icon">
+    <div class="load-radio-dots">
+      <div class="load-radio-dot"></div>
+      <div class="load-radio-dot"></div>
+      <div class="load-radio-dot"></div>
+    </div>
+  </div>
+  <h1 class="load-title">Mango <span>XM</span></h1>
+  <p class="load-subtitle">Tune In. Review Up.</p>
+  <div class="load-form">
+    <label class="load-label" for="listener-count">How many listeners today?</label>
+    <input class="load-input" type="number" id="listener-count" value="25" min="6" max="30" inputmode="numeric">
+    <button class="load-btn" id="power-btn">Power On</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     RADIO SCREEN
+============================================================ -->
+<div id="radio-screen">
+
+  <!-- Zone 1: Radio Face -->
+  <div class="radio-face">
+
+    <!-- Row 1: Brand | Waveform | Presets -->
+    <div class="radio-top-row">
+      <div class="radio-brand">
+        <div class="radio-brand-name">Mango XM</div>
+        <div class="radio-brand-sub">SQL + JDBC Review</div>
+      </div>
+
+      <div class="radio-waveform-wrap">
+        <div class="radio-now-line">
+          <div class="radio-now-freq" id="display-freq">--.-</div>
+          <div class="radio-now-fm">FM</div>
+          <div class="radio-now-station" id="display-station-name">Select a station</div>
+        </div>
+        <div class="radio-waveform idle" id="radio-waveform"></div>
+      </div>
+
+      <div class="radio-presets">
+        <button class="preset-btn" id="preset-0" data-station="0" aria-label="MANGO 88.1 SQL Basics">
+          <div class="preset-freq-label">88.1 FM</div>
+          <div class="preset-name">SQL Basics</div>
+          <div class="preset-status-text" id="preset-status-0">Ready</div>
+        </button>
+        <button class="preset-btn" id="preset-1" data-station="1" aria-label="MANGO 91.5 Aggregates">
+          <div class="preset-freq-label">91.5 FM</div>
+          <div class="preset-name">Aggregates</div>
+          <div class="preset-status-text" id="preset-status-1">Ready</div>
+        </button>
+        <button class="preset-btn" id="preset-2" data-station="2" aria-label="MANGO 95.3 Joins">
+          <div class="preset-freq-label">95.3 FM</div>
+          <div class="preset-name">Joins + Subqueries</div>
+          <div class="preset-status-text" id="preset-status-2">Ready</div>
+        </button>
+        <button class="preset-btn" id="preset-3" data-station="3" aria-label="MANGO 99.7 JDBC">
+          <div class="preset-freq-label">99.7 FM</div>
+          <div class="preset-name">JDBC</div>
+          <div class="preset-status-text" id="preset-status-3">Ready</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: Frequency band dial -->
+    <div class="radio-dial-row">
+      <div class="radio-dial-wrap">
+        <svg id="dial-svg" viewBox="0 0 1000 52" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="dial-needle" id="dial-needle" style="left:-20px"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Zone 2: Broadcast Panel -->
+  <div class="broadcast-panel">
+    <div class="broadcast-header">
+      <div class="broadcast-station-label" id="broadcast-station-label">No Station Selected</div>
+      <div class="broadcast-listener-badge" id="listener-badge">Select a station to begin</div>
+    </div>
+    <div class="broadcast-body" id="broadcast-body">
+      <div class="broadcast-idle" id="broadcast-idle">
+        <div class="broadcast-idle-icon">&#x25BE;</div>
+        <p>Tune in to a station to start the review</p>
+      </div>
+      <div class="hidden" id="question-panel"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     COMPLETION SCREEN
+============================================================ -->
+<div id="completion-screen">
+  <div class="completion-screen-glow"></div>
+  <div class="completion-signal" id="completion-signal"></div>
+  <div class="completion-title">All stations cleared.<br>Signal is strong.</div>
+  <div class="completion-sub">Every question answered. Broadcast complete.</div>
+  <button class="retune-btn" id="retune-btn">Tune In Again</button>
+</div>
+
+<script>
+// ============================================================
+// QUESTION DATA
+// ============================================================
+const STATIONS = [
+  {
+    id: 0,
+    name: "SQL Basics",
+    freq: "88.1",
+    questions: [
+      {
+        // Q1: Fill in the blank
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to return unique song titles:",
+        code: "SELECT /* ___ */\n       song_title\nFROM songs;",
+        blank: "DISTINCT",
+        blankPlaceholder: "keyword",
+        answer: "DISTINCT",
+        answerNote: "DISTINCT eliminates duplicate values in the result. Without it, every row, including duplicates, is returned."
+      },
+      {
+        // Q2: Code trace
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT song_title,\n       play_count\nFROM songs\nWHERE genre = 'jazz'\nORDER BY play_count DESC\nLIMIT 3;`,
+        options: [
+          "All songs from the songs table, sorted alphabetically",
+          "The 3 most-played jazz songs, sorted highest play count first",
+          "All jazz songs, sorted by title in descending order",
+          "The first 3 rows in the songs table, regardless of genre"
+        ],
+        correctIndex: 1,
+        answer: "WHERE filters to jazz only. ORDER BY play_count DESC sorts highest to lowest. LIMIT 3 keeps only the top 3 results."
+      },
+      {
+        // Q3: Multiple choice
+        format: "multiple-choice",
+        text: "Which clause controls how many rows are returned by a SELECT query?",
+        options: [
+          "WHERE: filters rows by a condition",
+          "ORDER BY: sorts the result set",
+          "LIMIT: caps the number of rows returned",
+          "DISTINCT: removes duplicate rows"
+        ],
+        correctIndex: 2,
+        answer: "LIMIT caps the number of rows the query returns. WHERE, ORDER BY, and DISTINCT do not control row count directly."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to sort songs by title from A to Z:",
+        code: "SELECT song_title\nFROM songs\n/* ___ */\n  song_title ASC;",
+        blank: "ORDER BY",
+        blankPlaceholder: "keyword(s)",
+        answer: "ORDER BY",
+        answerNote: "ORDER BY sorts the result set by the specified column. ASC is ascending (A to Z, lowest to highest) and is the default if omitted."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT DISTINCT genre\nFROM songs;`,
+        options: [
+          "Every row in the songs table",
+          "One row for each unique genre in the songs table",
+          "The genre column renamed to DISTINCT",
+          "All genres, including duplicates"
+        ],
+        correctIndex: 1,
+        answer: "DISTINCT removes duplicate values. This returns one row per unique genre, no matter how many songs share that genre."
+      },
+      {
+        format: "multiple-choice",
+        text: "What does the WHERE clause do in a SELECT statement?",
+        options: [
+          "Chooses which columns to display",
+          "Filters which rows are included in the result",
+          "Sorts the result set",
+          "Groups rows together for aggregation"
+        ],
+        correctIndex: 1,
+        answer: "WHERE filters rows based on a condition. Only rows that satisfy the condition are included in the result."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT song_title\nFROM songs\nWHERE play_count > 100\nORDER BY song_title ASC;`,
+        options: [
+          "All songs sorted by play count",
+          "Songs with more than 100 plays, sorted alphabetically by title",
+          "The first 100 songs in the table",
+          "Songs sorted alphabetically, then filtered by play count"
+        ],
+        correctIndex: 1,
+        answer: "WHERE play_count > 100 filters to only songs played more than 100 times. ORDER BY song_title ASC sorts the filtered results alphabetically."
+      }
+    ]
+  },
+  {
+    id: 1,
+    name: "Aggregates + Grouping",
+    freq: "91.5",
+    questions: [
+      {
+        // Q1: Multiple choice
+        format: "multiple-choice",
+        text: "What does COUNT(*) return when used without GROUP BY?",
+        options: [
+          "The number of distinct values in the first column",
+          "The total number of rows in the result set",
+          "The number of non-NULL values in the first column",
+          "It causes an error. COUNT requires GROUP BY"
+        ],
+        correctIndex: 1,
+        answer: "COUNT(*) counts every row in the result, including rows with NULL values in any column. GROUP BY is not required."
+      },
+      {
+        // Q2: Fill in the blank
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to filter groups that have more than 50 total plays:",
+        code: "SELECT artist_id,\n       SUM(play_count) AS total_plays\nFROM songs\nGROUP BY artist_id\n/* ___ */\n  SUM(play_count) > 50;",
+        blank: "HAVING",
+        blankPlaceholder: "keyword",
+        answer: "HAVING",
+        answerNote: "HAVING filters after grouping and aggregation. WHERE runs before GROUP BY, so you cannot use WHERE to filter on an aggregate result like SUM(play_count)."
+      },
+      {
+        // Q3: Code trace
+        format: "code-trace",
+        text: "What does this query produce one row for?",
+        code: `SELECT album_id,\n       AVG(duration_seconds) AS avg_duration\nFROM songs\nGROUP BY album_id;`,
+        options: [
+          "One row for every song in the songs table",
+          "One row for the song with the longest duration",
+          "One row per album, showing the average song duration for that album",
+          "One row for every unique duration value"
+        ],
+        correctIndex: 2,
+        answer: "GROUP BY album_id collapses all songs that share the same album_id into one group. AVG(duration_seconds) computes the average for each group."
+      },
+      {
+        format: "multiple-choice",
+        text: "What is the difference between COUNT(*) and COUNT(column_name)?",
+        options: [
+          "There is no difference, they always return the same number",
+          "COUNT(*) counts all rows. COUNT(column_name) counts only rows where that column is not NULL",
+          "COUNT(*) is faster. COUNT(column_name) is slower but more accurate",
+          "COUNT(*) counts columns. COUNT(column_name) counts rows"
+        ],
+        correctIndex: 1,
+        answer: "COUNT(*) counts every row regardless of NULL values. COUNT(column_name) only counts rows where the specified column is not NULL."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to get the highest play count across all songs:",
+        code: "SELECT /* ___ */ (play_count)\nFROM songs;",
+        blank: "MAX",
+        blankPlaceholder: "function",
+        answer: "MAX",
+        answerNote: "MAX returns the largest value in a column. MIN returns the smallest. Both work on numeric, date, and text columns."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT genre,\n       COUNT(*) AS song_count\nFROM songs\nGROUP BY genre\nHAVING COUNT(*) > 5;`,
+        options: [
+          "All genres and their song counts",
+          "Only genres that have more than 5 songs, with their counts",
+          "The first 5 genres in the table",
+          "All songs that belong to more than 5 genres"
+        ],
+        correctIndex: 1,
+        answer: "GROUP BY genre groups songs by genre. HAVING COUNT(*) > 5 filters out any genre group with 5 or fewer songs. Only genres with more than 5 songs appear in the result."
+      },
+      {
+        format: "multiple-choice",
+        text: "Can you use a column alias defined in SELECT inside a WHERE clause?",
+        options: [
+          "Yes, aliases are available everywhere in the query",
+          "No, WHERE runs before SELECT, so the alias does not exist yet",
+          "Only if the alias uses the AS keyword",
+          "Only in MySQL, not in other databases"
+        ],
+        correctIndex: 1,
+        answer: "WHERE filters rows before SELECT assigns aliases. To filter on an alias that uses an aggregate, use HAVING instead."
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "Joins + Subqueries",
+    freq: "95.3",
+    questions: [
+      {
+        // Q1: Multiple choice
+        format: "multiple-choice",
+        text: "You run a LEFT JOIN between songs and plays. A song has never been played. What appears in the result for that song?",
+        options: [
+          "The song row is excluded from the result entirely",
+          "The song row appears with NULL in all plays columns",
+          "An error is raised because the join has no match",
+          "The song row appears with 0 in all plays columns"
+        ],
+        correctIndex: 1,
+        answer: "A LEFT JOIN keeps all rows from the left table (songs) regardless of whether a match exists on the right. Unmatched right-side columns are filled with NULL."
+      },
+      {
+        // Q2: Code trace
+        format: "code-trace",
+        text: "What does this JOIN query produce?",
+        code: `SELECT songs.song_title,\n       artists.name\nFROM songs\nINNER JOIN artists\n  ON songs.artist_id = artists.id;`,
+        options: [
+          "All songs, with NULL for artist name if no artist is found",
+          "All artists, whether or not they have songs",
+          "Only songs that have a matching artist in the artists table",
+          "A row for every possible combination of song and artist"
+        ],
+        correctIndex: 2,
+        answer: "INNER JOIN returns only rows where the ON condition matches in both tables. Songs without a matching artist_id in artists are excluded."
+      },
+      {
+        // Q3: Drag and drop
+        format: "drag-and-drop",
+        text: "Match each subquery placement to what it does.",
+        items: [
+          { id: "dnd-a", label: "Subquery in WHERE" },
+          { id: "dnd-b", label: "Subquery in FROM" },
+          { id: "dnd-c", label: "Subquery in SELECT" }
+        ],
+        targets: [
+          { id: "tgt-a", label: "Acts as a temporary table the outer query selects from", matchId: "dnd-b" },
+          { id: "tgt-b", label: "Returns one value per row as a computed column", matchId: "dnd-c" },
+          { id: "tgt-c", label: "Returns a value or list used to filter rows", matchId: "dnd-a" }
+        ],
+        answer: "WHERE: filters using a returned value or list. FROM: produces a temporary table. SELECT: returns one value per row as a column."
+      },
+      {
+        format: "multiple-choice",
+        text: "What does the ON clause specify in a JOIN?",
+        options: [
+          "Which table is the left table and which is the right",
+          "The condition that determines which rows from each table are matched",
+          "The number of rows to return",
+          "Which columns to display in the result"
+        ],
+        correctIndex: 1,
+        answer: "ON specifies the join condition. The database compares the columns in the ON clause to determine which rows from each table match and should be combined."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to get all songs, including songs with no matching artist:",
+        code: "SELECT songs.song_title,\n       artists.name\nFROM songs\n/* ___ */\n  artists ON songs.artist_id = artists.id;",
+        blank: "LEFT JOIN",
+        blankPlaceholder: "join type",
+        answer: "LEFT JOIN",
+        answerNote: "LEFT JOIN keeps all rows from the left table (songs) even when there is no matching row in the right table (artists). Unmatched columns are filled with NULL."
+      },
+      {
+        format: "code-trace",
+        text: "What does this query return?",
+        code: `SELECT song_title\nFROM songs\nWHERE artist_id IN (\n  SELECT id\n  FROM artists\n  WHERE genre = 'rock'\n);`,
+        options: [
+          "All songs and all rock artists",
+          "Only songs by artists whose genre is rock",
+          "All artists who have songs",
+          "All songs, with a column showing if the artist is rock"
+        ],
+        correctIndex: 1,
+        answer: "The subquery finds all artist IDs where the genre is rock. The outer query returns songs whose artist_id is in that list."
+      },
+      {
+        format: "multiple-choice",
+        text: "What value fills the right-side columns when a LEFT JOIN finds no match?",
+        options: [
+          "0",
+          "An empty string",
+          "NULL",
+          "The value from the previous row"
+        ],
+        correctIndex: 2,
+        answer: "NULL. When a LEFT JOIN has no matching row on the right side, all columns from the right table are filled with NULL."
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "JDBC",
+    freq: "99.7",
+    questions: [
+      {
+        // Q1: Multiple choice
+        format: "multiple-choice",
+        text: "What is the key difference between Statement and PreparedStatement in JDBC?",
+        options: [
+          "Statement is faster; PreparedStatement is only for stored procedures",
+          "PreparedStatement uses parameterized queries; Statement concatenates values directly into the SQL string",
+          "Statement requires a Connection object; PreparedStatement does not",
+          "PreparedStatement can only run SELECT queries; Statement runs any query type"
+        ],
+        correctIndex: 1,
+        answer: "PreparedStatement uses placeholders (?) for parameter values. The database separates SQL structure from data, preventing injection. Statement builds SQL by string concatenation, which allows injected input to change query meaning."
+      },
+      {
+        // Q2: Fill in the blank
+        format: "fill-in-the-blank",
+        text: "Fill in the blank with the correct return type:",
+        code: 'PreparedStatement ps = conn.prepareStatement(\n  "SELECT *\n   FROM songs\n   WHERE genre = ?"\n);\nps.setString(1, genre);\n/* ___ */ rs = ps.executeQuery();',
+        blank: "ResultSet",
+        blankPlaceholder: "return type",
+        answer: "ResultSet",
+        answerNote: "executeQuery() returns a ResultSet, which is a cursor you iterate over with rs.next() to access rows. executeUpdate() is used for INSERT, UPDATE, and DELETE and returns a row count."
+      },
+      {
+        // Q3: Drag and drop
+        format: "drag-and-drop",
+        text: "Match each JDBC concept to its description.",
+        items: [
+          { id: "dnd-j-a", label: "DriverManager.getConnection()" },
+          { id: "dnd-j-b", label: "?" },
+          { id: "dnd-j-c", label: "executeUpdate()" }
+        ],
+        targets: [
+          { id: "tgt-j-a", label: "A placeholder for a parameter value in a parameterized query", matchId: "dnd-j-b" },
+          { id: "tgt-j-b", label: "Runs INSERT, UPDATE, or DELETE and returns a row count", matchId: "dnd-j-c" },
+          { id: "tgt-j-c", label: "Opens a connection to the database using a URL, username, and password", matchId: "dnd-j-a" }
+        ],
+        answer: "getConnection() opens the database connection. ? is the parameter placeholder that prevents injection. executeUpdate() handles write operations and returns affected row count."
+      },
+      {
+        format: "multiple-choice",
+        text: "Why should you use PreparedStatement instead of concatenating user input into a SQL string?",
+        options: [
+          "PreparedStatement runs faster in all cases",
+          "Concatenation does not support SELECT queries",
+          "PreparedStatement prevents SQL injection by separating SQL structure from data",
+          "PreparedStatement automatically creates tables if they do not exist"
+        ],
+        correctIndex: 2,
+        answer: "PreparedStatement uses parameterized queries. The database treats parameter values as data, not as SQL code, so injected input cannot change the query structure."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the blank to iterate through query results:",
+        code: "ResultSet rs = ps.executeQuery();\nwhile (rs./* ___ */()) {\n  String title = rs.getString(\"song_title\");\n}",
+        blank: "next",
+        blankPlaceholder: "method",
+        answer: "next",
+        answerNote: "rs.next() advances the cursor to the next row in the ResultSet. It returns true if there is another row, false when all rows have been read."
+      },
+      {
+        format: "code-trace",
+        text: "What does this code do?",
+        code: `String sql =\n  "INSERT INTO songs (title, genre)\n   VALUES (?, ?)";\nPreparedStatement ps = conn.prepareStatement(sql);\nps.setString(1, "Sunrise");\nps.setString(2, "pop");\nps.executeUpdate();`,
+        options: [
+          "Selects all songs with the title Sunrise",
+          "Inserts a new song with title Sunrise and genre pop into the songs table",
+          "Updates all pop songs to have the title Sunrise",
+          "Deletes the song Sunrise from the songs table"
+        ],
+        correctIndex: 1,
+        answer: "This prepares an INSERT statement with two placeholders, sets them to Sunrise and pop, then executes the insert. executeUpdate() is used for INSERT, UPDATE, and DELETE."
+      },
+      {
+        format: "multiple-choice",
+        text: "What does executeQuery() return?",
+        options: [
+          "The number of rows affected",
+          "A boolean indicating success or failure",
+          "A ResultSet containing the rows from the query",
+          "A String with the raw SQL output"
+        ],
+        correctIndex: 2,
+        answer: "executeQuery() returns a ResultSet, which is a cursor over the rows returned by a SELECT query. You iterate through it with rs.next() and read columns with getter methods."
+      }
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  listenerCount: 25,
+  activeStation: null,
+  stationState: [
+    { questionIdx: 0, listenerSlots: [], revealed: false, dndState: null },
+    { questionIdx: 0, listenerSlots: [], revealed: false, dndState: null },
+    { questionIdx: 0, listenerSlots: [], revealed: false, dndState: null },
+    { questionIdx: 0, listenerSlots: [], revealed: false, dndState: null }
+  ]
+};
+
+function fisherYates(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initSession(n) {
+  state.listenerCount = n;
+  state.activeStation = null;
+
+  // Total questions = enough for every student to answer at least once
+  // 6-12 students: 12 questions (3 per station)
+  // 13+: one question per student, distributed across 4 stations
+  const totalNeeded = Math.max(12, n);
+  const stationCount = STATIONS.length;
+  const basePerStation = Math.floor(totalNeeded / stationCount);
+  let remainder = totalNeeded - basePerStation * stationCount;
+
+  // Shuffle a global listener index pool
+  const allListeners = fisherYates(Array.from({length: n}, (_, i) => i + 1));
+  let listenerCursor = 0;
+
+  state.stationState = STATIONS.map((station, si) => {
+    const slots = [];
+    // Distribute remainder across first stations
+    let qps = basePerStation + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder--;
+    const questionCount = Math.min(qps, station.questions.length);
+    for (let q = 0; q < questionCount; q++) {
+      slots.push(allListeners[listenerCursor % allListeners.length]);
+      listenerCursor++;
+    }
+    return {
+      questionIdx: 0,
+      listenerSlots: slots,
+      revealed: false,
+      cleared: false,
+      dndState: null
+    };
+  });
+}
+
+// ============================================================
+// BUILD WAVEFORM (polychrome bars, matches Mango Music reference)
+// ============================================================
+(function buildRadioWaveform() {
+  const wf = document.getElementById('radio-waveform');
+  const N = 48;
+  const stops = [
+    [212,115,78],[190,100,140],[155,111,168],
+    [91,127,166],[110,150,140],[194,156,60],[212,115,78]
+  ];
+  function lerp(t) {
+    const seg = t*(stops.length-1), i = Math.min(Math.floor(seg), stops.length-2), f = seg-i;
+    const a = stops[i], b = stops[i+1];
+    return `rgb(${Math.round(a[0]+(b[0]-a[0])*f)},${Math.round(a[1]+(b[1]-a[1])*f)},${Math.round(a[2]+(b[2]-a[2])*f)})`;
+  }
+  const baseH = [30,48,68,82,58,90,42,75,52,86,46,70,34,80,54,88,62,95,95,62,88,54,80,34,70,46,86,52,75,42,90,58,82,68,48,30,42,78,56,88,44,68,36,82,52,90,60,38];
+  for (let i = 0; i < N; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'radio-waveform-bar';
+    bar.style.height = baseH[i % baseH.length] + '%';
+    bar.style.background = lerp(i/(N-1));
+    bar.style.animationDelay = (Math.random()*1.6).toFixed(2) + 's';
+    wf.appendChild(bar);
+  }
+})();
+
+// ============================================================
+// BUILD FREQUENCY BAND DIAL (SVG tick marks + labels)
+// Covers 87.5 to 108.0 MHz FM band
+// ============================================================
+(function buildDial() {
+  const svg = document.getElementById('dial-svg');
+  const W = 1000, H = 52;
+  const freqMin = 87.5, freqMax = 108.0;
+  const freqRange = freqMax - freqMin;
+
+  // Mark the station frequencies in the SVG so JS can find their x positions
+  svg._freqToX = (freq) => ((freq - freqMin) / freqRange) * W;
+
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  }
+
+  // Background -- subtle gradient
+  svg.appendChild(el('rect', {x:0,y:0,width:W,height:H, fill:'#0a0508'}));
+
+  // Horizontal center line
+  svg.appendChild(el('line', {x1:0,y1:H/2,x2:W,y2:H/2, stroke:'rgba(253,232,192,0.08)', 'stroke-width':'1'}));
+
+  // Draw ticks for every 0.1 MHz
+  for (let f = freqMin; f <= freqMax + 0.001; f = Math.round((f + 0.1)*10)/10) {
+    const x = svg._freqToX(f);
+    const isMajor = Math.abs(Math.round(f) - f) < 0.01;
+    const isMid   = !isMajor && Math.abs(f*2 - Math.round(f*2)) < 0.01; // 0.5 marks
+
+    let tickH, color, strokeW;
+    if (isMajor) {
+      tickH = 18; color = 'rgba(253,232,192,0.50)'; strokeW = 1.5;
+    } else if (isMid) {
+      tickH = 10; color = 'rgba(253,232,192,0.22)'; strokeW = 1;
+    } else {
+      tickH = 5; color = 'rgba(253,232,192,0.10)'; strokeW = 0.8;
+    }
+
+    svg.appendChild(el('line', {
+      x1: x, y1: (H-tickH)/2,
+      x2: x, y2: (H+tickH)/2,
+      stroke: color, 'stroke-width': strokeW
+    }));
+
+    // Label major marks
+    if (isMajor && f >= 88 && f <= 108) {
+      const txt = el('text', {
+        x: x, y: H - 4,
+        'text-anchor': 'middle',
+        fill: 'rgba(253,232,192,0.30)',
+        'font-family': 'JetBrains Mono, monospace',
+        'font-size': '8',
+        'font-weight': '500'
+      });
+      txt.textContent = Math.round(f);
+      svg.appendChild(txt);
+    }
+  }
+
+  // Station marker dots on the dial
+  const stationFreqs = [88.1, 91.5, 95.3, 99.7];
+  const stationColors = ['rgba(212,115,78,0.6)', 'rgba(155,111,168,0.6)', 'rgba(91,127,166,0.6)', 'rgba(110,180,120,0.6)'];
+  stationFreqs.forEach((freq, i) => {
+    const x = svg._freqToX(freq);
+    // Dot on center line
+    svg.appendChild(el('circle', {
+      cx: x, cy: H/2, r: 3,
+      fill: stationColors[i]
+    }));
+    // Small freq label above
+    const lbl = el('text', {
+      x: x, y: 10,
+      'text-anchor': 'middle',
+      fill: stationColors[i],
+      'font-family': 'JetBrains Mono, monospace',
+      'font-size': '7.5',
+      'font-weight': '600'
+    });
+    lbl.textContent = freq.toFixed(1);
+    svg.appendChild(lbl);
+  });
+})();
+
+// ============================================================
+// MOVE NEEDLE ON DIAL
+// ============================================================
+function moveDialNeedle(freq) {
+  const svg = document.getElementById('dial-svg');
+  const needle = document.getElementById('dial-needle');
+  if (!svg._freqToX) return;
+
+  if (freq === null) {
+    needle.style.left = '-20px';
+    return;
+  }
+
+  // Get rendered width of the dial wrap
+  const wrap = document.querySelector('.radio-dial-wrap');
+  const wrapW = wrap.getBoundingClientRect().width;
+  const freqMin = 87.5, freqMax = 108.0;
+  const pct = (parseFloat(freq) - freqMin) / (freqMax - freqMin);
+  needle.style.left = (pct * wrapW) + 'px';
+}
+
+// ============================================================
+// RENDER STATION BAR
+// ============================================================
+
+// ============================================================
+// UPDATE PRESET BUTTONS ON RADIO FACE
+// ============================================================
+function renderPresets() {
+  STATIONS.forEach((station, si) => {
+    const btn = document.getElementById('preset-' + si);
+    const statusEl = document.getElementById('preset-status-' + si);
+    const ss = state.stationState[si];
+    const isActive = state.activeStation === si;
+    const isCleared = ss.cleared;
+
+    btn.className = 'preset-btn' +
+      (isActive ? ' active-preset' : '') +
+      (isCleared ? ' cleared-preset' : '');
+
+    if (statusEl) {
+      if (isCleared) {
+        statusEl.textContent = 'Cleared';
+      } else if (isActive) {
+        const qi = ss.questionIdx;
+        const total = ss.listenerSlots.length;
+        statusEl.textContent = `Q${qi+1} of ${total}`;
+      } else {
+        statusEl.textContent = 'Ready';
+      }
+    }
+  });
+}
+
+// ============================================================
+// UPDATE RADIO DISPLAY (freq, station name, waveform state)
+// ============================================================
+function updateRadioDisplay() {
+  const freqEl = document.getElementById('display-freq');
+  const nameEl = document.getElementById('display-station-name');
+  const wf = document.getElementById('radio-waveform');
+
+  if (state.activeStation === null) {
+    freqEl.textContent = '--.-';
+    nameEl.textContent = 'Select a station';
+    wf.classList.add('idle');
+    moveDialNeedle(null);
+    return;
+  }
+
+  const si = state.activeStation;
+  const station = STATIONS[si];
+  const ss = state.stationState[si];
+
+  freqEl.textContent = station.freq;
+  nameEl.textContent = station.name;
+  wf.classList.remove('idle');
+  moveDialNeedle(station.freq);
+}
+
+// ============================================================
+// TUNE TO STATION
+// ============================================================
+function tuneToStation(si) {
+  state.activeStation = si;
+  renderPresets();
+  updateRadioDisplay();
+  renderQuestion();
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  const idle = document.getElementById('broadcast-idle');
+  const panel = document.getElementById('question-panel');
+  const stationLabel = document.getElementById('broadcast-station-label');
+  const listenerBadge = document.getElementById('listener-badge');
+
+  if (state.activeStation === null) {
+    idle.classList.remove('hidden');
+    panel.classList.add('hidden');
+    stationLabel.textContent = 'No Station Selected';
+    listenerBadge.textContent = 'Select a station to begin';
+    return;
+  }
+
+  const si = state.activeStation;
+  const station = STATIONS[si];
+  const ss = state.stationState[si];
+
+  stationLabel.textContent = `MANGO ${station.freq} | ${station.name}`;
+
+  if (ss.cleared) {
+    idle.classList.remove('hidden');
+    panel.classList.add('hidden');
+    idle.innerHTML = `
+      <div class="broadcast-idle-icon">&#9679;</div>
+      <p>Station cleared. All questions answered.</p>
+    `;
+    listenerBadge.textContent = 'Station Cleared';
+    return;
+  }
+
+  idle.classList.add('hidden');
+  panel.classList.remove('hidden');
+  panel.innerHTML = '';
+
+  const qi = ss.questionIdx;
+  const total = ss.listenerSlots.length;
+  const listenerNum = ss.listenerSlots[qi];
+  const q = station.questions[qi];
+
+  // Listener badge: global count across all stations
+  const globalCurrent = state.stationState.reduce((sum, s, i) => i === si ? sum : s.cleared ? sum + s.listenerSlots.length : sum + s.questionIdx, 0) + qi + 1;
+  const globalTotal = state.stationState.reduce((sum, s) => sum + s.listenerSlots.length, 0);
+  listenerBadge.innerHTML = `Listener <strong>${globalCurrent}</strong> of ${globalTotal}`;
+
+  // Format tag
+  const formatTag = document.createElement('div');
+  formatTag.className = 'q-format-tag';
+  formatTag.textContent = formatLabel(q.format);
+  panel.appendChild(formatTag);
+
+  // Question text
+  const qLabel = document.createElement('div');
+  qLabel.className = 'q-label';
+  qLabel.textContent = 'Question ' + (qi + 1) + ' of ' + total;
+  panel.appendChild(qLabel);
+
+  const qText = document.createElement('div');
+  qText.className = 'q-text';
+  qText.textContent = q.text;
+  panel.appendChild(qText);
+
+  // Spacer
+  panel.appendChild(spacer(14));
+
+  // Format-specific rendering
+  if (q.format === 'fill-in-the-blank') {
+    renderFITB(panel, q, ss);
+  } else if (q.format === 'code-trace' || q.format === 'multiple-choice') {
+    renderMC(panel, q, ss, si, qi);
+  } else if (q.format === 'drag-and-drop') {
+    renderDnD(panel, q, ss, si, qi);
+  }
+}
+
+function formatLabel(fmt) {
+  if (fmt === 'fill-in-the-blank') return 'Fill in the Blank';
+  if (fmt === 'code-trace') return 'Code Trace';
+  if (fmt === 'multiple-choice') return 'Multiple Choice';
+  if (fmt === 'drag-and-drop') return 'Drag and Drop';
+  return fmt;
+}
+
+function spacer(h) {
+  const d = document.createElement('div');
+  d.style.height = h + 'px';
+  return d;
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================
+// FILL IN THE BLANK
+// ============================================================
+function renderFITB(panel, q, ss) {
+  // Code block with inline input
+  const codeWrap = document.createElement('div');
+  codeWrap.className = 'q-code';
+
+  const codeText = q.code.replace('/* ___ */', '<span class="q-code-blank"><input type="text" placeholder="' + q.blankPlaceholder + '" id="fitb-input" autocomplete="off" spellcheck="false"></span>');
+  codeWrap.innerHTML = codeText;
+  panel.appendChild(codeWrap);
+
+  panel.appendChild(spacer(20));
+
+  const revealRow = document.createElement('div');
+  revealRow.className = 'reveal-row';
+
+  if (!ss.revealed) {
+    const revBtn = document.createElement('button');
+    revBtn.className = 'reveal-btn';
+    revBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Reveal Answer';
+    revBtn.addEventListener('click', () => {
+      ss.revealed = true;
+      renderQuestion();
+    });
+    revealRow.appendChild(revBtn);
+    panel.appendChild(revealRow);
+  } else {
+    const aBox = document.createElement('div');
+    aBox.className = 'answer-box';
+    aBox.innerHTML = '<strong>Answer: ' + esc(q.answer) + '</strong><br><span style="font-size:16px;color:var(--muted)">' + esc(q.answerNote) + '</span>';
+    panel.appendChild(aBox);
+
+    panel.appendChild(spacer(20));
+    appendNextBtn(panel, ss);
+  }
+}
+
+// ============================================================
+// MULTIPLE CHOICE / CODE TRACE
+// ============================================================
+function renderMC(panel, q, ss, si, qi) {
+  if (q.code) {
+    const codeBlock = document.createElement('pre');
+    codeBlock.className = 'q-code';
+    codeBlock.textContent = q.code;
+    panel.appendChild(codeBlock);
+    panel.appendChild(spacer(16));
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'mc-options';
+
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'mc-btn';
+    if (ss.revealed && oi === q.correctIndex) {
+      btn.className += ' revealed-correct';
+    }
+    btn.innerHTML = `<span class="mc-letter">${letters[oi]}</span><span>${esc(opt)}</span>`;
+    btn.disabled = ss.revealed;
+    grid.appendChild(btn);
+  });
+
+  panel.appendChild(grid);
+  panel.appendChild(spacer(20));
+
+  if (!ss.revealed) {
+    const revRow = document.createElement('div');
+    revRow.className = 'reveal-row';
+    const revBtn = document.createElement('button');
+    revBtn.className = 'reveal-btn';
+    revBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Reveal Answer';
+    revBtn.addEventListener('click', () => {
+      ss.revealed = true;
+      renderQuestion();
+    });
+    revRow.appendChild(revBtn);
+    panel.appendChild(revRow);
+  } else {
+    const aBox = document.createElement('div');
+    aBox.className = 'answer-box';
+    aBox.textContent = q.answer;
+    panel.appendChild(aBox);
+
+    panel.appendChild(spacer(20));
+    appendNextBtn(panel, ss, si, qi);
+  }
+}
+
+// ============================================================
+// DRAG AND DROP
+// ============================================================
+function renderDnD(panel, q, ss, si, qi) {
+  // Initialize dnd state if not present
+  if (!ss.dndState) {
+    ss.dndState = {
+      matches: {},  // targetId -> itemId
+      dragItem: null
+    };
+  }
+  const dndState = ss.dndState;
+
+  const container = document.createElement('div');
+  container.className = 'dnd-container';
+
+  // Left column: draggable items
+  const leftCol = document.createElement('div');
+  const leftLabel = document.createElement('div');
+  leftLabel.className = 'dnd-col-label';
+  leftLabel.textContent = 'Concepts';
+  leftCol.appendChild(leftLabel);
+
+  const itemsDiv = document.createElement('div');
+  itemsDiv.className = 'dnd-items';
+  itemsDiv.id = 'dnd-items';
+
+  // Figure out which items are already matched
+  const matchedItemIds = new Set(Object.values(dndState.matches));
+
+  q.items.forEach(item => {
+    if (matchedItemIds.has(item.id)) return; // already placed
+
+    const drag = document.createElement('div');
+    drag.className = 'dnd-draggable';
+    drag.draggable = true;
+    drag.dataset.itemId = item.id;
+    drag.innerHTML = `<span class="dnd-drag-handle">&#8801;</span><span>${esc(item.label)}</span>`;
+
+    drag.addEventListener('dragstart', e => {
+      dndState.dragItem = item.id;
+      drag.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    drag.addEventListener('dragend', () => {
+      drag.classList.remove('dragging');
+    });
+
+    itemsDiv.appendChild(drag);
+  });
+
+  leftCol.appendChild(itemsDiv);
+
+  // Right column: targets
+  const rightCol = document.createElement('div');
+  const rightLabel = document.createElement('div');
+  rightLabel.className = 'dnd-col-label';
+  rightLabel.textContent = 'Definitions';
+  rightCol.appendChild(rightLabel);
+
+  const targetsDiv = document.createElement('div');
+  targetsDiv.className = 'dnd-targets';
+
+  q.targets.forEach(target => {
+    const tgt = document.createElement('div');
+    tgt.className = 'dnd-target';
+    tgt.dataset.targetId = target.id;
+
+    const matchedItemId = dndState.matches[target.id];
+
+    if (matchedItemId) {
+      tgt.classList.add('matched');
+      const matchedItem = q.items.find(i => i.id === matchedItemId);
+      const correct = matchedItemId === target.matchId;
+
+      tgt.innerHTML = `
+        <span class="dnd-matched-chip">${esc(matchedItem ? matchedItem.label : '')}</span>
+        <span style="font-size:14px;color:var(--text-2);flex:1">${esc(target.label)}</span>
+        <span class="dnd-check">${correct ? '&#10003;' : '&#215;'}</span>
+      `;
+    } else {
+      tgt.innerHTML = `<span class="dnd-target-label">${esc(target.label)}</span>`;
+
+      tgt.addEventListener('dragover', e => {
+        e.preventDefault();
+        tgt.classList.add('drag-over');
+      });
+      tgt.addEventListener('dragleave', () => tgt.classList.remove('drag-over'));
+      tgt.addEventListener('drop', e => {
+        e.preventDefault();
+        tgt.classList.remove('drag-over');
+        if (dndState.dragItem) {
+          dndState.matches[target.id] = dndState.dragItem;
+          dndState.dragItem = null;
+          renderQuestion();
+        }
+      });
+    }
+
+    targetsDiv.appendChild(tgt);
+  });
+
+  rightCol.appendChild(targetsDiv);
+
+  container.appendChild(leftCol);
+  container.appendChild(rightCol);
+  panel.appendChild(container);
+  panel.appendChild(spacer(20));
+
+  const allMatched = q.targets.length === Object.keys(dndState.matches).length;
+
+  if (!ss.revealed) {
+    const revRow = document.createElement('div');
+    revRow.className = 'reveal-row';
+    const revBtn = document.createElement('button');
+    revBtn.className = 'reveal-btn';
+    revBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Reveal Answer';
+    revBtn.addEventListener('click', () => {
+      // Force all correct matches on reveal
+      q.targets.forEach(t => {
+        if (!dndState.matches[t.id]) {
+          dndState.matches[t.id] = t.matchId;
+        }
+      });
+      ss.revealed = true;
+      renderQuestion();
+    });
+    revRow.appendChild(revBtn);
+    panel.appendChild(revRow);
+  } else {
+    const aBox = document.createElement('div');
+    aBox.className = 'answer-box';
+    aBox.textContent = q.answer;
+    panel.appendChild(aBox);
+
+    panel.appendChild(spacer(20));
+    appendNextBtn(panel, ss, si, qi);
+  }
+}
+
+// ============================================================
+// NEXT / STATION CLEARED BUTTON
+// ============================================================
+function appendNextBtn(panel, ss, si, qi) {
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'next-btn';
+
+  const isLast = ss.questionIdx >= ss.listenerSlots.length - 1;
+
+  if (isLast) {
+    nextBtn.innerHTML = 'Station Cleared <span style="font-size:18px">&#9679;</span>';
+  } else {
+    nextBtn.innerHTML = 'Next Listener <span style="font-size:18px">&#8594;</span>';
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (isLast) {
+      ss.cleared = true;
+      state.activeStation = null;
+      renderPresets();
+      updateRadioDisplay();
+      renderQuestion();
+
+      // Check if all stations cleared
+      const allCleared = state.stationState.every(s => s.cleared);
+      if (allCleared) {
+        setTimeout(showCompletion, 500);
+      }
+    } else {
+      ss.questionIdx++;
+      ss.revealed = false;
+      ss.dndState = null;
+      updateRadioDisplay();
+      renderQuestion();
+    }
+  });
+
+  panel.appendChild(nextBtn);
+}
+
+// ============================================================
+// COMPLETION
+// ============================================================
+function buildCompletionSignal() {
+  const sig = document.getElementById('completion-signal');
+  sig.innerHTML = '';
+  const heights = [12, 20, 32, 44, 52, 40, 30, 22, 14];
+  heights.forEach(h => {
+    const s = document.createElement('span');
+    s.style.height = h + 'px';
+    sig.appendChild(s);
+  });
+}
+
+function showCompletion() {
+  buildCompletionSignal();
+  document.getElementById('completion-screen').style.display = 'flex';
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('listener-count').addEventListener('blur', function () {
+  let v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 6) v = 6;
+  if (v > 30) v = 30;
+  this.value = v;
+});
+
+document.getElementById('power-btn').addEventListener('click', () => {
+  const n = parseInt(document.getElementById('listener-count').value, 10) || 25;
+  initSession(n);
+
+  document.getElementById('load-screen').style.display = 'none';
+  document.getElementById('radio-screen').style.display = 'flex';
+
+  renderPresets();
+  updateRadioDisplay();
+  renderQuestion();
+});
+
+STATIONS.forEach((_, si) => {
+  document.getElementById('preset-' + si).addEventListener('click', () => {
+    const ss = state.stationState[si];
+    if (ss.cleared) return;
+    tuneToStation(si);
+  });
+});
+
+document.getElementById('retune-btn').addEventListener('click', () => {
+  document.getElementById('completion-screen').style.display = 'none';
+  document.getElementById('radio-screen').style.display = 'none';
+  document.getElementById('load-screen').style.display = 'flex';
+  document.getElementById('broadcast-idle').innerHTML = `
+    <div class="broadcast-idle-icon">&#x25BE;</div>
+    <p>Tune in to a station to start the review</p>
+  `;
+});
+</script>
+</body>
+</html>

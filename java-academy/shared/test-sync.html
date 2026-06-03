@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LiveShare Sync — Test Harness</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  background: #0d1117;
+  color: #e6edf3;
+  padding: 28px 32px;
+  max-width: 860px;
+}
+h1   { color: #58a6ff; font-size: 18px; margin-bottom: 4px; }
+.sub { color: #8b949e; font-size: 12px; margin-bottom: 28px; }
+.suite-name {
+  color: #8b949e; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin: 18px 0 6px;
+}
+.suite-name:first-of-type { margin-top: 0; }
+.test {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 5px 10px; border-radius: 4px; margin: 2px 0; line-height: 1.5;
+}
+.pass  { background: #0d2818; border-left: 3px solid #238636; }
+.fail  { background: #2d1515; border-left: 3px solid #da3633; }
+.icon  { font-size: 13px; flex-shrink: 0; }
+.name  { flex: 1; }
+.detail { color: #8b949e; font-size: 11px; }
+.fail .detail { color: #f85149; }
+.summary {
+  margin-top: 24px; padding: 10px 16px; border-radius: 5px;
+  font-weight: 700; font-size: 13px;
+}
+.all-pass { background: #0d2818; color: #3fb950; border: 1px solid #238636; }
+.has-fail  { background: #2d1515; color: #f85149; border: 1px solid #da3633; }
+.running   { color: #8b949e; font-style: italic; }
+</style>
+</head>
+<body>
+<h1>LiveShare Sync — Test Harness</h1>
+<p class="sub">
+  Validates presence reconciliation, stale eviction, turn advancement on disconnect,
+  and connection lifecycle using a mock Ably server (no real network).
+</p>
+<div id="output"><p class="running">Running…</p></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════════
+// MOCK ABLY SERVER
+// In-memory channel state. Delivers events asynchronously via setTimeout(0)
+// to mirror real network behaviour (callers can't assume synchronous delivery).
+// ═══════════════════════════════════════════════════════════════════════
+class MockServer {
+  constructor() { this._chs = new Map(); }
+
+  _ch(name) {
+    if (!this._chs.has(name)) {
+      this._chs.set(name, { presence: new Map(), msgSubs: [], presSubs: [] });
+    }
+    return this._chs.get(name);
+  }
+
+  _later(fn) { setTimeout(fn, 0); }
+
+  publish(chName, senderId, event, data) {
+    const envelope = { data, clientId: senderId };
+    this._ch(chName).msgSubs
+      .filter(s => s.event === event && s.id !== senderId)
+      .forEach(s => this._later(() => s.cb(envelope)));
+  }
+
+  subscribeMsg(chName, id, event, cb)  { this._ch(chName).msgSubs.push({ id, event, cb }); }
+  unsubscribeMsg(chName, id)           { const c = this._ch(chName); c.msgSubs  = c.msgSubs.filter(s => s.id !== id); }
+
+  enterPresence(chName, clientId, data) {
+    const ch = this._ch(chName);
+    if (ch.presence.has(clientId)) return;   // already present — no duplicate enter event
+    ch.presence.set(clientId, data);
+    ch.presSubs
+      .filter(s => s.event === 'enter' && s.id !== clientId)
+      .forEach(s => this._later(() => s.cb({ clientId, data })));
+  }
+
+  leavePresence(chName, clientId) {
+    const ch = this._ch(chName);
+    if (!ch.presence.has(clientId)) return;
+    ch.presence.delete(clientId);
+    ch.presSubs
+      .filter(s => s.event === 'leave' && s.id !== clientId)
+      .forEach(s => this._later(() => s.cb({ clientId })));
+  }
+
+  getPresence(chName) {
+    return Promise.resolve(
+      Array.from(this._ch(chName).presence.entries())
+        .map(([clientId, data]) => ({ clientId, data }))
+    );
+  }
+
+  subscribePresence(chName, id, event, cb)  { this._ch(chName).presSubs.push({ id, event, cb }); }
+  unsubscribePresence(chName, id)           { const c = this._ch(chName); c.presSubs = c.presSubs.filter(s => s.id !== id); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MOCK ABLY CLIENT
+// ═══════════════════════════════════════════════════════════════════════
+function createMockAbly(server, clientId, connectDelay = 5) {
+  let chRef = null;
+  const connCbs = {};
+  setTimeout(() => { if (connCbs.connected) connCbs.connected(); }, connectDelay);
+
+  return {
+    clientId,
+    connection: { on(e, cb) { connCbs[e] = cb; } },
+    channels: { get(name) { if (!chRef) chRef = _mkChannel(server, name, clientId); return chRef; } },
+    close() {
+      if (chRef) {
+        server.unsubscribeMsg(chRef._name, clientId);
+        server.unsubscribePresence(chRef._name, clientId);
+        server.leavePresence(chRef._name, clientId);
+        chRef = null;
+      }
+      if (connCbs.disconnected) connCbs.disconnected();
+    }
+  };
+}
+
+function _mkChannel(server, name, clientId) {
+  const attachCbs = []; let attached = false;
+  setTimeout(() => { attached = true; attachCbs.forEach(cb => cb()); }, 3);
+
+  const presence = {
+    enter(data)  { server.enterPresence(name, clientId, data); return Promise.resolve(); },
+    leave()      { server.leavePresence(name, clientId);       return Promise.resolve(); },
+    get()        { return server.getPresence(name); },
+    subscribe(e, cb)  { server.subscribePresence(name, clientId, e, cb); },
+    unsubscribe() { server.unsubscribePresence(name, clientId); }
+  };
+
+  return {
+    _name: name, presence,
+    subscribe(e, cb)   { server.subscribeMsg(name, clientId, e, cb); },
+    publish(e, data)   { server.publish(name, clientId, e, data); return Promise.resolve(); },
+    on(e, cb) {
+      if (e === 'attached') { if (attached) setTimeout(cb, 0); else attachCbs.push(cb); }
+    },
+    unsubscribe() { server.unsubscribeMsg(name, clientId); }
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SYNC AGENT
+// Implements the monkey-bot sync logic in isolation.
+// All time constants are scaled 100× smaller so tests run fast.
+//
+// Matches monkey-bot behaviour including:
+//   - presence reconciliation on enterPresenceAndAnnounce
+//   - confirmed-only memberNames in state-sync reply
+//   - empty-editorText skip
+//   - turn-aware stale eviction (active-turn holder evicted at 1.5× heartbeat)
+//   - visibilitychange model: leave-only on hide, re-enter on show
+// ═══════════════════════════════════════════════════════════════════════
+class SyncAgent {
+  constructor(server, name, { cohort = 1, roomCode = 'test', connectDelay = 5 } = {}) {
+    this.server      = server;
+    this.name        = name;
+    this.cohort      = cohort;
+    this.roomCode    = roomCode;
+    this.channelName = `ptm-c${cohort}-${roomCode}`;
+    this.clientId    = `${name}__${Math.random().toString(36).slice(2, 7)}`;
+
+    // App state
+    this.members    = {};
+    this.turnOrder  = [];
+    this.activeTurn = null;
+    this.editorText = '';
+
+    // Ably handles
+    this.ablyClient   = null;
+    this.ablyChannel  = null;
+    this.ablyPresence = null;
+    this.subscribed   = false;
+
+    // Time constants (100× reduced from production for test speed)
+    this.HEARTBEAT_INTERVAL   = 150;   // 15s → 150ms
+    this.STALE_CONFIRM_MS     = 100;   // 10s → 100ms
+    this.STALE_SEEN_MS        = 300;   // 30s → 300ms
+    this.STALE_TURN_HOLDER_MS = 225;   // 22.5s → 225ms
+
+    this._connectDelay = connectDelay;
+    this._addMember(name, true);
+  }
+
+  _dn(clientId) { return clientId ? clientId.split('__')[0] : 'Unknown'; }
+
+  _addMember(name, isSelf) {
+    if (!this.members[name]) {
+      this.members[name] = { isSelf, confirmed: isSelf, lastSeen: isSelf ? Date.now() : 0 };
+      this._addToTurnOrder(name);
+    }
+  }
+
+  _addToTurnOrder(name) {
+    if (!this.turnOrder.includes(name)) this.turnOrder.push(name);
+    if (!this.activeTurn && this.turnOrder.length > 0) this.activeTurn = this.turnOrder[0];
+  }
+
+  _removeFromTurnOrder(name) {
+    const wasActive = this.activeTurn === name;
+    this.turnOrder = this.turnOrder.filter(n => n !== name);
+    delete this.members[name];
+    if (wasActive) this.activeTurn = this.turnOrder.length > 0 ? this.turnOrder[0] : null;
+  }
+
+  _broadcast(msg) {
+    if (!this.ablyChannel) return;
+    msg._sender = this.name;
+    try { this.ablyChannel.publish('msg', JSON.stringify(msg)); } catch(e) {}
+  }
+
+  _onPresenceEnter(clientId) {
+    if (clientId === this.clientId) return;
+    this._addMember(this._dn(clientId), false);
+  }
+
+  _onPresenceLeave(clientId) {
+    if (clientId === this.clientId) return;
+    this._removeFromTurnOrder(this._dn(clientId));
+  }
+
+  _evictStaleMembers() {
+    const now = Date.now();
+    Object.entries(this.members).forEach(([name, m]) => {
+      if (m.isSelf) return;
+      const isActiveTurn = name === this.activeTurn;
+      const stale = !m.confirmed
+        ? now - m.lastSeen > this.STALE_CONFIRM_MS
+        : isActiveTurn
+          ? now - m.lastSeen > this.STALE_TURN_HOLDER_MS  // faster eviction on their turn
+          : now - m.lastSeen > this.STALE_SEEN_MS;
+      if (stale) this._removeFromTurnOrder(name);
+    });
+  }
+
+  _startHeartbeat() {
+    clearInterval(this._heartbeatTimer);
+    this._heartbeatTimer = setInterval(
+      () => this._broadcast({ type: 'heartbeat' }), this.HEARTBEAT_INTERVAL
+    );
+  }
+  _stopHeartbeat()   { clearInterval(this._heartbeatTimer); this._heartbeatTimer = null; }
+
+  _startStaleCheck(earlyMs) {
+    clearInterval(this._staleTimer);
+    if (earlyMs) setTimeout(() => this._evictStaleMembers(), earlyMs);
+    this._staleTimer = setInterval(() => this._evictStaleMembers(), this.HEARTBEAT_INTERVAL);
+  }
+  _stopStaleCheck() { clearInterval(this._staleTimer); this._staleTimer = null; }
+
+  _handleMsg(raw) {
+    let msg;
+    try { msg = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch(e) { return; }
+    if (!msg || msg._sender === this.name) return;
+    const sender = msg._sender || 'Unknown';
+
+    const sm = this.members[sender];
+    if (sm) { sm.confirmed = true; sm.lastSeen = Date.now(); }
+
+    switch (msg.type) {
+      case 'heartbeat': break;
+
+      case 'join':
+        this._addMember(sender, false);
+        this._broadcast({
+          type: 'state-sync',
+          editorText:  this.editorText,
+          memberNames: Object.keys(this.members).filter(n => {
+            const m = this.members[n]; return m && (m.isSelf || m.confirmed);
+          }),
+          turnOrder: this.turnOrder.filter(n => {
+            const m = this.members[n]; return m && (m.isSelf || m.confirmed);
+          }),
+          activeTurn: this.activeTurn,
+        });
+        break;
+
+      case 'leave':
+        this._removeFromTurnOrder(sender);
+        break;
+
+      case 'state-sync':
+        if (msg.memberNames) {
+          msg.memberNames.forEach(n => { if (n !== this.name) this._addMember(n, false); });
+        }
+        if (msg.turnOrder) {
+          const merged = [...msg.turnOrder];
+          Object.keys(this.members).forEach(n => { if (!merged.includes(n)) merged.push(n); });
+          this.turnOrder = merged;
+        }
+        if (msg.activeTurn !== undefined) this.activeTurn = msg.activeTurn;
+        // Only non-empty — empty-editor peer must not overwrite real content
+        if (msg.editorText) this.editorText = msg.editorText;
+        break;
+
+      case 'editor':
+        this.editorText = msg.text;
+        break;
+
+      case 'turn-set':
+        if (msg.turnOrder) {
+          const merged = [...msg.turnOrder];
+          Object.keys(this.members).forEach(n => { if (!merged.includes(n)) merged.push(n); });
+          this.turnOrder = merged;
+        }
+        if (msg.activeTurn !== undefined) this.activeTurn = msg.activeTurn;
+        break;
+
+      case 'reset':
+        this.wasReset = true;
+        // turns must NOT change on reset — only monkey/banana/basket position resets
+        break;
+    }
+  }
+
+  // Mirrors production resetGrid('app') — broadcasts reset to peers, does NOT touch turns
+  resetGrid() {
+    this.wasReset = true;
+    this._broadcast({ type: 'reset' });
+  }
+
+  // Mirrors production _handlePageUnload — broadcast leave + delayed close
+  simulatePageUnload() {
+    if (!this.ablyChannel) return Promise.resolve();
+    try { this._broadcast({ type: 'leave' }); } catch(e) {}
+    if (this.ablyPresence) { try { this.ablyPresence.leave(); } catch(e) {} }
+    this._stopHeartbeat();
+    this._stopStaleCheck();
+    const _ch = this.ablyChannel, _cl = this.ablyClient;
+    this.ablyPresence = null; this.ablyChannel = null; this.ablyClient = null; this.subscribed = false;
+    return new Promise(resolve => setTimeout(() => {
+      if (_ch) { try { _ch.unsubscribe(); _ch.presence.unsubscribe(); } catch(e) {} }
+      if (_cl) { try { _cl.close(); } catch(e) {} }
+      resolve();
+    }, 20));
+  }
+
+  _enterPresenceAndAnnounce() {
+    return this.ablyPresence.enter({ name: this.name }).then(() =>
+      this.ablyPresence.get().then(members => {
+        const inPresence = new Set(members.map(m => this._dn(m.clientId)));
+        // Reconcile: remove stale locals not in Ably presence
+        Object.keys(this.members).forEach(name => {
+          if (!this.members[name].isSelf && !inPresence.has(name)) {
+            this._removeFromTurnOrder(name);
+          }
+        });
+        const others = members.filter(m => m.clientId !== this.clientId);
+        others.forEach(m => this._addMember(this._dn(m.clientId), false));
+
+        if (others.length > 0) {
+          this.activeTurn = null;
+          this._startStaleCheck(this.STALE_CONFIRM_MS);
+        } else {
+          this._startStaleCheck(null);
+        }
+        this._startHeartbeat();
+        this._broadcast({ type: 'join', name: this.name });
+      })
+    ).catch(() => {
+      this._broadcast({ type: 'join', name: this.name });
+    });
+  }
+
+  syncStart() {
+    return new Promise(resolve => {
+      this.ablyClient = createMockAbly(this.server, this.clientId, this._connectDelay);
+      this.ablyClient.connection.on('connected', () => {
+        if (!this.ablyChannel) {
+          this.ablyChannel  = this.ablyClient.channels.get(this.channelName);
+          this.ablyPresence = this.ablyChannel.presence;
+        }
+        if (!this.subscribed) {
+          this.ablyChannel.subscribe('msg', env => this._handleMsg(env.data));
+          this.subscribed = true;
+        }
+        this.ablyPresence.subscribe('enter', m => this._onPresenceEnter(m.clientId));
+        this.ablyPresence.subscribe('leave', m => this._onPresenceLeave(m.clientId));
+        this.ablyChannel.on('attached', () => {
+          this._enterPresenceAndAnnounce().then(resolve);
+        });
+      });
+    });
+  }
+
+  syncStop() {
+    this._stopHeartbeat();
+    this._stopStaleCheck();
+    if (this.ablyPresence) { try { this.ablyPresence.leave(); } catch(e) {} this.ablyPresence = null; }
+    if (this.ablyChannel)  {
+      try { this.ablyChannel.unsubscribe(); this.ablyChannel.presence.unsubscribe(); } catch(e) {}
+      this.ablyChannel = null;
+    }
+    if (this.ablyClient)   { try { this.ablyClient.close(); } catch(e) {} this.ablyClient = null; }
+    this.subscribed = false;
+  }
+
+  // ── Visibility-change model ───────────────────────────────────────────
+  // Mirrors the production visibilitychange handler exactly:
+  //   hide  → leave presence, stop timers, keep socket open
+  //   show  → re-enter if connection alive, full syncStart if not
+  simulateHide() {
+    this._stopHeartbeat();
+    this._stopStaleCheck();
+    if (this.ablyPresence) { try { this.ablyPresence.leave(); } catch(e) {} }
+    // NOTE: does NOT close the connection (leave message must be delivered first)
+  }
+
+  simulateShow() {
+    if (this.ablyClient && this.ablyPresence) return this._enterPresenceAndAnnounce();
+    if (this.name && this.roomCode)            return this.syncStart();
+    return Promise.resolve();
+  }
+
+  // ── Abrupt disconnect ─────────────────────────────────────────────────
+  // Simulates what happens when a browser process is killed:
+  // no beforeunload, no pagehide, no presence.leave — the socket just drops.
+  // Others will only notice once their stale eviction fires.
+  simulateAbruptDisconnect() {
+    this._stopHeartbeat();
+    this._stopStaleCheck();
+    // Unsubscribe locally without sending any leave message
+    if (this.ablyChannel) {
+      try { this.ablyChannel.unsubscribe(); } catch(e) {}
+      this.ablyChannel = null;
+    }
+    this.ablyPresence = null;
+    this.ablyClient   = null;
+    this.subscribed   = false;
+    // NOTE: server.presence still contains this clientId — no leave event fired
+  }
+
+  // Call this to simulate Ably detecting the dropped TCP connection and firing
+  // the presence.leave to all subscribers (happens ~15-30s after a real kill).
+  simulateAblyDetectsDisconnect() {
+    this.server.leavePresence(this.channelName, this.clientId);
+  }
+
+  setEditor(text) {
+    this.editorText = text;
+    this._broadcast({ type: 'editor', text });
+  }
+
+  // Old leave — only used internally / by tests that need instant teardown
+  leave() {
+    this._broadcast({ type: 'leave' });
+    this.syncStop();
+  }
+
+  // Mirrors the production leaveRoom() — broadcast first, leave presence,
+  // then delay close() so messages flush before socket drops.
+  leaveRoom() {
+    this._broadcast({ type: 'leave' });
+    if (this.ablyPresence) { try { this.ablyPresence.leave(); } catch(e) {} }
+    this._stopHeartbeat();
+    this._stopStaleCheck();
+    const _ch = this.ablyChannel, _cl = this.ablyClient;
+    this.ablyPresence = null; this.ablyChannel = null; this.ablyClient = null; this.subscribed = false;
+    // Delay close — let leave messages flush (mirrors the 250ms in production)
+    return new Promise(resolve => setTimeout(() => {
+      if (_ch) { try { _ch.unsubscribe(); _ch.presence.unsubscribe(); } catch(e) {} }
+      if (_cl) { try { _cl.close(); } catch(e) {} }
+      resolve();
+    }, 20)); // 20ms in test (250ms in production)
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TEST RUNNER
+// ═══════════════════════════════════════════════════════════════════════
+const results = [];
+function assert(ok, msg) { if (!ok) throw new Error(msg || 'assertion failed'); }
+async function test(name, fn) {
+  try { await fn(); results.push({ name, pass: true }); }
+  catch(e) { results.push({ name, pass: false, detail: e.message }); console.error(`FAIL: ${name}`, e); }
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// ═══════════════════════════════════════════════════════════════════════
+// SUITES
+// ═══════════════════════════════════════════════════════════════════════
+
+async function suite_basic() {
+
+  await test('single user joins empty room — only themselves', async () => {
+    const s = new MockServer(), a = new SyncAgent(s, 'Alice');
+    await a.syncStart(); await wait(40);
+    assert(Object.keys(a.members).length === 1, `expected 1 member, got ${Object.keys(a.members).length}`);
+    assert(a.members['Alice']?.isSelf, 'Alice not marked as self');
+    assert(a.activeTurn === 'Alice', `expected activeTurn=Alice, got ${a.activeTurn}`);
+    a.syncStop();
+  });
+
+  await test('two users join — both see each other', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s, 'Alice'), b = new SyncAgent(s, 'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(80);
+    assert(Object.keys(a.members).length === 2, `Alice: expected 2 members, got ${Object.keys(a.members).length}`);
+    assert(Object.keys(b.members).length === 2, `Bob: expected 2 members, got ${Object.keys(b.members).length}`);
+    assert('Bob' in a.members, 'Alice does not see Bob');
+    assert('Alice' in b.members, 'Bob does not see Alice');
+    a.syncStop(); b.syncStop();
+  });
+
+  await test('three users join sequentially — all see all three', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob'), c = new SyncAgent(s,'Charlie');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(20);
+    await c.syncStart(); await wait(120);
+    for (const ag of [a, b, c]) {
+      assert(Object.keys(ag.members).length === 3,
+        `${ag.name}: expected 3 members, got ${Object.keys(ag.members).length}`);
+      assert(ag.turnOrder.length === 3,
+        `${ag.name}: expected turnOrder.length=3, got ${ag.turnOrder.length}`);
+    }
+    a.syncStop(); b.syncStop(); c.syncStop();
+  });
+}
+
+async function suite_leave() {
+
+  await test('graceful leave — removed from peers', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(80);
+    b.leave(); await wait(40);
+    assert(!('Bob' in a.members), 'Bob still in Alice\'s members after leave');
+    assert(!a.turnOrder.includes('Bob'), 'Bob still in Alice\'s turnOrder');
+  });
+
+  await test('active-turn user gracefully leaves — turn advances', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob'), c = new SyncAgent(s,'Charlie');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(20);
+    await c.syncStart(); await wait(120);
+    [a, b, c].forEach(ag => { ag.activeTurn = 'Bob'; });
+    b.leave(); await wait(60);
+    assert(a.activeTurn !== 'Bob', `Alice's turn should have advanced from Bob (still: ${a.activeTurn})`);
+    assert(!a.members['Bob'], 'Bob still in Alice\'s members');
+    assert(!c.members['Bob'], 'Bob still in Charlie\'s members');
+    a.syncStop(); c.syncStop();
+  });
+
+  // ─────────────────────────────────────────────────────────────────────
+  // ABRUPT DISCONNECT TESTS — the scenario that was previously untested
+  // ─────────────────────────────────────────────────────────────────────
+
+  await test('abrupt disconnect — Ably TCP timeout fires presence.leave to peers', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(80);
+
+    assert('Alice' in b.members, 'Bob does not see Alice before disconnect');
+
+    // Alice's browser is killed — no leave message, no events
+    a.simulateAbruptDisconnect();
+    await wait(20);
+
+    // At this point Bob still has Alice (no leave event yet)
+    assert('Alice' in b.members, 'Bob removed Alice before Ably timeout (unexpected)');
+
+    // Ably detects the dropped TCP and fires presence.leave
+    a.simulateAblyDetectsDisconnect();
+    await wait(20);
+
+    assert(!b.members['Alice'], 'Bob still has Alice after Ably TCP timeout fired');
+    assert(!b.turnOrder.includes('Alice'), 'Alice still in Bob\'s turnOrder');
+
+    b.syncStop();
+  });
+
+  await test('abrupt disconnect while active-turn holder — stale eviction advances turn', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob'), c = new SyncAgent(s,'Charlie');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(20);
+    await c.syncStart(); await wait(120);
+
+    // Confirm Bob so he's treated as confirmed-but-going-silent
+    ['Alice','Charlie'].forEach(ag => {
+      const agent = [a,b,c].find(x => x.name === ag);
+      if (agent.members['Bob']) {
+        agent.members['Bob'].confirmed = true;
+        agent.members['Bob'].lastSeen  = Date.now();
+      }
+    });
+    [a, b, c].forEach(ag => { ag.activeTurn = 'Bob'; });
+
+    // Bob's process is killed — no presence.leave, heartbeats stop
+    b.simulateAbruptDisconnect();
+    await wait(20);
+
+    // Others still show Bob (no leave event)
+    assert(a.members['Bob'], 'Alice removed Bob too early (before stale check)');
+
+    // Wait for stale eviction to fire (STALE_TURN_HOLDER_MS = 225ms in test)
+    await wait(a.STALE_TURN_HOLDER_MS + a.HEARTBEAT_INTERVAL + 50);
+
+    assert(!a.members['Bob'],   'Alice still has Bob after stale eviction window');
+    assert(!c.members['Bob'],   'Charlie still has Bob after stale eviction window');
+    assert(a.activeTurn !== 'Bob',
+      `Alice's turn stuck on Bob after stale eviction (now: ${a.activeTurn})`);
+    assert(c.activeTurn !== 'Bob',
+      `Charlie's turn stuck on Bob after stale eviction (now: ${c.activeTurn})`);
+
+    a.syncStop(); c.syncStop();
+  });
+
+  await test('stale unconfirmed member evicted after STALE_CONFIRM_MS', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s, 'Alice');
+    await a.syncStart(); await wait(30);
+    // Ghost member — joined presence but never replied to anything
+    a.members['Ghost'] = { isSelf: false, confirmed: false, lastSeen: 0 };
+    a.turnOrder.push('Ghost');
+    a._startStaleCheck(a.STALE_CONFIRM_MS);
+    await wait(a.STALE_CONFIRM_MS + 60);
+    assert(!a.members['Ghost'],            'Ghost not evicted from members');
+    assert(!a.turnOrder.includes('Ghost'), 'Ghost not evicted from turnOrder');
+    a.syncStop();
+  });
+}
+
+async function suite_reconciliation() {
+
+  await test('joining reconciles against Ably presence — local ghost removed', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(80);
+
+    a.syncStop(); await wait(30); // Alice leaves
+
+    // Simulate ghost: re-inject Alice into Bob's local state after she left
+    b.members['Alice']  = { isSelf: false, confirmed: true, lastSeen: Date.now() };
+    b.turnOrder = ['Bob', 'Alice'];
+
+    // Bob hides tab (leave only) then shows (re-enter)
+    b.simulateHide(); await wait(10);
+    await b.simulateShow(); await wait(80);
+
+    assert(!b.members['Alice'],            'Ghost Alice persists after reconciliation');
+    assert(!b.turnOrder.includes('Alice'), 'Ghost Alice persists in turnOrder');
+    b.syncStop();
+  });
+
+  await test('state-sync does not propagate unconfirmed ghosts to joiner', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice');
+    await a.syncStart(); await wait(20);
+    // Alice has a ghost in her local state (unconfirmed, lastSeen=0)
+    a.members['Ghost'] = { isSelf: false, confirmed: false, lastSeen: 0 };
+    a.turnOrder.push('Ghost');
+
+    const b = new SyncAgent(s,'Bob');
+    await b.syncStart(); await wait(80);
+
+    assert(!b.members['Ghost'], 'Bob received Ghost from Alice\'s state-sync');
+    a.syncStop(); b.syncStop();
+  });
+
+  await test('rejoin does not duplicate self in member list', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice');
+    await a.syncStart(); await wait(40);
+    a.simulateHide(); await wait(10);
+    await a.simulateShow(); await wait(80);
+    const n = Object.keys(a.members).length;
+    assert(n === 1, `Alice has ${n} members after rejoin (expected 1)`);
+    a.syncStop();
+  });
+
+}
+
+async function suite_state_sync() {
+
+  await test('late joiner receives editor content from host', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice');
+    await a.syncStart(); await wait(20);
+    a.setEditor('move north\nmove south');
+
+    const b = new SyncAgent(s,'Bob');
+    await b.syncStart(); await wait(80);
+    assert(b.editorText === 'move north\nmove south',
+      `Bob got wrong editor text: "${b.editorText}"`);
+    a.syncStop(); b.syncStop();
+  });
+
+  await test('empty editor from peer does not overwrite real content', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(60);
+
+    // Alice typed something; Bob never did
+    a.editorText = 'move north\nmove south';
+    b.editorText = '';
+
+    const c = new SyncAgent(s,'Charlie');
+    await c.syncStart(); await wait(120);
+
+    assert(c.editorText === 'move north\nmove south',
+      `Charlie got wrong content: "${c.editorText}" (empty peer overwrote real content)`);
+    a.syncStop(); b.syncStop(); c.syncStop();
+  });
+
+  await test('visibility reconnect — editor content restored from peer', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(60);
+
+    b.editorText = 'pickup banana';
+
+    // Alice hides (leave only, keep socket open)
+    a.simulateHide(); await wait(20);
+
+    // Bob should see Alice leave (presence.leave sent before socket stays open)
+    assert(!b.members['Alice'], 'Bob still has Alice while she\'s hidden');
+
+    // Alice restores
+    await a.simulateShow(); await wait(100);
+
+    assert(a.editorText === 'pickup banana',
+      `Alice's editor not restored after reconnect: "${a.editorText}"`);
+    assert(a.members['Bob'], 'Alice does not see Bob after reconnect');
+    assert(b.members['Alice'], 'Bob does not see Alice after reconnect');
+
+    a.syncStop(); b.syncStop();
+  });
+
+}
+
+async function suite_lifecycle() {
+
+  await test('syncStop removes user from server presence immediately', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice');
+    await a.syncStart(); await wait(30);
+    const before = await s.getPresence(a.channelName);
+    assert(before.some(m => m.clientId === a.clientId), 'Alice not in presence before syncStop');
+    a.syncStop(); await wait(10);
+    const after = await s.getPresence(a.channelName);
+    assert(!after.some(m => m.clientId === a.clientId), 'Alice still in presence after syncStop');
+  });
+
+  await test('peer receives presence-leave when user calls syncStop', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(80);
+    assert(b.members['Alice'], 'Bob does not see Alice before disconnect');
+    a.syncStop(); await wait(30);
+    assert(!b.members['Alice'], 'Alice still in Bob\'s members after syncStop');
+  });
+
+  await test('simulateHide sends presence.leave — Bob sees Alice leave immediately', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(80);
+    assert(b.members['Alice'], 'Bob does not see Alice before hide');
+    a.simulateHide(); await wait(20);
+    assert(!b.members['Alice'], 'Alice still in Bob\'s members after simulateHide');
+  });
+
+  await test('leaveRoom broadcasts leave message AND removes from peers before socket closes', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob'), c = new SyncAgent(s,'Charlie');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(20);
+    await c.syncStart(); await wait(120);
+
+    assert(b.members['Alice'] && c.members['Alice'], 'Alice not visible to peers before leave');
+
+    // Alice clicks "Leave Channel" — peers should see her go before the socket closes
+    const leavePromise = a.leaveRoom();
+    await wait(30); // after broadcast + presence.leave, before delayed close()
+
+    assert(!b.members['Alice'],
+      'Bob still has Alice after leaveRoom broadcast (leave message not delivered)');
+    assert(!c.members['Alice'],
+      'Charlie still has Alice after leaveRoom broadcast');
+    assert(!b.turnOrder.includes('Alice'), 'Alice still in Bob\'s turnOrder after leaveRoom');
+
+    await leavePromise; // wait for delayed close
+    b.syncStop(); c.syncStop();
+  });
+
+  await test('reset does not change turn order or active turn', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob'), c = new SyncAgent(s,'Charlie');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(20);
+    await c.syncStart(); await wait(120);
+
+    // Advance to Bob's turn manually
+    [a, b, c].forEach(ag => { ag.activeTurn = 'Bob'; });
+    const orderBefore = [...a.turnOrder];
+
+    // Alice (non-host) hits reset
+    a.resetGrid();
+    await wait(30);
+
+    assert(b.wasReset,  'Bob did not receive reset broadcast');
+    assert(c.wasReset,  'Charlie did not receive reset broadcast');
+    assert(b.activeTurn === 'Bob',
+      `Bob's activeTurn changed after reset (now: ${b.activeTurn})`);
+    assert(c.activeTurn === 'Bob',
+      `Charlie's activeTurn changed after reset (now: ${c.activeTurn})`);
+    assert(JSON.stringify(b.turnOrder) === JSON.stringify(orderBefore),
+      `Bob's turnOrder changed after reset`);
+
+    a.syncStop(); b.syncStop(); c.syncStop();
+  });
+
+  await test('tab close (pageUnload) broadcasts leave — peers remove user immediately', async () => {
+    const s = new MockServer();
+    const a = new SyncAgent(s,'Alice'), b = new SyncAgent(s,'Bob'), c = new SyncAgent(s,'Charlie');
+    await a.syncStart(); await wait(20);
+    await b.syncStart(); await wait(20);
+    await c.syncStart(); await wait(120);
+
+    assert(b.members['Alice'] && c.members['Alice'], 'Alice not visible to peers before unload');
+    [a, b, c].forEach(ag => { ag.activeTurn = 'Alice'; });
+
+    // Alice's tab is closed (beforeunload fires)
+    const unloadPromise = a.simulatePageUnload();
+    await wait(30); // after broadcast + presence.leave, before delayed close
+
+    assert(!b.members['Alice'],
+      'Bob still has Alice after tab close');
+    assert(!c.members['Alice'],
+      'Charlie still has Alice after tab close');
+    assert(!b.turnOrder.includes('Alice'),
+      'Alice still in Bob\'s turnOrder after tab close');
+
+    await unloadPromise;
+    b.syncStop(); c.syncStop();
+  });
+
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RUN & RENDER
+// ═══════════════════════════════════════════════════════════════════════
+const SUITES = [
+  { name: 'Basic Membership',               fn: suite_basic },
+  { name: 'Leave & Eviction',              fn: suite_leave },
+  { name: 'Ghost Cleanup / Reconciliation', fn: suite_reconciliation },
+  { name: 'State-Sync Content',            fn: suite_state_sync },
+  { name: 'Connection Lifecycle',          fn: suite_lifecycle },
+];
+
+function render(suiteSizes) {
+  const pass = results.filter(r => r.pass).length;
+  const fail = results.length - pass;
+  let html = '', ri = 0;
+  for (let s = 0; s < SUITES.length; s++) {
+    html += `<div class="suite-name">${SUITES[s].name}</div>`;
+    for (let t = 0; t < (suiteSizes[s] || 0); t++) {
+      const r = results[ri++];
+      if (!r) break;
+      html += `<div class="test ${r.pass ? 'pass' : 'fail'}">
+        <span class="icon">${r.pass ? '✓' : '✗'}</span>
+        <span class="name">${r.name}</span>
+        ${r.detail ? `<span class="detail">${r.detail}</span>` : ''}
+      </div>`;
+    }
+  }
+  html += `<div class="summary ${fail === 0 ? 'all-pass' : 'has-fail'}">
+    ${fail === 0 ? `All ${results.length} tests passed` : `${fail} of ${results.length} tests failed`}
+  </div>`;
+  document.getElementById('output').innerHTML = html;
+}
+
+async function main() {
+  const sizes = [];
+  for (const suite of SUITES) {
+    const before = results.length;
+    await suite.fn();
+    sizes.push(results.length - before);
+  }
+  render(sizes);
+}
+
+main();
+</script>
+</body>
+</html>

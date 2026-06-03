@@ -1,0 +1,341 @@
+/*
+  Stepper module: Math / Integer Division
+  Visual type: long-division
+  TEMPLATE NOTE: no em dashes anywhere -- use plain hyphens or rewrite the sentence.
+*/
+STEPPER_REGISTRY.register("math/integer-division", {
+
+  label: 'Integer division',
+
+  panelConfig: {
+    visual: { title: 'Long division' },
+    stack: false,
+    heap:  false,
+    custom: false,
+    editableInputs: [
+      { id: 'dividend', label: 'a', type: 'integer', defaultVal: 17, min: 0, max: 999 },
+      { id: 'divisor',  label: 'b', type: 'integer', defaultVal: 5,  min: 1, max: 99  },
+    ],
+    legend: [
+      { color:'#a0540a', border:'#e8c070', label:'Currently computing' },
+      { color:'#095e40', border:'#90d4b8', label:'Computed and done' },
+      { color:'#d4d1cc', border:'#b8b4ae', label:'Not yet computed' },
+    ]
+  },
+
+  // Returns updated code lines when the user edits values (scenario 0 only)
+  getCodeLines(scenIdx, params) {
+    if (scenIdx !== 0 || !params) return null;
+    return [
+      { code: [['tok-type','int '],['tok-op','a = '],['tok-num', String(params.dividend)],['tok-op',';']] },
+      { code: [['tok-type','int '],['tok-op','b = '],['tok-num', String(params.divisor)],['tok-op',';']] },
+      { code: [['tok-type','int '],['tok-op','result = a / b;']] },
+    ];
+  },
+
+  scenarios: [
+
+    // ----------------------------------------------------------------
+    // Scenario 1 -- 17 / 5  (in Java: int result = 17 / 5 => 3)
+    // Lines:
+    //   0: int a = 17
+    //   1: int b = 5
+    //   2: int result = a / b
+    // ----------------------------------------------------------------
+    {
+      label: '17 / 5',
+      lines: [
+        { code: [['tok-type','int '],['tok-op','a = '],['tok-num','17'],['tok-op',';']] },
+        { code: [['tok-type','int '],['tok-op','b = '],['tok-num','5'],['tok-op',';']] },
+        { code: [['tok-type','int '],['tok-op','result = a / b;']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: {
+            type: 'long-division', dividend: 17, divisor: 5,
+            steps: [
+              { label: 'How many times?', value: '?', state: 'dim' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'a = 17', text:'<hi>a = 17</hi> is the dividend -- the number being divided. In Java, <hi>int / int</hi> keeps only the whole-number part of the result.' }
+        },
+        {
+          line: 1,
+          visual: {
+            type: 'long-division', dividend: 17, divisor: 5,
+            steps: [
+              { label: 'How many times?', value: '?', state: 'dim' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'b = 5', text:'<hi>b = 5</hi> is the divisor. The question: how many times does 5 go into 17 as a whole number?' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 17, divisor: 5,
+            steps: [
+              { label: 'How many times?', value: '3', state: 'active' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'Step 1 -- how many times?', text:'5 goes into 17 at most <hi>3</hi> whole times (5 x 3 = 15, 5 x 4 = 20 which is too big). The quotient is <hi>3</hi>.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 17, divisor: 5,
+            steps: [
+              { label: 'How many times?', value: '3',  state: 'done' },
+              { label: 'Times divisor',  value: '15', state: 'active' },
+              { label: 'Subtract',       value: '?',  state: 'dim' },
+              { label: 'Remainder',      value: '?',  state: 'dim' },
+            ]
+          },
+          expl: { label:'Step 2 -- multiply', text:'Quotient times divisor: <hi>3 x 5 = 15</hi>. This is how much of the dividend we have accounted for.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 17, divisor: 5,
+            steps: [
+              { label: 'How many times?', value: '3',  state: 'done' },
+              { label: 'Times divisor',  value: '15', state: 'done' },
+              { label: 'Subtract',       value: '2',  state: 'active' },
+              { label: 'Remainder',      value: '?',  state: 'dim' },
+            ]
+          },
+          expl: { label:'Step 3 -- subtract', text:'<hi>17 - 15 = 2</hi>. This is what is left after removing the full groups. Two cannot form another complete group of 5.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 17, divisor: 5,
+            steps: [
+              { label: 'How many times?', value: '3',  state: 'done' },
+              { label: 'Times divisor',  value: '15', state: 'done' },
+              { label: 'Subtract',       value: '2',  state: 'done' },
+              { label: 'Remainder',      value: '2',  state: 'active' },
+            ]
+          },
+          expl: { label:'Step 4 -- remainder', text:'The remainder is <hi>2</hi>. In Java <hi>int</hi> division, this gets thrown away. Only the quotient is kept.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 17, divisor: 5,
+            steps: [
+              { label: 'How many times?', value: '3',            state: 'done' },
+              { label: 'Times divisor',  value: '15',           state: 'done' },
+              { label: 'Subtract',       value: '2',            state: 'done' },
+              { label: 'Remainder',      value: '2 (dropped)',  state: 'done' },
+            ]
+          },
+          expl: { label:'result = 3', text:'<hi>17 / 5 = 3</hi> in integer division. The <hi>.4</hi> is silently discarded -- not rounded, just cut. This is called truncation toward zero.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 2 -- 20 / 4 (divides evenly, remainder is 0)
+    // Lines:
+    //   0: int a = 20
+    //   1: int b = 4
+    //   2: int result = a / b
+    // ----------------------------------------------------------------
+    {
+      label: '20 / 4',
+      lines: [
+        { code: [['tok-type','int '],['tok-op','a = '],['tok-num','20'],['tok-op',';']] },
+        { code: [['tok-type','int '],['tok-op','b = '],['tok-num','4'],['tok-op',';']] },
+        { code: [['tok-type','int '],['tok-op','result = a / b;']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: {
+            type: 'long-division', dividend: 20, divisor: 4,
+            steps: [
+              { label: 'How many times?', value: '?', state: 'dim' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'a = 20', text:'<hi>a = 20</hi>. This one divides evenly -- a good case to see what zero remainder looks like.' }
+        },
+        {
+          line: 1,
+          visual: {
+            type: 'long-division', dividend: 20, divisor: 4,
+            steps: [
+              { label: 'How many times?', value: '?', state: 'dim' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'b = 4', text:'<hi>b = 4</hi>. How many times does 4 fit into 20?' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 20, divisor: 4,
+            steps: [
+              { label: 'How many times?', value: '5', state: 'active' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'Step 1 -- how many times?', text:'4 x 5 = 20 exactly. So the quotient is <hi>5</hi>. We suspect the remainder will be 0.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 20, divisor: 4,
+            steps: [
+              { label: 'How many times?', value: '5',  state: 'done' },
+              { label: 'Times divisor',  value: '20', state: 'active' },
+              { label: 'Subtract',       value: '?',  state: 'dim' },
+              { label: 'Remainder',      value: '?',  state: 'dim' },
+            ]
+          },
+          expl: { label:'Step 2 -- multiply', text:'<hi>5 x 4 = 20</hi>. This exactly matches the dividend, which is the sign of even division.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 20, divisor: 4,
+            steps: [
+              { label: 'How many times?', value: '5',  state: 'done' },
+              { label: 'Times divisor',  value: '20', state: 'done' },
+              { label: 'Subtract',       value: '0',  state: 'active' },
+              { label: 'Remainder',      value: '?',  state: 'dim' },
+            ]
+          },
+          expl: { label:'Step 3 -- subtract', text:'<hi>20 - 20 = 0</hi>. Nothing left over. When the subtraction hits zero, the division is exact.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 20, divisor: 4,
+            steps: [
+              { label: 'How many times?', value: '5',  state: 'done' },
+              { label: 'Times divisor',  value: '20', state: 'done' },
+              { label: 'Subtract',       value: '0',  state: 'done' },
+              { label: 'Remainder',      value: '0',  state: 'active' },
+            ]
+          },
+          expl: { label:'result = 5', text:'<hi>20 / 4 = 5</hi> exactly. Remainder is 0, so nothing is thrown away. The integer result is <hi>5</hi>, same as the real-number result.' }
+        },
+      ]
+    },
+
+    // ----------------------------------------------------------------
+    // Scenario 3 -- 7 / 10 (small dividend, result is 0)
+    // Lines:
+    //   0: int a = 7
+    //   1: int b = 10
+    //   2: int result = a / b
+    // ----------------------------------------------------------------
+    {
+      label: '7 / 10',
+      lines: [
+        { code: [['tok-type','int '],['tok-op','a = '],['tok-num','7'],['tok-op',';']] },
+        { code: [['tok-type','int '],['tok-op','b = '],['tok-num','10'],['tok-op',';']] },
+        { code: [['tok-type','int '],['tok-op','result = a / b;']] },
+      ],
+      steps: [
+        {
+          line: 0,
+          visual: {
+            type: 'long-division', dividend: 7, divisor: 10,
+            steps: [
+              { label: 'How many times?', value: '?', state: 'dim' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'a = 7', text:'<hi>a = 7</hi>. This one is smaller than the divisor -- a common trip-up in Java.' }
+        },
+        {
+          line: 1,
+          visual: {
+            type: 'long-division', dividend: 7, divisor: 10,
+            steps: [
+              { label: 'How many times?', value: '?', state: 'dim' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'b = 10', text:'<hi>b = 10</hi>. Does 10 fit into 7 even once? No -- 10 is already bigger than 7.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 7, divisor: 10,
+            steps: [
+              { label: 'How many times?', value: '0', state: 'active' },
+              { label: 'Times divisor',  value: '?', state: 'dim' },
+              { label: 'Subtract',       value: '?', state: 'dim' },
+              { label: 'Remainder',      value: '?', state: 'dim' },
+            ]
+          },
+          expl: { label:'Quotient = 0', text:'10 does not fit into 7 at all. The quotient is <hi>0</hi>. In Java this is valid -- no error, no warning, just 0.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 7, divisor: 10,
+            steps: [
+              { label: 'How many times?', value: '0',  state: 'done' },
+              { label: 'Times divisor',  value: '0',  state: 'active' },
+              { label: 'Subtract',       value: '?',  state: 'dim' },
+              { label: 'Remainder',      value: '?',  state: 'dim' },
+            ]
+          },
+          expl: { label:'0 x 10 = 0', text:'Quotient times divisor: <hi>0 x 10 = 0</hi>. We have accounted for nothing from the dividend.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 7, divisor: 10,
+            steps: [
+              { label: 'How many times?', value: '0',  state: 'done' },
+              { label: 'Times divisor',  value: '0',  state: 'done' },
+              { label: 'Subtract',       value: '7',  state: 'active' },
+              { label: 'Remainder',      value: '?',  state: 'dim' },
+            ]
+          },
+          expl: { label:'7 - 0 = 7', text:'<hi>7 - 0 = 7</hi>. The entire dividend is still there as the remainder. All of it is left over.' }
+        },
+        {
+          line: 2,
+          visual: {
+            type: 'long-division', dividend: 7, divisor: 10,
+            steps: [
+              { label: 'How many times?', value: '0',           state: 'done' },
+              { label: 'Times divisor',  value: '0',           state: 'done' },
+              { label: 'Subtract',       value: '7',           state: 'done' },
+              { label: 'Remainder',      value: '7 (dropped)', state: 'active' },
+            ]
+          },
+          expl: { label:'result = 0', text:'<hi>7 / 10 = 0</hi> in integer division. The remainder 7 is dropped. This surprises beginners: dividing a smaller number by a larger one always gives 0 in integer division.' }
+        },
+      ]
+    },
+
+  ]
+
+});

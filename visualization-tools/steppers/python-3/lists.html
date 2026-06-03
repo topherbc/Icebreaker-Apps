@@ -1,0 +1,177 @@
+/*
+  Python 3 -- Lists
+  Create and index, access with a loop, update by index, remove with del, copy with a loop
+  No em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Line index comments mark each scenario's 0-based line numbers
+  (blank lines are not counted).
+*/
+STEPPER_REGISTRY.register("python-3/lists", {
+  label: 'Lists',
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: false,
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+      { color:'#3d3490', border:'#b0a8e0', label:'Reference (list)' },
+    ]
+  },
+  scenarios: [
+
+    /* ------------------------------------------------------------------ */
+    /*  1. Create and index                                                 */
+    /*                                                                      */
+    /*  0  nums = [10, 20, 30]                                              */
+    /*  1  x = nums[0]                                                      */
+    /*  2  y = nums[2]                                                      */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Create and index',
+      lines: [
+        { code: [['tok-op','nums = ['],['tok-num','10'],['tok-op',', '],['tok-num','20'],['tok-op',', '],['tok-num','30'],['tok-op',']']] },
+        { code: [['tok-op','x = nums['],['tok-num','0'],['tok-op',']']] },
+        { code: [['tok-op','y = nums['],['tok-num','2'],['tok-op',']']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:true,cls:true}],active:true}],
+          expl:{label:'List created', text:'<hi>nums = [10, 20, 30]</hi> creates a 3-element list. <hi>nums</hi> holds a reference to it. The purple pill signals it is a reference, not a primitive value.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'x',v:'10',fresh:true,cls:false}],active:true}],
+          expl:{label:'Reading index 0', text:'<hi>nums[0]</hi> reads the element at index 0. Lists are zero-indexed, so the first element is <hi>10</hi>. That value is copied into <hi>x</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'x',v:'10',fresh:false,cls:false},{n:'y',v:'30',fresh:true,cls:false}],active:true}],
+          expl:{label:'Reading index 2', text:'<hi>nums[2]</hi> reads the last element. Index 2 holds <hi>30</hi>, which is copied into <hi>y</hi>. Valid indices for a 3-element list are 0, 1, and 2.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'x',v:'10',fresh:false,cls:false},{n:'y',v:'30',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'All local variables go out of scope and the script finishes.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  2. Access with a loop                                               */
+    /*                                                                      */
+    /*  0  nums = [10, 20, 30]                                              */
+    /*  1  total = 0                                                        */
+    /*  2  for i in range(len(nums)):                                       */
+    /*  3      total = total + nums[i]                                      */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Access with a loop',
+      lines: [
+        { code: [['tok-op','nums = ['],['tok-num','10'],['tok-op',', '],['tok-num','20'],['tok-op',', '],['tok-num','30'],['tok-op',']']] },
+        { code: [['tok-op','total = '],['tok-num','0']] },
+        { code: [['tok-kw','for '],['tok-op','i '],['tok-kw','in '],['tok-meth','range'],['tok-op','('],['tok-meth','len'],['tok-op','(nums)):']] },
+        { code: [['','    '],['tok-op','total = total + nums[i]']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:true,cls:true}],active:true}],
+          expl:{label:'List created', text:'<hi>nums</hi> holds a reference to a 3-element list. We will visit each element using a loop.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'0',fresh:true,cls:false}],active:true}],
+          expl:{label:'Accumulator initialized', text:'<hi>total = 0</hi>. Each loop iteration will read one element from <hi>nums</hi> and add it to <hi>total</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'0',fresh:false,cls:false},{n:'i',v:'0',fresh:true,cls:false}],active:true}],
+          expl:{label:'First value from range', text:'<hi>range(len(nums))</hi> produces range(3). Python asks it for its first value. <hi>i = 0</hi>. It will serve as the index into <hi>nums</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'0',fresh:false,cls:false},{n:'i',v:'0',fresh:false,cls:false}],active:true}],
+          expl:{label:'Condition: true', text:'Python checks the range is not exhausted. 0 < 3 -- first iteration begins.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'10',fresh:true,cls:false},{n:'i',v:'0',fresh:false,cls:false}],active:true}],
+          expl:{label:'Read index 0', text:'<hi>nums[i]</hi> is <hi>nums[0]</hi>, which is <hi>10</hi>. <hi>total = 0 + 10</hi> gives <hi>total = 10</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'10',fresh:false,cls:false},{n:'i',v:'1',fresh:true,cls:false}],active:true}],
+          expl:{label:'Next value from range', text:'Python asks the range for its next value. <hi>i = 1</hi>.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'30',fresh:true,cls:false},{n:'i',v:'1',fresh:false,cls:false}],active:true}],
+          expl:{label:'Read index 1', text:'<hi>nums[1]</hi> is <hi>20</hi>. <hi>total = 10 + 20</hi> gives <hi>total = 30</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'30',fresh:false,cls:false},{n:'i',v:'2',fresh:true,cls:false}],active:true}],
+          expl:{label:'Next value from range', text:'Python asks the range for its next value. <hi>i = 2</hi>.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'60',fresh:true,cls:false},{n:'i',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'Read index 2', text:'<hi>nums[2]</hi> is <hi>30</hi>. <hi>total = 30 + 30</hi> gives <hi>total = 60</hi>. All elements have been visited.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'60',fresh:false,cls:false}],active:true}],
+          expl:{label:'range exhausted', text:'<hi>range(3)</hi> has no more values. The loop exits and <hi>i</hi> goes out of scope.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:false,cls:true},{n:'total',v:'60',fresh:false,cls:false}],active:true}],
+          expl:{label:'Script ends', text:'The loop visited every element once, using <hi>i</hi> as the index. The final value of <hi>total</hi> is <hi>60</hi>: 10 + 20 + 30.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  3. Update by index                                                  */
+    /*                                                                      */
+    /*  0  nums = [10, 20, 30]                                              */
+    /*  1  nums[1] = 99                                                     */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Update by index',
+      lines: [
+        { code: [['tok-op','nums = ['],['tok-num','10'],['tok-op',', '],['tok-num','20'],['tok-op',', '],['tok-num','30'],['tok-op',']']] },
+        { code: [['tok-op','nums['],['tok-num','1'],['tok-op','] = '],['tok-num','99']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:true,cls:true}],active:true}],
+          expl:{label:'List created', text:'<hi>nums</hi> holds a reference to a 3-element list: <hi>[10, 20, 30]</hi>.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 99, 30]',fresh:true,cls:true}],active:true}],
+          expl:{label:'Element updated', text:'<hi>nums[1] = 99</hi> overwrites the element at index 1. The list goes from <hi>[10, 20, 30]</hi> to <hi>[10, 99, 30]</hi>. Indices 0 and 2 are unchanged.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 99, 30]',fresh:false,cls:true}],active:true}],
+          expl:{label:'Script ends', text:'The list holds <hi>[10, 99, 30]</hi> at the end.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  4. Remove by index (del)                                            */
+    /*                                                                      */
+    /*  0  nums = [10, 20, 30]                                              */
+    /*  1  del nums[1]                                                      */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Remove by index',
+      lines: [
+        { code: [['tok-op','nums = ['],['tok-num','10'],['tok-op',', '],['tok-num','20'],['tok-op',', '],['tok-num','30'],['tok-op',']']] },
+        { code: [['tok-kw','del '],['tok-op','nums['],['tok-num','1'],['tok-op',']']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 20, 30]',fresh:true,cls:true}],active:true}],
+          expl:{label:'List created', text:'<hi>nums</hi> is <hi>[10, 20, 30]</hi>. Unlike Java arrays, Python lists are dynamic -- they can grow and shrink.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 30]',fresh:true,cls:true}],active:true}],
+          expl:{label:'Element removed', text:'<hi>del nums[1]</hi> removes the element at index 1 (<hi>20</hi>). The remaining elements shift left automatically. The list shrinks from length 3 to length 2 -- no zeroing, no placeholders.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'nums',v:'[10, 30]',fresh:false,cls:true}],active:true}],
+          expl:{label:'Script ends', text:'The list holds <hi>[10, 30]</hi>. <hi>del</hi> is unique to Python -- Java arrays require manual shifting because their size is fixed.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  5. Copy with a loop (append)                                        */
+    /*                                                                      */
+    /*  0  src = [1, 2, 3]                                                  */
+    /*  1  copy = []                                                        */
+    /*  2  for item in src:                                                 */
+    /*  3      copy.append(item)                                            */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Copy with a loop',
+      lines: [
+        { code: [['tok-op','src = ['],['tok-num','1'],['tok-op',', '],['tok-num','2'],['tok-op',', '],['tok-num','3'],['tok-op',']']] },
+        { code: [['tok-op','copy = []']] },
+        { code: [['tok-kw','for '],['tok-op','item '],['tok-kw','in '],['tok-op','src:']] },
+        { code: [['','    '],['tok-op','copy.'],['tok-meth','append'],['tok-op','(item)']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:true,cls:true}],active:true}],
+          expl:{label:'Source list created', text:'<hi>src</hi> holds a reference to <hi>[1, 2, 3]</hi>. This is the list we want to copy from.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[]',fresh:true,cls:true}],active:true}],
+          expl:{label:'Empty destination list', text:'<hi>copy = []</hi> creates a fresh empty list. <hi>copy</hi> is a separate list in memory -- not the same object as <hi>src</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[]',fresh:false,cls:true},{n:'item',v:'1',fresh:true,cls:false}],active:true}],
+          expl:{label:'First element', text:'Python takes the first element from <hi>src</hi>. <hi>item = 1</hi>.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[1]',fresh:true,cls:true},{n:'item',v:'1',fresh:false,cls:false}],active:true}],
+          expl:{label:'append(item)', text:'<hi>copy.append(item)</hi> adds <hi>1</hi> to the end of <hi>copy</hi>. <hi>copy</hi> is now <hi>[1]</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[1]',fresh:false,cls:true},{n:'item',v:'2',fresh:true,cls:false}],active:true}],
+          expl:{label:'Next element', text:'Python takes the next element from <hi>src</hi>. <hi>item = 2</hi>.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[1, 2]',fresh:true,cls:true},{n:'item',v:'2',fresh:false,cls:false}],active:true}],
+          expl:{label:'append(item)', text:'<hi>copy.append(item)</hi> adds <hi>2</hi>. <hi>copy</hi> is now <hi>[1, 2]</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[1, 2]',fresh:false,cls:true},{n:'item',v:'3',fresh:true,cls:false}],active:true}],
+          expl:{label:'Last element', text:'Python takes the last element from <hi>src</hi>. <hi>item = 3</hi>.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[1, 2, 3]',fresh:true,cls:true},{n:'item',v:'3',fresh:false,cls:false}],active:true}],
+          expl:{label:'append(item)', text:'<hi>copy.append(item)</hi> adds <hi>3</hi>. All elements are now copied. <hi>copy</hi> is <hi>[1, 2, 3]</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[1, 2, 3]',fresh:false,cls:true}],active:true}],
+          expl:{label:'No more elements', text:'All elements have been visited. The loop exits and <hi>item</hi> goes out of scope.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'src',v:'[1, 2, 3]',fresh:false,cls:true},{n:'copy',v:'[1, 2, 3]',fresh:false,cls:true}],active:true}],
+          expl:{label:'Two separate lists', text:'<hi>src</hi> and <hi>copy</hi> each hold a reference to a different list object. Changing one will not affect the other.'} },
+      ]
+    },
+
+  ]
+});

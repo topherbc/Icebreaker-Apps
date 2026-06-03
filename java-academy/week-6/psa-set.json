@@ -1,0 +1,237 @@
+{
+  "id": "week-6",
+  "title": "Inheritance and Polymorphism",
+  "labels": [
+    {
+      "id": "class",
+      "name": "Class",
+      "desc": "A blueprint for objects",
+      "example": "public class Dog {\n    String name;\n}"
+    },
+    {
+      "id": "parent",
+      "name": "Parent class",
+      "desc": "The class being extended — defines shared structure and default behavior",
+      "example": "public class Animal {\n    public void breathe() { ... }\n}"
+    },
+    {
+      "id": "child",
+      "name": "Child class",
+      "desc": "A class that inherits from another and can provide its own version of inherited behavior",
+      "example": "public class Dog extends Animal {\n    public void fetch() { ... }\n}"
+    },
+    {
+      "id": "override",
+      "name": "Override",
+      "desc": "A child redefining a parent method with its own implementation",
+      "example": "@Override\npublic double getArea() {\n    return Math.PI * radius * radius;\n}"
+    },
+    {
+      "id": "polymorphism",
+      "name": "Polymorphism",
+      "desc": "Different objects responding to the same method call in their own way",
+      "example": "for (Shape s : shapes) {\n    System.out.println(s.getArea());\n}"
+    },
+    {
+      "id": "abstract",
+      "name": "Abstract",
+      "desc": "A method or class that must be completed by a subclass — cannot be used directly",
+      "example": "public abstract class Shape {\n    public abstract double getArea();\n}"
+    },
+    {
+      "id": "super",
+      "name": "Super",
+      "desc": "Calling or referencing the parent class from inside the child",
+      "example": "public Mage(String name, int attack) {\n    super(name, attack);\n}"
+    },
+    {
+      "id": "downcast",
+      "name": "Downcast",
+      "desc": "Treating a parent-typed reference as its specific child type after confirming what it actually is",
+      "example": "if (asset instanceof House house) {\n    System.out.println(house.getAddress());\n}"
+    }
+  ],
+  "prompts": [
+    {
+      "title": "Asset Value Hierarchy",
+      "statement": "A financial app needs to track two types of assets: houses and vehicles. Both share common info like a description, date acquired, and original cost — but each calculates its current value differently.",
+      "expectedTags": [
+        {
+          "phrase": "two types of assets: houses and vehicles",
+          "labels": ["child", "abstract"],
+          "explanation": "Houses and vehicles are the specific types that must each provide their own implementation — they are the concrete child classes of an abstract blueprint that cannot be used on its own."
+        },
+        {
+          "phrase": "Both share common info like a description, date acquired, and original cost",
+          "labels": ["parent", "class"],
+          "explanation": "The shared fields belong to a single blueprint that both types build on — that shared structure is what the parent class defines."
+        },
+        {
+          "phrase": "each calculates its current value differently",
+          "labels": ["override", "polymorphism"],
+          "explanation": "Each type provides its own version of the same calculation — that is override in action, and calling that calculation on a mixed list without knowing the type is polymorphism."
+        }
+      ],
+      "code": "public abstract class Asset {\n    private String description;\n    private String dateAcquired;\n    private double originalCost;\n\n    public Asset(String description, String dateAcquired, double originalCost) {\n        this.description = description;\n        this.dateAcquired = dateAcquired;\n        this.originalCost = originalCost;\n    }\n\n    public String getDescription() { return description; }\n    public double getOriginalCost() { return originalCost; }\n\n    public abstract double getCurrentValue();\n}\n\npublic class House extends Asset {\n    @Override\n    public double getCurrentValue() { /* house-specific logic */ return 0; }\n}\n\npublic class Vehicle extends Asset {\n    @Override\n    public double getCurrentValue() { /* vehicle-specific logic */ return 0; }\n}"
+    },
+    {
+      "title": "House Valuation",
+      "statement": "A house's current value depends on its square footage and condition. Excellent condition drives the price per square foot up; poor condition drives it down. Lot size adds a fixed premium on top of the base calculation. A house builds on a shared asset record that includes the description and original cost.",
+      "expectedTags": [
+        {
+          "phrase": "A house builds on a shared asset record that includes the description and original cost",
+          "labels": ["super", "parent"],
+          "explanation": "The house type doesn't define the description and original cost itself — it passes those up to the shared record when it is created, which is what calling super in the constructor does."
+        },
+        {
+          "phrase": "A house's current value depends on its square footage and condition",
+          "labels": ["child", "override"],
+          "explanation": "This is the house's own version of the value calculation — a specific rule that only this type applies, overriding the placeholder defined in the shared blueprint."
+        },
+        {
+          "phrase": "Lot size adds a fixed premium on top of the base calculation",
+          "labels": ["override"],
+          "explanation": "Adding a lot-size premium is part of what makes the house's calculation unique — it is logic that only lives in the house's version of getCurrentValue."
+        }
+      ],
+      "code": "public class House extends Asset {\n    private double squareFootage;\n    private double lotSize;\n    private String condition; // \"excellent\", \"good\", \"poor\"\n\n    public House(String description, String dateAcquired, double originalCost,\n                 double squareFootage, double lotSize, String condition) {\n        super(description, dateAcquired, originalCost);\n        this.squareFootage = squareFootage;\n        this.lotSize = lotSize;\n        this.condition = condition;\n    }\n\n    @Override\n    public double getCurrentValue() {\n        double pricePerSqFt = switch (condition.toLowerCase()) {\n            case \"excellent\" -> 180.0;\n            case \"poor\"      -> 95.0;\n            default          -> 135.0;\n        };\n        return (squareFootage * pricePerSqFt) + (lotSize * 500.0);\n    }\n}"
+    },
+    {
+      "title": "Vehicle Depreciation",
+      "statement": "A vehicle's current value depends on its age and mileage. Depreciation increases in steps as the vehicle gets older, and high mileage reduces the final value — unless it's a Honda or Toyota, which hold their value better. A vehicle builds on a shared asset record that stores the original cost.",
+      "expectedTags": [
+        {
+          "phrase": "A vehicle builds on a shared asset record that stores the original cost",
+          "labels": ["super", "parent"],
+          "explanation": "The vehicle type retrieves the original cost from the shared record rather than storing it separately — accessing that value through the parent is what super-based access makes possible."
+        },
+        {
+          "phrase": "Depreciation increases in steps as the vehicle gets older",
+          "labels": ["child", "override"],
+          "explanation": "This stepped depreciation is the vehicle's own version of the value calculation — specific logic that only this type provides, overriding the abstract requirement from the shared blueprint."
+        },
+        {
+          "phrase": "high mileage reduces the final value",
+          "labels": ["class"],
+          "explanation": "Mileage is a field that belongs specifically to the Vehicle blueprint — it is part of the data that defines what a vehicle object knows about itself."
+        },
+        {
+          "phrase": "Honda or Toyota, which hold their value better",
+          "labels": ["polymorphism"],
+          "explanation": "Even within the vehicle type, different makes produce different final values from the same calculation call — the same method produces a different result depending on the object's state."
+        }
+      ],
+      "code": "public class Vehicle extends Asset {\n    private int year;\n    private String make;\n    private double mileage;\n\n    public Vehicle(String description, String dateAcquired, double originalCost,\n                   int year, String make, double mileage) {\n        super(description, dateAcquired, originalCost);\n        this.year = year;\n        this.make = make;\n        this.mileage = mileage;\n    }\n\n    @Override\n    public double getCurrentValue() {\n        int age = 2025 - year;\n        double value = getOriginalCost();\n        if (age <= 2)       value *= 0.85;\n        else if (age <= 5)  value *= 0.65;\n        else if (age <= 10) value *= 0.40;\n        else                value *= 0.20;\n        if (mileage > 100000) value *= 0.90;\n        if (make.equalsIgnoreCase(\"Honda\") || make.equalsIgnoreCase(\"Toyota\")) value *= 1.10;\n        return value;\n    }\n}"
+    },
+    {
+      "title": "Mixed Asset List",
+      "statement": "The financial app stores both houses and vehicles in one collection. When displaying the portfolio, it should show each asset's description and current value — without needing to know which specific type each one is.",
+      "expectedTags": [
+        {
+          "phrase": "stores both houses and vehicles in one collection",
+          "labels": ["parent", "polymorphism"],
+          "explanation": "Holding different specific types together in one collection is possible because both share a common parent type — and polymorphism is what lets you call the same method on each without knowing which type it is."
+        },
+        {
+          "phrase": "show each asset's description and current value",
+          "labels": ["child", "override"],
+          "explanation": "When getCurrentValue is called on each item, the correct version runs automatically — each specific type has its own override that produces the right result."
+        },
+        {
+          "phrase": "without needing to know which specific type each one is",
+          "labels": ["polymorphism"],
+          "explanation": "This is the defining feature of polymorphism — the code that loops through the collection does not need to branch on type, because each object responds correctly to the same method call."
+        }
+      ],
+      "code": "List<Asset> portfolio = new ArrayList<>();\nportfolio.add(new House(\"Main St Home\", \"2018-06-01\", 250000, 1800, 0.25, \"good\"));\nportfolio.add(new Vehicle(\"2020 Honda Civic\", \"2020-03-15\", 22000, 2020, \"Honda\", 45000));\nportfolio.add(new House(\"Beach Cottage\", \"2015-09-10\", 180000, 900, 0.10, \"excellent\"));\n\nfor (Asset asset : portfolio) {\n    System.out.printf(\"%s — Current value: $%.2f%n\",\n        asset.getDescription(), asset.getCurrentValue());\n}"
+    },
+    {
+      "title": "Type-Specific Asset Details",
+      "statement": "After displaying the portfolio, the application needs to show extra details unique to each asset type — the address for a house, or the year and make for a vehicle. The app needs to figure out which type each asset is before accessing those details.",
+      "expectedTags": [
+        {
+          "phrase": "The app needs to figure out which type each asset is before accessing those details",
+          "labels": ["downcast"],
+          "explanation": "When assets are stored under a shared type, the app must confirm what specific type each one actually is before it can access type-specific details — that confirmation and narrowing is what a downcast does."
+        },
+        {
+          "phrase": "extra details unique to each asset type",
+          "labels": ["child"],
+          "explanation": "Fields like address or year and make exist only on the specific types, not on the shared record — they are defined in each child class and are only accessible after the type is confirmed."
+        },
+        {
+          "phrase": "the address for a house, or the year and make for a vehicle",
+          "labels": ["child", "polymorphism"],
+          "explanation": "Each specific type exposes its own details that the shared type does not know about — accessing them requires knowing which child type you are working with, which is the result of a successful downcast."
+        }
+      ],
+      "code": "for (Asset asset : portfolio) {\n    System.out.println(asset.getDescription() + \" - $\" + asset.getCurrentValue());\n    if (asset instanceof House house) {\n        System.out.println(\"  Address: \" + house.getAddress());\n    } else if (asset instanceof Vehicle vehicle) {\n        System.out.println(\"  Year/Make: \" + vehicle.getYear() + \" \" + vehicle.getMake());\n    }\n}"
+    },
+    {
+      "title": "Shape Area Calculator",
+      "statement": "A drawing app supports circles, rectangles, and triangles. All shapes need to report their area, but each calculates it differently. The app should be able to work with a mixed list of shapes and print each area without checking what type it is.",
+      "expectedTags": [
+        {
+          "phrase": "All shapes need to report their area",
+          "labels": ["abstract", "parent"],
+          "explanation": "Requiring every shape to report an area — without providing the formula — is what an abstract method in a parent class does: it sets the expectation without fulfilling it."
+        },
+        {
+          "phrase": "each calculates it differently",
+          "labels": ["override", "child"],
+          "explanation": "Each specific shape type provides its own formula — circle, rectangle, and triangle are the child types that each override the area method with their own implementation."
+        },
+        {
+          "phrase": "without checking what type it is",
+          "labels": ["polymorphism"],
+          "explanation": "The ability to call the same method on every shape in the list and get the right result — without branching on type — is polymorphism at work."
+        }
+      ],
+      "code": "public abstract class Shape {\n    public abstract double getArea();\n}\n\npublic class Circle extends Shape {\n    private double radius;\n    public Circle(double radius) { this.radius = radius; }\n    @Override public double getArea() { return Math.PI * radius * radius; }\n}\n\npublic class Rectangle extends Shape {\n    private double width, height;\n    public Rectangle(double width, double height) { this.width = width; this.height = height; }\n    @Override public double getArea() { return width * height; }\n}\n\n// In main:\nList<Shape> shapes = List.of(new Circle(5), new Rectangle(4, 6), new Triangle(3, 8));\nfor (Shape s : shapes) {\n    System.out.printf(\"Area: %.2f%n\", s.getArea());\n}"
+    },
+    {
+      "title": "Checking and Savings Accounts",
+      "statement": "A banking app has two account types: checking and savings. Both can accept deposits and process withdrawals the same way — but each calculates its monthly maintenance fee differently.",
+      "expectedTags": [
+        {
+          "phrase": "two account types: checking and savings",
+          "labels": ["child", "abstract"],
+          "explanation": "Checking and savings are the specific types that must each supply their own fee logic — they are concrete child classes of an abstract blueprint that defines the requirement without filling it in."
+        },
+        {
+          "phrase": "Both can accept deposits and process withdrawals the same way",
+          "labels": ["parent", "class"],
+          "explanation": "Shared behavior that works identically for both types lives in the parent class — deposits and withdrawals are concrete methods defined once and available to all account types."
+        },
+        {
+          "phrase": "each calculates its monthly maintenance fee differently",
+          "labels": ["override", "polymorphism"],
+          "explanation": "Each account type provides its own version of the fee calculation — that is an override — and calling the same method on a mixed list of accounts and getting the right fee each time is polymorphism."
+        }
+      ],
+      "code": "public abstract class BankAccount {\n    protected double balance;\n\n    public void deposit(double amount) { if (amount > 0) balance += amount; }\n    public boolean withdraw(double amount) {\n        if (amount > 0 && amount <= balance) { balance -= amount; return true; }\n        return false;\n    }\n    public abstract double getMonthlyFee();\n}\n\npublic class CheckingAccount extends BankAccount {\n    @Override\n    public double getMonthlyFee() { return balance >= 1000 ? 0 : 12.00; }\n}\n\npublic class SavingsAccount extends BankAccount {\n    @Override\n    public double getMonthlyFee() { return balance >= 500 ? 0 : 5.00; }\n}"
+    },
+    {
+      "title": "Warrior vs. Mage Damage",
+      "statement": "In a game, warriors and mages are both characters — but they deal damage differently. A mage's damage calculation layers spell power on top of their base attack strength, while a warrior's relies solely on that base attack.",
+      "expectedTags": [
+        {
+          "phrase": "warriors and mages are both characters",
+          "labels": ["parent", "child", "abstract"],
+          "explanation": "\"Characters\" is the shared type that both warriors and mages belong to — it is the abstract parent that defines what every character must be able to do, while warrior and mage are the child types that fulfill that requirement."
+        },
+        {
+          "phrase": "they deal damage differently",
+          "labels": ["override", "polymorphism"],
+          "explanation": "Each type provides its own damage formula — that is an override — and the ability to call the same damage method on any character and get the right result is polymorphism."
+        },
+        {
+          "phrase": "layers spell power on top of their base attack strength",
+          "labels": ["super"],
+          "explanation": "The mage's formula adds spell power to the base attack value that comes from the shared character record — accessing that inherited value from inside the mage's own method is what super enables."
+        }
+      ],
+      "code": "public abstract class Character {\n    protected String name;\n    protected int baseAttack;\n\n    public Character(String name, int baseAttack) {\n        this.name = name;\n        this.baseAttack = baseAttack;\n    }\n\n    public abstract int calculateDamage();\n}\n\npublic class Warrior extends Character {\n    public Warrior(String name, int baseAttack) { super(name, baseAttack); }\n    @Override\n    public int calculateDamage() { return baseAttack * 2; }\n}\n\npublic class Mage extends Character {\n    private int spellPower;\n    public Mage(String name, int baseAttack, int spellPower) {\n        super(name, baseAttack);\n        this.spellPower = spellPower;\n    }\n    @Override\n    public int calculateDamage() { return super.baseAttack + (spellPower * 3); }\n}"
+    }
+  ]
+}

@@ -1,0 +1,977 @@
+[
+  {
+    "id": "week1-variables-01",
+    "title": "Movie Night Budget",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program calculates the total cost for 4 friends going to a movie with tickets, popcorn, and drinks.",
+    "code": [
+      {
+        "line": 1,
+        "text": "public class MovieNight {"
+      },
+      {
+        "line": 2,
+        "text": "  public static void main(String[] args) {"
+      },
+      {
+        "line": 3,
+        "text": "    int friends = 4;"
+      },
+      {
+        "line": 4,
+        "text": "    double ticketPrice = 12.50;"
+      },
+      {
+        "line": 5,
+        "text": "    double popcornPrice = 8.75;"
+      },
+      {
+        "line": 6,
+        "text": "    int drinksPerPerson = 1;"
+      },
+      {
+        "line": 7,
+        "text": "    double drinkPrice = 4.50;"
+      },
+      {
+        "line": 8,
+        "text": ""
+      },
+      {
+        "line": 9,
+        "text": "    double ticketTotal = ticketPrice * friends;"
+      },
+      {
+        "line": 10,
+        "text": "    int popcornBuckets = friends / 2;",
+        "bugId": "b1"
+      },
+      {
+        "line": 11,
+        "text": "    double popcornTotal = popcornBuckets * popcornPrice;"
+      },
+      {
+        "line": 12,
+        "text": "    double drinkTotal = drinkPrice * drinksPerPerson;",
+        "bugId": "b2"
+      },
+      {
+        "line": 13,
+        "text": ""
+      },
+      {
+        "line": 14,
+        "text": "    double grandTotal = ticketTotal + popcornTotal + drinkTotal;"
+      },
+      {
+        "line": 15,
+        "text": "    double eachPays = grandTotal / friends;"
+      },
+      {
+        "line": 16,
+        "text": "    System.out.println(\"Total: $\" + grandTotal);"
+      },
+      {
+        "line": 17,
+        "text": "    System.out.println(\"Each: $\" + grandTotal);",
+        "bugId": "b3"
+      },
+      {
+        "line": 18,
+        "text": "  }"
+      },
+      {
+        "line": 19,
+        "text": "}"
+      }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 10,
+        "fix": "    double popcornBuckets = (double) friends / 2;",
+        "altFixes": [
+          "    double popcornBuckets = friends / 2.0;"
+        ],
+        "clue": "When the group size is odd (say 5 friends), the popcorn count comes out wrong; 5 friends somehow only need 2 buckets instead of 2.5."
+      },
+      {
+        "id": "b2",
+        "line": 12,
+        "fix": "    double drinkTotal = drinkPrice * drinksPerPerson * friends;",
+        "altFixes": [
+          "    double drinkTotal = drinkPrice * friends;"
+        ],
+        "clue": "The drink total comes out to $4.50, but 4 people are each getting a drink."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "    System.out.println(\"Each: $\" + eachPays);",
+        "altFixes": [],
+        "clue": "The 'Each' line prints the exact same dollar amount as the 'Total' line."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-02",
+    "title": "Score Tracker",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program tracks three game scores and prints the total and average.",
+    "code": [
+      { "line": 1, "text": "public class ScoreTracker {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int score1 = 85;" },
+      { "line": 4, "text": "    int score2 = 92;" },
+      { "line": 5, "text": "    int score3 = 78;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    int total = score1 * score2 + score3;", "bugId": "b1" },
+      { "line": 8, "text": "    int average = total / 3;", "bugId": "b2" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    System.out.println(\"Score 1: \" + score1);" },
+      { "line": 11, "text": "    System.out.println(\"Score 2: \" + score2);" },
+      { "line": 12, "text": "    System.out.println(\"Score 3: \" + score3);" },
+      { "line": 13, "text": "    System.out.println(\"Total: \" + total);" },
+      { "line": 14, "text": "    System.out.println(\"Average: \" + total);", "bugId": "b3" },
+      { "line": 15, "text": "  }" },
+      { "line": 16, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    int total = score1 + score2 + score3;",
+        "altFixes": [],
+        "clue": "The total prints as 7898 instead of 255."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "    double average = (double) total / 3;",
+        "altFixes": [
+          "    double average = total / 3.0;"
+        ],
+        "clue": "The average of 85, 92, and 78 displays as 85 instead of 85.0; the decimal part is always missing."
+      },
+      {
+        "id": "b3",
+        "line": 14,
+        "fix": "    System.out.println(\"Average: \" + average);",
+        "altFixes": [],
+        "clue": "The 'Average' line prints the exact same number as the 'Total' line."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-03",
+    "title": "Temperature Log",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program converts a temperature from Fahrenheit to Celsius and prints the result.",
+    "code": [
+      { "line": 1, "text": "public class TemperatureLog {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    double fahrenheit = 98.6;" },
+      { "line": 4, "text": "" },
+      { "line": 5, "text": "    double adjusted = fahrenheit - 212;", "bugId": "b1" },
+      { "line": 6, "text": "    double celsius = 5.0 / 9.0 + adjusted;", "bugId": "b2" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "    System.out.println(\"Fahrenheit: \" + fahrenheit);" },
+      { "line": 9, "text": "    System.out.println(\"Celsius: \" + fahrenheit);", "bugId": "b3" },
+      { "line": 10, "text": "  }" },
+      { "line": 11, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    double adjusted = fahrenheit - 32;",
+        "altFixes": [],
+        "clue": "The Celsius result is a huge negative number like -62.89 instead of 37.0."
+      },
+      {
+        "id": "b2",
+        "line": 6,
+        "fix": "    double celsius = 5.0 / 9.0 * adjusted;",
+        "altFixes": [],
+        "clue": "Even with the right subtraction, the Celsius value comes out as 37.56 instead of 37.0; the fraction is being added instead of multiplied."
+      },
+      {
+        "id": "b3",
+        "line": 9,
+        "fix": "    System.out.println(\"Celsius: \" + celsius);",
+        "altFixes": [],
+        "clue": "The 'Celsius' line displays 98.6, which is the same as the Fahrenheit value."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-04",
+    "title": "Ticket Pricer",
+    "week": 1,
+    "topic": "conditions",
+    "description": "This program determines the ticket price based on age: children under 12 pay $5, seniors 65 and over pay $7.50, everyone else pays $12.",
+    "code": [
+      { "line": 1, "text": "public class TicketPricer {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int age = 65;" },
+      { "line": 4, "text": "    double price;" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "    if (age < 12) {" },
+      { "line": 7, "text": "      price = 5.00;" },
+      { "line": 8, "text": "    } else if (age > 65) {", "bugId": "b1" },
+      { "line": 9, "text": "      price = 7.50;" },
+      { "line": 10, "text": "    } else {" },
+      { "line": 11, "text": "      price = 12.00;" },
+      { "line": 12, "text": "    }" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "    double tax = price * 0.08;" },
+      { "line": 15, "text": "    double total = price * tax;", "bugId": "b2" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "    System.out.println(\"Age: \" + age);" },
+      { "line": 18, "text": "    System.out.println(\"Total: $\" + price);", "bugId": "b3" },
+      { "line": 19, "text": "  }" },
+      { "line": 20, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    } else if (age >= 65) {",
+        "altFixes": [],
+        "clue": "A 65-year-old customer is charged $12.00 instead of the senior price of $7.50."
+      },
+      {
+        "id": "b2",
+        "line": 15,
+        "fix": "    double total = price + tax;",
+        "altFixes": [],
+        "clue": "The total for a $12.00 ticket comes out to $11.52 instead of $12.96."
+      },
+      {
+        "id": "b3",
+        "line": 18,
+        "fix": "    System.out.println(\"Total: $\" + total);",
+        "altFixes": [],
+        "clue": "The Total line shows the base ticket price without tax included."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-05",
+    "title": "Grade Letter",
+    "week": 1,
+    "topic": "conditions",
+    "description": "This program converts a numeric score to a letter grade: 90+ is A, 80+ is B, 70+ is C, and below 70 is F.",
+    "code": [
+      { "line": 1, "text": "public class GradeLetter {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int score = 90;" },
+      { "line": 4, "text": "    String letter;" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "    if (score > 90) {", "bugId": "b1" },
+      { "line": 7, "text": "      letter = \"A\";" },
+      { "line": 8, "text": "    } else if (score >= 80) {" },
+      { "line": 9, "text": "      letter = \"B\";" },
+      { "line": 10, "text": "    } else if (score >= 70) {" },
+      { "line": 11, "text": "      letter = \"C\";" },
+      { "line": 12, "text": "    } else {" },
+      { "line": 13, "text": "      letter = \"F\";" },
+      { "line": 14, "text": "    }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "    boolean passing = score > 70;", "bugId": "b2" },
+      { "line": 17, "text": "    System.out.println(\"Score: \" + score);" },
+      { "line": 18, "text": "    System.out.println(\"Grade: \" + letter);" },
+      { "line": 19, "text": "    System.out.println(\"Passing: \" + letter);", "bugId": "b3" },
+      { "line": 20, "text": "  }" },
+      { "line": 21, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 6,
+        "fix": "    if (score >= 90) {",
+        "altFixes": [],
+        "clue": "A student who scored exactly 90 gets a B instead of an A."
+      },
+      {
+        "id": "b2",
+        "line": 16,
+        "fix": "    boolean passing = score >= 70;",
+        "altFixes": [],
+        "clue": "A student who scored exactly 70 shows as not passing, but 70 should be passing."
+      },
+      {
+        "id": "b3",
+        "line": 19,
+        "fix": "    System.out.println(\"Passing: \" + passing);",
+        "altFixes": [],
+        "clue": "The Passing line prints a letter like 'B' instead of true or false."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-06",
+    "title": "Pizza Splitter",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program splits 10 pizza slices among 3 people and calculates each person's share of the cost.",
+    "code": [
+      { "line": 1, "text": "public class PizzaSplitter {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int totalSlices = 10;" },
+      { "line": 4, "text": "    int people = 3;" },
+      { "line": 5, "text": "    double cost = 14.99;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    int slicesEach = totalSlices / people;" },
+      { "line": 8, "text": "    int leftover = totalSlices / people;", "bugId": "b1" },
+      { "line": 9, "text": "    double costEach = cost * people;", "bugId": "b2" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    System.out.println(\"Slices each: \" + slicesEach);" },
+      { "line": 12, "text": "    System.out.println(\"Leftover: \" + leftover);" },
+      { "line": 13, "text": "    System.out.println(\"Cost each: $\" + cost);", "bugId": "b3" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    int leftover = totalSlices % people;",
+        "altFixes": [],
+        "clue": "The leftover shows 3, which is the same as slices each instead of the remainder."
+      },
+      {
+        "id": "b2",
+        "line": 9,
+        "fix": "    double costEach = cost / people;",
+        "altFixes": [],
+        "clue": "The cost per person shows $44.97, which is more than the total pizza cost."
+      },
+      {
+        "id": "b3",
+        "line": 13,
+        "fix": "    System.out.println(\"Cost each: $\" + costEach);",
+        "altFixes": [],
+        "clue": "The cost line shows the full pizza price instead of each person's share."
+      }
+    ]
+  },
+  {
+    "id": "week1-scanner-07",
+    "title": "Name Greeter",
+    "week": 1,
+    "topic": "Scanner",
+    "description": "This program asks the user for their first and last name, then prints a personalized greeting.",
+    "code": [
+      { "line": 1, "text": "import java.util.Scanner;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class NameGreeter {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    Scanner scanner = new Scanner(System.in);" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    System.out.println(\"Enter your first name:\");" },
+      { "line": 8, "text": "    String firstName = scanner.nextLine();" },
+      { "line": 9, "text": "    System.out.println(\"Enter your last name:\");" },
+      { "line": 10, "text": "    String lastName = scanner.next();", "bugId": "b1" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "    String fullName = firstName + lastName;", "bugId": "b2" },
+      { "line": 13, "text": "    int nameLength = firstName.length();" },
+      { "line": 14, "text": "" },
+      { "line": 15, "text": "    System.out.println(\"Hello, \" + fullName + \"!\");" },
+      { "line": 16, "text": "    System.out.println(\"Your full name has \" + nameLength + \" letters.\");", "bugId": "b3" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 10,
+        "fix": "    String lastName = scanner.nextLine();",
+        "altFixes": [],
+        "clue": "If the user types a last name with a space (like \"De Leon\"), only \"De\" gets stored and the rest is lost."
+      },
+      {
+        "id": "b2",
+        "line": 12,
+        "fix": "    String fullName = firstName + \" \" + lastName;",
+        "altFixes": [],
+        "clue": "The greeting prints \"Hello, JohnSmith!\" with no space between the names."
+      },
+      {
+        "id": "b3",
+        "line": 16,
+        "fix": "    System.out.println(\"Your full name has \" + fullName.length() + \" letters.\");",
+        "altFixes": [],
+        "clue": "The letter count only reflects the first name length, not the full name."
+      }
+    ]
+  },
+  {
+    "id": "week1-scanner-08",
+    "title": "Age in Days",
+    "week": 1,
+    "topic": "Scanner",
+    "description": "This program asks the user for their age in years and calculates how many days they have been alive.",
+    "code": [
+      { "line": 1, "text": "import java.util.Scanner;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class AgeInDays {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    Scanner scanner = new Scanner(System.in);" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    System.out.println(\"Enter your age in years:\");" },
+      { "line": 8, "text": "    double age = scanner.nextDouble();", "bugId": "b1" },
+      { "line": 9, "text": "" },
+      { "line": 10, "text": "    int daysInYear = 365;" },
+      { "line": 11, "text": "    int totalDays = age * daysInYear;", "bugId": "b2" },
+      { "line": 12, "text": "    int totalWeeks = totalDays / 7;" },
+      { "line": 13, "text": "" },
+      { "line": 14, "text": "    System.out.println(\"You are \" + age + \" years old.\");" },
+      { "line": 15, "text": "    System.out.println(\"That is about \" + totalDays + \" days.\");" },
+      { "line": 16, "text": "    System.out.println(\"Or about \" + totalDays + \" weeks.\");", "bugId": "b3" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    int age = scanner.nextInt();",
+        "altFixes": [],
+        "clue": "The program reads the age as a decimal number like 20.0, but age in whole years should be an integer like 20."
+      },
+      {
+        "id": "b2",
+        "line": 11,
+        "fix": "    int totalDays = (int)(age * daysInYear);",
+        "altFixes": [
+          "    long totalDays = (long)(age * daysInYear);"
+        ],
+        "clue": "The code will not compile because you cannot store a double result in an int without casting."
+      },
+      {
+        "id": "b3",
+        "line": 16,
+        "fix": "    System.out.println(\"Or about \" + totalWeeks + \" weeks.\");",
+        "altFixes": [],
+        "clue": "The weeks line prints the same number as the days line instead of dividing by 7."
+      }
+    ]
+  },
+  {
+    "id": "week1-scanner-09",
+    "title": "Rectangle Info",
+    "week": 1,
+    "topic": "Scanner",
+    "description": "This program asks the user for the length and width of a rectangle, then prints the area and perimeter.",
+    "code": [
+      { "line": 1, "text": "import java.util.Scanner;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class RectangleInfo {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    Scanner Scanner = new Scanner(System.in);", "bugId": "b1" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    System.out.println(\"Enter the length:\");" },
+      { "line": 8, "text": "    double length = scanner.nextDouble();" },
+      { "line": 9, "text": "    System.out.println(\"Enter the width:\");" },
+      { "line": 10, "text": "    double width = scanner.nextDouble();" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "    double area = length * width;" },
+      { "line": 13, "text": "    double perimeter = length + width;", "bugId": "b2" },
+      { "line": 14, "text": "" },
+      { "line": 15, "text": "    System.out.println(\"Area: \" + area);" },
+      { "line": 16, "text": "    System.out.println(\"Perimeter: \" + area);", "bugId": "b3" },
+      { "line": 17, "text": "  }" },
+      { "line": 18, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 5,
+        "fix": "    Scanner scanner = new Scanner(System.in);",
+        "altFixes": [],
+        "clue": "The program crashes with an error saying \"cannot find symbol: variable scanner\" because the variable name does not match."
+      },
+      {
+        "id": "b2",
+        "line": 13,
+        "fix": "    double perimeter = 2 * (length + width);",
+        "altFixes": [
+          "    double perimeter = 2 * length + 2 * width;"
+        ],
+        "clue": "A 5x3 rectangle shows a perimeter of 8.0 instead of 16.0. The formula only adds the sides once."
+      },
+      {
+        "id": "b3",
+        "line": 16,
+        "fix": "    System.out.println(\"Perimeter: \" + perimeter);",
+        "altFixes": [],
+        "clue": "The Perimeter line displays the same number as the Area line."
+      }
+    ]
+  },
+  {
+    "id": "week1-scanner-10",
+    "title": "Tip Calculator",
+    "week": 1,
+    "topic": "Scanner",
+    "description": "This program asks the user for a meal price and tip percentage, then calculates the tip and total bill.",
+    "code": [
+      { "line": 1, "text": "import java.util.Scanner;" },
+      { "line": 2, "text": "" },
+      { "line": 3, "text": "public class TipCalculator {" },
+      { "line": 4, "text": "  public static void main(String[] args) {" },
+      { "line": 5, "text": "    Scanner scanner = new Scanner(System.in);" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    System.out.println(\"Enter the meal price:\");" },
+      { "line": 8, "text": "    double mealPrice = scanner.nextInt();", "bugId": "b1" },
+      { "line": 9, "text": "    System.out.println(\"Enter tip percentage (e.g. 20):\");" },
+      { "line": 10, "text": "    double tipPercent = scanner.nextDouble();" },
+      { "line": 11, "text": "" },
+      { "line": 12, "text": "    double tipAmount = mealPrice * tipPercent;", "bugId": "b2" },
+      { "line": 13, "text": "    double totalBill = mealPrice + tipAmount;" },
+      { "line": 14, "text": "" },
+      { "line": 15, "text": "    System.out.println(\"Meal: $\" + mealPrice);" },
+      { "line": 16, "text": "    System.out.println(\"Tip: $\" + tipAmount);" },
+      { "line": 17, "text": "    System.out.println(\"Total: $\" + tipAmount);", "bugId": "b3" },
+      { "line": 18, "text": "  }" },
+      { "line": 19, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    double mealPrice = scanner.nextDouble();",
+        "altFixes": [],
+        "clue": "When the user enters 25.99, the program crashes with an InputMismatchException because it only reads whole numbers."
+      },
+      {
+        "id": "b2",
+        "line": 12,
+        "fix": "    double tipAmount = mealPrice * tipPercent / 100;",
+        "altFixes": [
+          "    double tipAmount = mealPrice * (tipPercent / 100);"
+        ],
+        "clue": "A 20% tip on a $50 meal shows $1000.00 instead of $10.00. The percentage is not being converted to a decimal."
+      },
+      {
+        "id": "b3",
+        "line": 17,
+        "fix": "    System.out.println(\"Total: $\" + totalBill);",
+        "altFixes": [],
+        "clue": "The Total line shows the same amount as the Tip line instead of showing meal plus tip."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-11",
+    "title": "Savings Goal",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program calculates how many weeks it takes to save up for a $500 gaming console by saving $35 per week.",
+    "code": [
+      { "line": 1, "text": "public class SavingsGoal {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    double goal = 500.00;" },
+      { "line": 4, "text": "    double weeklyDeposit = 35.00;" },
+      { "line": 5, "text": "    double currentSavings = 50.00;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    double remaining = goal + currentSavings;", "bugId": "b1" },
+      { "line": 8, "text": "    int weeksNeeded = (int)(remaining / weeklyDeposit);" },
+      { "line": 9, "text": "    double totalSaved = currentSavings + weeklyDeposit + weeksNeeded;", "bugId": "b2" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    System.out.println(\"Goal: $\" + goal);" },
+      { "line": 12, "text": "    System.out.println(\"Already saved: $\" + currentSavings);" },
+      { "line": 13, "text": "    System.out.println(\"Weeks needed: \" + weeksNeeded);" },
+      { "line": 14, "text": "    System.out.println(\"Total after saving: $\" + remaining);", "bugId": "b3" },
+      { "line": 15, "text": "  }" },
+      { "line": 16, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    double remaining = goal - currentSavings;",
+        "altFixes": [],
+        "clue": "The remaining amount shows $550.00, which is more than the goal. The starting savings should be subtracted, not added."
+      },
+      {
+        "id": "b2",
+        "line": 9,
+        "fix": "    double totalSaved = currentSavings + weeklyDeposit * weeksNeeded;",
+        "altFixes": [],
+        "clue": "The total saved comes out to a tiny number like $98.00. The weekly deposit needs to be multiplied by the number of weeks, not added."
+      },
+      {
+        "id": "b3",
+        "line": 14,
+        "fix": "    System.out.println(\"Total after saving: $\" + totalSaved);",
+        "altFixes": [],
+        "clue": "The total line shows the remaining amount instead of how much has been saved up."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-12",
+    "title": "Road Trip Fuel",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program estimates how many gallons of gas are needed for a 350-mile road trip and the total fuel cost.",
+    "code": [
+      { "line": 1, "text": "public class RoadTripFuel {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int distance = 350;" },
+      { "line": 4, "text": "    int mpg = 28;" },
+      { "line": 5, "text": "    double pricePerGallon = 3.49;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    double gallonsNeeded = distance * mpg;", "bugId": "b1" },
+      { "line": 8, "text": "    double fuelCost = gallonsNeeded * pricePerGallon;" },
+      { "line": 9, "text": "    double costPerMile = fuelCost + distance;", "bugId": "b2" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    System.out.println(\"Distance: \" + distance + \" miles\");" },
+      { "line": 12, "text": "    System.out.println(\"Gallons needed: \" + gallonsNeeded);" },
+      { "line": 13, "text": "    System.out.println(\"Fuel cost: $\" + fuelCost);" },
+      { "line": 14, "text": "    System.out.println(\"Cost per mile: $\" + fuelCost);", "bugId": "b3" },
+      { "line": 15, "text": "  }" },
+      { "line": 16, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    double gallonsNeeded = (double) distance / mpg;",
+        "altFixes": [
+          "    double gallonsNeeded = distance / (double) mpg;"
+        ],
+        "clue": "The gallons needed shows 9800.0 instead of 12.5. Distance should be divided by mpg, not multiplied."
+      },
+      {
+        "id": "b2",
+        "line": 9,
+        "fix": "    double costPerMile = fuelCost / distance;",
+        "altFixes": [],
+        "clue": "The cost per mile shows a huge number like $34,552. The fuel cost should be divided by distance, not added."
+      },
+      {
+        "id": "b3",
+        "line": 14,
+        "fix": "    System.out.println(\"Cost per mile: $\" + costPerMile);",
+        "altFixes": [],
+        "clue": "The cost per mile line shows the same number as the total fuel cost line."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-13",
+    "title": "Study Planner",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program calculates how many hours of study time are needed per day to prepare for an exam in 5 days with 15 total hours of material.",
+    "code": [
+      { "line": 1, "text": "public class StudyPlanner {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int totalHours = 15;" },
+      { "line": 4, "text": "    int daysUntilExam = 5;" },
+      { "line": 5, "text": "    int breakMinutesPerHour = 10;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    int hoursPerDay = totalHours / daysUntilExam;", "bugId": "b1" },
+      { "line": 8, "text": "    int breakTimePerDay = breakMinutesPerHour + hoursPerDay;", "bugId": "b2" },
+      { "line": 9, "text": "    int totalMinutesPerDay = hoursPerDay * 60 + breakTimePerDay;" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    System.out.println(\"Study hours per day: \" + hoursPerDay);" },
+      { "line": 12, "text": "    System.out.println(\"Break time per day: \" + breakTimePerDay + \" minutes\");" },
+      { "line": 13, "text": "    System.out.println(\"Total time per day: \" + hoursPerDay + \" minutes\");", "bugId": "b3" },
+      { "line": 14, "text": "  }" },
+      { "line": 15, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    double hoursPerDay = (double) totalHours / daysUntilExam;",
+        "altFixes": [
+          "    double hoursPerDay = totalHours / (double) daysUntilExam;"
+        ],
+        "clue": "When totalHours does not divide evenly by days (e.g., 16 hours over 5 days), the decimal part is lost; it shows 3 instead of 3.2."
+      },
+      {
+        "id": "b2",
+        "line": 8,
+        "fix": "    int breakTimePerDay = breakMinutesPerHour * hoursPerDay;",
+        "altFixes": [],
+        "clue": "The break time shows 13 minutes instead of 30. The 10 minutes per hour should be multiplied by hours, not added."
+      },
+      {
+        "id": "b3",
+        "line": 13,
+        "fix": "    System.out.println(\"Total time per day: \" + totalMinutesPerDay + \" minutes\");",
+        "altFixes": [],
+        "clue": "The total time line shows 3 minutes, which is the same as the hours per day instead of the full time in minutes."
+      }
+    ]
+  },
+  {
+    "id": "week1-variables-14",
+    "title": "Playlist Timer",
+    "week": 1,
+    "topic": "variables",
+    "description": "This program calculates the total length of a playlist with three songs and converts it to minutes and seconds.",
+    "code": [
+      { "line": 1, "text": "public class PlaylistTimer {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int song1Seconds = 214;" },
+      { "line": 4, "text": "    int song2Seconds = 187;" },
+      { "line": 5, "text": "    int song3Seconds = 246;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    int totalSeconds = song1Seconds + song2Seconds + song3Seconds;" },
+      { "line": 8, "text": "    int minutes = totalSeconds % 60;", "bugId": "b1" },
+      { "line": 9, "text": "    int seconds = totalSeconds / 60;", "bugId": "b2" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    System.out.println(\"Song 1: \" + song1Seconds + \"s\");" },
+      { "line": 12, "text": "    System.out.println(\"Song 2: \" + song2Seconds + \"s\");" },
+      { "line": 13, "text": "    System.out.println(\"Song 3: \" + song3Seconds + \"s\");" },
+      { "line": 14, "text": "    System.out.println(\"Total: \" + totalSeconds + \"s\");" },
+      { "line": 15, "text": "    System.out.println(\"That is \" + minutes + \"m \" + minutes + \"s\");", "bugId": "b3" },
+      { "line": 16, "text": "  }" },
+      { "line": 17, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    int minutes = totalSeconds / 60;",
+        "altFixes": [],
+        "clue": "The minutes value shows 47 instead of 10. The modulo operator gives the remainder, but we need integer division to get minutes."
+      },
+      {
+        "id": "b2",
+        "line": 9,
+        "fix": "    int seconds = totalSeconds % 60;",
+        "altFixes": [],
+        "clue": "The seconds value shows 10 instead of 47. The division operator gives whole minutes, but we need the remainder for leftover seconds."
+      },
+      {
+        "id": "b3",
+        "line": 15,
+        "fix": "    System.out.println(\"That is \" + minutes + \"m \" + seconds + \"s\");",
+        "altFixes": [],
+        "clue": "The output prints the same number for both minutes and seconds, like \"10m 10s\"."
+      }
+    ]
+  },
+  {
+    "id": "week1-conditions-15",
+    "title": "Shipping Cost",
+    "week": 1,
+    "topic": "conditions",
+    "description": "This program calculates shipping cost based on weight: under 2 lbs is $5, 2-10 lbs is $10, over 10 lbs is $20. Orders over $50 get free shipping.",
+    "code": [
+      { "line": 1, "text": "public class ShippingCost {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    double weight = 5.0;" },
+      { "line": 4, "text": "    double orderTotal = 55.00;" },
+      { "line": 5, "text": "    double shipping;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    if (orderTotal > 50 && weight < 2) {", "bugId": "b1" },
+      { "line": 8, "text": "      shipping = 0;" },
+      { "line": 9, "text": "    } else if (weight < 2) {" },
+      { "line": 10, "text": "      shipping = 5.00;" },
+      { "line": 11, "text": "    } else if (weight < 10) {", "bugId": "b2" },
+      { "line": 12, "text": "      shipping = 10.00;" },
+      { "line": 13, "text": "    } else {" },
+      { "line": 14, "text": "      shipping = 20.00;" },
+      { "line": 15, "text": "    }" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "    double finalTotal = orderTotal + shipping;" },
+      { "line": 18, "text": "    System.out.println(\"Shipping: $\" + shipping);" },
+      { "line": 19, "text": "    System.out.println(\"Final total: $\" + orderTotal);", "bugId": "b3" },
+      { "line": 20, "text": "  }" },
+      { "line": 21, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    if (orderTotal > 50) {",
+        "altFixes": [],
+        "clue": "A $55 order that weighs 5 lbs still gets charged $10 shipping. Free shipping should apply to all orders over $50 regardless of weight."
+      },
+      {
+        "id": "b2",
+        "line": 11,
+        "fix": "    } else if (weight <= 10) {",
+        "altFixes": [],
+        "clue": "A package that weighs exactly 10 lbs gets charged $20 instead of $10. The 2-10 lb range should include 10."
+      },
+      {
+        "id": "b3",
+        "line": 19,
+        "fix": "    System.out.println(\"Final total: $\" + finalTotal);",
+        "altFixes": [],
+        "clue": "The final total shows $55.00, which is the order subtotal without shipping added."
+      }
+    ]
+  },
+  {
+    "id": "week1-conditions-16",
+    "title": "Password Checker",
+    "week": 1,
+    "topic": "conditions",
+    "description": "This program checks if a stored username and password match the user's input and grants or denies access.",
+    "code": [
+      { "line": 1, "text": "public class PasswordChecker {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    String storedUser = \"admin\";" },
+      { "line": 4, "text": "    String storedPass = \"secret123\";" },
+      { "line": 5, "text": "    String inputUser = \"admin\";" },
+      { "line": 6, "text": "    String inputPass = \"secret123\";" },
+      { "line": 7, "text": "" },
+      { "line": 8, "text": "    boolean userMatch = inputUser == storedUser;", "bugId": "b1" },
+      { "line": 9, "text": "    boolean passMatch = inputPass == storedPass;", "bugId": "b2" },
+      { "line": 10, "text": "" },
+      { "line": 11, "text": "    if (userMatch || passMatch) {", "bugId": "b3" },
+      { "line": 12, "text": "      System.out.println(\"Access granted!\");" },
+      { "line": 13, "text": "    } else {" },
+      { "line": 14, "text": "      System.out.println(\"Access denied.\");" },
+      { "line": 15, "text": "    }" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "    System.out.println(\"Username match: \" + userMatch);" },
+      { "line": 18, "text": "    System.out.println(\"Password match: \" + passMatch);" },
+      { "line": 19, "text": "  }" },
+      { "line": 20, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 8,
+        "fix": "    boolean userMatch = inputUser.equals(storedUser);",
+        "altFixes": [],
+        "clue": "When the username comes from Scanner input, userMatch shows false even though both strings say \"admin\". The == operator compares memory locations, not text content."
+      },
+      {
+        "id": "b2",
+        "line": 9,
+        "fix": "    boolean passMatch = inputPass.equals(storedPass);",
+        "altFixes": [],
+        "clue": "Same as the username issue; passMatch can return false for identical passwords when they come from different sources."
+      },
+      {
+        "id": "b3",
+        "line": 11,
+        "fix": "    if (userMatch && passMatch) {",
+        "altFixes": [],
+        "clue": "Access is granted even when only the username matches but the password is wrong. Both must match for login to succeed."
+      }
+    ]
+  },
+  {
+    "id": "week1-conditions-17",
+    "title": "Weather Advisor",
+    "week": 1,
+    "topic": "conditions",
+    "description": "This program recommends what to wear based on the temperature: below 32 is a heavy coat, 32-59 is a jacket, 60-79 is a t-shirt, 80+ is shorts and sunscreen.",
+    "code": [
+      { "line": 1, "text": "public class WeatherAdvisor {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int temp = 60;" },
+      { "line": 4, "text": "    String advice;" },
+      { "line": 5, "text": "" },
+      { "line": 6, "text": "    if (temp < 32) {" },
+      { "line": 7, "text": "      advice = \"Wear a heavy coat!\";" },
+      { "line": 8, "text": "    } else if (temp < 60) {" },
+      { "line": 9, "text": "      advice = \"Bring a jacket.\";" },
+      { "line": 10, "text": "    } else if (temp > 80) {", "bugId": "b1" },
+      { "line": 11, "text": "      advice = \"Shorts and sunscreen!\";" },
+      { "line": 12, "text": "    } else {" },
+      { "line": 13, "text": "      advice = \"A t-shirt is fine.\";" },
+      { "line": 14, "text": "    }" },
+      { "line": 15, "text": "" },
+      { "line": 16, "text": "    boolean isNice = temp >= 60 || temp <= 79;", "bugId": "b2" },
+      { "line": 17, "text": "" },
+      { "line": 18, "text": "    System.out.println(\"Temperature: \" + temp + \"F\");" },
+      { "line": 19, "text": "    System.out.println(\"Advice: \" + advice);" },
+      { "line": 20, "text": "    System.out.println(\"Nice weather: \" + advice);", "bugId": "b3" },
+      { "line": 21, "text": "  }" },
+      { "line": 22, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 10,
+        "fix": "    } else if (temp >= 80) {",
+        "altFixes": [],
+        "clue": "When the temperature is exactly 80, the advice says \"A t-shirt is fine\" instead of \"Shorts and sunscreen!\" because 80 is not greater than 80."
+      },
+      {
+        "id": "b2",
+        "line": 16,
+        "fix": "    boolean isNice = temp >= 60 && temp <= 79;",
+        "altFixes": [],
+        "clue": "The isNice variable always shows true, even when the temperature is 10 degrees. It should only be true when the temp is between 60 and 79."
+      },
+      {
+        "id": "b3",
+        "line": 20,
+        "fix": "    System.out.println(\"Nice weather: \" + isNice);",
+        "altFixes": [],
+        "clue": "The nice weather line prints a clothing recommendation string instead of true or false."
+      }
+    ]
+  },
+  {
+    "id": "week1-conditions-18",
+    "title": "Movie Rating",
+    "week": 1,
+    "topic": "conditions",
+    "description": "This program checks a viewer's age and a movie rating to decide if they can watch: G is for everyone, PG-13 requires age 13+, R requires age 17+.",
+    "code": [
+      { "line": 1, "text": "public class MovieRating {" },
+      { "line": 2, "text": "  public static void main(String[] args) {" },
+      { "line": 3, "text": "    int age = 15;" },
+      { "line": 4, "text": "    String rating = \"PG-13\";" },
+      { "line": 5, "text": "    boolean allowed;" },
+      { "line": 6, "text": "" },
+      { "line": 7, "text": "    if (rating == \"G\") {", "bugId": "b1" },
+      { "line": 8, "text": "      allowed = true;" },
+      { "line": 9, "text": "    } else if (rating.equals(\"PG-13\")) {" },
+      { "line": 10, "text": "      allowed = age > 13;", "bugId": "b2" },
+      { "line": 11, "text": "    } else if (rating.equals(\"R\")) {" },
+      { "line": 12, "text": "      allowed = age >= 17;" },
+      { "line": 13, "text": "    } else {" },
+      { "line": 14, "text": "      allowed = false;" },
+      { "line": 15, "text": "    }" },
+      { "line": 16, "text": "" },
+      { "line": 17, "text": "    System.out.println(\"Age: \" + age);" },
+      { "line": 18, "text": "    System.out.println(\"Rating: \" + rating);" },
+      { "line": 19, "text": "    System.out.println(\"Allowed: \" + rating);", "bugId": "b3" },
+      { "line": 20, "text": "  }" },
+      { "line": 21, "text": "}" }
+    ],
+    "bugs": [
+      {
+        "id": "b1",
+        "line": 7,
+        "fix": "    if (rating.equals(\"G\")) {",
+        "altFixes": [],
+        "clue": "When the rating is \"G\", the code may skip into the else branch and set allowed to false. Using == on strings compares memory addresses, not the actual text."
+      },
+      {
+        "id": "b2",
+        "line": 10,
+        "fix": "      allowed = age >= 13;",
+        "altFixes": [],
+        "clue": "A 13-year-old is denied entry to a PG-13 movie. A viewer who is exactly 13 should be allowed in."
+      },
+      {
+        "id": "b3",
+        "line": 19,
+        "fix": "    System.out.println(\"Allowed: \" + allowed);",
+        "altFixes": [],
+        "clue": "The Allowed line prints \"PG-13\" instead of true or false."
+      }
+    ]
+  }
+]

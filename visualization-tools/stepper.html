@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept Stepper</title>
+<!--
+  STATIC LOADING NOTE:
+  Module files are included via <script src="..."> tags at the bottom of this file.
+  Each module calls STEPPER_REGISTRY.register(...) to add itself.
+  To add a new module: add a <script src="..."> tag and update MANIFEST.
+  No fetch(), no server required. Works on file://, GitHub Pages, anywhere.
+
+  TEMPLATE NOTE: no em dashes anywhere in this file -- use plain hyphens or rewrite the sentence.
+-->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'&gt;&lt;rect width='32' height='32' rx='4' fill='%23b5630a'/&gt;&lt;path d='M4 22 Q6 18 10 18 L18 18 Q22 18 25 16 L28 14' stroke='%23fff8ee' stroke-width='2.5' stroke-linecap='round' fill='none'/&gt;&lt;path d='M4 22 L6 26 L24 26 Q28 26 28 22 L28 14' stroke='%23fff8ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='%23e8820c'/&gt;&lt;path d='M10 18 L11 22' stroke='%23fff8ee' stroke-width='1.5' stroke-linecap='round'/&gt;&lt;path d='M14 18 L15 22' stroke='%23fff8ee' stroke-width='1.5' stroke-linecap='round'/&gt;&lt;path d='M18 18 L19 22' stroke='%23fff8ee' stroke-width='1.5' stroke-linecap='round'/&gt;&lt;/svg&gt;">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* TEMPLATE NOTE: no em dashes anywhere in this file -- use plain hyphens or rewrite the sentence */
+
+  /*
+    ACCESSIBILITY NOTES:
+    - All body text meets WCAG AA (4.5:1 min). Most meets AAA (7:1).
+    - Syntax tokens are differentiated by weight AND style, not color alone.
+    - Font: DM Sans has open letterforms and clear letter spacing, friendly for dyslexia.
+    - Code font: JetBrains Mono has clear distinctions between 0/O, 1/l/I.
+    - Font sizes bumped up for projection: body 16px, code 15px, explanations 16px.
+    - Line height 1.7 on explanation text for readability.
+    - Active line highlight uses amber background (safe for all color blindness types).
+    - No information is conveyed by color alone.
+  */
+
+  :root {
+    --bg:        #ffffff;
+    --bg2:       #f5f4f1;
+    --bg3:       #eceae6;
+    --bg4:       #e0deda;
+    --border:    #d4d1cc;
+    --border2:   #b8b4ae;
+    --text:      #1a1916;
+    --muted:     #4a4844;
+    --hint:      #68655f;
+    --accent:    #a0540a;
+    --accent-bg: #fdf0e0;
+    --accent-mid:#c46b10;
+    --blue:      #1a4f8a;
+    --blue-bg:   #e8f0fa;
+    --blue-mid:  #1d5799;
+    --teal:      #095e40;
+    --teal-bg:   #dff2ea;
+    --purple:    #3d3490;
+    --purple-bg: #ece9fb;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+    --radius:    10px;
+    --radius-lg: 14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 16px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ---- Top nav ---- */
+  .top-nav {
+    display: flex; align-items: center;
+    padding: 0 24px; height: 54px; flex-shrink: 0;
+    background: var(--bg); border-bottom: 2px solid var(--border);
+    position: sticky; top: 0; z-index: 100; gap: 0;
+  }
+  .nav-sep { width: 2px; height: 20px; background: var(--border); margin: 0 18px; flex-shrink: 0; }
+  .nav-dropdown { position: relative; flex-shrink: 0; }
+  .nav-dropdown-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 2px; border: none; background: none;
+    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    color: var(--accent);
+    cursor: pointer; transition: opacity .13s; white-space: nowrap; line-height: 1;
+  }
+  .nav-dropdown-btn:hover { opacity: 0.75; }
+  .nav-dropdown-btn.open  { opacity: 0.75; }
+  .btn-caret {
+    width: 12px; height: 12px; color: var(--accent);
+    transition: transform .15s; flex-shrink: 0; position: relative; top: 1px;
+  }
+  .nav-dropdown-btn.open .btn-caret { transform: rotate(180deg); }
+  .nav-dropdown.topic .nav-dropdown-btn {
+    font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--text);
+  }
+  .nav-dropdown.topic .nav-dropdown-btn:hover { color: var(--accent); opacity: 1; }
+  .nav-dropdown.topic .nav-dropdown-btn.open  { color: var(--accent); opacity: 1; }
+  .nav-dropdown.topic .btn-caret { color: var(--hint); }
+  .nav-dropdown.topic .nav-dropdown-btn:hover .btn-caret,
+  .nav-dropdown.topic .nav-dropdown-btn.open  .btn-caret { color: var(--accent); }
+  .nav-dropdown-menu {
+    display: none; position: absolute; top: calc(100% + 8px); left: -10px;
+    min-width: 220px; background: var(--bg);
+    border: 2px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 6px; z-index: 200;
+    animation: menuIn .12s ease-out;
+  }
+  .nav-dropdown-menu.open { display: block; }
+  @keyframes menuIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .menu-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 500; color: var(--muted);
+    transition: all .1s; border: none; background: none;
+    width: 100%; text-align: left; font-family: var(--sans);
+  }
+  .menu-item:hover  { background: var(--bg2); color: var(--text); }
+  .menu-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+  .menu-item-label  { flex: 1; }
+  .menu-item-check  {
+    width: 14px; height: 14px; color: var(--accent);
+    flex-shrink: 0; opacity: 0; transition: opacity .1s;
+  }
+  .menu-item.active .menu-item-check { opacity: 1; }
+
+  /* ---- Scenario bar ---- */
+  .scenario-bar {
+    padding: 12px 24px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    border-bottom: 2px solid var(--border); background: var(--bg2); flex-shrink: 0;
+  }
+  .scen-label {
+    font-size: 12px; font-weight: 600; color: var(--hint);
+    text-transform: uppercase; letter-spacing: .05em; margin-right: 4px;
+  }
+  .scen-btn {
+    font-family: var(--sans); font-size: 14px; font-weight: 500;
+    padding: 6px 16px; border-radius: 20px;
+    border: 2px solid var(--border); background: var(--bg); color: var(--muted);
+    cursor: pointer; transition: all .15s;
+  }
+  .scen-btn:hover  { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+  .scen-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+
+  /* ---- Workspace ---- */
+  .workspace { flex: 1; display: grid; grid-template-columns: 1fr 340px; min-height: 0; }
+  @media (max-width: 780px) { .workspace { grid-template-columns: 1fr; } }
+
+  /* ---- Code panel ---- */
+  .code-panel {
+    display: flex; flex-direction: column;
+    border-right: 2px solid var(--border); min-height: 0; overflow: hidden;
+  }
+  .panel-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--hint); padding: 9px 24px;
+    border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0;
+  }
+  .code-scroll { flex: 1; overflow-y: auto; padding: 14px 0; background: var(--bg); }
+  .code-line {
+    display: flex; align-items: center;
+    padding: 0 24px 0 0; min-height: 32px; transition: background .1s;
+  }
+  .code-line.blank  { min-height: 10px; }
+  .code-line.active-line { background: var(--accent-bg); }
+  .linenum {
+    width: 44px; text-align: right; padding-right: 16px; flex-shrink: 0;
+    font-family: var(--mono); font-size: 12px; color: var(--hint);
+    user-select: none; line-height: 32px;
+  }
+  .active-line .linenum { color: var(--accent); font-weight: 700; }
+  .arrow-col { width: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .code-text { font-family: var(--mono); font-size: 15px; line-height: 32px; white-space: pre; }
+
+  .tok-kw    { color: #5b1a96; font-weight: 700; }
+  .tok-type  { color: #095e40; font-weight: 700; }
+  .tok-meth  { color: #1a4f8a; font-weight: 700; }
+  .tok-cls   { color: #3d3490; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .tok-str   { color: #8a2500; }
+  .tok-num   { color: #a0540a; font-weight: 600; }
+  .tok-cmt   { color: var(--hint); font-style: italic; }
+  .tok-op    { color: var(--muted); }
+  .tok-field { color: #3d3490; font-style: italic; }
+  .tok-dec   { color: #095e40; font-style: italic; }
+  .tok-self  { color: #5b1a96; font-style: italic; font-weight: 600; }
+
+  /* Sub-line focus: dims non-active tokens when a step targets part of a line */
+  .code-line.active-line .tok-dim { opacity: 0.28; }
+
+  /* ---- Explanation area ---- */
+  .expl-area {
+    padding: 16px 24px; border-top: 2px solid var(--border);
+    background: var(--bg2); min-height: 96px; flex-shrink: 0;
+  }
+  .expl-step-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px;
+  }
+  .expl-text { font-size: 16px; color: var(--text); line-height: 1.7; }
+  .expl-text .hi {
+    font-family: var(--mono); font-size: 13px;
+    background: var(--accent-bg); color: var(--accent);
+    padding: 2px 7px; border-radius: 4px;
+    border: 1.5px solid #e8c070; font-weight: 700;
+  }
+
+  /* ---- Controls ---- */
+  .controls {
+    padding: 12px 24px; border-top: 2px solid var(--border);
+    display: flex; align-items: center; gap: 8px; background: var(--bg); flex-shrink: 0;
+  }
+  .ctrl-btn {
+    font-family: var(--sans); font-size: 15px; font-weight: 600;
+    padding: 8px 20px; border-radius: var(--radius);
+    border: 2px solid var(--border2); background: var(--bg); color: var(--text);
+    cursor: pointer; transition: all .15s;
+  }
+  .ctrl-btn:hover  { background: var(--bg3); }
+  .ctrl-btn:active { transform: scale(0.97); }
+  .ctrl-btn:disabled { opacity: 0.28; cursor: not-allowed; transform: none; }
+  .ctrl-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .ctrl-btn.primary:hover { background: var(--accent-mid); border-color: var(--accent-mid); }
+  .ctrl-btn.ghost { background: transparent; border-color: var(--border); color: var(--muted); font-size: 14px; padding: 8px 16px; }
+  .ctrl-btn.ghost:hover { color: var(--text); background: var(--bg2); }
+  .step-counter { margin-left: auto; font-size: 14px; font-family: var(--mono); color: var(--hint); font-weight: 500; }
+
+  /* ---- Right panel ---- */
+  .right-panel { display: flex; flex-direction: column; background: var(--bg2); overflow-y: auto; }
+  .right-section { padding: 12px; }
+  .right-section + .right-section { border-top: 2px solid var(--border); }
+  .section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--hint); margin-bottom: 10px;
+  }
+
+  /* Editable math inputs */
+  .editable-inputs-area {
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 8px 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .edit-inputs-heading {
+    font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--hint); margin-bottom: 2px;
+  }
+  .edit-inp-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .edit-inp-label { font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+  .edit-inp {
+    font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--accent);
+    background: var(--accent-bg); border: 1.5px solid #e8c070; border-radius: 6px;
+    padding: 4px 6px; width: 62px; text-align: center; outline: none;
+    -moz-appearance: textfield;
+  }
+  .edit-inp::-webkit-inner-spin-button,
+  .edit-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .edit-inp:focus { border-color: var(--accent-mid); }
+  .edit-inp-op { font-family: var(--mono); font-size: 15px; color: var(--muted); font-weight: 500; padding: 0 2px; }
+  .edit-frac-stack { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .edit-frac-stack .edit-inp { width: 46px; }
+  .edit-frac-bar { width: 50px; height: 1.5px; background: var(--accent); border-radius: 1px; margin: 1px 0; }
+
+  /* Call stack frames */
+  .frame { border: 2px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 6px; background: var(--bg); animation: frameIn .18s ease-out; }
+  .frame.top-frame { border-color: var(--blue-mid); }
+  @keyframes frameIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .frame-header { padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; background: var(--bg2); border-bottom: 1px solid var(--border); }
+  .top-frame .frame-header { background: var(--blue-bg); }
+  .frame-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--text); }
+  .frame-tag { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; }
+  .tag-active  { background: var(--blue-bg); color: var(--blue); border: 1.5px solid #9dc0e8; }
+  .tag-waiting { background: var(--bg3);      color: var(--hint); border: 1.5px solid var(--border); }
+  .frame-vars { padding: 7px 12px; display: flex; flex-direction: column; gap: 5px; }
+  .var-row    { display: flex; align-items: baseline; gap: 10px; font-family: var(--mono); font-size: 13px; }
+  .var-name   { color: var(--muted); min-width: 52px; font-weight: 500; }
+  .var-val    { font-weight: 700; padding: 2px 9px; border-radius: 5px; transition: background .3s, color .3s; }
+  .val-set     { background: var(--teal-bg);   color: var(--teal);   border: 1.5px solid #90d4b8; }
+  .val-unset   { background: var(--bg3);        color: var(--muted);  font-style: italic; font-weight: 400; border: 1.5px dashed var(--border2); }
+  .val-new     { background: var(--accent-bg);  color: var(--accent); border: 1.5px solid #e8c070; animation: flash .4s ease-out; }
+  .val-ref     { background: var(--purple-bg);  color: var(--purple); border: 1.5px solid #b0a8e0; }
+  .val-ref-new { background: var(--purple-bg);  color: var(--purple); border: 1.5px solid #b0a8e0; animation: flash .4s ease-out; }
+  @keyframes flash { 0% { background: #f5d070; } 100% {} }
+  .stack-connector { text-align: center; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--hint); padding: 2px 0 5px; font-weight: 600; }
+  .panel-empty { font-size: 14px; color: var(--hint); text-align: center; padding: 20px 0; font-style: italic; }
+
+  /* Heap objects */
+  .heap-obj { border: 2px solid #b0a8e0; border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; background: var(--bg); animation: frameIn .22s ease-out; }
+  .heap-obj.active-obj { border-color: var(--accent-mid); border-width: 2.5px; }
+  .heap-obj-header { padding: 7px 12px; display: flex; align-items: center; justify-content: space-between; background: var(--purple-bg); border-bottom: 1px solid #c8c0f0; }
+  .heap-obj.active-obj .heap-obj-header { background: var(--accent-bg); border-bottom-color: #e8c070; }
+  .heap-obj-type { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--purple); }
+  .heap-obj.active-obj .heap-obj-type { color: var(--accent); }
+  .heap-obj-ref  { font-family: var(--mono); font-size: 12px; color: var(--purple); background: #dcd8f5; padding: 2px 8px; border-radius: 10px; border: 1.5px solid #b0a8e0; }
+  .heap-obj.active-obj .heap-obj-ref { background: var(--accent-bg); color: var(--accent); border-color: #e8c070; }
+  .heap-obj-fields { padding: 7px 12px; display: flex; flex-direction: column; gap: 5px; }
+  .heap-field-row  { display: flex; align-items: baseline; gap: 10px; font-family: var(--mono); font-size: 13px; }
+  .heap-field-name { color: var(--purple); min-width: 52px; font-weight: 600; }
+  .heap-field-val  { font-weight: 700; padding: 2px 9px; border-radius: 5px; background: var(--teal-bg); color: var(--teal); border: 1.5px solid #90d4b8; }
+  .heap-field-val.fresh { background: var(--accent-bg); color: var(--accent); border-color: #e8c070; animation: flash .4s ease-out; }
+
+  /* Custom panel */
+  .custom-item { border: 2px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 6px; background: var(--bg); animation: frameIn .18s ease-out; }
+  .custom-item-header { padding: 7px 12px; background: var(--bg2); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; justify-content: space-between; }
+  .custom-item-tag { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; background: var(--bg3); color: var(--muted); border: 1.5px solid var(--border2); }
+  .custom-item-body { padding: 7px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .custom-row { display: flex; align-items: baseline; gap: 10px; font-family: var(--mono); font-size: 13px; }
+  .custom-key { color: var(--muted); min-width: 60px; font-weight: 500; }
+  .custom-val { font-weight: 700; padding: 2px 9px; border-radius: 5px; background: var(--teal-bg); color: var(--teal); border: 1.5px solid #90d4b8; }
+  .custom-val.fresh { background: var(--accent-bg); color: var(--accent); border-color: #e8c070; animation: flash .4s ease-out; }
+
+  /* ================================================================
+     VISUAL PANEL -- math diagrams
+     Each visual type (remainder-bar, long-division, fraction-grid)
+     is rendered by renderVisual() reading step.visual descriptors.
+  ================================================================ */
+  #visualArea {
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  /* -- Remainder bar (modulus) -- */
+  .rem-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rem-bar-equation {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+  .rem-bar-equation .eq-op { color: var(--muted); font-weight: 500; }
+  .rem-bar-equation .eq-active { color: var(--accent); }
+  .rem-bar-equation .eq-dim { color: var(--border2); }
+
+  .rem-bar-groups-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--hint); margin-bottom: 2px;
+  }
+  .rem-bar-track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 10px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    min-height: 44px;
+    align-content: flex-start;
+  }
+  .rem-cell {
+    width: 26px; height: 26px;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    transition: background .25s, border-color .25s, opacity .25s;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+  }
+  .rem-cell.full    { background: var(--teal-bg);   border-color: #90d4b8; color: var(--teal); }
+  .rem-cell.group-divider { margin-left: 6px; }
+  .rem-cell.remain  { background: var(--accent-bg); border-color: #e8c070; color: var(--accent); animation: flash .4s ease-out; }
+  .rem-cell.dim     { background: var(--bg3);        border-color: var(--border); color: var(--hint); opacity: 0.4; }
+
+  .rem-groups-row {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .rem-group-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .rem-group-cells {
+    display: flex;
+    gap: 3px;
+  }
+  .rem-group-label {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    color: var(--teal); background: var(--teal-bg);
+    padding: 1px 6px; border-radius: 10px; border: 1.5px solid #90d4b8;
+  }
+  .rem-remainder-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 2px dashed var(--border2);
+  }
+  .rem-remainder-label {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    color: var(--accent); background: var(--accent-bg);
+    padding: 1px 6px; border-radius: 10px; border: 1.5px solid #e8c070;
+  }
+  .rem-summary {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    color: var(--muted); text-align: center;
+    padding: 6px 10px; background: var(--bg); border: 2px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .rem-summary .hi { color: var(--accent); }
+
+  /* -- Long division -- */
+  .longdiv-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+  .longdiv-scaffold {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.9;
+    position: relative;
+    display: inline-block;
+    text-align: right;
+    padding: 8px 12px 8px 16px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .longdiv-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    position: relative;
+    white-space: pre;
+  }
+  .longdiv-row.dim     { color: var(--border2); }
+  .longdiv-row.active  { color: var(--accent); }
+  .longdiv-row.normal  { color: var(--text); }
+  .longdiv-row.muted   { color: var(--muted); }
+  .longdiv-underline {
+    border-top: 2.5px solid currentColor;
+    position: relative;
+  }
+  .longdiv-bracket {
+    /* the divisor | dividend bracket */
+    display: inline-flex;
+    align-items: baseline;
+  }
+  .longdiv-divisor {
+    color: var(--blue);
+    padding-right: 6px;
+    font-weight: 700;
+  }
+  .longdiv-dividend-wrap {
+    border-left: 2.5px solid var(--text);
+    border-top: 2.5px solid var(--text);
+    padding: 2px 8px 0 8px;
+    position: relative;
+  }
+  .longdiv-step-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 16px;
+  }
+  .longdiv-step-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--hint); min-width: 60px;
+  }
+  .longdiv-step-val {
+    font-family: var(--mono); font-weight: 700;
+    padding: 2px 8px; border-radius: 5px;
+    font-size: 14px;
+  }
+  .longdiv-step-val.active { background: var(--accent-bg); color: var(--accent); border: 1.5px solid #e8c070; animation: flash .4s; }
+  .longdiv-step-val.done   { background: var(--teal-bg);   color: var(--teal);   border: 1.5px solid #90d4b8; }
+  .longdiv-step-val.dim    { background: var(--bg3);        color: var(--hint);   border: 1.5px dashed var(--border2); }
+  .longdiv-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    padding: 10px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  /* -- Fraction grid -- */
+  .frac-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+  }
+  .frac-equation-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .frac-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .frac-num   { font-weight: 700; color: var(--text); line-height: 1.1; }
+  .frac-bar   { width: 100%; height: 2.5px; background: currentColor; border-radius: 2px; margin: 2px 0; }
+  .frac-den   { font-weight: 700; color: var(--text); line-height: 1.1; }
+  .frac-display.active .frac-num,
+  .frac-display.active .frac-den { color: var(--accent); }
+  .frac-display.active .frac-bar { background: var(--accent); }
+  .frac-display.dim .frac-num,
+  .frac-display.dim .frac-den { color: var(--border2); }
+  .frac-display.dim .frac-bar { background: var(--border2); }
+
+  .frac-op { color: var(--muted); font-size: 20px; }
+  .frac-eq { color: var(--muted); font-size: 20px; }
+
+  .frac-grid-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .frac-grid-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--hint);
+  }
+  .frac-grid {
+    display: grid;
+    gap: 3px;
+    padding: 8px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .frac-cell {
+    width: 30px; height: 30px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    transition: background .3s, border-color .3s;
+  }
+  .frac-cell.shaded    { background: var(--accent-bg); border-color: #e8c070; }
+  .frac-cell.unshaded  { background: var(--bg3);        border-color: var(--border); }
+  .frac-cell.highlight { background: #f5d070;            border-color: var(--accent); animation: flash .4s; }
+
+  .frac-legend-row {
+    display: flex; gap: 12px; align-items: center;
+    font-size: 12px; color: var(--muted);
+  }
+  .frac-legend-swatch {
+    width: 14px; height: 14px; border-radius: 3px; border: 2px solid transparent; flex-shrink: 0;
+  }
+
+  /* -- Decimal product -- */
+  .dec-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Big equation at top */
+  .dec-equation {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+  }
+  .dec-equation .eq-dim    { color: var(--border2); }
+  .dec-equation .eq-active { color: var(--accent); }
+  .dec-equation .eq-muted  { color: var(--muted); font-weight: 500; }
+
+  /* Place value decomposition row */
+  .dec-decomp {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .dec-decomp-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .dec-decomp-label {
+    min-width: 56px;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .dec-decomp-eq {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .dec-pv-pill {
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1.5px solid transparent;
+    transition: background .2s, color .2s;
+  }
+  .dec-pv-pill.ones      { background: var(--blue-bg);   color: var(--blue);   border-color: #9dc0e8; }
+  .dec-pv-pill.tenths    { background: var(--teal-bg);   color: var(--teal);   border-color: #90d4b8; }
+  .dec-pv-pill.hundredths{ background: var(--purple-bg); color: var(--purple); border-color: #b0a8e0; }
+  .dec-pv-pill.dim       { background: var(--bg3);        color: var(--hint);   border-color: var(--border); opacity: 0.5; }
+  .dec-op-txt { color: var(--muted); font-weight: 500; font-size: 14px; }
+
+  /* Partial products table */
+  .dec-partials {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .dec-partials-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--hint); margin-bottom: 6px;
+  }
+  .dec-partial-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 28px;
+  }
+  .dec-partial-desc {
+    color: var(--muted);
+    font-size: 12px;
+    min-width: 120px;
+    font-weight: 500;
+  }
+  .dec-partial-val {
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 5px;
+  }
+  .dec-partial-val.done    { background: var(--teal-bg);   color: var(--teal);   border: 1.5px solid #90d4b8; }
+  .dec-partial-val.active  { background: var(--accent-bg); color: var(--accent); border: 1.5px solid #e8c070; animation: flash .4s; }
+  .dec-partial-val.dim     { background: var(--bg3);        color: var(--hint);   border: 1.5px dashed var(--border2); opacity: 0.5; }
+  .dec-divider {
+    border: none;
+    border-top: 2px solid var(--border2);
+    margin: 4px 0;
+  }
+  .dec-total-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+  .dec-total-label { color: var(--muted); font-size: 12px; font-weight: 600; min-width: 120px; text-transform: uppercase; letter-spacing: .04em; }
+  .dec-total-val {
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 15px;
+  }
+  .dec-total-val.active { background: var(--accent-bg); color: var(--accent); border: 1.5px solid #e8c070; animation: flash .4s; }
+  .dec-total-val.done   { background: var(--teal-bg);   color: var(--teal);   border: 1.5px solid #90d4b8; }
+  .dec-total-val.dim    { background: var(--bg3);        color: var(--hint);   border: 1.5px dashed var(--border2); opacity: 0.5; }
+
+  /* Concept meaning callout (shown for decimal module) */
+  .dec-meaning-note {
+    padding: 8px 12px; background: var(--blue-bg);
+    border: 2px solid #9dc0e8; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; color: var(--blue);
+    text-align: center; line-height: 1.5;
+  }
+
+  /* Decimal point placement callout */
+  .dec-placement {
+    padding: 8px 12px;
+    background: var(--accent-bg);
+    border: 2px solid #e8c070;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: center;
+    animation: flash .4s;
+  }
+  .dec-placement.dim { background: var(--bg3); border-color: var(--border); color: var(--hint); font-weight: 400; opacity: 0.5; animation: none; }
+
+  /* Legend */
+  .legend-section { padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+  .legend-row     { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .legend-dot     { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* Load error */
+  .load-error { padding: 32px 24px; font-size: 14px; color: #8a2500; font-family: var(--mono); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<!-- ==================== TOP NAV ==================== -->
+<nav class="top-nav">
+  <div class="nav-dropdown" id="langDropdown">
+    <button class="nav-dropdown-btn" id="langBtn" onclick="toggleDropdown('lang')">
+      <span id="langBtnValue">Java 17</span>
+      <svg class="btn-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 4l4 4 4-4"/>
+      </svg>
+    </button>
+    <div class="nav-dropdown-menu" id="langMenu"></div>
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-dropdown topic" id="topicDropdown">
+    <button class="nav-dropdown-btn" id="topicBtn" onclick="toggleDropdown('topic')">
+      <span id="topicBtnValue">Loading...</span>
+      <svg class="btn-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 4l4 4 4-4"/>
+      </svg>
+    </button>
+    <div class="nav-dropdown-menu" id="topicMenu"></div>
+  </div>
+</nav>
+
+<!-- ==================== SCENARIO BAR ==================== -->
+<div class="scenario-bar" id="scenBar">
+  <span class="scen-label">Example</span>
+</div>
+
+<!-- ==================== WORKSPACE ==================== -->
+<div class="workspace">
+  <div class="code-panel">
+    <div class="panel-label">Source code</div>
+    <div class="code-scroll" id="codeArea"></div>
+    <div class="expl-area">
+      <div class="expl-step-label" id="explLabel"></div>
+      <div class="expl-text" id="explText"></div>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" id="btnBack" onclick="step(-1)">&#8592; Back</button>
+      <button class="ctrl-btn primary" id="btnNext" onclick="step(1)">Next step &#8594;</button>
+      <button class="ctrl-btn ghost" onclick="reset()">Reset</button>
+      <span class="step-counter" id="stepCounter"></span>
+    </div>
+  </div>
+  <div class="right-panel" id="rightPanel"></div>
+</div>
+
+
+<script>
+/* TEMPLATE NOTE: no em dashes anywhere in this file -- use plain hyphens or rewrite the sentence */
+
+const STEPPER_REGISTRY = {
+  _modules: {},
+  register(id, moduleObj) { this._modules[id] = moduleObj; },
+  get(id) { return this._modules[id] || null; }
+};
+
+const MANIFEST = {
+  'Java 17': [
+    { label: 'Scanner and user input', id: 'java-17/scanner' },
+    { label: 'Conditions',             id: 'java-17/conditions' },
+    { label: 'Method calls',           id: 'java-17/methods' },
+    { label: 'Switch statements',      id: 'java-17/switch' },
+    { label: 'Classes and objects',    id: 'java-17/classes-and-objects' },
+    { label: 'Loops and recursion',    id: 'java-17/loops' },
+    { label: 'Arrays',                 id: 'java-17/arrays' },
+  ],
+  'Python 3': [
+    { label: 'Input',               id: 'python-3/input' },
+    { label: 'Conditions',         id: 'python-3/conditions' },
+    { label: 'Functions',          id: 'python-3/functions' },
+    { label: 'Match statements',   id: 'python-3/match' },
+    { label: 'Classes and objects', id: 'python-3/classes' },
+    { label: 'Loops and recursion', id: 'python-3/loops' },
+    { label: 'Lists',               id: 'python-3/lists' },
+  ],
+  'Math': [
+    { label: 'Modulus',                    id: 'math/modulus' },
+    { label: 'Integer division',           id: 'math/integer-division' },
+    { label: 'Multiplying with fractions', id: 'math/multiplying-fractions' },
+    { label: 'Multiplying with decimals',  id: 'math/multiplying-decimals' },
+  ],
+};
+
+let activeLang   = Object.keys(MANIFEST)[0];
+let activeTopic  = null;
+let activeModule = null;
+let scenIdx = 0;
+let stepIdx = 0;
+let activeEditableValues = null; // { paramId: value } for math modules with editable inputs
+
+/* ================================================================
+   PERSISTENCE (localStorage)
+================================================================ */
+function savePrefs() {
+  try {
+    localStorage.setItem('stepper-lang', activeLang);
+    if (activeTopic) localStorage.setItem('stepper-topic', activeTopic.id);
+  } catch(e) {}
+}
+
+function loadPrefs() {
+  try {
+    return {
+      lang:    localStorage.getItem('stepper-lang'),
+      topicId: localStorage.getItem('stepper-topic'),
+    };
+  } catch(e) { return {}; }
+}
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+/* Decompose a decimal string into place-value parts for the partial-products visual */
+function decomposeDecimal(numStr) {
+  const s = String(numStr);
+  const [intPart, fracPart = ''] = s.split('.');
+  const intVal = parseInt(intPart) || 0;
+  const parts = [];
+  if (intVal !== 0) parts.push({ label: String(intVal), cls: 'ones' });
+  const t = fracPart.length >= 1 ? parseInt(fracPart[0]) : 0;
+  const h = fracPart.length >= 2 ? parseInt(fracPart[1]) : 0;
+  if (t > 0) parts.push({ label: '0.' + fracPart[0], cls: 'tenths' });
+  if (h > 0) parts.push({ label: '0.0' + fracPart[1], cls: 'hundredths' });
+  if (parts.length === 0) parts.push({ label: s, cls: 'ones' });
+  return parts;
+}
+
+function computeDecimalPartials(aDecomp, bDecomp, existingStates) {
+  const partials = [];
+  aDecomp.forEach(ap => {
+    bDecomp.forEach(bp => {
+      const product = parseFloat(ap.label) * parseFloat(bp.label);
+      const places = (ap.label.split('.')[1] || '').length + (bp.label.split('.')[1] || '').length;
+      partials.push({ desc: `${ap.label} x ${bp.label}`, value: product.toFixed(places), state: 'dim' });
+    });
+  });
+  partials.forEach((p, i) => { if (existingStates && existingStates[i]) p.state = existingStates[i]; });
+  return partials;
+}
+
+function computeDecimalTotal(partials) {
+  const sum = partials.reduce((acc, p) => acc + parseFloat(p.value), 0);
+  const places = Math.max(...partials.map(p => (p.value.split('.')[1] || '').length));
+  return isFinite(sum) ? sum.toFixed(places) : '0';
+}
+
+function computeDecimalPlacementNote(aStr, bStr, total) {
+  const aP = (aStr.split('.')[1] || '').length;
+  const bP = (bStr.split('.')[1] || '').length;
+  const tp = aP + bP;
+  const aInt = aStr.replace('.', '');
+  const bInt = bStr.replace('.', '');
+  return `${aStr} has ${aP} decimal place${aP !== 1 ? 's' : ''}, ${bStr} has ${bP} decimal place${bP !== 1 ? 's' : ''} -- ${aP} + ${bP} = ${tp} decimal places. ${aInt} x ${bInt} = ${parseInt(aInt) * parseInt(bInt)} -- place ${tp} from right: ${total}`;
+}
+
+/* ---- Dropdowns ---- */
+function toggleDropdown(which) {
+  const menuId = which === 'lang' ? 'langMenu' : 'topicMenu';
+  const btnId  = which === 'lang' ? 'langBtn'  : 'topicBtn';
+  const menu = document.getElementById(menuId);
+  const btn  = document.getElementById(btnId);
+  const isOpen = menu.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) { menu.classList.add('open'); btn.classList.add('open'); }
+}
+function closeAllDropdowns() {
+  document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('open'));
+}
+document.addEventListener('click', e => { if (!e.target.closest('.nav-dropdown')) closeAllDropdowns(); });
+
+function buildLangMenu() {
+  const menu = document.getElementById('langMenu');
+  menu.innerHTML = '';
+  Object.keys(MANIFEST).forEach(lang => {
+    const btn = document.createElement('button');
+    btn.className = 'menu-item' + (lang === activeLang ? ' active' : '');
+    btn.innerHTML = `<span class="menu-item-label">${lang}</span>
+      <svg class="menu-item-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5 6.5-7"/></svg>`;
+    btn.onclick = () => selectLang(lang);
+    menu.appendChild(btn);
+  });
+}
+
+function buildTopicMenu() {
+  const menu = document.getElementById('topicMenu');
+  menu.innerHTML = '';
+  (MANIFEST[activeLang] || []).forEach(t => {
+    const isActive = activeTopic && activeTopic.id === t.id;
+    const btn = document.createElement('button');
+    btn.className = 'menu-item' + (isActive ? ' active' : '');
+    btn.innerHTML = `<span class="menu-item-label">${t.label}</span>
+      <svg class="menu-item-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5 6.5-7"/></svg>`;
+    btn.onclick = () => selectTopic(t);
+    menu.appendChild(btn);
+  });
+}
+
+function selectLang(lang) {
+  activeLang = lang;
+  savePrefs();
+  document.getElementById('langBtnValue').textContent = lang;
+  buildLangMenu(); closeAllDropdowns();
+  const first = MANIFEST[lang][0];
+  if (first) selectTopic(first);
+}
+
+function selectTopic(topic) {
+  activeTopic = topic;
+  savePrefs();
+  if (location.hash.replace(/^#\/?/, '') !== topic.id) {
+    history.replaceState(null, '', '#' + topic.id);
+  }
+  document.getElementById('topicBtnValue').textContent = topic.label;
+  buildTopicMenu(); closeAllDropdowns();
+  scenIdx = 0; stepIdx = 0;
+  const mod = STEPPER_REGISTRY.get(topic.id);
+  if (!mod) { showLoadError(topic.id); return; }
+  activeModule = mod;
+  buildRightPanel();
+  render();
+}
+
+function showLoadError(id) {
+  document.getElementById('codeArea').innerHTML =
+    `<div class="load-error">Module not found: ${id}<br><br>Check that the module file is included via a &lt;script src="..."&gt; tag<br>and calls STEPPER_REGISTRY.register("${id}", ...) correctly.</div>`;
+  document.getElementById('explLabel').textContent = '';
+  document.getElementById('explText').textContent  = '';
+  document.getElementById('rightPanel').innerHTML  = '';
+  document.getElementById('scenBar').querySelectorAll('.scen-btn').forEach(b => b.remove());
+  document.getElementById('stepCounter').textContent = '';
+}
+
+/* ---- Right panel builder ---- */
+function buildEditableInputsDOM(inputs) {
+  const wrap = document.createElement('div');
+  wrap.className = 'editable-inputs-area';
+  const heading = document.createElement('div');
+  heading.className = 'edit-inputs-heading';
+  heading.textContent = 'Edit values';
+  wrap.appendChild(heading);
+
+  const fracInputs = inputs.filter(i => i.type === 'fraction');
+  const intInputs  = inputs.filter(i => i.type !== 'fraction');
+
+  intInputs.forEach(inp => {
+    const row = document.createElement('div'); row.className = 'edit-inp-row';
+    const lbl = document.createElement('span'); lbl.className = 'edit-inp-label';
+    lbl.textContent = inp.label + ' =';
+    const el = document.createElement('input');
+    el.className = 'edit-inp';
+    el.id = `inp-${inp.id}`; el.value = inp.defaultVal;
+
+    if (inp.type === 'decimal') {
+      el.type = 'text';
+      el.style.width = '58px';
+      el.addEventListener('input', () => {
+        const str = el.value.trim();
+        if (!/^\d*\.?\d*$/.test(str) || str === '' || str === '.') return;
+        activeEditableValues[inp.id] = str;
+        render();
+      });
+      el.addEventListener('blur', () => {
+        if (activeEditableValues) el.value = activeEditableValues[inp.id];
+      });
+    } else {
+      el.type = 'number';
+      el.min = inp.min; el.max = inp.max;
+      el.addEventListener('input', () => {
+        const val = parseInt(el.value);
+        if (isNaN(val)) return;
+        activeEditableValues[inp.id] = Math.max(inp.min, Math.min(inp.max, val));
+        render();
+      });
+      el.addEventListener('blur', () => {
+        if (activeEditableValues) el.value = activeEditableValues[inp.id];
+      });
+    }
+
+    row.appendChild(lbl); row.appendChild(el);
+    wrap.appendChild(row);
+  });
+
+  if (fracInputs.length > 0) {
+    const row = document.createElement('div'); row.className = 'edit-inp-row';
+    fracInputs.forEach((inp, idx) => {
+      if (idx > 0) {
+        const op = document.createElement('span');
+        op.className = 'edit-inp-op'; op.textContent = '\u00d7';
+        row.appendChild(op);
+      }
+      const stack = document.createElement('div'); stack.className = 'edit-frac-stack';
+      const nEl = document.createElement('input');
+      nEl.type = 'number'; nEl.className = 'edit-inp';
+      nEl.id = `inp-${inp.id}-n`; nEl.value = inp.defaultVal.n;
+      nEl.min = inp.min; nEl.max = inp.max;
+      const bar = document.createElement('div'); bar.className = 'edit-frac-bar';
+      const dEl = document.createElement('input');
+      dEl.type = 'number'; dEl.className = 'edit-inp';
+      dEl.id = `inp-${inp.id}-d`; dEl.value = inp.defaultVal.d;
+      dEl.min = inp.min; dEl.max = inp.max;
+      [nEl, dEl].forEach((el, pi) => {
+        const part = pi === 0 ? 'n' : 'd';
+        el.addEventListener('input', () => {
+          const val = parseInt(el.value);
+          if (isNaN(val) || val < 1) return;
+          if (!activeEditableValues[inp.id]) activeEditableValues[inp.id] = {};
+          activeEditableValues[inp.id][part] = Math.max(inp.min, Math.min(inp.max, val));
+          render();
+        });
+        el.addEventListener('blur', () => {
+          if (activeEditableValues?.[inp.id]) el.value = activeEditableValues[inp.id][part];
+        });
+      });
+      stack.appendChild(nEl); stack.appendChild(bar); stack.appendChild(dEl);
+      row.appendChild(stack);
+    });
+    wrap.appendChild(row);
+  }
+
+  return wrap;
+}
+
+function buildRightPanel() {
+  const panel = document.getElementById('rightPanel');
+  panel.innerHTML = '';
+  const cfg = activeModule.panelConfig;
+
+  if (cfg.visual) {
+    const sec = document.createElement('div'); sec.className = 'right-section';
+    sec.innerHTML = `<div class="section-title">${cfg.visual.title || 'Diagram'}</div>`;
+
+    if (cfg.editableInputs && cfg.editableInputs.length > 0) {
+      activeEditableValues = {};
+      cfg.editableInputs.forEach(inp => {
+        activeEditableValues[inp.id] = inp.type === 'fraction'
+          ? { n: inp.defaultVal.n, d: inp.defaultVal.d }
+          : inp.defaultVal;
+      });
+      sec.appendChild(buildEditableInputsDOM(cfg.editableInputs));
+    } else {
+      activeEditableValues = null;
+    }
+
+    const area = document.createElement('div'); area.id = 'visualArea';
+    sec.appendChild(area); panel.appendChild(sec);
+  }
+  if (cfg.stack) {
+    const sec = document.createElement('div'); sec.className = 'right-section';
+    sec.innerHTML = '<div class="section-title">Call stack</div>';
+    const area = document.createElement('div'); area.id = 'stackArea';
+    area.innerHTML = '<div class="panel-empty">empty</div>';
+    sec.appendChild(area); panel.appendChild(sec);
+  }
+  if (cfg.heap) {
+    const sec = document.createElement('div'); sec.className = 'right-section';
+    sec.innerHTML = '<div class="section-title">Objects in memory</div>';
+    const area = document.createElement('div'); area.id = 'heapArea';
+    area.innerHTML = '<div class="panel-empty">no objects yet</div>';
+    sec.appendChild(area); panel.appendChild(sec);
+  }
+  if (cfg.custom) {
+    const sec = document.createElement('div'); sec.className = 'right-section';
+    sec.innerHTML = `<div class="section-title">${cfg.custom.title}</div>`;
+    const area = document.createElement('div'); area.id = 'customArea';
+    area.innerHTML = `<div class="panel-empty">${cfg.custom.emptyText}</div>`;
+    sec.appendChild(area); panel.appendChild(sec);
+  }
+  if (cfg.legend && cfg.legend.length > 0) {
+    const leg = document.createElement('div'); leg.className = 'legend-section';
+    cfg.legend.forEach(item => {
+      leg.innerHTML += `<div class="legend-row">
+        <div class="legend-dot" style="background:${item.color};border:1.5px solid ${item.border}"></div>
+        ${item.label}
+      </div>`;
+    });
+    panel.appendChild(leg);
+  }
+  // Sync input fields to the actual values in scenario 0 (guards against stale defaults)
+  if (activeEditableValues) syncEditableValuesToScenario(0);
+}
+
+/* ================================================================
+   VISUAL PANEL RENDERER
+   Reads step.visual = { type, ...data } and renders the right diagram.
+   Types: 'remainder-bar' | 'long-division' | 'fraction-grid'
+================================================================ */
+function renderVisual() {
+  const area = document.getElementById('visualArea');
+  if (!area) return;
+  const scenario = activeModule.scenarios[scenIdx];
+  if (!scenario) return;
+  const st = scenario.steps[stepIdx];
+  if (!st.visual) { area.innerHTML = ''; return; }
+
+  // Spread step visual so we can override without mutating module data
+  let v = {...st.visual};
+
+  // Apply editable value overrides for math modules
+  if (activeEditableValues) {
+    if (v.type === 'remainder-bar' || v.type === 'long-division') {
+      if (activeEditableValues.dividend !== undefined) v.dividend = activeEditableValues.dividend;
+      if (activeEditableValues.divisor  !== undefined) v.divisor  = activeEditableValues.divisor;
+      // Guard against division by zero
+      if (v.divisor < 1) v.divisor = 1;
+    } else if (v.type === 'fraction-grid') {
+      if (activeEditableValues.a && activeEditableValues.b) {
+        const a = {...activeEditableValues.a};
+        const b = {...activeEditableValues.b};
+        if (a.d < 1) a.d = 1; if (b.d < 1) b.d = 1;
+        const maxShaded = a.n * b.n;
+        const g = gcd(a.n * b.n, a.d * b.d);
+        v = {...v, a, b,
+          shadedCells: Math.min(v.shadedCells || 0, maxShaded),
+          result: { n: a.n * b.n, d: a.d * b.d, simplified: `${(a.n*b.n)/g}/${(a.d*b.d)/g}` }
+        };
+      }
+    } else if (v.type === 'decimal-product') {
+      if (activeEditableValues.a !== undefined && activeEditableValues.b !== undefined) {
+        const aStr = String(activeEditableValues.a);
+        const bStr = String(activeEditableValues.b);
+        const aDecomp = decomposeDecimal(aStr);
+        const bDecomp = decomposeDecimal(bStr);
+        const existingStates = (v.partials || []).map(p => p.state);
+        const partials = computeDecimalPartials(aDecomp, bDecomp, existingStates);
+        const totalValue = computeDecimalTotal(partials);
+        const placementNote = v.placementNote
+          ? computeDecimalPlacementNote(aStr, bStr, totalValue)
+          : null;
+        v = {...v, a: aStr, b: bStr, aDecomp, bDecomp, partials, totalValue, placementNote};
+      }
+    }
+  }
+
+  if      (v.type === 'remainder-bar')   renderRemainderBar(area, v);
+  else if (v.type === 'long-division')   renderLongDivision(area, v);
+  else if (v.type === 'fraction-grid')   renderFractionGrid(area, v);
+  else if (v.type === 'decimal-product') renderDecimalProduct(area, v);
+  else { area.innerHTML = `<div class="panel-empty">unknown visual type: ${v.type}</div>`; }
+}
+
+/* ---- Remainder bar ---- */
+/*
+  visual = {
+    type: 'remainder-bar',
+    dividend: 17, divisor: 5,
+    groupsVisible: 3,    -- how many complete groups to show (0 = none yet)
+    remainderVisible: 2, -- how many remainder cells to show (0 = none yet)
+    showSummary: true,   -- show "17 = 3*5 + 2" line
+    highlightStep: 'groups' | 'remainder' | 'equation'
+  }
+*/
+function renderRemainderBar(area, v) {
+  const { dividend, divisor, showSummary, highlightStep } = v;
+  const totalGroups = Math.floor(dividend / divisor);
+  const remainder   = dividend % divisor;
+  // Cap animation state at actual values so custom inputs never over-draw
+  const groupsVisible    = Math.min(v.groupsVisible,    totalGroups);
+  const remainderVisible = Math.min(v.remainderVisible, remainder);
+
+  let html = '<div class="rem-bar-wrap">';
+
+  // Big equation display
+  const eqGroupPart   = groupsVisible > 0   ? `${groupsVisible} &times; ${divisor}` : '? &times; ?';
+  const eqRemainPart  = remainderVisible > 0 ? ` + ${remainderVisible}` : '';
+  const eqDone        = groupsVisible === totalGroups && remainderVisible === remainder;
+  html += `<div class="rem-bar-equation">
+    <span class="${highlightStep === 'equation' ? 'eq-active' : ''}">${dividend}</span>
+    <span class="eq-op"> = </span>
+    <span class="${highlightStep === 'groups' ? 'eq-active' : (groupsVisible === 0 ? 'eq-dim' : '')}">${eqGroupPart}</span>
+    <span class="${highlightStep === 'remainder' ? 'eq-active' : (remainderVisible === 0 ? 'eq-dim' : '')}">${eqRemainPart}</span>
+  </div>`;
+
+  // Groups row
+  html += '<div class="rem-bar-groups-label">Groups</div>';
+  html += '<div class="rem-groups-row">';
+
+  for (let g = 0; g < totalGroups; g++) {
+    const visible = g < groupsVisible;
+    html += '<div class="rem-group-box">';
+    html += '<div class="rem-group-cells">';
+    for (let c = 0; c < divisor; c++) {
+      html += `<div class="rem-cell ${visible ? 'full' : 'dim'}"></div>`;
+    }
+    html += '</div>';
+    if (visible) html += `<div class="rem-group-label">group ${g+1}</div>`;
+    html += '</div>';
+  }
+
+  // Remainder
+  if (remainder > 0) {
+    html += '<div class="rem-remainder-box">';
+    html += '<div class="rem-group-cells">';
+    for (let c = 0; c < remainder; c++) {
+      const vis = c < remainderVisible;
+      html += `<div class="rem-cell ${vis ? 'remain' : 'dim'}"></div>`;
+    }
+    html += '</div>';
+    if (remainderVisible > 0) html += `<div class="rem-remainder-label">remainder</div>`;
+    html += '</div>';
+  }
+
+  html += '</div>'; // rem-groups-row
+
+  // Summary
+  if (showSummary) {
+    const q = groupsVisible;
+    html += `<div class="rem-summary">${dividend} &divide; ${divisor} = <span class="hi">${q}</span> remainder <span class="hi">${remainder}</span></div>`;
+  }
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+/* ---- Long division ---- */
+/*
+  visual = {
+    type: 'long-division',
+    dividend: 17, divisor: 5,
+    steps: [
+      { label: 'Quotient',  value: '?',  state: 'dim' },
+      { label: 'Multiply',  value: '?',  state: 'dim' },
+      { label: 'Subtract',  value: '?',  state: 'dim' },
+      { label: 'Remainder', value: '?',  state: 'dim' },
+    ]
+  }
+  state: 'dim' | 'active' | 'done'
+*/
+function renderLongDivision(area, v) {
+  const { dividend, divisor, steps: ldSteps } = v;
+  let html = '<div class="longdiv-wrap">';
+
+  // The scaffold bracket
+  html += `<div class="longdiv-scaffold">
+    <div class="longdiv-bracket">
+      <span class="longdiv-divisor">${divisor}</span>
+      <div class="longdiv-dividend-wrap">
+        <span>${dividend}</span>
+      </div>
+    </div>
+  </div>`;
+
+  // Compute step values from operands so custom inputs update correctly
+  const quotient  = Math.floor(dividend / divisor);
+  const product   = quotient * divisor;
+  const remainder = dividend - product;
+  const computedVals = [
+    String(quotient),
+    String(product),
+    String(remainder),
+    remainder === 0 ? '0' : `${remainder} (dropped)`,
+  ];
+
+  // Steps breakdown panel
+  html += '<div class="longdiv-steps">';
+  ldSteps.forEach((s, i) => {
+    const displayVal = s.state === 'dim' ? '?' : (computedVals[i] ?? s.value);
+    html += `<div class="longdiv-step-row">
+      <div class="longdiv-step-label">${s.label}</div>
+      <div class="longdiv-step-val ${s.state}">${displayVal}</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+/* ---- Fraction grid ---- */
+/*
+  visual = {
+    type: 'fraction-grid',
+    a: { n: 2, d: 3 },   -- first fraction
+    b: { n: 3, d: 4 },   -- second fraction
+    showGrid: true,
+    shadedCells: 6,       -- how many cells in the grid to shade (starts 0)
+    highlightNew: false,  -- animate the newly shaded cells
+    showResult: false,    -- show the result fraction
+    result: { n: 6, d: 12, simplified: '1/2' }
+  }
+*/
+function renderFractionGrid(area, v) {
+  const { a, b, showGrid, shadedCells, highlightNew, showResult, result } = v;
+  const totalCols = b.d; // denominator of b = columns
+  const totalRows = a.d; // denominator of a = rows
+  const totalCells = totalRows * totalCols;
+
+  let html = '<div class="frac-wrap">';
+
+  // Equation row
+  const resultN = a.n * b.n;
+  const resultD = a.d * b.d;
+  html += `<div class="frac-equation-row">`;
+  html += fracHTML(a.n, a.d, !showResult ? 'active' : 'normal');
+  html += `<span class="frac-op">&times;</span>`;
+  html += fracHTML(b.n, b.d, !showResult ? 'active' : 'normal');
+  html += `<span class="frac-eq">=</span>`;
+  if (showResult) {
+    html += fracHTML(resultN, resultD, 'active');
+    if (result && result.simplified && result.simplified !== `${resultN}/${resultD}`) {
+      html += `<span class="frac-op">=</span>`;
+      const [sn, sd] = result.simplified.split('/');
+      html += fracHTML(parseInt(sn), parseInt(sd), 'active');
+    }
+  } else {
+    html += fracHTML('?', '?', 'dim');
+  }
+  html += `</div>`;
+
+  // Grid
+  if (showGrid) {
+    html += `<div class="frac-grid-wrap">`;
+    html += `<div class="frac-grid-label">${totalRows}&times;${totalCols} grid -- each cell = 1/${totalCells}</div>`;
+    html += `<div class="frac-grid" style="grid-template-columns: repeat(${totalCols}, 30px); grid-template-rows: repeat(${totalRows}, 30px);">`;
+
+    for (let r = 0; r < totalRows; r++) {
+      for (let c = 0; c < totalCols; c++) {
+        const idx = r * totalCols + c;
+        const shouldShade = r < a.n && c < b.n; // top-left block is numerator product
+        const isShaded = idx < shadedCells && shouldShade;
+        // highlightNew: animate the last batch
+        const prevShaded = shadedCells - (highlightNew ? b.n : 0);
+        const isNew = highlightNew && idx >= prevShaded * (totalCols / b.n) * b.n && isShaded;
+        let cls = 'frac-cell ';
+        if (isNew)    cls += 'highlight';
+        else if (isShaded) cls += 'shaded';
+        else          cls += 'unshaded';
+        html += `<div class="${cls}"></div>`;
+      }
+    }
+
+    html += '</div>';
+
+    // Legend
+    html += `<div class="frac-legend-row">
+      <div class="frac-legend-swatch" style="background:var(--accent-bg);border-color:#e8c070;"></div> shaded = ${shadedCells}/${totalCells}
+      &nbsp;&nbsp;
+      <div class="frac-legend-swatch" style="background:var(--bg3);border-color:var(--border);"></div> unshaded
+    </div>`;
+    html += `</div>`;
+  }
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function fracHTML(n, d, cls) {
+  return `<div class="frac-display ${cls}">
+    <div class="frac-num">${n}</div>
+    <div class="frac-bar"></div>
+    <div class="frac-den">${d}</div>
+  </div>`;
+}
+
+/* ---- Decimal product ---- */
+/*
+  visual = {
+    type: 'decimal-product',
+    a: '1.2',        -- first number as string (preserves trailing zeros)
+    b: '0.3',        -- second number as string
+    aDecomp: [       -- place-value breakdown of a, each part shown as a pill
+      { label: '1', cls: 'ones' },
+      { label: '0.2', cls: 'tenths' },
+    ],
+    bDecomp: [
+      { label: '0.3', cls: 'tenths' },
+    ],
+    showDecomp: true,
+    partials: [
+      { desc: '1 x 0.3',   value: '0.3',   state: 'dim' },
+      { desc: '0.2 x 0.3', value: '0.06',  state: 'dim' },
+    ],
+    totalState: 'dim',   -- 'dim' | 'active' | 'done'
+    totalValue: '0.36',
+    placementNote: null, -- string shown when decimal point rule is the focus, null = hidden
+  }
+*/
+function renderDecimalProduct(area, v) {
+  const { a, b, aDecomp, bDecomp, showDecomp, partials, totalState, totalValue, placementNote } = v;
+
+  let html = '<div class="dec-wrap">';
+
+  // Concept meaning callout (shown when step sets meaningNote)
+  if (v.meaningNote) {
+    html += `<div class="dec-meaning-note">${v.meaningNote}</div>`;
+  }
+
+  // Big equation
+  const totalDone = totalState === 'done';
+  html += `<div class="dec-equation">
+    <span>${a}</span>
+    <span class="eq-muted"> &times; </span>
+    <span>${b}</span>
+    <span class="eq-muted"> = </span>
+    <span class="${totalDone ? '' : 'eq-dim'}">${totalDone ? totalValue : '?'}</span>
+  </div>`;
+
+  // Decomposition
+  if (showDecomp) {
+    html += '<div class="dec-decomp">';
+
+    // Row for a
+    html += '<div class="dec-decomp-row">';
+    html += `<div class="dec-decomp-label">${a} =</div>`;
+    html += '<div class="dec-decomp-eq">';
+    aDecomp.forEach((part, i) => {
+      if (i > 0) html += `<span class="dec-op-txt">+</span>`;
+      html += `<span class="dec-pv-pill ${part.cls}">${part.label}</span>`;
+    });
+    html += '</div></div>';
+
+    // Row for b
+    html += '<div class="dec-decomp-row">';
+    html += `<div class="dec-decomp-label">${b} =</div>`;
+    html += '<div class="dec-decomp-eq">';
+    bDecomp.forEach((part, i) => {
+      if (i > 0) html += `<span class="dec-op-txt">+</span>`;
+      html += `<span class="dec-pv-pill ${part.cls}">${part.label}</span>`;
+    });
+    html += '</div></div>';
+
+    html += '</div>'; // dec-decomp
+  }
+
+  // Partial products
+  if (partials && partials.length > 0) {
+    html += '<div class="dec-partials">';
+    html += '<div class="dec-partials-label">Partial products</div>';
+    partials.forEach(p => {
+      html += `<div class="dec-partial-row">
+        <div class="dec-partial-desc">${p.desc}</div>
+        <div class="dec-partial-val ${p.state}">${p.state === 'dim' ? '?' : p.value}</div>
+      </div>`;
+    });
+    html += '<hr class="dec-divider">';
+    html += `<div class="dec-total-row">
+      <div class="dec-total-label">Sum</div>
+      <div class="dec-total-val ${totalState}">${totalState === 'dim' ? '?' : totalValue}</div>
+    </div>`;
+    html += '</div>'; // dec-partials
+  }
+
+  // Decimal placement note
+  if (placementNote !== null && placementNote !== undefined) {
+    const isDim = !placementNote;
+    html += `<div class="dec-placement${isDim ? ' dim' : ''}">${placementNote || 'decimal point not yet placed'}</div>`;
+  }
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+/* ---- Standard renderers (unchanged) ---- */
+/* Sync editable input fields + activeEditableValues to the values used by a scenario */
+function syncEditableValuesToScenario(idx) {
+  if (!activeEditableValues || !activeModule) return;
+  const scenario = activeModule.scenarios[idx];
+  if (!scenario || !scenario.steps[0]?.visual) return;
+  const v = scenario.steps[0].visual;
+
+  if (v.type === 'remainder-bar' || v.type === 'long-division') {
+    if (activeEditableValues.dividend !== undefined) {
+      activeEditableValues.dividend = v.dividend;
+      const el = document.getElementById('inp-dividend');
+      if (el) el.value = v.dividend;
+    }
+    if (activeEditableValues.divisor !== undefined) {
+      activeEditableValues.divisor = v.divisor;
+      const el = document.getElementById('inp-divisor');
+      if (el) el.value = v.divisor;
+    }
+  } else if (v.type === 'fraction-grid') {
+    if (activeEditableValues.a && v.a) {
+      activeEditableValues.a = {...v.a};
+      activeEditableValues.b = {...v.b};
+      const nA = document.getElementById('inp-a-n'); if (nA) nA.value = v.a.n;
+      const dA = document.getElementById('inp-a-d'); if (dA) dA.value = v.a.d;
+      const nB = document.getElementById('inp-b-n'); if (nB) nB.value = v.b.n;
+      const dB = document.getElementById('inp-b-d'); if (dB) dB.value = v.b.d;
+    }
+  } else if (v.type === 'decimal-product') {
+    if (activeEditableValues.a !== undefined) {
+      activeEditableValues.a = v.a;
+      activeEditableValues.b = v.b;
+      const elA = document.getElementById('inp-a'); if (elA) elA.value = v.a;
+      const elB = document.getElementById('inp-b'); if (elB) elB.value = v.b;
+    }
+  }
+}
+
+function renderScenarioBar() {
+  const bar   = document.getElementById('scenBar');
+  const label = bar.querySelector('.scen-label');
+  bar.innerHTML = ''; bar.appendChild(label);
+  activeModule.scenarios.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = 'scen-btn' + (i === scenIdx ? ' active' : '');
+    b.textContent = s.label;
+    b.onclick = () => { scenIdx = i; stepIdx = 0; syncEditableValuesToScenario(i); render(); };
+    bar.appendChild(b);
+  });
+}
+
+function renderCode() {
+  const scenario = activeModule.scenarios[scenIdx]; if (!scenario) return;
+  const st       = scenario.steps[stepIdx];
+  const area     = document.getElementById('codeArea');
+  area.innerHTML = '';
+  let lineNum = 0;
+  const lines = (activeModule.getCodeLines && activeEditableValues)
+    ? (activeModule.getCodeLines(scenIdx, activeEditableValues) || scenario.lines)
+    : scenario.lines;
+  lines.forEach(line => {
+    if (line.blank) {
+      const d = document.createElement('div'); d.className = 'code-line blank'; area.appendChild(d); return;
+    }
+    const isActive = lineNum === st.line;
+    const row   = document.createElement('div'); row.className = 'code-line' + (isActive ? ' active-line' : '');
+    const numEl = document.createElement('div'); numEl.className = 'linenum'; numEl.textContent = lineNum + 1;
+    const arrEl = document.createElement('div'); arrEl.className = 'arrow-col';
+    if (isActive) {
+      arrEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 12 12" fill="none">
+        <path d="M2 1.5L9.5 6L2 10.5" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+    }
+    const codeEl = document.createElement('div'); codeEl.className = 'code-text';
+    const tokenRange = (isActive && st.tokenRange) ? st.tokenRange : null;
+    line.code.forEach(([cls, txt], tokenIdx) => {
+      const sp = document.createElement('span');
+      let fullCls = cls || '';
+      if (tokenRange) {
+        const inRange = tokenIdx >= tokenRange[0] && tokenIdx <= tokenRange[1];
+        if (!inRange) fullCls += (fullCls ? ' ' : '') + 'tok-dim';
+      }
+      if (fullCls) sp.className = fullCls;
+      sp.textContent = txt;
+      codeEl.appendChild(sp);
+    });
+    row.appendChild(numEl); row.appendChild(arrEl); row.appendChild(codeEl);
+    area.appendChild(row); lineNum++;
+  });
+}
+
+function renderExpl() {
+  const scenario = activeModule.scenarios[scenIdx]; if (!scenario) return;
+  const st = scenario.steps[stepIdx];
+  document.getElementById('explLabel').textContent = st.expl ? st.expl.label : '';
+  document.getElementById('explText').innerHTML    = st.expl
+    ? st.expl.text.replace(/<hi>(.*?)<\/hi>/g, '<span class="hi">$1</span>') : '';
+}
+
+function renderStack() {
+  const area = document.getElementById('stackArea'); if (!area) return;
+  const scenario = activeModule.scenarios[scenIdx]; if (!scenario) return;
+  const st = scenario.steps[stepIdx];
+  if (!st.stack || st.stack.length === 0) { area.innerHTML = '<div class="panel-empty">empty</div>'; return; }
+  area.innerHTML = '';
+  st.stack.forEach((frame, fi) => {
+    if (fi > 0) {
+      const conn = document.createElement('div'); conn.className = 'stack-connector';
+      conn.textContent = 'called from'; area.appendChild(conn);
+    }
+    const f   = document.createElement('div'); f.className   = 'frame' + (fi === 0 ? ' top-frame' : '');
+    const hdr = document.createElement('div'); hdr.className = 'frame-header';
+    const nm  = document.createElement('div'); nm.className  = 'frame-name'; nm.textContent = frame.name;
+    const tag = document.createElement('div'); tag.className = 'frame-tag ' + (frame.active ? 'tag-active' : 'tag-waiting');
+    tag.textContent = frame.active ? 'running' : 'waiting';
+    hdr.appendChild(nm); hdr.appendChild(tag); f.appendChild(hdr);
+    if (frame.vars && frame.vars.length > 0) {
+      const vd = document.createElement('div'); vd.className = 'frame-vars';
+      frame.vars.forEach(v => {
+        const row = document.createElement('div'); row.className = 'var-row';
+        const vn  = document.createElement('div'); vn.className  = 'var-name'; vn.textContent = v.n;
+        const vv  = document.createElement('div');
+        let vc = (v.v === '?' || v.v === 'null') ? 'val-unset'
+               : v.fresh ? (v.cls ? 'val-ref-new' : 'val-new')
+               : (v.cls ? 'val-ref' : 'val-set');
+        vv.className = 'var-val ' + vc; vv.textContent = v.v;
+        row.appendChild(vn); row.appendChild(vv); vd.appendChild(row);
+      });
+      f.appendChild(vd);
+    }
+    area.appendChild(f);
+  });
+}
+
+function renderHeap() {
+  const area = document.getElementById('heapArea'); if (!area) return;
+  const scenario = activeModule.scenarios[scenIdx]; if (!scenario) return;
+  const st = scenario.steps[stepIdx];
+  if (!st.heap || st.heap.length === 0) { area.innerHTML = '<div class="panel-empty">no objects yet</div>'; return; }
+  area.innerHTML = '';
+  st.heap.forEach(obj => {
+    const o   = document.createElement('div'); o.className   = 'heap-obj' + (obj.active ? ' active-obj' : '');
+    const hdr = document.createElement('div'); hdr.className = 'heap-obj-header';
+    const typ = document.createElement('div'); typ.className = 'heap-obj-type'; typ.textContent = obj.type;
+    const ref = document.createElement('div'); ref.className = 'heap-obj-ref';  ref.textContent = obj.ref;
+    hdr.appendChild(typ); hdr.appendChild(ref); o.appendChild(hdr);
+    const fields = document.createElement('div'); fields.className = 'heap-obj-fields';
+    obj.fields.forEach(f => {
+      const row = document.createElement('div'); row.className = 'heap-field-row';
+      const fn  = document.createElement('div'); fn.className  = 'heap-field-name'; fn.textContent = f.n;
+      const fv  = document.createElement('div'); fv.className  = 'heap-field-val' + (f.fresh ? ' fresh' : ''); fv.textContent = f.v;
+      row.appendChild(fn); row.appendChild(fv); fields.appendChild(row);
+    });
+    o.appendChild(fields); area.appendChild(o);
+  });
+}
+
+function renderCustom() {
+  const area = document.getElementById('customArea'); if (!area) return;
+  const scenario = activeModule.scenarios[scenIdx]; if (!scenario) return;
+  const st  = scenario.steps[stepIdx];
+  const cfg = activeModule.panelConfig.custom;
+  if (!st.custom || st.custom.length === 0) {
+    area.innerHTML = `<div class="panel-empty">${cfg ? cfg.emptyText : ''}</div>`; return;
+  }
+  area.innerHTML = '';
+  st.custom.forEach(item => {
+    const el  = document.createElement('div'); el.className  = 'custom-item';
+    const hdr = document.createElement('div'); hdr.className = 'custom-item-header'; hdr.textContent = item.name;
+    if (item.tag) { const t = document.createElement('span'); t.className = 'custom-item-tag'; t.textContent = item.tag; hdr.appendChild(t); }
+    el.appendChild(hdr);
+    if (item.rows && item.rows.length > 0) {
+      const body = document.createElement('div'); body.className = 'custom-item-body';
+      item.rows.forEach(r => {
+        const row = document.createElement('div'); row.className = 'custom-row';
+        const k   = document.createElement('div'); k.className   = 'custom-key'; k.textContent = r.k;
+        const v   = document.createElement('div'); v.className   = 'custom-val' + (r.fresh ? ' fresh' : ''); v.textContent = r.v;
+        row.appendChild(k); row.appendChild(v); body.appendChild(row);
+      });
+      el.appendChild(body);
+    }
+    area.appendChild(el);
+  });
+}
+
+function renderControls() {
+  const scenario = activeModule ? activeModule.scenarios[scenIdx] : null;
+  document.getElementById('btnBack').disabled = !scenario || stepIdx === 0;
+  document.getElementById('btnNext').disabled = !scenario || stepIdx === scenario.steps.length - 1;
+  document.getElementById('stepCounter').textContent = scenario ? `${stepIdx + 1} / ${scenario.steps.length}` : '';
+}
+
+function render() {
+  if (!activeModule) return;
+  renderScenarioBar(); renderCode(); renderExpl();
+  renderVisual(); renderStack(); renderHeap(); renderCustom(); renderControls();
+}
+
+function step(dir) {
+  if (!activeModule) return;
+  const scenario = activeModule.scenarios[scenIdx]; if (!scenario) return;
+  stepIdx = Math.max(0, Math.min(scenario.steps.length - 1, stepIdx + dir));
+  render();
+}
+function reset() { stepIdx = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') step(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   step(-1);
+});
+</script>
+
+<!--
+  MODULE SCRIPTS
+  Each file calls STEPPER_REGISTRY.register(id, moduleObj).
+-->
+<script src="steppers/java-17/conditions.html"></script>
+<script src="steppers/java-17/methods.html"></script>
+<script src="steppers/java-17/classes-and-objects.html"></script>
+<script src="steppers/java-17/scanner.html"></script>
+<script src="steppers/java-17/switch.html"></script>
+<script src="steppers/java-17/loops.html"></script>
+<script src="steppers/java-17/arrays.html"></script>
+<script src="steppers/python-3/input.html"></script>
+<script src="steppers/python-3/conditions.html"></script>
+<script src="steppers/python-3/functions.html"></script>
+<script src="steppers/python-3/match.html"></script>
+<script src="steppers/python-3/classes.html"></script>
+<script src="steppers/python-3/loops.html"></script>
+<script src="steppers/python-3/lists.html"></script>
+<script src="steppers/math/modulus.html"></script>
+<script src="steppers/math/integer-division.html"></script>
+<script src="steppers/math/multiplying-fractions.html"></script>
+<script src="steppers/math/multiplying-decimals.html"></script>
+
+<script>
+(function() {
+  // Hash routing: #java-17/loops -> lang "Java 17", topic "java-17/loops"
+  function resolveFromHash() {
+    const hash = location.hash.replace(/^#\/?/, '');
+    if (!hash) return null;
+    for (const [lang, topics] of Object.entries(MANIFEST)) {
+      const match = topics.find(t => t.id === hash);
+      if (match) return { lang, topic: match };
+    }
+    return null;
+  }
+
+  const hashResult = resolveFromHash();
+  if (hashResult) {
+    activeLang = hashResult.lang;
+    document.getElementById('langBtnValue').textContent = hashResult.lang;
+    buildLangMenu();
+    selectTopic(hashResult.topic);
+  } else {
+    const prefs = loadPrefs();
+    if (prefs.lang && MANIFEST[prefs.lang]) {
+      activeLang = prefs.lang;
+      document.getElementById('langBtnValue').textContent = prefs.lang;
+    }
+    buildLangMenu();
+    const topics  = MANIFEST[activeLang] || [];
+    const target  = (prefs.topicId && topics.find(t => t.id === prefs.topicId)) || topics[0];
+    if (target) selectTopic(target);
+  }
+
+  // Update hash when topic changes; listen for back/forward
+  window.addEventListener('hashchange', () => {
+    const r = resolveFromHash();
+    if (r && r.topic.id !== (activeTopic && activeTopic.id)) {
+      activeLang = r.lang;
+      document.getElementById('langBtnValue').textContent = r.lang;
+      buildLangMenu();
+      selectTopic(r.topic);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

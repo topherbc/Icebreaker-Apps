@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Over Screen</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0e1a'/><text x='4' y='24' font-size='22'>🎮</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:        #f0f2ff;
+  --bg2:       #e4e8f8;
+  --surface:   #ffffff;
+  --surface2:  #f0f2ff;
+  --border:    #c8ceea;
+  --border2:   #a8b0d8;
+  --green:     #007a3d;
+  --green-dk:  #006633;
+  --pink:      #e0165a;
+  --pink-dk:   #880030;
+  --cyan:      #005c91;
+  --cyan-dk:   #005588;
+  --yellow:    #8c5c00;
+  --yellow-dk: #885500;
+  --purple:    #7733cc;
+  --text:      #0d1030;
+  --text2:     #3a4060;
+  --muted:     #5a6080;
+  --font-px:   'Press Start 2P', monospace;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 18px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+
+.screen { display: none; }
+.screen.active { display: flex; }
+
+/* ═══════════════════════════════════════
+   GRID BACKGROUND HELPER
+═══════════════════════════════════════ */
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,119,187,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,119,187,0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+   LOAD SCREEN
+═══════════════════════════════════════ */
+#loadScreen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.load-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center;
+}
+
+.load-pixel {
+  margin-bottom: 36px;
+}
+
+.load-eyebrow {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--cyan);
+  letter-spacing: 0.18em;
+  margin-bottom: 24px;
+  animation: blink-anim 1.6s step-end infinite;
+}
+
+@keyframes blink-anim {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.load-title {
+  font-family: var(--font-px);
+  font-size: clamp(32px, 5vw, 56px);
+  color: var(--text);
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  text-shadow: 4px 4px 0 var(--pink), 8px 8px 0 rgba(224,22,90,0.2);
+  letter-spacing: 0.04em;
+}
+
+.load-subtitle {
+  font-family: var(--font-px);
+  font-size: 12px;
+  color: var(--yellow);
+  margin-bottom: 56px;
+  letter-spacing: 0.12em;
+  animation: blink-anim 1s step-end infinite;
+}
+
+.load-panel {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1), 6px 6px 0 var(--border);
+  padding: 36px 44px 40px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+}
+
+.load-panel::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: 20px; right: 20px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--cyan), var(--green));
+}
+
+.form-label {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.16em;
+  display: block;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-bottom: 3px solid var(--cyan);
+  color: var(--text);
+  font-family: var(--font-px);
+  font-size: 28px;
+  padding: 14px 16px;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  letter-spacing: 0.1em;
+}
+.form-input::-webkit-inner-spin-button,
+.form-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.form-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0,207,255,0.12);
+}
+
+.form-hint {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+}
+
+.btn-begin {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 20px 24px;
+  background: var(--green);
+  border: none;
+  color: #fff;
+  font-family: var(--font-px);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  min-height: 60px;
+  box-shadow: 4px 4px 0 var(--green-dk), inset 0 -3px 0 rgba(0,0,0,0.2);
+  transition: background 0.1s, transform 0.1s, box-shadow 0.1s;
+}
+.btn-begin:hover {
+  background: #009948;
+  transform: translateY(-1px);
+  box-shadow: 6px 6px 0 var(--green-dk), inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+.btn-begin:active {
+  transform: translateY(2px);
+  box-shadow: 2px 2px 0 var(--green-dk);
+}
+
+/* ═══════════════════════════════════════
+   STATION SCREEN
+═══════════════════════════════════════ */
+#stationScreen {
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.station-header {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--border);
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hdr-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hdr-title {
+  font-family: var(--font-px);
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0.06em;
+  text-shadow: 2px 2px 0 var(--pink);
+}
+
+.hdr-divider {
+  width: 1px; height: 24px;
+  background: var(--border);
+}
+
+.hdr-sub {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.btn-reset-hdr {
+  padding: 0 20px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-reset-hdr:hover { border-color: var(--muted); color: var(--text); }
+
+.btn-pick {
+  padding: 0 22px;
+  height: 36px;
+  background: var(--pink);
+  border: none;
+  color: #fff;
+  font-family: var(--font-px);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  min-height: 36px;
+  box-shadow: 3px 3px 0 var(--pink-dk);
+  transition: background 0.1s, transform 0.1s, box-shadow 0.1s;
+}
+.btn-pick:hover {
+  background: #cc1250;
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 0 var(--pink-dk);
+}
+.btn-pick:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 var(--pink-dk);
+}
+.btn-pick:disabled {
+  background: var(--border);
+  color: var(--muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.station-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 48px;
+  position: relative;
+}
+
+.station-intro {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  margin-bottom: 36px;
+  text-transform: uppercase;
+}
+
+.station-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+  max-width: 960px;
+}
+
+.station-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  padding: 32px 36px;
+  cursor: default;
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.35s,
+              border-color 0.2s,
+              opacity 0.3s;
+  box-shadow: 4px 4px 0 var(--border);
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  user-select: none;
+}
+
+.station-card.cleared {
+  opacity: 0.45;
+  border-color: var(--green-dk);
+  box-shadow: 4px 4px 0 var(--green-dk);
+}
+
+/* Highlight state when picked */
+.station-card.pick-highlight {
+  border-color: var(--pink);
+  box-shadow: 6px 6px 0 var(--pink-dk);
+  transform: translate(-2px, -2px);
+}
+
+/* Carousel keyframes are generated dynamically in pickStation() */
+
+.station-num {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+}
+
+.station-name {
+  font-family: var(--font-px);
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+.station-topic {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text2);
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: auto;
+}
+
+.station-badge {
+  position: absolute;
+  top: 20px; right: 20px;
+  font-family: var(--font-px);
+  font-size: 8px;
+  padding: 5px 10px;
+  letter-spacing: 0.12em;
+  border: 1px solid;
+}
+
+.station-badge.not-started {
+  color: var(--muted);
+  border-color: var(--border2);
+  background: transparent;
+}
+
+.station-badge.in-progress {
+  color: var(--yellow-dk);
+  border-color: var(--yellow);
+  background: rgba(204,136,0,0.07);
+}
+
+.station-badge.cleared {
+  color: var(--green);
+  border-color: var(--green-dk);
+  background: rgba(0,168,85,0.07);
+}
+
+/* ═══════════════════════════════════════
+   QUESTION SCREEN
+═══════════════════════════════════════ */
+#questionScreen {
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.q-header {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--border);
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.q-station-tag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.q-station-dot {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.q-station-name {
+  font-family: var(--font-px);
+  font-size: 11px;
+  color: var(--text);
+  letter-spacing: 0.06em;
+}
+
+.q-progress {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+}
+
+.btn-back {
+  padding: 0 20px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-back:hover { border-color: var(--muted); color: var(--text); }
+
+.q-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 48px;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* ─── CARD CONTAINER ─── */
+.card-stage {
+  width: 100%;
+  max-width: 860px;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* Shuffle ghost cards -- offset behind the main card */
+.card-ghost {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  pointer-events: none;
+}
+.card-ghost-1 {
+  transform: translate(8px, 8px);
+  opacity: 0.35;
+  background: var(--surface2);
+  border-color: var(--border2);
+}
+.card-ghost-2 {
+  transform: translate(4px, 4px);
+  opacity: 0.55;
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+/* Main question card */
+.q-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1), 6px 6px 0 var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.q-card.shuffle-anim {
+  animation: shuffle-bounce 0.5s ease-out;
+}
+
+@keyframes shuffle-bounce {
+  0%   { transform: translateX(0); opacity: 1; }
+  25%  { transform: translateX(-60px) rotate(-3deg); opacity: 0.5; }
+  50%  { transform: translateX(80px) rotate(2deg); opacity: 0.7; }
+  75%  { transform: translateX(-20px) rotate(-1deg); opacity: 0.9; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.card-top-stripe {
+  height: 4px;
+  background: var(--cyan);
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.card-content {
+  padding: 36px 44px;
+  flex: 1;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.card-format-tag {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+}
+
+.card-player-tag {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--cyan);
+  letter-spacing: 0.16em;
+}
+
+.card-question-text {
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 28px;
+}
+
+/* ─── MULTIPLE CHOICE ─── */
+.mc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.mc-btn {
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 500;
+  padding: 16px 20px;
+  text-align: left;
+  cursor: pointer;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1.4;
+}
+.mc-btn:hover { border-color: var(--cyan); background: var(--bg2); }
+
+.mc-key {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  padding: 3px 7px;
+}
+
+.mc-btn.revealed-correct {
+  border-color: var(--green);
+  background: rgba(0,168,85,0.08);
+}
+.mc-btn.revealed-correct .mc-key {
+  color: var(--green);
+  border-color: var(--green-dk);
+}
+.mc-btn.revealed-correct::after {
+  content: '◀';
+  margin-left: auto;
+  color: var(--green);
+  font-size: 16px;
+}
+
+/* ─── CODE TRACE ─── */
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  padding: 20px 24px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  tab-size: 4;
+}
+
+.code-block .kw  { color: var(--cyan); }
+.code-block .str { color: var(--yellow); }
+.code-block .cmt { color: var(--muted); font-style: italic; }
+.code-block .cls { color: var(--purple); }
+.code-block .num { color: var(--green); }
+
+/* ─── FILL IN THE BLANK ─── */
+.fitb-code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--yellow);
+  padding: 20px 24px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--text);
+  margin-bottom: 8px;
+  tab-size: 4;
+}
+
+.blank-input {
+  display: inline-block;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--yellow);
+  color: var(--yellow);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  width: 7em;
+  outline: none;
+  padding: 0 4px;
+  text-align: center;
+  transition: border-color 0.15s;
+  vertical-align: middle;
+}
+.blank-input:focus { border-color: var(--cyan); color: var(--cyan); }
+.blank-input.revealed-correct { color: var(--green); border-color: var(--green); border-bottom-width: 5px; }
+
+/* ─── DRAG AND DROP ─── */
+.dnd-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-top: 8px;
+}
+
+.dnd-items-col, .dnd-targets-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dnd-col-label {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  margin-bottom: 4px;
+}
+
+.dnd-item {
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+  min-height: 52px;
+  line-height: 1.35;
+}
+.dnd-item:active { cursor: grabbing; }
+.dnd-item:hover { border-color: var(--cyan); }
+
+.dnd-item.dragging {
+  opacity: 0.4;
+  border-color: var(--cyan);
+}
+
+.dnd-item.locked {
+  cursor: default;
+  border-color: var(--green-dk);
+  background: rgba(0,230,118,0.06);
+}
+
+.drag-handle {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.dnd-target {
+  border: 2px dashed var(--border2);
+  padding: 10px 16px;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.dnd-target.drag-over {
+  border-color: var(--cyan);
+  background: rgba(0,119,187,0.06);
+}
+
+.dnd-target.matched {
+  border-style: solid;
+  border-color: var(--green-dk);
+  background: rgba(0,168,85,0.05);
+}
+
+.dnd-target.dnd-wrong {
+  border-color: var(--pink);
+  background: rgba(224,22,90,0.06);
+  animation: dnd-shake 0.5s ease-out;
+}
+
+@keyframes dnd-shake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-8px); }
+  40%  { transform: translateX(7px); }
+  60%  { transform: translateX(-5px); }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.dnd-target-label {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--cyan);
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+}
+
+.dnd-target-content {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text2);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.dnd-target-filled {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.35;
+}
+
+.dnd-check-icon {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+/* ─── REVEAL / ANSWER ─── */
+.card-answer-zone {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-answer-zone.has-answer {
+  padding: 0 44px 20px;
+}
+
+
+
+.answer-block {
+  display: none;
+  background: rgba(0,119,187,0.05);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  padding: 16px 20px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--text);
+}
+.answer-block.visible { display: block; }
+.answer-block code {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--purple);
+  background: rgba(119,51,204,0.08);
+  padding: 1px 5px;
+}
+
+/* ─── CARD FOOTER ─── */
+.card-footer {
+  padding: 20px 44px 28px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-action {
+  padding: 14px 36px;
+  background: var(--text);
+  border: none;
+  color: #fff;
+  font-family: var(--font-px);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  min-height: 48px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.25);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.btn-action:hover {
+  background: #1a2040;
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.25);
+}
+.btn-action:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+}
+.btn-action.next-mode {
+  background: var(--cyan);
+  box-shadow: 3px 3px 0 var(--cyan-dk);
+}
+.btn-action.next-mode:hover {
+  background: #0088cc;
+}
+.btn-action.stage-clear-mode {
+  background: var(--green);
+  box-shadow: 3px 3px 0 var(--green-dk);
+}
+.btn-action.stage-clear-mode:hover {
+  background: #009948;
+}
+
+.btn-shuffle {
+  padding: 12px 24px;
+  background: transparent;
+  border: 2px solid var(--border2);
+  color: var(--text2);
+  font-family: var(--font-px);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s;
+}
+.btn-shuffle:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+.shuffle-icon {
+  font-size: 16px;
+  display: inline-block;
+}
+
+.btn-shuffle.spinning .shuffle-icon {
+  animation: spin-icon 0.5s ease-out;
+}
+
+@keyframes spin-icon {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+/* ═══════════════════════════════════════
+   COMPLETION SCREEN
+═══════════════════════════════════════ */
+#completionScreen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.completion-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center;
+  max-width: 640px;
+}
+
+.completion-label {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 0.2em;
+  margin-bottom: 28px;
+  animation: blink-anim 0.8s step-end infinite;
+}
+
+.completion-title {
+  font-family: var(--font-px);
+  font-size: clamp(22px, 3.5vw, 40px);
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  text-shadow: 4px 4px 0 var(--green-dk);
+  letter-spacing: 0.05em;
+}
+
+.completion-msg {
+  font-family: var(--font-px);
+  font-size: 11px;
+  color: var(--yellow);
+  letter-spacing: 0.14em;
+  line-height: 2;
+  margin-bottom: 52px;
+}
+
+.btn-new-game {
+  padding: 20px 56px;
+  background: transparent;
+  border: 2px solid var(--border2);
+  color: var(--muted);
+  font-family: var(--font-px);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  min-height: 60px;
+  transition: all 0.15s;
+}
+.btn-new-game:hover {
+  border-color: var(--text2);
+  color: var(--text);
+}
+
+/* Star burst decorations */
+.completion-stars {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  font-size: 14px;
+  animation: float-star 4s ease-in-out infinite;
+  opacity: 0.6;
+}
+@keyframes float-star {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+  50%       { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     LOAD SCREEN
+══════════════════════════════════════ -->
+<div id="loadScreen" class="screen active">
+  <div class="grid-bg"></div>
+  <div class="load-inner">
+
+    <svg class="load-pixel" width="88" height="72" viewBox="0 0 88 72" fill="none" aria-hidden="true">
+      <!-- Monitor body -->
+      <rect x="4" y="4" width="80" height="52" rx="4" fill="#e4e8f8" stroke="#c8ceea" stroke-width="2"/>
+      <!-- Screen -->
+      <rect x="12" y="12" width="64" height="36" fill="#0d1030"/>
+      <!-- Screen content - colorful pixel art -->
+      <rect x="18" y="18" width="6" height="2" fill="#0077bb"/>
+      <rect x="26" y="18" width="4" height="2" fill="#e0165a"/>
+      <rect x="32" y="18" width="6" height="2" fill="#00a855"/>
+      <rect x="40" y="18" width="4" height="2" fill="#cc8800"/>
+      <rect x="46" y="18" width="6" height="2" fill="#0077bb"/>
+      <rect x="18" y="24" width="52" height="2" fill="#2a3158"/>
+      <rect x="18" y="30" width="36" height="2" fill="#2a3158"/>
+      <rect x="18" y="36" width="44" height="2" fill="#2a3158"/>
+      <!-- Monitor stand -->
+      <rect x="36" y="56" width="16" height="6" fill="#e4e8f8" stroke="#c8ceea" stroke-width="1"/>
+      <rect x="28" y="62" width="32" height="4" rx="2" fill="#e4e8f8" stroke="#c8ceea" stroke-width="1"/>
+    </svg>
+
+    <div class="load-eyebrow">WEEK 6 -- FRIDAY REVIEW</div>
+    <h1 class="load-title">GAME<br>OVER<br>SCREEN</h1>
+    <p class="load-subtitle">END OF WEEK FINAL BOSS</p>
+
+    <div class="load-panel">
+      <label class="form-label" for="playerCount">PLAYERS JOINING TODAY</label>
+      <input class="form-input" type="number" id="playerCount" value="25" min="6" max="30" aria-describedby="playerHint" />
+      <p class="form-hint" id="playerHint">Between 6 and 25 players</p>
+      <button class="btn-begin" onclick="startSession()">CONTINUE?</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     STATION SCREEN
+══════════════════════════════════════ -->
+<div id="stationScreen" class="screen">
+  <div class="grid-bg"></div>
+  <header class="station-header">
+    <div class="hdr-left">
+      <span class="hdr-title">GAME OVER SCREEN</span>
+      <div class="hdr-divider"></div>
+      <span class="hdr-sub">Select Stage</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="btn-pick" id="btnPick" onclick="pickStation()" aria-label="Pick a random stage">PICK</button>
+      <button class="btn-reset-hdr" onclick="resetAll()">New Game</button>
+    </div>
+  </header>
+
+  <div class="station-body">
+    <div class="station-intro" id="stationIntro">ALL 4 STAGES MUST BE CLEARED</div>
+    <div class="station-grid" id="stationGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     QUESTION SCREEN
+══════════════════════════════════════ -->
+<div id="questionScreen" class="screen">
+  <div class="grid-bg"></div>
+  <header class="q-header">
+    <div class="q-station-tag">
+      <div class="q-station-dot" id="qDot"></div>
+      <span class="q-station-name" id="qStationName"></span>
+    </div>
+    <span class="q-progress" id="qProgress"></span>
+    <button class="btn-back" onclick="goToStations()">Stages</button>
+  </header>
+
+  <div class="q-body">
+    <!-- Ghost stack for shuffle visual -->
+    <div class="card-stage" id="cardStage">
+      <div class="card-ghost card-ghost-1" id="ghost1" aria-hidden="true"></div>
+      <div class="card-ghost card-ghost-2" id="ghost2" aria-hidden="true"></div>
+
+      <!-- Main card -->
+      <div class="q-card" id="qCard">
+        <div class="card-top-stripe" id="cardTopStripe"></div>
+        <div class="card-content">
+          <div class="card-meta">
+            <span class="card-format-tag" id="cardFormatTag"></span>
+            <span class="card-player-tag" id="cardPlayerTag"></span>
+          </div>
+          <p class="card-question-text" id="cardQuestionText"></p>
+          <div id="cardInteractive"></div>
+        </div>
+        <div class="card-answer-zone" id="cardAnswerZone">
+          <div class="answer-block" id="answerBlock"></div>
+        </div>
+        <div class="card-footer">
+          <button class="btn-shuffle" id="btnShuffle" onclick="doShuffle()" aria-label="Shuffle to a different question">
+            <span class="shuffle-icon" id="shuffleIcon">&#8635;</span>
+            <span>SHUFFLE</span>
+          </button>
+          <div class="footer-actions">
+            <button class="btn-action" id="btnAction" onclick="handleAction()">SHOW ANSWER</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     COMPLETION SCREEN
+══════════════════════════════════════ -->
+<div id="completionScreen" class="screen">
+  <div class="grid-bg"></div>
+  <div class="completion-stars" id="compStars" aria-hidden="true"></div>
+  <div class="completion-inner">
+    <div class="completion-label">ALL STAGES CLEARED</div>
+    <h2 class="completion-title">CONGRATULATIONS<br>PLAYER ONE</h2>
+    <p class="completion-msg">ALL STAGES CLEARED.<br>INSERT COIN TO PLAY AGAIN.</p>
+    <button class="btn-new-game" onclick="resetAll()">NEW GAME</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  QUESTION DATA
+// ════════════════════════════════════════════════════════
+
+const STATIONS = [
+  {
+    id: 'inheritance',
+    name: 'The Inheritance Tree',
+    topic: 'extends, super(), protected, subclass members, constructor chain',
+    color: '#e0165a',
+    colorDk: '#880030',
+  },
+  {
+    id: 'polymorphism',
+    name: 'The Polymorphism Lab',
+    topic: '@Override, runtime method resolution, reference vs object type, downcasting, ClassCastException',
+    color: '#0077bb',
+    colorDk: '#005588',
+  },
+  {
+    id: 'abstract',
+    name: 'The Abstract Floor',
+    topic: 'abstract class, abstract method, cannot instantiate, concrete subclass requirements',
+    color: '#7733cc',
+    colorDk: '#551199',
+  },
+  {
+    id: 'bonus',
+    name: 'Bonus Round',
+    topic: 'Spaced repetition -- String methods (Wk 2), HashMap + ArrayList (Wk 3), OOP fundamentals (Wk 5)',
+    color: '#cc8800',
+    colorDk: '#885500',
+  },
+];
+
+// Format types: 'mc' | 'trace' | 'fitb' | 'dnd'
+const QUESTIONS = {
+  inheritance: [
+    {
+      format: 'fitb',
+      question: 'Fill in the two blanks to declare Mage as a subclass of Fighter and call the parent constructor.',
+      code: [
+        'public class Mage /* _1_ */ Fighter {',
+        '    public Mage(String name) {',
+        '        /* _2_ */(name);',
+        '    }',
+        '}',
+      ],
+      blanks: ['extends', 'super'],
+      blankWidths: ['6em', '5em'],
+      answer: 'extends declares that Mage is a subclass of Fighter. super(name) calls the Fighter constructor and passes the name up to it. Without super(), the parent constructor never runs.',
+    },
+    {
+      format: 'mc',
+      question: 'Which access modifier allows a field to be read by subclasses but keeps it hidden from unrelated classes?',
+      options: ['public', 'private', 'protected', 'default (no modifier)'],
+      correct: 2,
+      answer: 'protected gives access to the class itself, all subclasses, and other classes in the same package -- but not to unrelated classes outside the package. private would block subclasses too.',
+    },
+    {
+      format: 'trace',
+      question: 'What does this print?',
+      code: [
+        'class Fighter {',
+        '    String weapon = "Sword";',
+        '    void describe() { System.out.println("Fighter"); }',
+        '}',
+        'class Mage extends Fighter {',
+        '    void describe() { System.out.println("Mage"); }',
+        '}',
+        'Mage m = new Mage();',
+        'System.out.println(m.weapon);',
+      ],
+      options: ['Mage', 'Fighter', 'Sword', 'Compile error'],
+      correct: 2,
+      answer: 'Sword -- Mage inherits the weapon field from Fighter. Subclasses inherit all non-private fields from their parent.',
+    },
+    {
+      format: 'trace',
+      question: 'Fighter has a no-arg constructor that prints "Fighter created". Mage extends Fighter but does not call super(). What prints when you run this?',
+      code: [
+        'class Fighter {',
+        '    Fighter() { System.out.println("Fighter created"); }',
+        '}',
+        'class Mage extends Fighter {',
+        '    Mage() { System.out.println("Mage created"); }',
+        '}',
+        'new Mage();',
+      ],
+      options: [
+        'Mage created',
+        'Fighter created',
+        'Fighter created\nMage created',
+        'Compile error -- super() is required',
+      ],
+      correct: 2,
+      answer: 'Fighter created\nMage created -- Java automatically inserts super() as the first line of any constructor that does not call it explicitly. The parent constructor always runs first.',
+    },
+    {
+      format: 'dnd',
+      question: 'Match each keyword or concept to its correct role.',
+      items: [
+        'Declares a subclass relationship',
+        'Calls the parent class constructor',
+        'Visible to subclasses but not outside the package',
+        'Tells the compiler this method replaces a parent method',
+      ],
+      targets: [
+        { label: 'extends',    correctItemIdx: 0 },
+        { label: 'super()',    correctItemIdx: 1 },
+        { label: 'protected',  correctItemIdx: 2 },
+        { label: '@Override',  correctItemIdx: 3 },
+      ],
+    },
+  ],
+
+  polymorphism: [
+    {
+      format: 'trace',
+      question: 'What does this print?',
+      code: [
+        'class Fighter { void attack() { System.out.println("Swing"); } }',
+        'class Mage extends Fighter {',
+        '    void attack() { System.out.println("Zap"); }',
+        '}',
+        'Fighter f = new Mage();',
+        'f.attack();',
+      ],
+      options: ['Swing', 'Zap', 'SwingZap', 'Compile error'],
+      correct: 1,
+      answer: 'Zap -- Java resolves the method at runtime using the actual object type, not the reference type. The object is a Mage, so Mage\'s attack() runs.',
+    },
+    {
+      format: 'mc',
+      question: 'What does @Override guarantee at compile time?',
+      options: [
+        'The method runs faster than the parent version',
+        'The method is automatically inherited by subclasses',
+        'A method with the same signature exists in the parent class',
+        'The method cannot be overridden by further subclasses',
+      ],
+      correct: 2,
+      answer: 'If no matching method exists in the parent, the compiler throws an error. Without @Override, a typo silently creates a brand new method instead of overriding anything.',
+    },
+    {
+      format: 'fitb',
+      question: 'Fill in the blank to downcast the Fighter reference so you can call a Mage-only method.',
+      code: [
+        'Fighter f = new Mage();',
+        '// castShield() only exists on Mage',
+        'Mage m = /* _1_ */ f;',
+        'm.castShield();',
+      ],
+      blanks: ['(Mage)'],
+      blankWidths: ['6em'],
+      answer: '(Mage) is the cast operator. It tells Java to treat f as a Mage reference so you can call Mage-only methods. If f is not actually a Mage object at runtime, Java throws a ClassCastException.',
+    },
+    {
+      format: 'trace',
+      question: 'What happens when this runs?',
+      code: [
+        'class Fighter {}',
+        'class Mage extends Fighter {}',
+        'class Brawler extends Fighter {}',
+        '',
+        'Fighter f = new Brawler();',
+        'Mage m = (Mage) f;',
+      ],
+      options: [
+        'Works fine -- Mage and Brawler are both Fighters',
+        'Compile error -- cannot cast between siblings',
+        'ClassCastException at runtime',
+        'NullPointerException at runtime',
+      ],
+      correct: 2,
+      answer: 'ClassCastException at runtime. The compiler allows the cast because f is declared as Fighter. But at runtime, the actual object is a Brawler -- not a Mage -- so Java throws ClassCastException.',
+    },
+    {
+      format: 'dnd',
+      question: 'Match each term to what it describes in polymorphism.',
+      items: [
+        'Determines what methods are visible at compile time',
+        'Determines which method version runs at runtime',
+        'Lets you access subclass-only methods through a parent reference',
+        'Thrown when the actual object is not compatible with the cast target',
+      ],
+      targets: [
+        { label: 'Reference type',      correctItemIdx: 0 },
+        { label: 'Object type',         correctItemIdx: 1 },
+        { label: 'Downcast',            correctItemIdx: 2 },
+        { label: 'ClassCastException',  correctItemIdx: 3 },
+      ],
+    },
+  ],
+
+  abstract: [
+    {
+      format: 'trace',
+      question: 'What happens when this code runs?',
+      code: [
+        'abstract class Fighter {',
+        '    abstract void attack();',
+        '}',
+        '',
+        'Fighter f = new Fighter();',
+      ],
+      options: [
+        'Runs fine -- Fighter is declared',
+        'NullPointerException at runtime',
+        'Compile error -- cannot instantiate an abstract class',
+        'Compile error -- Fighter has no fields',
+      ],
+      correct: 2,
+      answer: 'Compile error. The abstract keyword prevents Fighter from being instantiated directly. You can only create objects of concrete subclasses.',
+    },
+    {
+      format: 'fitb',
+      question: 'Fill in both blanks to make Fighter an abstract class with one abstract method.',
+      code: [
+        'public /* _1_ */ class Fighter {',
+        '    public /* _2_ */ void attack();',
+        '    public void rest() {',
+        '        System.out.println("Resting");',
+        '    }',
+        '}',
+      ],
+      blanks: ['abstract', 'abstract'],
+      blankWidths: ['7em', '7em'],
+      answer: 'The first abstract marks the class as abstract -- it cannot be instantiated directly. The second abstract on the method means it has no body here; any concrete subclass must provide one. rest() has a body, so it does not need abstract.',
+    },
+    {
+      format: 'trace',
+      question: 'What does this print?',
+      code: [
+        'abstract class Fighter {',
+        '    String name;',
+        '    Fighter(String n) { this.name = n; }',
+        '    abstract void attack();',
+        '    void rest() { System.out.println(name + " rests"); }',
+        '}',
+        'class Brawler extends Fighter {',
+        '    Brawler(String n) { super(n); }',
+        '    void attack() { System.out.println(name + " punches"); }',
+        '}',
+        'Brawler b = new Brawler("Rex");',
+        'b.rest();',
+      ],
+      options: ['Rex punches', 'Rex rests', 'Compile error -- abstract class', 'null rests'],
+      correct: 1,
+      answer: 'Rex rests -- rest() is a concrete method defined in the abstract parent. Brawler inherits it just like any other method. Abstract classes can have concrete methods.',
+    },
+    {
+      format: 'trace',
+      question: 'What happens when this code is compiled?',
+      code: [
+        'abstract class Fighter {',
+        '    abstract void attack();',
+        '    abstract void defend();',
+        '}',
+        '',
+        'class Mage extends Fighter {',
+        '    void attack() { System.out.println("Zap"); }',
+        '    // defend() is not implemented',
+        '}',
+      ],
+      options: [
+        'Compiles fine -- partial implementation is allowed',
+        'Compile error -- Mage must implement all abstract methods',
+        'Compile error -- abstract class cannot have two abstract methods',
+        'Runs but defend() does nothing',
+      ],
+      correct: 1,
+      answer: 'Compile error. Mage does not implement defend(), so Java requires Mage to also be declared abstract. A concrete class must provide a body for every inherited abstract method.',
+    },
+    {
+      format: 'dnd',
+      question: 'Match each term to its correct description.',
+      items: [
+        'Can have both abstract and concrete methods; cannot be instantiated',
+        'Has no body; subclasses must provide the implementation',
+        'Must provide a body for every abstract method it inherits',
+        'Inherited as-is by subclasses; no override required',
+      ],
+      targets: [
+        { label: 'abstract class',                      correctItemIdx: 0 },
+        { label: 'abstract method',                     correctItemIdx: 1 },
+        { label: 'concrete subclass',                   correctItemIdx: 2 },
+        { label: 'concrete method in abstract class',   correctItemIdx: 3 },
+      ],
+    },
+  ],
+
+  bonus: [
+    {
+      format: 'fitb',
+      question: 'Fill in the blanks to store a power level in the map and then retrieve it. (Week 3 -- HashMap)',
+      code: [
+        'HashMap<String, Integer> levels = new HashMap<>();',
+        'levels./* _1_ */("Mage", 95);',
+        'System.out.println(levels./* _2_ */("Mage"));',
+      ],
+      blanks: ['put', 'get'],
+      blankWidths: ['4em', '4em'],
+      answer: 'put(key, value) stores an entry in the map. get(key) retrieves the value for that key. Both take the key as an argument -- here the key is the String "Mage".',
+    },
+    {
+      format: 'trace',
+      question: 'What does this print? (Week 3 -- ArrayList)',
+      code: [
+        'ArrayList<String> roster = new ArrayList<>();',
+        'roster.add("Fighter");',
+        'roster.add("Mage");',
+        'roster.add("Brawler");',
+        'roster.remove(1);',
+        'System.out.println(roster.get(1));',
+      ],
+      options: ['Fighter', 'Mage', 'Brawler', 'IndexOutOfBoundsException'],
+      correct: 2,
+      answer: 'Brawler -- remove(1) removes the element at index 1, which is "Mage". That shifts "Brawler" down to index 1. roster.get(1) then returns "Brawler".',
+    },
+    {
+      format: 'mc',
+      question: 'A class has a field: boolean shielded. Which method signature follows the correct boolean getter convention? (Week 5 -- OOP)',
+      options: [
+        'boolean getShielded()',
+        'boolean isShielded()',
+        'boolean returnShielded()',
+        'boolean checkShielded()',
+      ],
+      correct: 1,
+      answer: 'Boolean getters use the is prefix by convention: isShielded(). This is the standard naming pattern in Java and is recognized by many frameworks.',
+    },
+    {
+      format: 'mc',
+      question: 'This class has two private fields. Which return statement correctly builds a full name with a space in between? (Week 5 -- OOP)',
+      code: [
+        'public class Fighter {',
+        '    private String firstName;',
+        '    private String lastName;',
+        '',
+        '    public String getFullName() {',
+        '        return ???;',
+        '    }',
+        '}',
+      ],
+      options: [
+        'firstName + lastName',
+        'firstName + " " + lastName',
+        '"firstName lastName"',
+        'this.getFirstName(this.getLastName())',
+      ],
+      correct: 1,
+      answer: 'firstName + " " + lastName -- string concatenation joins the two fields with a literal space between them. Without the " " you get "FighterRex" with no gap.',
+    },
+    {
+      format: 'trace',
+      question: 'What does this print? (Week 2 -- String methods)',
+      code: [
+        'String title = "  Grand Mage  ";',
+        'System.out.println(title.trim().toUpperCase());',
+      ],
+      options: ['  Grand Mage  ', 'grand mage', 'GRAND MAGE', 'Grand Mage'],
+      correct: 2,
+      answer: 'GRAND MAGE -- trim() removes leading and trailing whitespace first, giving "Grand Mage". Then toUpperCase() converts every character, giving "GRAND MAGE".',
+    },
+  ],
+};
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+
+let playerCount     = 25;
+let stationStatus   = {};   // 'not-started' | 'in-progress' | 'cleared'
+let assignments     = {};   // stationId -> [ { questionIdx, playerIdx } ]
+let currentStation  = null;
+let currentCardIdx  = 0;    // index into assignments[currentStation]
+let dndState        = {};   // for drag and drop per question
+let revealOpen      = false;
+
+// ════════════════════════════════════════════════════════
+//  UTILITIES
+// ════════════════════════════════════════════════════════
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════
+//  SESSION INIT
+// ════════════════════════════════════════════════════════
+
+document.getElementById('playerCount').addEventListener('blur', function () {
+  let v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 6) v = 6;
+  if (v > 30) v = 30;
+  this.value = v;
+});
+
+function startSession() {
+  let n = parseInt(document.getElementById('playerCount').value, 10);
+  if (isNaN(n) || n < 6) n = 6;
+  if (n > 30) n = 30;
+  playerCount = n;
+
+  // Pre-assign questions to player slots
+  // total active questions = min(playerCount, 20)
+  const totalQ = Math.min(playerCount, 20);
+  const perStation = Math.floor(totalQ / 4);
+  const extras = totalQ % 4; // 0-3 stations get an extra question
+
+  // Shuffle player indices globally
+  let playerIndices = shuffle([...Array(playerCount).keys()]);
+
+  STATIONS.forEach((st, stIdx) => {
+    stationStatus[st.id] = 'not-started';
+
+    // How many Qs for this station
+    const qCount = perStation + (stIdx < extras ? 1 : 0);
+
+    // Shuffle this station's question pool
+    const qPool = shuffle([...Array(QUESTIONS[st.id].length).keys()]).slice(0, qCount);
+
+    // Assign players (pull from front of shuffled global list)
+    assignments[st.id] = qPool.map((qIdx, i) => ({
+      questionIdx: qIdx,
+      playerNum: playerIndices[stIdx * perStation + i] + 1,
+    }));
+  });
+
+  // Handle overflow: if playerCount > 20, second round
+  // Players beyond slot 20 get assigned round 2 (one per station, back-fill)
+  if (playerCount > 20) {
+    const overflow = playerIndices.slice(20);
+    let o = 0;
+    STATIONS.forEach(st => {
+      if (o < overflow.length) {
+        // pick a random question from this station's pool for the extra player
+        const randQ = Math.floor(Math.random() * QUESTIONS[st.id].length);
+        assignments[st.id].push({ questionIdx: randQ, playerNum: overflow[o] + 1 });
+        o++;
+      }
+    });
+  }
+
+  renderStationScreen();
+  showScreen('stationScreen');
+}
+
+// ════════════════════════════════════════════════════════
+//  STATION SCREEN
+// ════════════════════════════════════════════════════════
+
+function renderStationScreen() {
+  const grid = document.getElementById('stationGrid');
+  grid.innerHTML = '';
+
+  STATIONS.forEach((st, idx) => {
+    const status = stationStatus[st.id];
+    const card = document.createElement('div');
+    card.className = 'station-card' + (status === 'cleared' ? ' cleared' : '');
+    card.id = 'stationCard-' + st.id;
+    // No click, no role=button, no tabindex -- instructor uses PICK only
+    card.setAttribute('aria-label', st.name + ' -- ' + (
+      status === 'not-started' ? 'Not Started' :
+      status === 'in-progress' ? 'In Progress' : 'Cleared'
+    ));
+
+    const badgeText = status === 'not-started' ? 'NOT STARTED' :
+                      status === 'in-progress'  ? 'IN PROGRESS' : 'CLEARED';
+    const badgeCls  = status === 'not-started' ? 'not-started' :
+                      status === 'in-progress'  ? 'in-progress' : 'cleared';
+
+    card.innerHTML = `
+      <span class="station-num">STAGE ${String(idx + 1).padStart(2, '0')}</span>
+      <span class="station-name" style="color:${st.color}">${st.name}</span>
+      <span class="station-topic">${st.topic}</span>
+      <span class="station-badge ${badgeCls}" aria-label="Status: ${badgeText}">${badgeText}</span>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Update Pick button state
+  const available = STATIONS.filter(st => stationStatus[st.id] !== 'cleared');
+  const btnPick = document.getElementById('btnPick');
+  if (btnPick) btnPick.disabled = available.length === 0;
+
+  // Check completion
+  const allCleared = STATIONS.every(st => stationStatus[st.id] === 'cleared');
+  if (allCleared) setTimeout(showCompletion, 400);
+}
+
+// ════════════════════════════════════════════════════════
+//  PICK STATION (carousel spin + auto-select top-right)
+// ════════════════════════════════════════════════════════
+
+function pickStation() {
+  const available = STATIONS.filter(st => stationStatus[st.id] !== 'cleared');
+  if (available.length === 0) return;
+
+  const btnPick = document.getElementById('btnPick');
+  btnPick.disabled = true;
+
+  const grid = document.getElementById('stationGrid');
+  const domCards = Array.from(grid.querySelectorAll('.station-card'));
+  // Read current slot order directly from DOM (correct even after a previous spin)
+  const positions = domCards.map(el => el.id.replace('stationCard-', ''));
+
+  // Pick random target and calculate clockwise steps to land it at TL (slot 0)
+  const target = available[Math.floor(Math.random() * available.length)];
+  const clockwiseOrder = [0, 1, 3, 2]; // TL→TR→BR→BL→TL
+  const stepsPerLap = 4;
+  const extraLaps = 2;
+  const targetCyclePos = clockwiseOrder.indexOf(positions.indexOf(target.id));
+  const stepsToLand = (0 - targetCyclePos + stepsPerLap) % stepsPerLap || stepsPerLap;
+  const totalSteps = extraLaps * stepsPerLap + stepsToLand;
+
+  // Compute the final DOM order after all clockwise steps
+  let finalPositions = [...positions];
+  for (let s = 0; s < totalSteps; s++) {
+    finalPositions = [finalPositions[2], finalPositions[0], finalPositions[3], finalPositions[1]];
+  }
+
+  // Animation timing: fast warm-up laps, slow final approach
+  const fastMs = 250;  // ms per step during warm-up laps
+  const slowMs = 600;  // ms per step during final approach
+  const fastSteps = extraLaps * stepsPerLap;
+  const animDuration = fastSteps * fastMs + stepsToLand * slowMs;
+
+  // Map keyframe index k → percentage along the animation timeline
+  function stepPct(k) {
+    if (k === 0) return 0;
+    if (k === totalSteps) return 100;
+    if (k <= fastSteps) return Math.round(k * fastMs / animDuration * 100);
+    return Math.round((fastSteps * fastMs + (k - fastSteps) * slowMs) / animDuration * 100);
+  }
+
+  // Slot grid geometry: col/row for each slot index (TL=0, TR=1, BL=2, BR=3)
+  const slotCol = [0, 1, 0, 1];
+  const slotRow = [0, 0, 1, 1];
+  const gap    = 'calc(100% + 24px)';
+  const negGap = 'calc(-100% - 24px)';
+  const txOf = d => d === 0 ? '0' : d > 0 ? gap : negGap;
+
+  // Build and inject per-card @keyframes animations
+  const styleEl = document.createElement('style');
+  document.head.appendChild(styleEl);
+  const idToEl = Object.fromEntries(domCards.map(el => [el.id.replace('stationCard-', ''), el]));
+
+  positions.forEach((stId, startSlot) => {
+    const name = `cp-${stId}`;
+    let kf = `@keyframes ${name}{`;
+    let slot = startSlot;
+    for (let k = 0; k <= totalSteps; k++) {
+      const tx = txOf(slotCol[slot] - slotCol[startSlot]);
+      const ty = txOf(slotRow[slot] - slotRow[startSlot]);
+      kf += `${stepPct(k)}%{transform:translate(${tx},${ty})}`;
+      if (k < totalSteps) slot = clockwiseOrder[(clockwiseOrder.indexOf(slot) + 1) % 4];
+    }
+    kf += '}';
+    styleEl.textContent += kf;
+    idToEl[stId].style.animation = `${name} ${animDuration}ms linear forwards`;
+  });
+
+  setTimeout(() => {
+    // Disable CSS transitions so removing the animation doesn't cause a snap-back
+    domCards.forEach(el => { el.style.transition = 'none'; el.style.animation = ''; });
+    void grid.offsetWidth; // force reflow
+    // Reorder DOM to match final positions (cards are now at natural grid positions = landing spots)
+    finalPositions.forEach(stId => { if (idToEl[stId]) grid.appendChild(idToEl[stId]); });
+    // Restore transitions in the next frame so pick-highlight animates normally
+    requestAnimationFrame(() => { domCards.forEach(el => { el.style.transition = ''; }); });
+    styleEl.remove();
+    finishPick(finalPositions[0]);
+  }, animDuration + 80);
+}
+
+function finishPick(chosenId) {
+  // Highlight the TL card (first in grid = finalPositions[0] after animation)
+  const grid = document.getElementById('stationGrid');
+  const trCard = grid.querySelectorAll('.station-card')[0];
+  if (trCard) {
+    trCard.classList.add('pick-highlight');
+  }
+
+  // Update intro text
+  const st = STATIONS.find(s => s.id === chosenId);
+  const intro = document.getElementById('stationIntro');
+  if (intro && st) {
+    intro.textContent = 'PICKED: ' + st.name.toUpperCase();
+  }
+
+  // Enter the station after a brief pause so instructor can see the result
+  setTimeout(() => {
+    if (trCard) trCard.classList.remove('pick-highlight');
+    if (intro) intro.textContent = 'ALL 4 STAGES MUST BE CLEARED';
+    enterStation(chosenId);
+  }, 1400);
+}
+
+// ════════════════════════════════════════════════════════
+//  ENTER STATION
+// ════════════════════════════════════════════════════════
+
+function enterStation(stationId) {
+  currentStation = stationId;
+  currentCardIdx = 0;
+  if (stationStatus[stationId] === 'not-started') {
+    stationStatus[stationId] = 'in-progress';
+  }
+
+  const st = STATIONS.find(s => s.id === stationId);
+  document.getElementById('qDot').style.background = st.color;
+  document.getElementById('qStationName').textContent = st.name;
+  document.getElementById('cardTopStripe').style.background = st.color;
+
+  renderCard();
+  showScreen('questionScreen');
+}
+
+// ════════════════════════════════════════════════════════
+//  RENDER CARD
+// ════════════════════════════════════════════════════════
+
+function renderCard() {
+  // Single action button always starts as SHOW ANSWER
+  const btnAction = document.getElementById('btnAction');
+  btnAction.textContent = 'SHOW ANSWER';
+  btnAction.className = 'btn-action';
+  btnAction.disabled = false;
+
+  const assignList = assignments[currentStation];
+  const { questionIdx, playerNum } = assignList[currentCardIdx];
+  const q = QUESTIONS[currentStation][questionIdx];
+  const total = assignList.length;
+
+  revealOpen = false;
+
+  // Progress
+  document.getElementById('qProgress').textContent =
+    `PLAYER ${currentCardIdx + 1} OF ${total}`;
+
+  // Format tag
+  const fmtLabel = { mc: 'MULTIPLE CHOICE', trace: 'CODE TRACE', fitb: 'FILL IN THE BLANK', dnd: 'MATCHING' };
+  document.getElementById('cardFormatTag').textContent = fmtLabel[q.format] || q.format.toUpperCase();
+  document.getElementById('cardPlayerTag').textContent = `PLAYER ${playerNum}`;
+
+  // Question text
+  document.getElementById('cardQuestionText').textContent = q.question;
+
+  // Interactive zone
+  const zone = document.getElementById('cardInteractive');
+  zone.innerHTML = '';
+
+  if (q.format === 'mc') {
+    renderMC(zone, q);
+  } else if (q.format === 'trace') {
+    renderTrace(zone, q);
+  } else if (q.format === 'fitb') {
+    renderFITB(zone, q);
+  } else if (q.format === 'dnd') {
+    renderDND(zone, q, questionIdx);
+  }
+
+  // Clear answer block
+  const answerBlock = document.getElementById('answerBlock');
+  answerBlock.classList.remove('visible');
+  answerBlock.innerHTML = '';
+  document.getElementById('cardAnswerZone').classList.remove('has-answer');
+
+  // Shuffle button: only show if unused questions remain
+  const btnShuffle = document.getElementById('btnShuffle');
+  const stationQCount = QUESTIONS[currentStation].length;
+  const used = new Set(assignList.map(a => a.questionIdx));
+  const available = [...Array(stationQCount).keys()].filter(i => !used.has(i));
+  btnShuffle.style.display = available.length > 0 ? 'flex' : 'none';
+
+  document.getElementById('qCard').classList.remove('shuffle-anim');
+  updateGhostCards();
+}
+
+function updateGhostCards() {
+  const assignList = assignments[currentStation];
+  const remaining = assignList.length - currentCardIdx - 1;
+  document.getElementById('ghost1').style.display = remaining >= 2 ? 'block' : 'none';
+  document.getElementById('ghost2').style.display = remaining >= 1 ? 'block' : 'none';
+}
+
+// ─── MULTIPLE CHOICE ───
+function renderMC(zone, q) {
+  const grid = document.createElement('div');
+  grid.className = 'mc-grid';
+  const keys = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mc-btn';
+    const safeOpt = escHtml(opt).replace(/\n/g, '<br>');
+    btn.innerHTML = `<span class="mc-key">${keys[i]}</span><span>${safeOpt}</span>`;
+    btn.dataset.idx = i;
+    grid.appendChild(btn);
+  });
+  zone.appendChild(grid);
+}
+
+function highlightMC(q) {
+  document.querySelectorAll('.mc-btn').forEach(b => {
+    if (parseInt(b.dataset.idx) === q.correct) {
+      b.classList.add('revealed-correct');
+    }
+    b.style.pointerEvents = 'none';
+  });
+}
+
+// ─── CODE TRACE ───
+function renderTrace(zone, q) {
+  const pre = document.createElement('pre');
+  pre.className = 'code-block';
+  pre.setAttribute('role', 'code');
+  pre.textContent = q.code.join('\n');
+  zone.appendChild(pre);
+  renderMC(zone, q);
+}
+
+// ─── FILL IN THE BLANK ───
+function renderFITB(zone, q) {
+  const container = document.createElement('div');
+  container.className = 'fitb-code';
+
+  let blankCount = 0;
+  let inputRefs = [];
+
+  q.code.forEach(line => {
+    if (line === '') {
+      container.appendChild(document.createElement('br'));
+      return;
+    }
+    const lineDiv = document.createElement('div');
+    lineDiv.style.fontFamily = 'var(--font-mono)';
+    lineDiv.style.fontSize = '15px';
+    lineDiv.style.lineHeight = '1.9';
+    lineDiv.style.whiteSpace = 'pre-wrap';
+
+    const parts = line.split(/(\/\* _\d+_ \*\/)/g);
+    parts.forEach(part => {
+      const match = part.match(/\/\* _(\d+)_ \*\//);
+      if (match) {
+        const idx = parseInt(match[1]) - 1;
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.className = 'blank-input';
+        inp.style.width = q.blankWidths[idx] || '6em';
+        inp.setAttribute('aria-label', `Blank ${idx + 1}`);
+        inp.autocomplete = 'off';
+        inp.spellcheck = false;
+        inputRefs.push({ el: inp, answer: q.blanks[idx] });
+        lineDiv.appendChild(inp);
+        blankCount++;
+      } else if (part) {
+        lineDiv.appendChild(document.createTextNode(part));
+      }
+    });
+    container.appendChild(lineDiv);
+  });
+
+  zone.appendChild(container);
+  // Store refs so revealAnswer() can fill them
+  zone._blankInputs = inputRefs;
+}
+
+// ─── DRAG AND DROP ───
+function renderDND(zone, q, qId) {
+  const key = currentStation + '_' + qId;
+  if (!dndState[key]) {
+    dndState[key] = {
+      matched: new Set(),       // set of item indices (descriptions) that have been placed
+      targetContents: {},       // targetIdx -> itemIdx
+    };
+  }
+  const state = dndState[key];
+
+  const layout = document.createElement('div');
+  layout.className = 'dnd-layout';
+
+  // LEFT column: descriptions (draggable) -- shuffled, hide ones already placed
+  const itemsCol = document.createElement('div');
+  itemsCol.className = 'dnd-items-col';
+  const itemsLabel = document.createElement('div');
+  itemsLabel.className = 'dnd-col-label';
+  itemsLabel.textContent = 'DRAG TO MATCH';
+  itemsCol.appendChild(itemsLabel);
+
+  const itemOrder = shuffle([...Array(q.items.length).keys()]);
+  itemOrder.forEach(itemIdx => {
+    const alreadyPlaced = state.matched.has(itemIdx);
+    const item = document.createElement('div');
+    item.className = 'dnd-item' + (alreadyPlaced ? ' locked' : '');
+    item.dataset.itemIdx = itemIdx;
+    item.draggable = !alreadyPlaced;
+    item.style.opacity = alreadyPlaced ? '0.3' : '1';
+    item.innerHTML = `<span class="drag-handle" aria-hidden="true">::</span>${escHtml(q.items[itemIdx])}`;
+
+    if (!alreadyPlaced) {
+      item.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', itemIdx);
+        item.classList.add('dragging');
+      });
+      item.addEventListener('dragend', () => item.classList.remove('dragging'));
+    }
+    itemsCol.appendChild(item);
+  });
+
+  // RIGHT column: term labels (drop targets)
+  const targetsCol = document.createElement('div');
+  targetsCol.className = 'dnd-targets-col';
+  const targetsLabel = document.createElement('div');
+  targetsLabel.className = 'dnd-col-label';
+  targetsLabel.textContent = 'DROP ON TERM';
+  targetsCol.appendChild(targetsLabel);
+
+  q.targets.forEach((tgt, tIdx) => {
+    const targetDiv = document.createElement('div');
+    targetDiv.className = 'dnd-target' + (state.targetContents[tIdx] !== undefined ? ' matched' : '');
+
+    // Term label always visible at top
+    const lbl = document.createElement('div');
+    lbl.className = 'dnd-target-label';
+    lbl.textContent = tgt.label;
+
+    // Content area: empty placeholder or filled description
+    const content = document.createElement('div');
+    if (state.targetContents[tIdx] !== undefined) {
+      const placedItemIdx = state.targetContents[tIdx];
+      content.className = 'dnd-target-filled';
+      content.innerHTML = `<span class="dnd-check-icon" aria-hidden="true">OK</span>${escHtml(q.items[placedItemIdx])}`;
+    } else {
+      content.className = 'dnd-target-content';
+      content.textContent = 'drop here';
+    }
+
+    targetDiv.appendChild(lbl);
+    targetDiv.appendChild(content);
+
+    // Drop handlers
+    targetDiv.addEventListener('dragover', e => {
+      if (state.targetContents[tIdx] !== undefined) return;
+      e.preventDefault();
+      targetDiv.classList.add('drag-over');
+    });
+    targetDiv.addEventListener('dragleave', () => targetDiv.classList.remove('drag-over'));
+    targetDiv.addEventListener('drop', e => {
+      e.preventDefault();
+      targetDiv.classList.remove('drag-over');
+      if (state.targetContents[tIdx] !== undefined) return;
+      const itemIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      if (state.matched.has(itemIdx)) return;
+
+      // Only accept the correct match -- wrong drops get a shake and are rejected
+      if (itemIdx !== tgt.correctItemIdx) {
+        targetDiv.classList.add('dnd-wrong');
+        setTimeout(() => targetDiv.classList.remove('dnd-wrong'), 600);
+        return;
+      }
+
+      state.matched.add(itemIdx);
+      state.targetContents[tIdx] = itemIdx;
+      renderDND(zone, q, qId);
+    });
+
+    targetsCol.appendChild(targetDiv);
+  });
+
+  layout.appendChild(itemsCol);
+  layout.appendChild(targetsCol);
+  zone.innerHTML = '';
+  zone.appendChild(layout);
+}
+
+// ════════════════════════════════════════════════════════
+//  ACTION BUTTON DISPATCHER
+// ════════════════════════════════════════════════════════
+
+function handleAction() {
+  if (!revealOpen) {
+    revealAnswer();
+  } else {
+    nextCard();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  REVEAL ANSWER -- unified handler for all formats
+// ════════════════════════════════════════════════════════
+
+function revealAnswer() {
+  const assignList = assignments[currentStation];
+  const { questionIdx } = assignList[currentCardIdx];
+  const q = QUESTIONS[currentStation][questionIdx];
+  const isLast = currentCardIdx === assignList.length - 1;
+
+  const answerBlock = document.getElementById('answerBlock');
+
+  // ── MC / TRACE: highlight correct option ──
+  if (q.format === 'mc' || q.format === 'trace') {
+    highlightMC(q);
+    if (q.answer) {
+      answerBlock.innerHTML = escHtml(q.answer).replace(/\n/g, '<br>');
+      answerBlock.classList.add('visible');
+      document.getElementById('cardAnswerZone').classList.add('has-answer');
+    }
+  }
+
+  // ── FITB: fill blanks and show explanation ──
+  if (q.format === 'fitb') {
+    const zone = document.getElementById('cardInteractive');
+    const inputRefs = zone._blankInputs || [];
+    inputRefs.forEach(({ el, answer }) => {
+      el.value = answer;
+      el.classList.add('revealed-correct');
+      el.disabled = true;
+    });
+    const blankSummary = inputRefs.map((r, i) =>
+      `Blank ${i + 1}: <code>${escHtml(r.answer)}</code>`
+    ).join(' &nbsp;&nbsp; ');
+    const explanation = q.answer ? `<br><br>${escHtml(q.answer)}` : '';
+    answerBlock.innerHTML = blankSummary + explanation;
+    answerBlock.classList.add('visible');
+    document.getElementById('cardAnswerZone').classList.add('has-answer');
+  }
+
+  // ── DND: lock all targets and snap correct matches ──
+  if (q.format === 'dnd') {
+    const key = currentStation + '_' + questionIdx;
+    const state = dndState[key] || { matched: new Set(), targetContents: {} };
+    q.targets.forEach((tgt, tIdx) => {
+      if (state.targetContents[tIdx] === undefined) {
+        state.targetContents[tIdx] = tgt.correctItemIdx;
+        state.matched.add(tgt.correctItemIdx);
+      }
+    });
+    renderDND(document.getElementById('cardInteractive'), q, questionIdx);
+    document.querySelectorAll('.dnd-item').forEach(el => {
+      el.draggable = false;
+      el.style.opacity = '0.4';
+    });
+    if (q.answer) {
+      answerBlock.innerHTML = escHtml(q.answer);
+      answerBlock.classList.add('visible');
+      document.getElementById('cardAnswerZone').classList.add('has-answer');
+    }
+  }
+
+  // ── Transition button to NEXT PLAYER / STAGE CLEARED ──
+  revealOpen = true;
+  const btnAction = document.getElementById('btnAction');
+  if (isLast) {
+    btnAction.textContent = 'STAGE CLEARED';
+    btnAction.className = 'btn-action stage-clear-mode';
+  } else {
+    btnAction.textContent = 'NEXT PLAYER';
+    btnAction.className = 'btn-action next-mode';
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  SHUFFLE
+// ════════════════════════════════════════════════════════
+
+function doShuffle() {
+  const assignList = assignments[currentStation];
+  const stationQCount = QUESTIONS[currentStation].length;
+  const usedIndices = new Set(assignList.map(a => a.questionIdx));
+  const currentQIdx = assignList[currentCardIdx].questionIdx;
+
+  // Available = not used by ANY slot in this station, plus the current one
+  const available = [...Array(stationQCount).keys()].filter(i => !usedIndices.has(i));
+
+  if (available.length === 0) return; // nothing to swap to
+
+  // Pick a random replacement
+  const replacement = available[Math.floor(Math.random() * available.length)];
+
+  // Swap the current assignment
+  assignList[currentCardIdx].questionIdx = replacement;
+
+  // Animate card
+  const card = document.getElementById('qCard');
+  card.classList.add('shuffle-anim');
+
+  // Spin the icon
+  const btn = document.getElementById('btnShuffle');
+  btn.classList.add('spinning');
+  setTimeout(() => btn.classList.remove('spinning'), 500);
+
+  // Re-render after brief delay
+  setTimeout(() => {
+    dndState = {};  // reset dnd state for the new card
+    renderCard();
+  }, 180);
+}
+
+// ════════════════════════════════════════════════════════
+//  NEXT CARD / STATION COMPLETE
+// ════════════════════════════════════════════════════════
+
+function nextCard() {
+  const assignList = assignments[currentStation];
+  const isLast = currentCardIdx === assignList.length - 1;
+
+  if (isLast) {
+    stationStatus[currentStation] = 'cleared';
+    renderStationScreen();
+    showScreen('stationScreen');
+  } else {
+    currentCardIdx++;
+    dndState = {};
+    renderCard();
+  }
+}
+
+function goToStations() {
+  renderStationScreen();
+  showScreen('stationScreen');
+}
+
+// ════════════════════════════════════════════════════════
+//  COMPLETION
+// ════════════════════════════════════════════════════════
+
+function showCompletion() {
+  // Generate floating stars
+  const starsEl = document.getElementById('compStars');
+  starsEl.innerHTML = '';
+  const symbols = ['★', '✦', '◆', '▲', '●', '◀', '▶'];
+  const colors  = ['#ff2d78', '#00cfff', '#ffe600', '#00e676', '#c084fc'];
+  for (let i = 0; i < 24; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 100 + '%';
+    s.style.color = colors[Math.floor(Math.random() * colors.length)];
+    s.style.animationDelay = (Math.random() * 4) + 's';
+    s.style.animationDuration = (3 + Math.random() * 3) + 's';
+    s.style.fontSize = (10 + Math.random() * 20) + 'px';
+    starsEl.appendChild(s);
+  }
+  showScreen('completionScreen');
+}
+
+// ════════════════════════════════════════════════════════
+//  RESET
+// ════════════════════════════════════════════════════════
+
+function resetAll() {
+  stationStatus = {};
+  assignments = {};
+  currentStation = null;
+  currentCardIdx = 0;
+  dndState = {};
+  revealOpen = false;
+  document.getElementById('playerCount').value = 25;
+  showScreen('loadScreen');
+}
+
+// ════════════════════════════════════════════════════════
+//  UTILITY
+// ════════════════════════════════════════════════════════
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+</script>
+</body>
+</html>

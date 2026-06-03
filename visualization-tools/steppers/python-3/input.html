@@ -1,0 +1,114 @@
+/*
+  Python 3 -- User input
+  input(), int(input()), multiple inputs
+  No em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Line index comments mark each scenario's 0-based line numbers
+  (blank lines are not counted).
+*/
+STEPPER_REGISTRY.register("python-3/input", {
+  label: 'User input',
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: { title: 'Input buffer', emptyText: 'waiting for user to type' },
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+  scenarios: [
+
+    /* ------------------------------------------------------------------ */
+    /*  1. input() for a string                                             */
+    /*                                                                      */
+    /*  0  name = input("Enter your name: ")                               */
+    /*  1  print("Hello, " + name)                                         */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'input() for a string',
+      lines: [
+        { code: [['tok-op','name = '],['tok-meth','input'],['tok-op','('],['tok-str','"Enter your name: "'],['tok-op',')']] },
+        { code: [['tok-meth','print'],['tok-op','('],['tok-str','"Hello, "'],['tok-op',' + name)']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}], custom:[],
+          expl:{label:'Script starts', text:'<hi>input()</hi> displays the prompt and pauses. The program is now waiting for the user to type something.'} },
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          custom:[{name:'Input buffer',tag:'has data',rows:[{k:'buffered',v:'"Alice\\n"',fresh:true}]}],
+          expl:{label:'User types input', text:'The user types <hi>Alice</hi> and presses Enter. The full line including the newline arrives in the buffer as <hi>"Alice\\n"</hi>.'} },
+        { line:0, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:true,cls:false}],active:true}], custom:[],
+          expl:{label:'input() reads the line', text:'<hi>input()</hi> reads the entire line and strips the trailing newline. <hi>name = "Alice"</hi>. Unlike Java\'s Scanner, <hi>input()</hi> always consumes the whole line -- no leftover newline in the buffer.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:false,cls:false}],active:true}], custom:[],
+          expl:{label:'print runs', text:'<hi>print("Hello, " + name)</hi> prints "Hello, Alice".'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:false,cls:false}],active:true}], custom:[],
+          expl:{label:'Script ends', text:'There is nothing more to run.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  2. int(input()) for a number                                        */
+    /*                                                                      */
+    /*  0  age = int(input("Enter your age: "))                            */
+    /*  1  print("Age: " + str(age))                                       */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'int(input()) for a number',
+      lines: [
+        { code: [['tok-op','age = '],['tok-meth','int'],['tok-op','('],['tok-meth','input'],['tok-op','('],['tok-str','"Enter your age: "'],['tok-op','))']] },
+        { code: [['tok-meth','print'],['tok-op','('],['tok-str','"Age: "'],['tok-op',' + '],['tok-meth','str'],['tok-op','(age))']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}], custom:[],
+          expl:{label:'Waiting for input', text:'<hi>int(input())</hi> -- first <hi>input()</hi> runs and displays the prompt. The program pauses waiting for the user to type a number.'} },
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          custom:[{name:'Input buffer',tag:'has data',rows:[{k:'buffered',v:'"25\\n"',fresh:true}]}],
+          expl:{label:'User types input', text:'The user types <hi>25</hi> and presses Enter. The full line arrives in the buffer.'} },
+        { line:0, stack:[{name:'<module>',vars:[{n:'age',v:'25',fresh:true,cls:false}],active:true}], custom:[],
+          expl:{label:'input() and int() both run', text:'<hi>input()</hi> reads the string <hi>"25"</hi> and consumes the newline. Then <hi>int()</hi> converts the string to the integer <hi>25</hi>. No leftover newline -- <hi>input()</hi> consumed the whole line.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'age',v:'25',fresh:false,cls:false}],active:true}], custom:[],
+          expl:{label:'print runs', text:'<hi>age</hi> is <hi>25</hi>. <hi>print("Age: " + str(age))</hi> prints "Age: 25".'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'age',v:'25',fresh:false,cls:false}],active:true}], custom:[],
+          expl:{label:'Script ends', text:'There is nothing more to run.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  3. Two consecutive inputs                                           */
+    /*                                                                      */
+    /*  0  name = input("Name: ")                                           */
+    /*  1  age = int(input("Age: "))                                        */
+    /*  2  print(name + " is " + str(age))                                 */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Two consecutive inputs',
+      lines: [
+        { code: [['tok-op','name = '],['tok-meth','input'],['tok-op','('],['tok-str','"Name: "'],['tok-op',')']] },
+        { code: [['tok-op','age = '],['tok-meth','int'],['tok-op','('],['tok-meth','input'],['tok-op','('],['tok-str','"Age: "'],['tok-op','))']] },
+        { code: [['tok-meth','print'],['tok-op','(name + '],['tok-str','" is "'],['tok-op',' + '],['tok-meth','str'],['tok-op','(age))']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}], custom:[],
+          expl:{label:'First input call', text:'<hi>input("Name: ")</hi> displays the prompt and waits. The buffer is empty.'} },
+        { line:0, stack:[{name:'<module>',vars:[],active:true}],
+          custom:[{name:'Input buffer',tag:'has data',rows:[{k:'buffered',v:'"Alice\\n"',fresh:true}]}],
+          expl:{label:'User types name', text:'The user types <hi>Alice</hi> and presses Enter. The full line arrives in the buffer.'} },
+        { line:0, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:true,cls:false}],active:true}], custom:[],
+          expl:{label:'name is assigned', text:'<hi>input()</hi> reads <hi>"Alice"</hi> and strips the newline. <hi>name = "Alice"</hi>. Buffer is now empty -- nothing left over.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:false,cls:false}],active:true}], custom:[],
+          expl:{label:'Second input call', text:'<hi>input("Age: ")</hi> displays the prompt and waits again. The buffer is still empty -- no leftover newline from the first call.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:false,cls:false}],active:true}],
+          custom:[{name:'Input buffer',tag:'has data',rows:[{k:'buffered',v:'"25\\n"',fresh:true}]}],
+          expl:{label:'User types age', text:'The user types <hi>25</hi> and presses Enter. The second line arrives in the buffer.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:false,cls:false},{n:'age',v:'25',fresh:true,cls:false}],active:true}], custom:[],
+          expl:{label:'age is assigned', text:'<hi>input()</hi> reads <hi>"25"</hi>, then <hi>int()</hi> converts it to <hi>25</hi>. No CRLF issue -- each <hi>input()</hi> call cleanly reads one full line.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:false,cls:false},{n:'age',v:'25',fresh:false,cls:false}],active:true}], custom:[],
+          expl:{label:'print runs', text:'<hi>print(name + " is " + str(age))</hi> prints "Alice is 25". Two clean reads, no special handling needed.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'name',v:'"Alice"',fresh:false,cls:false},{n:'age',v:'25',fresh:false,cls:false}],active:true}], custom:[],
+          expl:{label:'Script ends', text:'There is nothing more to run. Because <hi>input()</hi> always reads a complete line, mixing string and integer inputs never causes the leftover newline problem that Scanner in Java has.'} },
+      ]
+    },
+
+  ]
+});

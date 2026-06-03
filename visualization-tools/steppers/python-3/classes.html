@@ -1,0 +1,163 @@
+/*
+  Python 3 -- Classes and objects
+  class, __init__, self, instances, methods
+  No em dashes anywhere -- use plain hyphens or rewrite the sentence.
+
+  Line index comments mark each scenario's 0-based line numbers
+  (blank lines are not counted).
+*/
+STEPPER_REGISTRY.register("python-3/classes", {
+  label: 'Classes and objects',
+  panelConfig: {
+    stack: true,
+    heap:  true,
+    custom: false,
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#3d3490', border:'#b0a8e0', label:'Object instance (heap)' },
+      { color:'#a0540a', border:'#e8c070', label:'Just assigned or created' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+  scenarios: [
+
+    /* ------------------------------------------------------------------ */
+    /*  1. What is a class?                                                 */
+    /*                                                                      */
+    /*  0  class Cat:                                                       */
+    /*  1      def __init__(self, name, age):                               */
+    /*  2          self.name = name                                         */
+    /*  3          self.age = age                                           */
+    /*     (blank -- not counted)                                           */
+    /*  4      def meow(self):                                              */
+    /*  5          print(self.name + " says: Meow!")                       */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'What is a class?',
+      lines: [
+        { code: [['tok-kw','class '],['tok-cls','Cat'],['tok-op',':']] },
+        { code: [['','    '],['tok-kw','def '],['tok-meth','__init__'],['tok-op','(self, name, age):']] },
+        { code: [['','        '],['tok-field','self.name'],['tok-op',' = name']] },
+        { code: [['','        '],['tok-field','self.age'],['tok-op',' = age']] },
+        { blank: true },
+        { code: [['','    '],['tok-kw','def '],['tok-meth','meow'],['tok-op','(self):']] },
+        { code: [['','        '],['tok-meth','print'],['tok-op','('],['tok-field','self.name'],['tok-op',' + '],['tok-str','" says: Meow!"'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[], heap:[],
+          expl:{label:'A class is a blueprint', text:'<hi>class Cat</hi> defines a blueprint. It describes what data a Cat holds and what it can do. No actual Cat exists yet.'} },
+        { line:1, stack:[], heap:[],
+          expl:{label:'__init__: the constructor', text:'<hi>def __init__(self, name, age)</hi> is the constructor. Python calls it automatically when you create a new Cat. <hi>self</hi> refers to the object being built.'} },
+        { line:2, stack:[], heap:[],
+          expl:{label:'Setting an instance attribute', text:'<hi>self.name = name</hi> stores the passed-in value on the object itself. Every Cat will have its own <hi>name</hi>.'} },
+        { line:3, stack:[], heap:[],
+          expl:{label:'Another instance attribute', text:'<hi>self.age = age</hi> sets a second attribute. The constructor job is to set up all attributes so the object starts in a valid state.'} },
+        { line:4, stack:[], heap:[],
+          expl:{label:'A method: the behavior', text:'<hi>def meow(self)</hi> is a method -- something a Cat can do. <hi>self</hi> is how the method reaches back to the specific object that called it.'} },
+        { line:5, stack:[], heap:[],
+          expl:{label:'Using an instance attribute', text:'<hi>self.name</hi> inside <hi>meow()</hi> refers to the name of whichever Cat object called the method -- not a fixed value.'} },
+        { line:5, stack:[], heap:[],
+          expl:{label:'The blueprint is complete', text:'The class definition is done. But we still have zero Cat objects. A blueprint by itself does nothing -- we need to build from it.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  2. Creating an instance                                             */
+    /*                                                                      */
+    /*  0  class Cat:  # ...                                                */
+    /*  1  mittens = Cat("Mittens", 3)                                      */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Creating an instance',
+      lines: [
+        { code: [['tok-kw','class '],['tok-cls','Cat'],['tok-op',':  '],['tok-cmt','# ...']] },
+        { blank: true },
+        { code: [['tok-op','mittens = '],['tok-cls','Cat'],['tok-op','('],['tok-str','"Mittens"'],['tok-op',', '],['tok-num','3'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[], heap:[],
+          expl:{label:'Two components', text:'The class <hi>Cat</hi> defines the blueprint. Below it we write top-level code to create an actual object.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'mittens',v:'None',fresh:false,cls:false}],active:true}], heap:[],
+          expl:{label:'Constructor call', text:'<hi>Cat("Mittens", 3)</hi> calls the constructor. Python allocates space for the object in memory.'} },
+        { line:1, stack:[{name:'__init__()',vars:[{n:'self',v:'@Cat1',fresh:true,cls:true},{n:'name',v:'"Mittens"',fresh:true,cls:false},{n:'age',v:'3',fresh:true,cls:false}],active:true},{name:'<module>',vars:[{n:'mittens',v:'None',fresh:false,cls:false}],active:false}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'None',fresh:false},{n:'age',v:'None',fresh:false}],active:false}],
+          expl:{label:'__init__ runs', text:'A frame is pushed for <hi>__init__()</hi>. <hi>self</hi> points to the new Cat object. Its attributes are not set yet.'} },
+        { line:1, stack:[{name:'__init__()',vars:[{n:'self',v:'@Cat1',fresh:false,cls:true},{n:'name',v:'"Mittens"',fresh:false,cls:false},{n:'age',v:'3',fresh:false,cls:false}],active:true},{name:'<module>',vars:[{n:'mittens',v:'None',fresh:false,cls:false}],active:false}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:true},{n:'age',v:'3',fresh:true}],active:true}],
+          expl:{label:'Attributes set', text:'<hi>__init__</hi> sets <hi>self.name = "Mittens"</hi> and <hi>self.age = 3</hi>. The object now has its own data.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:true,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false}],
+          expl:{label:'Variable holds a reference', text:'<hi>__init__()</hi> finishes, its frame is popped. <hi>mittens</hi> now holds a reference pointing to the Cat object in memory -- not the object itself.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false}],
+          expl:{label:'Script ends', text:'There is nothing more to run. The object in memory goes away when the script finishes.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  3. Two instances                                                    */
+    /*                                                                      */
+    /*  0  class Cat:  # ...                                                */
+    /*  1  mittens = Cat("Mittens", 3)                                      */
+    /*  2  mochi = Cat("Mochi", 5)                                          */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Two instances',
+      lines: [
+        { code: [['tok-kw','class '],['tok-cls','Cat'],['tok-op',':  '],['tok-cmt','# ...']] },
+        { blank: true },
+        { code: [['tok-op','mittens = '],['tok-cls','Cat'],['tok-op','('],['tok-str','"Mittens"'],['tok-op',', '],['tok-num','3'],['tok-op',')']] },
+        { code: [['tok-op','mochi = '],['tok-cls','Cat'],['tok-op','('],['tok-str','"Mochi"'],['tok-op',', '],['tok-num','5'],['tok-op',')']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}], heap:[],
+          expl:{label:'Script starts', text:'We have our <hi>Cat</hi> blueprint. We are going to create two separate Cat objects from it.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:true,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:true},{n:'age',v:'3',fresh:true}],active:false}],
+          expl:{label:'First instance created', text:'<hi>Cat("Mittens", 3)</hi> builds a Cat object in memory. <hi>mittens</hi> holds a reference to it. This object has its own <hi>name</hi> and <hi>age</hi>.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:true,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:true},{n:'age',v:'5',fresh:true}],active:false}],
+          expl:{label:'Second instance created', text:'<hi>Cat("Mochi", 5)</hi> builds a completely separate object. <hi>mochi</hi> holds a reference to it. Same blueprint, totally independent data.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:false,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:false}],
+          expl:{label:'Two objects, one blueprint', text:'Both <hi>mittens</hi> and <hi>mochi</hi> are Cats, but they are distinct objects. Changing Mittens name would have zero effect on Mochi. Each instance owns its data.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:false,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:false}],
+          expl:{label:'Script ends', text:'There is nothing more to run.'} },
+      ]
+    },
+
+    /* ------------------------------------------------------------------ */
+    /*  4. Calling instance methods                                         */
+    /*                                                                      */
+    /*  0  class Cat:  # ...                                                */
+    /*  1  mittens = Cat("Mittens", 3)                                      */
+    /*  2  mochi = Cat("Mochi", 5)                                          */
+    /*  3  mittens.meow()   # "Mittens says: Meow!"                         */
+    /*  4  mochi.meow()     # "Mochi says: Meow!"                           */
+    /* ------------------------------------------------------------------ */
+    {
+      label: 'Calling instance methods',
+      lines: [
+        { code: [['tok-kw','class '],['tok-cls','Cat'],['tok-op',':  '],['tok-cmt','# ...']] },
+        { blank: true },
+        { code: [['tok-op','mittens = '],['tok-cls','Cat'],['tok-op','('],['tok-str','"Mittens"'],['tok-op',', '],['tok-num','3'],['tok-op',')']] },
+        { code: [['tok-op','mochi = '],['tok-cls','Cat'],['tok-op','('],['tok-str','"Mochi"'],['tok-op',', '],['tok-num','5'],['tok-op',')']] },
+        { blank: true },
+        { code: [['tok-op','mittens.'],['tok-meth','meow'],['tok-op','()'],['','    '],['tok-cmt','# "Mittens says: Meow!"']] },
+        { code: [['tok-op','mochi.'],['tok-meth','meow'],['tok-op','()'],['','      '],['tok-cmt','# "Mochi says: Meow!"']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'<module>',vars:[],active:true}], heap:[],
+          expl:{label:'Script starts', text:'We have the <hi>Cat</hi> blueprint. We will create two instances and call a method on each.'} },
+        { line:1, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:true,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false}],
+          expl:{label:'mittens created', text:'<hi>mittens</hi> now points to a Cat object with name "Mittens" and age 3.'} },
+        { line:2, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:true,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:false}],
+          expl:{label:'mochi created', text:'<hi>mochi</hi> now points to a separate Cat object with name "Mochi" and age 5. Two objects, both from the same class.'} },
+        { line:3, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:false,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:false}],
+          expl:{label:'Calling meow() on mittens', text:'<hi>mittens.meow()</hi> -- the dot means "call this method on that specific object." Python follows the reference in <hi>mittens</hi> to find the right object.'} },
+        { line:3, stack:[{name:'meow() on @Cat1',vars:[],active:true},{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:false,cls:true}],active:false}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:true},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:false}],
+          expl:{label:'meow() runs on Mittens', text:'Python enters <hi>meow()</hi> with the Mittens object as <hi>self</hi>. Inside the method, <hi>self.name</hi> is "Mittens". It prints "Mittens says: Meow!"'} },
+        { line:4, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:false,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:false}],
+          expl:{label:'Now calling meow() on mochi', text:'<hi>mochi.meow()</hi> calls the exact same method code, but this time on the Mochi object. Python follows the reference in <hi>mochi</hi>.'} },
+        { line:4, stack:[{name:'meow() on @Cat2',vars:[],active:true},{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:false,cls:true}],active:false}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:true}],
+          expl:{label:'Same method, different object', text:'Now <hi>self.name</hi> inside <hi>meow()</hi> refers to "Mochi". It prints "Mochi says: Meow!" One method definition, two different results depending on which object called it.'} },
+        { line:4, stack:[{name:'<module>',vars:[{n:'mittens',v:'@Cat1',fresh:false,cls:true},{n:'mochi',v:'@Cat2',fresh:false,cls:true}],active:true}], heap:[{id:'c1',type:'Cat',ref:'@Cat1',fields:[{n:'name',v:'"Mittens"',fresh:false},{n:'age',v:'3',fresh:false}],active:false},{id:'c2',type:'Cat',ref:'@Cat2',fields:[{n:'name',v:'"Mochi"',fresh:false},{n:'age',v:'5',fresh:false}],active:false}],
+          expl:{label:'Script ends', text:'This is the core idea: one class, many independent instances, each with its own state.'} },
+      ]
+    },
+
+  ]
+});

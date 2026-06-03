@@ -1,0 +1,123 @@
+STEPPER_REGISTRY.register("java-17/methods", {
+  label: 'Method calls',
+  panelConfig: {
+    stack: true,
+    heap:  false,
+    custom: false,
+    legend: [
+      { color:'#1d5799', border:'#9dc0e8', label:'Currently running frame' },
+      { color:'#68655f', border:'#d4d1cc', label:'Paused, waiting to resume' },
+      { color:'#a0540a', border:'#e8c070', label:'Variable just assigned' },
+      { color:'#095e40', border:'#90d4b8', label:'Holding a value' },
+    ]
+  },
+  scenarios: [
+    {
+      label: "No args, no return",
+      lines: [
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','main'],['tok-op','(String[] args) {']] },
+        { code: [['','  '],['tok-meth','greet'],['tok-op','();']] },
+        { code: [['tok-op','}']] },
+        { blank: true },
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','greet'],['tok-op','() {']] },
+        { code: [['','  '],['tok-op','System.out.println('],['tok-str','"Hello!"'],['tok-op',');']] },
+        { code: [['tok-op','}']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Program starts', text:'Java enters <hi>main()</hi>. A new frame is pushed onto the call stack.'} },
+        { line:1, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'A method call', text:'We see <hi>greet();</hi> -- the parentheses mean "call this method now." No arguments, no return value needed.'} },
+        { line:4, stack:[{name:'greet()',vars:[],active:true},{name:'main()',vars:[],active:false}],
+          expl:{label:'Jumped into greet()', text:'Java pauses <hi>main()</hi> and pushes a new frame for <hi>greet()</hi>. We are now inside that method.'} },
+        { line:5, stack:[{name:'greet()',vars:[],active:true},{name:'main()',vars:[],active:false}],
+          expl:{label:'Executing the body', text:'<hi>System.out.println("Hello!")</hi> runs and prints to the console. This is the only thing <hi>greet()</hi> does.'} },
+        { line:6, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Method returns', text:'<hi>greet()</hi> hits the closing brace. Its frame is popped off the stack. We are back in <hi>main()</hi>.'} },
+        { line:2, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'main() finishes', text:'<hi>main()</hi> reaches its closing brace. Its frame is popped. The program ends.'} },
+      ]
+    },
+    {
+      label: "With arguments",
+      lines: [
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','main'],['tok-op','(String[] args) {']] },
+        { code: [['','  '],['tok-meth','printScore'],['tok-op','('],['tok-num','42'],['tok-op',');']] },
+        { code: [['tok-op','}']] },
+        { blank: true },
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','printScore'],['tok-op','('],['tok-type','int '],['tok-op','points) {']] },
+        { code: [['','  '],['tok-op','System.out.println('],['tok-str','"Score: "'],['tok-op',' + points);']] },
+        { code: [['tok-op','}']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Program starts', text:'<hi>main()</hi> begins. Its frame is on the stack.'} },
+        { line:1, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Calling with an argument', text:'We call <hi>printScore(42)</hi>. The value <hi>42</hi> will be passed in as the <hi>points</hi> parameter.'} },
+        { line:4, stack:[{name:'printScore()',vars:[{n:'points',v:'42',fresh:true}],active:true},{name:'main()',vars:[],active:false}],
+          expl:{label:'New frame -- parameter set', text:'Java pushes a frame for <hi>printScore()</hi>. The parameter <hi>points</hi> is automatically set to <hi>42</hi>. It lives inside this frame.'} },
+        { line:5, stack:[{name:'printScore()',vars:[{n:'points',v:'42',fresh:false}],active:true},{name:'main()',vars:[],active:false}],
+          expl:{label:'Using the parameter', text:'<hi>points</hi> holds <hi>42</hi>. The method uses it to print "Score: 42".'} },
+        { line:6, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Frame popped', text:'<hi>printScore()</hi> finishes. Its frame (and the local variable <hi>points</hi>) are gone. Back in <hi>main()</hi>.'} },
+        { line:2, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Done', text:'<hi>main()</hi> completes and its frame is popped. Program ends.'} },
+      ]
+    },
+    {
+      label: "Return a value",
+      lines: [
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','main'],['tok-op','(String[] args) {']] },
+        { code: [['','  '],['tok-type','int '],['tok-op','total = '],['tok-meth','add'],['tok-op','('],['tok-num','3'],['tok-op',', '],['tok-num','5'],['tok-op',');']] },
+        { code: [['','  '],['tok-op','System.out.println(total);']] },
+        { code: [['tok-op','}']] },
+        { blank: true },
+        { code: [['tok-kw','static '],['tok-type','int '],['tok-meth','add'],['tok-op','('],['tok-type','int '],['tok-op','a, '],['tok-type','int '],['tok-op','b) {']] },
+        { code: [['','  '],['tok-kw','return '],['tok-op','a + b;']] },
+        { code: [['tok-op','}']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Program starts', text:'<hi>main()</hi> begins.'} },
+        { line:1, stack:[{name:'main()',vars:[{n:'total',v:'?',fresh:false}],active:true}],
+          expl:{label:'Declaration + call', text:'Java sees <hi>int total = add(3, 5);</hi>. It reserves space for <hi>total</hi>, then must call <hi>add()</hi> first to get a value.'} },
+        { line:5, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:true},{n:'b',v:'5',fresh:true}],active:true},{name:'main()',vars:[{n:'total',v:'?',fresh:false}],active:false}],
+          expl:{label:'add() frame created', text:'A new frame for <hi>add()</hi> is pushed. Parameters <hi>a = 3</hi> and <hi>b = 5</hi> are set. <hi>main()</hi> is paused -- <hi>total</hi> is still unknown.'} },
+        { line:6, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:false},{n:'b',v:'5',fresh:false}],active:true},{name:'main()',vars:[{n:'total',v:'?',fresh:false}],active:false}],
+          expl:{label:'return statement', text:'<hi>return a + b</hi> computes 3 + 5 = 8. This value is packaged up and sent back to the caller.'} },
+        { line:1, stack:[{name:'main()',vars:[{n:'total',v:'8',fresh:true}],active:true}],
+          expl:{label:'Return value received', text:'<hi>add()</hi> is popped. The value <hi>8</hi> comes back to <hi>main()</hi>, and <hi>total</hi> is finally assigned.'} },
+        { line:2, stack:[{name:'main()',vars:[{n:'total',v:'8',fresh:false}],active:true}],
+          expl:{label:'Using the result', text:'<hi>total</hi> is now <hi>8</hi>. We pass it to <hi>println()</hi>, which prints 8 to the console.'} },
+        { line:3, stack:[{name:'main()',vars:[{n:'total',v:'8',fresh:false}],active:true}],
+          expl:{label:'Done', text:'<hi>main()</hi> closes. Program ends.'} },
+      ]
+    },
+    {
+      label: "Fire and forget",
+      lines: [
+        { code: [['tok-kw','static '],['tok-kw','void '],['tok-meth','main'],['tok-op','(String[] args) {']] },
+        { code: [['','  '],['tok-meth','add'],['tok-op','('],['tok-num','3'],['tok-op',', '],['tok-num','5'],['tok-op',');'],['','  '],['tok-cmt','// return value ignored']] },
+        { code: [['tok-op','}']] },
+        { blank: true },
+        { code: [['tok-kw','static '],['tok-type','int '],['tok-meth','add'],['tok-op','('],['tok-type','int '],['tok-op','a, '],['tok-type','int '],['tok-op','b) {']] },
+        { code: [['','  '],['tok-kw','return '],['tok-op','a + b;']] },
+        { code: [['tok-op','}']] },
+      ],
+      steps: [
+        { line:0, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Program starts', text:'<hi>main()</hi> begins.'} },
+        { line:1, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Calling without assigning', text:'We call <hi>add(3, 5)</hi> but there is no <hi>int x =</hi> in front. The method will still run and return a value -- we just will not use it.'} },
+        { line:4, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:true},{n:'b',v:'5',fresh:true}],active:true},{name:'main()',vars:[],active:false}],
+          expl:{label:'add() runs normally', text:'<hi>add()</hi> has no idea it is being ignored. It executes exactly the same as before.'} },
+        { line:5, stack:[{name:'add()',vars:[{n:'a',v:'3',fresh:false},{n:'b',v:'5',fresh:false}],active:true},{name:'main()',vars:[],active:false}],
+          expl:{label:'Returns 8 - nobody catches it', text:'<hi>add()</hi> computes and returns <hi>8</hi>. That value floats back to the call site in <hi>main()</hi>...'} },
+        { line:1, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Value is discarded', text:'...and is immediately thrown away. No variable catches it. Valid Java, but only makes sense when the result truly does not matter.'} },
+        { line:2, stack:[{name:'main()',vars:[],active:true}],
+          expl:{label:'Done', text:'<hi>main()</hi> ends. The value 8 was computed and immediately lost.'} },
+      ]
+    }
+  ]
+});

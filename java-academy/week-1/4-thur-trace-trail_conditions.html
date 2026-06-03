@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Trail Conditions Check -- Debug &amp; Trace</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230d1f2d'/><polygon points='16,4 28,28 4,28' fill='%232a7a4b'/><polygon points='16,10 24,28 8,28' fill='%231a4f7a'/></svg>">
+<script>(function(){var t=localStorage.getItem('claude-theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /*
+    WCAG AA spot-check:
+    #e8eef4 on #0d1f2d:  ~11:1  PASS (dark panel text)
+    #0d1f2d on #f0f4f8:  ~14:1  PASS (body)
+    #ffffff on #2a7a4b:   ~5.2:1 PASS (buttons)
+    #0d1f2d on #ffffff:  ~17:1  PASS (card body)
+    #1a4f7a on #f0f4f8:   ~8.5:1 PASS (section headers on body)
+    #1a4f7a on #ffffff:   ~8.5:1 PASS (section headers on card)
+    #e8eef4 on #0d1f2d:  ~11:1  PASS (code panel text on dark)
+    #c8d8e4 border on #ffffff: decorative only
+  */
+  :root {
+    --body-bg:      #f0f4f8;
+    --text-primary: #0d1f2d;
+    --accent1:      #2a7a4b;
+    --accent1-hov:  #4a9a6a;
+    --accent2:      #1a4f7a;
+    --card-bg:      #ffffff;
+    --dark-panel:   #0d1f2d;
+    --border:       #c8d8e4;
+    --error:        #c0392b;
+    --code-bg:      #0d1117;
+
+    --dp-text:      #e8eef4;
+    --dp-ln:        #6e90a8;  /* was #4a6a80 (3.7:1 fail on #0d1117) -- lightened to ~5:1 */
+    --dp-border:    #1e3a50;
+
+    --fix-correct:   #c8f0d8;
+    --fix-correct-t: #1e4f3a;
+    --fix-border:    #2a7a4b;
+
+    --s-kw:  #79b8ff;
+    --s-ty:  #b392f0;
+    --s-str: #85e89d;
+    --s-num: #f8c555;
+    --s-mth: #9ecbff;
+    --s-pln: #e8eef4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: var(--body-bg);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* ─── Top bar ─── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 54px;
+    background: var(--dark-panel);
+    border-bottom: 2px solid var(--accent2);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    padding: 0 22px;
+    gap: 14px;
+    z-index: 100;
+  }
+
+  .tb-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    font-weight: 400;
+    color: #e8eef4;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tb-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: #7a9ab8;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tb-spacer { flex: 1; }
+
+  .top-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    padding: 0 18px;
+    height: 40px;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, opacity 0.15s;
+  }
+
+  #btn-export {
+    background: var(--accent2);
+    color: #e8eef4;
+  }
+  #btn-export:hover:not(:disabled) { background: #2166a0; }
+  #btn-export:disabled { opacity: 0.35; cursor: default; }
+  #btn-export:focus-visible { outline: 2px solid var(--accent1); outline-offset: 2px; }
+
+  #btn-reset {
+    background: var(--error);
+    color: #ffffff;
+  }
+  #btn-reset:hover { background: #a93226; }
+  #btn-reset:focus-visible { outline: 2px solid var(--accent1); outline-offset: 2px; }
+
+  /* ─── Layout ─── */
+  #layout {
+    display: flex;
+    height: 100vh;
+    padding-top: 102px;
+  }
+
+  /* ─── Left: code panel ─── */
+  #code-panel {
+    width: 60%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--dark-panel);
+    border-right: 2px solid var(--accent2);
+    overflow: hidden;
+  }
+
+  #code-header {
+    background: #060e18;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--dp-border);
+    flex-shrink: 0;
+  }
+
+  .filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent1-hov);
+  }
+
+  .lang-badge {
+    background: #1a3050;
+    color: #b0cce0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 0;
+    border: 1px solid var(--accent2);
+  }
+
+  .edit-hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: #8ab0c8;
+    font-style: italic;
+  }
+
+  .mac-dots { display: flex; gap: 5px; margin-left: auto; }
+  .mac-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+
+  #code-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    background: var(--code-bg);
+    padding: 14px 0 40px;
+    scrollbar-width: thin;
+    scrollbar-color: #1a4f7a #0d1117;
+  }
+
+  table.code-table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+  }
+
+  td.ln {
+    width: 46px;
+    padding: 1px 12px 1px 16px;
+    text-align: right;
+    color: var(--dp-ln);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    user-select: none;
+    border-right: 1px solid #1a2a3a;
+    vertical-align: middle;
+  }
+
+  td.code {
+    padding: 1px 20px 1px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14.5px;
+    color: var(--s-pln);
+    white-space: pre;
+    line-height: 1.85;
+    vertical-align: middle;
+  }
+
+  /* Bug rows -- yellow highlight (turns green only when fixed) */
+  tr.bug-row { background: #1a1800; }
+  tr.bug-row td.ln { color: #f8c555; border-left: 3px solid #c9a000; }
+
+  /* Editable fix input */
+  .bug-input {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14.5px;
+    color: var(--s-pln);
+    background: transparent;
+    border: 1.5px dashed #c9a000;
+    border-radius: 0;
+    padding: 1px 8px;
+    width: 100%;
+    outline: none;
+    white-space: pre;
+    line-height: 1.85;
+    transition: border-color 0.15s, background 0.25s, color 0.25s;
+  }
+
+  .bug-input:focus {
+    border-color: #f8c555;
+    border-style: solid;
+    background: rgba(248,197,85,0.06);
+  }
+
+  .bug-input.correct {
+    background: var(--fix-correct);
+    color: var(--fix-correct-t);
+    border: 2px solid var(--fix-border);
+    border-style: solid;
+  }
+
+  .bug-input:disabled {
+    opacity: 0.6;
+    cursor: default;
+    border-style: dashed;
+  }
+
+  /* Syntax tokens */
+  .kw  { color: var(--s-kw); font-weight: 500; }
+  .ty  { color: var(--s-ty); }
+  .str { color: var(--s-str); }
+  .num { color: var(--s-num); }
+  .bl  { color: #c49af0; }
+  .mth { color: var(--s-mth); }
+  .cm  { color: #6a9a7a; font-style: italic; }
+
+  /* ─── Right: question panel ─── */
+  #question-panel {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--body-bg);
+    padding: 16px 15px 48px 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--body-bg);
+  }
+
+  /* ─── Bug tracker bar ─── */
+  .bug-bar {
+    position: fixed;
+    top: 54px;
+    left: 0; right: 0;
+    z-index: 90;
+    background: var(--dark-panel);
+    border-bottom: 1px solid var(--accent2);
+    padding: 0 22px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .bug-bar-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--error);
+    flex-shrink: 0;
+  }
+
+  .bug-dots {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .bug-dot-wrap {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .bug-dot {
+    width: 13px; height: 13px;
+    border-radius: 0;
+    background: #1a3050;
+    border: 2px solid #4a6a80;
+    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  /* found: dashed border = shape cue for colorblind users */
+  .bug-dot.found { background: var(--error); border-color: #a93226; border-style: dashed; }
+  /* fixed: solid border + accent = shape cue differentiates from found */
+  .bug-dot.fixed { background: var(--accent1); border-color: #1e6038; border-style: solid; border-width: 3px; }
+
+  .bug-dot-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #7a9ab8;
+  }
+
+  .bug-dot.found + .bug-dot-label { color: #e8eef4; }
+  .bug-dot.fixed + .bug-dot-label { color: var(--accent1-hov); }
+
+  /* Section divider */
+  .s-div {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 11px;
+    padding: 6px 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--body-bg);
+  }
+
+  .s-div::before, .s-div::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+  }
+
+  .s-div span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 13px 14px 11px;
+    margin-bottom: 11px;
+    transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(13,31,45,0.07);
+  }
+
+  .q-card.q-active {
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 2px rgba(42,122,75,0.15);
+  }
+
+  .q-card.q-done-state {
+    border-color: var(--accent1);
+  }
+
+  .q-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .q-num-badge {
+    background: var(--dark-panel);
+    color: var(--accent1-hov);
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 400;
+    font-size: 14px;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    border: 1px solid var(--accent2);
+  }
+
+  .q-meta { flex: 1; }
+
+  .q-anchor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    margin-bottom: 3px;
+  }
+
+  .q-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  .q-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    background: #e4eef6;
+    padding: 1px 5px;
+    border-radius: 0;
+    color: var(--accent2);
+    border: 1px solid var(--border);
+  }
+
+  .q-input {
+    width: 100%;
+    background: var(--body-bg);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 48px;
+    margin-top: 7px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .q-input:focus { border-color: var(--accent1); }
+
+  .q-input::placeholder {
+    color: #7a9ab8;
+    font-style: italic;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+  }
+
+  .q-input:disabled {
+    opacity: 0.7;
+    cursor: default;
+    resize: none;
+  }
+
+  /* Fix prompt (shown after typing in a bug question) */
+  .fix-prompt {
+    display: none;
+    margin-top: 8px;
+    background: rgba(42,122,75,0.07);
+    border: 1px dashed var(--accent1);
+    border-radius: 0;
+    padding: 8px 12px;
+  }
+
+  .fix-prompt.shown { display: block; }
+
+  .fix-prompt-lbl {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent1);
+  }
+
+  /* ===== THEME TOGGLE BUTTON ===== */
+  html                    { color-scheme: light dark; }
+  html[data-theme="light"]{ color-scheme: light; }
+  html[data-theme="dark"] { color-scheme: dark; }
+  .btn-theme {
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid #4a6a80;
+    color: #b0cce0;
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-theme:hover { background: #1a3050; border-color: var(--accent2); }
+  .btn-theme:focus-visible { outline: 2px solid var(--accent1); outline-offset: 2px; }
+
+  /* ===== LIGHT MODE ===== */
+  html[data-theme="light"] body                  { background: var(--body-bg); color: var(--text-primary); }
+
+  /* Question panel */
+  html[data-theme="light"] #question-panel        { background: var(--body-bg); }
+  html[data-theme="light"] .s-div                 { background: var(--body-bg); }
+  html[data-theme="light"] .s-div::before,
+  html[data-theme="light"] .s-div::after          { background: var(--border); }
+  html[data-theme="light"] .s-div span            { color: var(--accent2); }
+  html[data-theme="light"] .q-card                { background: var(--card-bg); border-color: var(--border); box-shadow: 0 2px 8px rgba(13,31,45,0.08); }
+  html[data-theme="light"] .q-card.q-active       { border-color: var(--accent1); box-shadow: 0 0 0 2px rgba(42,122,75,0.15); }
+  html[data-theme="light"] .q-card.q-done-state   { border-color: var(--accent1); }
+  html[data-theme="light"] .q-num-badge           { background: var(--card-bg); color: var(--accent2); border-color: var(--accent2); }
+  html[data-theme="light"] .q-anchor              { color: var(--accent2); }
+  html[data-theme="light"] .q-text                { color: var(--text-primary); }
+  html[data-theme="light"] .q-text code           { background: #e4eef6; color: var(--accent2); border-color: var(--border); }
+  html[data-theme="light"] .q-input               { background: var(--card-bg); border-color: var(--border); color: var(--text-primary); }
+  html[data-theme="light"] .q-input::placeholder  { color: #8aabbc; }
+  html[data-theme="light"] .q-input:focus         { border-color: var(--accent1); }
+  html[data-theme="light"] .fix-prompt            { background: rgba(42,122,75,0.07); border-color: var(--accent1); }
+  html[data-theme="light"] .fix-prompt-lbl        { color: var(--accent1); }
+
+  /* Top bar -- light */
+  html[data-theme="light"] .topbar               { background: var(--body-bg); border-bottom: 2px solid var(--accent2); box-shadow: 0 2px 8px rgba(13,31,45,0.08); }
+  html[data-theme="light"] .tb-title             { color: var(--text-primary); }
+  html[data-theme="light"] .tb-sub               { color: #5a7a8a; }
+  html[data-theme="light"] .btn-theme            { color: var(--accent2); border-color: var(--border); background: var(--card-bg); }
+  html[data-theme="light"] .btn-theme:hover      { background: #e4eef6; }
+
+  /* Bug tracker bar -- light */
+  html[data-theme="light"] .bug-bar              { background: #e8eef4; border-bottom: 1px solid var(--border); }
+  html[data-theme="light"] .bug-bar-label        { color: var(--error); }
+  html[data-theme="light"] .bug-dot              { background: var(--card-bg); border-color: var(--border); }
+  html[data-theme="light"] .bug-dot-label        { color: #5a7a8a; }
+
+  /* Code panel -- light */
+  html[data-theme="light"] #code-panel           { background: #f0f4f8; border-right: 2px solid var(--accent2); }
+  html[data-theme="light"] #code-header          { background: #e0eaf2; border-bottom: 1px solid var(--border); }
+  html[data-theme="light"] .filename             { color: var(--accent1); }
+  html[data-theme="light"] .lang-badge           { background: var(--card-bg); color: var(--accent2); border-color: var(--accent2); }
+  html[data-theme="light"] .edit-hint            { color: #6a8a9a; }
+  html[data-theme="light"] #code-body            { background: #ffffff; scrollbar-color: var(--border) #ffffff; }
+  html[data-theme="light"] td.ln                 { color: #8aabbc; border-right-color: var(--border); }
+  html[data-theme="light"] td.code               { color: #0d1f2d; }
+  html[data-theme="light"] .kw                   { color: #1a4f7a; }
+  html[data-theme="light"] .ty                   { color: #6b3fa0; }
+  html[data-theme="light"] .str                  { color: #1e6038; }
+  html[data-theme="light"] .num                  { color: #7a5000; }
+  html[data-theme="light"] .bl                   { color: #6b3fa0; }
+  html[data-theme="light"] .mth                  { color: #1a5f7a; }
+  html[data-theme="light"] .cm                   { color: #4a7a5a; }
+  html[data-theme="light"] tr.bug-row            { background: #fef9e4; }
+  html[data-theme="light"] tr.bug-row td.ln      { color: #9a6800; border-left: 3px solid #c97c09; }
+  html[data-theme="light"] .bug-input            { color: #0d1f2d; border-color: #c97c09; }
+  html[data-theme="light"] .bug-input.correct    { background: var(--fix-correct); color: var(--fix-correct-t); }
+
+  /* ===== DARK MODE ===== */
+  html[data-theme="dark"] body                  { background: #0d1117; color: #e8eef4; }
+  html[data-theme="dark"] #question-panel        { background: #0d1117; scrollbar-color: #253040 #0d1117; }
+  html[data-theme="dark"] .s-div                 { background: #0d1117; }
+  html[data-theme="dark"] .s-div::before,
+  html[data-theme="dark"] .s-div::after          { background: #253040; }
+  html[data-theme="dark"] .s-div span            { color: #4a9a6a; }
+  html[data-theme="dark"] .q-card                { background: #161c24; border-color: #253040; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+  html[data-theme="dark"] .q-card.q-active       { border-color: var(--accent1); box-shadow: 0 0 0 2px rgba(42,122,75,0.2); }
+  html[data-theme="dark"] .q-card.q-done-state   { border-color: var(--accent1); }
+  html[data-theme="dark"] .q-num-badge           { background: #0d1f2d; color: #4a9a6a; border-color: #1a4f7a; }
+  html[data-theme="dark"] .q-anchor              { color: #4a9a6a; }
+  html[data-theme="dark"] .q-text                { color: #e8eef4; }
+  html[data-theme="dark"] .q-text code           { background: #1a2e40; color: #79b8ff; border-color: #253040; }
+  html[data-theme="dark"] .q-input               { background: #0d1117; border-color: #253040; color: #e8eef4; }
+  html[data-theme="dark"] .q-input::placeholder  { color: #3a5a6a; font-style: italic; }
+  html[data-theme="dark"] .q-input:focus         { border-color: var(--accent1); }
+  html[data-theme="dark"] .fix-prompt            { background: rgba(42,122,75,0.10); border-color: var(--accent1); }
+  html[data-theme="dark"] .fix-prompt-lbl        { color: #4a9a6a; }
+  html[data-theme="dark"] .topbar                { background: #060e18; border-bottom-color: #1a4f7a; }
+  html[data-theme="dark"] .bug-bar               { background: #060e18; border-bottom-color: #1a4f7a; }
+  html[data-theme="dark"] .btn-theme             { color: #b0cce0; border-color: #2a4a60; background: transparent; }
+  html[data-theme="dark"] .btn-theme:hover       { background: #0d1f2d; }
+  html[data-theme="dark"] tr.bug-row             { background: #1a1800; }
+  html[data-theme="dark"] tr.bug-row td.ln       { color: #f8c555; border-left: 3px solid #c9a000; }
+
+  /* Disable font ligatures — prevents >= rendering as ≥ in code display */
+  td.code, .bug-input {
+    font-feature-settings: "liga" 0, "calt" 0;
+    font-variant-ligatures: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Top bar ─── -->
+<div class="topbar" role="banner">
+  <div class="tb-title">&#9968; BASE CAMP</div>
+  <div class="tb-sub">Trail Conditions Check -- Debug &amp; Trace -- Week 1, Thursday</div>
+  <div class="tb-spacer"></div>
+  <button class="btn-theme" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode">
+    <span id="theme-icon" aria-hidden="true">&#9728;</span>
+  </button>
+  <button class="top-btn" id="btn-export" onclick="exportMarkdown()" disabled aria-label="Export answers as Markdown file">
+    &#11015; Export Answers
+  </button>
+  <button class="top-btn" id="btn-reset" onclick="resetAll()" aria-label="Reset all inputs and bug fixes">
+    &#8635; Reset
+  </button>
+</div>
+
+<!-- ─── Bug tracker bar ─── -->
+<div class="bug-bar" role="region" aria-label="Bug tracker">
+  <span class="bug-bar-label">&#128030; Bug Tracker</span>
+  <div class="bug-dots" role="list">
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-1" aria-label="Bug 1 status: not yet identified"></div>
+      <span class="bug-dot-label">Branch order</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-2" aria-label="Bug 2 status: not yet identified"></div>
+      <span class="bug-dot-label">String comparison</span>
+    </div>
+    <div class="bug-dot-wrap" role="listitem">
+      <div class="bug-dot" id="dot-3" aria-label="Bug 3 status: not yet identified"></div>
+      <span class="bug-dot-label">Impossible &amp;&amp;</span>
+    </div>
+  </div>
+</div>
+
+<div id="layout">
+
+  <!-- ─── Left: code ─── -->
+  <div id="code-panel" aria-label="Java source code">
+    <div id="code-header">
+      <span class="filename">SummitClearance.java</span>
+      <span class="lang-badge">Java 17</span>
+      <span class="edit-hint">-- bug lines become editable after you write a prediction</span>
+      <div class="mac-dots">
+        <span style="background:#e05c4b"></span>
+        <span style="background:#d4a017"></span>
+        <span style="background:#4a9e5c"></span>
+      </div>
+    </div>
+    <div id="code-body">
+      <table class="code-table" id="code-table"></table>
+    </div>
+  </div>
+
+  <!-- ─── Right: questions ─── -->
+  <div id="question-panel" aria-label="Trace questions">
+
+    <div class="s-div"><span>Variables</span></div>
+
+    <!-- Q1 -->
+    <div class="q-card" id="card-q1">
+      <div class="q-card-header">
+        <div class="q-num-badge">1</div>
+        <div class="q-meta">
+          <div class="q-anchor">Lines 5-7</div>
+          <div class="q-text">Before reading any conditions -- look only at the variable names and values. What do you think this program is trying to decide? Predict what the final output will be.</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q1" placeholder="Write your prediction..." aria-label="Question 1 answer"></textarea>
+    </div>
+
+    <div class="s-div"><span>Hiker rating check (Bug 1)</span></div>
+
+    <!-- Q2 -->
+    <div class="q-card" id="card-q2">
+      <div class="q-card-header">
+        <div class="q-num-badge">2</div>
+        <div class="q-meta">
+          <div class="q-anchor">Lines 9-15</div>
+          <div class="q-text">Read the if/else if/else chain carefully. For <code>hikerRating = 10</code>, which branch actually runs? Now look at the branch that did NOT run -- under what value of <code>hikerRating</code> could it ever run? What does that tell you about the code?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q2" placeholder="Which branch runs? Can the Summit elite branch ever run?" aria-label="Question 2 answer"></textarea>
+      <div class="fix-prompt" id="fix-1">
+        <div class="fix-prompt-lbl">&#9978; Found a bug? Fix the if/else if order in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="s-div"><span>String comparison (Bug 2)</span></div>
+
+    <!-- Q3 -->
+    <div class="q-card" id="card-q3">
+      <div class="q-card-header">
+        <div class="q-num-badge">3</div>
+        <div class="q-meta">
+          <div class="q-anchor">Line 17</div>
+          <div class="q-text"><code>if (trailName == "Avalanche Peak")</code> -- what does <code>==</code> actually check in Java? Is it the right tool for comparing Strings? Why or why not?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q3" placeholder="What does == check? Is it safe?" aria-label="Question 3 answer"></textarea>
+      <div class="fix-prompt" id="fix-2">
+        <div class="fix-prompt-lbl">&#9978; Found a bug? Fix line 17 in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="s-div"><span>Weather status check (Bug 3)</span></div>
+
+    <!-- Q4 -->
+    <div class="q-card" id="card-q4">
+      <div class="q-card-header">
+        <div class="q-num-badge">4</div>
+        <div class="q-meta">
+          <div class="q-anchor">Line 23</div>
+          <div class="q-text"><code>weatherStatus.equals("Clear") &amp;&amp; weatherStatus.equals("Stormy")</code> -- evaluate both sides for <code>weatherStatus = "Clear"</code>. Can this condition ever be true for any value of <code>weatherStatus</code>? Why or why not?</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q4" placeholder="Can both sides ever be true at once?" aria-label="Question 4 answer"></textarea>
+      <div class="fix-prompt" id="fix-3">
+        <div class="fix-prompt-lbl">&#9978; Found a bug? Fix line 23 in the code panel.</div>
+      </div>
+    </div>
+
+    <div class="s-div"><span>Full program trace</span></div>
+
+    <!-- Q5 -->
+    <div class="q-card" id="card-q5">
+      <div class="q-card-header">
+        <div class="q-num-badge">5</div>
+        <div class="q-meta">
+          <div class="q-anchor">Full program</div>
+          <div class="q-text">Write out the complete output of this program exactly as it runs with all bugs fixed. One line per printed statement.</div>
+        </div>
+      </div>
+      <textarea class="q-input" id="q5" style="min-height:76px" placeholder="Write the full output, line by line..." aria-label="Question 5 answer"></textarea>
+    </div>
+
+  </div><!-- /question-panel -->
+</div><!-- /layout -->
+
+<script>
+// =====================================================================
+// CODE DATA
+// =====================================================================
+const CODE = [
+  { t: 'public class SummitClearance {' },
+  { t: '' },
+  { t: '    public static void main(String[] args) {' },
+  { t: '' },
+  { t: '        int hikerRating = 10;' },
+  { t: '        String trailName = "Avalanche Peak";' },
+  { t: '        String weatherStatus = "Clear";' },
+  { t: '' },
+  { t: '        if (hikerRating >= 5) {',
+    bugId: 'b1', dotId: 'dot-1',
+    fixes: [
+      '        if (hikerRating > 10) {',
+      'if (hikerRating > 10) {'
+    ]
+  },
+  { t: '            System.out.println("Permit granted: Experienced hiker.");' },
+  { t: '        } else if (hikerRating > 10) {',
+    bugId: 'b1swap', dotId: 'dot-1',
+    fixes: [
+      '        } else if (hikerRating >= 5) {',
+      '} else if (hikerRating >= 5) {'
+    ]
+  },
+  { t: '            System.out.println("Permit granted: Summit elite.");' },
+  { t: '        } else {' },
+  { t: '            System.out.println("Permit denied. Complete more training first.");' },
+  { t: '        }' },
+  { t: '' },
+  { t: '        if (trailName == "Avalanche Peak") {',
+    bugId: 'b2', dotId: 'dot-2',
+    fixes: [
+      '        if (trailName.equals("Avalanche Peak")) {',
+      'if (trailName.equals("Avalanche Peak")) {'
+    ]
+  },
+  { t: '            System.out.println("Trail recognized: access permitted.");' },
+  { t: '        } else {' },
+  { t: '            System.out.println("Unknown trail. Access blocked.");' },
+  { t: '        }' },
+  { t: '' },
+  { t: '        if (weatherStatus.equals("Clear") && weatherStatus.equals("Stormy")) {',
+    bugId: 'b3', dotId: 'dot-3',
+    fixes: [
+      '        if (weatherStatus.equals("Clear") || weatherStatus.equals("Stormy")) {',
+      'if (weatherStatus.equals("Clear") || weatherStatus.equals("Stormy")) {'
+    ]
+  },
+  { t: '            System.out.println("Weather verified: trail open.");' },
+  { t: '        } else {' },
+  { t: '            System.out.println("Weather unverified. Trail closed.");' },
+  { t: '        }' },
+  { t: '' },
+  { t: '    }' },
+  { t: '}' },
+];
+
+const Q_TO_BUG = { q2: 'b1', q3: 'b2', q4: 'b3' };
+const BUG_TO_FIX_DIV = { b1: 'fix-1', b2: 'fix-2', b3: 'fix-3' };
+const ALL_QS = ['q1','q2','q3','q4','q5'];
+
+
+// =====================================================================
+// BUG FIX STATE
+// =====================================================================
+const fixed = new Set();
+
+// =====================================================================
+// SYNTAX HIGHLIGHTER
+// =====================================================================
+function hi(raw) {
+  let s = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  // Extract comments into a placeholder array so subsequent regexes can't break the span attribute
+  const cmSlots = [];
+  s = s.replace(/(\/\/[^\n]*)$/gm, (m) => { cmSlots.push(m); return `\x00CM${cmSlots.length - 1}\x00`; });
+  s = s.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+  s = s.replace(/\b(\d+)\b(?![^<]*<\/span>)/g, '<span class="num">$1</span>');
+  for (const kw of ['public','static','void','class','if','else','return','new','boolean','this','true','false']) {
+    s = s.replace(new RegExp(`\\b${kw}\\b(?![^<]*<\\/span>)`, 'g'), `<span class="kw">${kw}</span>`);
+  }
+  for (const ty of ['String','int','boolean','System']) {
+    s = s.replace(new RegExp(`\\b${ty}\\b(?![^<]*<\\/span>)`, 'g'), `<span class="ty">${ty}</span>`);
+  }
+  s = s.replace(/\b([a-z][a-zA-Z0-9_]*)(?=\()(?![^<]*<\/span>)/g, '<span class="mth">$1</span>');
+  // Restore comments
+  s = s.replace(/\x00CM(\d+)\x00/g, (_, i) => `<span class="cm">${cmSlots[i]}</span>`);
+  return s;
+}
+
+// =====================================================================
+// CODE TABLE
+// =====================================================================
+function buildCode() {
+  const table = document.getElementById('code-table');
+  CODE.forEach((line, i) => {
+    const tr  = document.createElement('tr');
+    const tdL = document.createElement('td');
+    const tdC = document.createElement('td');
+    tdL.className = 'ln';
+    tdC.className = 'code';
+    tdL.textContent = i + 1;
+
+    if (line.bugId) {
+      tr.classList.add('bug-row');
+      tr.id = 'brow-' + line.bugId + '-' + i;
+      tdC.id = 'bcell-' + line.bugId + '-' + i;
+      tdC.innerHTML = hi(line.t);
+      tdC.dataset.lineIdx = i;
+    } else {
+      tdC.innerHTML = line.t ? hi(line.t) : '\u00a0';
+    }
+
+    tr.appendChild(tdL);
+    tr.appendChild(tdC);
+    table.appendChild(tr);
+  });
+}
+
+// =====================================================================
+// BUG LINE ACTIVATION
+// =====================================================================
+function activateBugLines(bugId) {
+  const qid = Object.keys(Q_TO_BUG).find(k => Q_TO_BUG[k] === bugId);
+  const ls = window.TraceLiveShare?.getState();
+  const editable = (
+    !ls || ls.mode !== 'room' ||
+    !window.TraceLiveShare.isMultiPlayer() ||
+    (ls.currentQ === window.TRACE_ADAPTER.questions.findIndex(q => q.id === qid) &&
+     window.TraceLiveShare.isMyTurn())
+  );
+
+  CODE.forEach((line, i) => {
+    if (line.bugId !== bugId && line.bugId !== bugId + 'swap') return;
+    const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+    if (!cell || cell.querySelector('input')) return;
+
+    const dot = document.getElementById(line.dotId);
+    if (dot && !dot.classList.contains('fixed')) dot.classList.add('found');
+
+    cell.innerHTML = '';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'bug-input';
+    inp.value = line.t;
+    inp.setAttribute('aria-label', `Fix the bug on line ${i + 1}`);
+    inp.setAttribute('spellcheck', 'false');
+    inp.setAttribute('autocomplete', 'off');
+    const lineKey = line.bugId + '-' + i;
+    inp.dataset.lineKey = lineKey;
+    if (!editable) inp.disabled = true;
+    inp.addEventListener('input', () => checkFix(lineKey, line.dotId, inp, line));
+    cell.appendChild(inp);
+  });
+}
+
+// Toggle editability of already-created bug inputs for a given question index
+function updateBugInputEditability(qIdx, editable) {
+  const qid = window.TRACE_ADAPTER.questions[qIdx].id;
+  const bugId = Q_TO_BUG[qid];
+  if (!bugId) return;
+  CODE.forEach((line, i) => {
+    if (line.bugId !== bugId && line.bugId !== bugId + 'swap') return;
+    const lineKey = line.bugId + '-' + i;
+    const inp = document.querySelector(`.bug-input[data-line-key="${lineKey}"]`);
+    if (inp && !inp.classList.contains('correct')) {
+      if (editable) inp.removeAttribute('disabled');
+      else inp.setAttribute('disabled', true);
+    }
+  });
+}
+
+// =====================================================================
+// FIX VALIDATION
+// =====================================================================
+function norm(s) { return s.trim().replace(/\s+/g, ' '); }
+
+function checkFix(lineKey, dotId, inp, lineData) {
+  const typed = norm(inp.value);
+  const correct = lineData.fixes.some(f => typed === norm(f));
+  const dot = document.getElementById(dotId);
+
+  if (correct && !fixed.has(lineKey)) {
+    fixed.add(lineKey);
+    inp.classList.add('correct');
+    inp.setAttribute('readonly', true);
+  } else if (!correct && fixed.has(lineKey)) {
+    fixed.delete(lineKey);
+    inp.classList.remove('correct');
+    inp.removeAttribute('readonly');
+  }
+
+  if (dot) {
+    const dotBugLines = CODE.filter(l => l.dotId === dotId);
+    const dotKeys = dotBugLines.map(l => l.bugId + '-' + CODE.indexOf(l));
+    const allFixed = dotKeys.every(k => fixed.has(k));
+    const anyFixed = dotKeys.some(k => fixed.has(k));
+
+    if (allFixed) {
+      dot.classList.remove('found');
+      dot.classList.add('fixed');
+    } else if (anyFixed) {
+      dot.classList.add('found');
+      dot.classList.remove('fixed');
+    } else {
+      dot.classList.add('found');
+      dot.classList.remove('fixed');
+    }
+  }
+
+  // Room mode: gate the Done button and broadcast fix value
+  const _ls = window.TraceLiveShare?.getState();
+  if (_ls?.mode === 'room' && window.TraceLiveShare.isMyTurn()) {
+    const baseBugId = lineData.bugId ? lineData.bugId.replace('swap', '') : null;
+    const qid = baseBugId ? Object.keys(Q_TO_BUG).find(k => Q_TO_BUG[k] === baseBugId) : null;
+    const qIdx = qid ? window.TRACE_ADAPTER.questions.findIndex(q => q.id === qid) : -1;
+    if (qIdx >= 0) window.TraceLiveShare.checkDoneEnabled(qIdx);
+    window.TraceLiveShare.syncBroadcast({ type: 'fix-update', lineKey, value: inp.value });
+  }
+}
+
+// Rebuild bug dot states from the fixed Set (used after remote state sync)
+function rebuildBugDots() {
+  ['dot-1', 'dot-2', 'dot-3'].forEach(dotId => {
+    const dot = document.getElementById(dotId);
+    if (!dot) return;
+    const dotBugLines = CODE.filter(l => l.dotId === dotId);
+    const dotKeys = dotBugLines.map(l => l.bugId + '-' + CODE.indexOf(l));
+    const allFixed = dotKeys.every(k => fixed.has(k));
+    const anyInp = dotKeys.some(k => document.querySelector(`.bug-input[data-line-key="${k}"]`));
+    if (allFixed) {
+      dot.classList.remove('found'); dot.classList.add('fixed');
+    } else if (anyInp) {
+      dot.classList.add('found'); dot.classList.remove('fixed');
+    } else {
+      dot.classList.remove('found', 'fixed');
+    }
+  });
+}
+
+// =====================================================================
+// EXPORT ENABLE CHECK
+// =====================================================================
+function checkExportEnabled() {
+  const any = ALL_QS.some(id => {
+    const el = document.getElementById(id);
+    return el && el.value.trim().length > 0;
+  });
+  document.getElementById('btn-export').disabled = !any;
+}
+
+
+// =====================================================================
+// Q INPUT LISTENERS
+// =====================================================================
+ALL_QS.forEach(qid => {
+  const el = document.getElementById(qid);
+  if (!el) return;
+  const bugId = Q_TO_BUG[qid];
+
+  el.addEventListener('input', () => {
+    checkExportEnabled();
+
+    if (bugId && el.value.length > 0) {
+      const fp = document.getElementById(BUG_TO_FIX_DIV[bugId]);
+      if (fp && !fp.classList.contains('shown')) fp.classList.add('shown');
+      activateBugLines(bugId);
+    }
+    // Room sync is handled by trace-liveshare.js input listeners
+  });
+});
+
+// =====================================================================
+// RESET
+// =====================================================================
+function resetAll() {
+  fixed.clear();
+
+  ALL_QS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  document.querySelectorAll('.bug-dot').forEach(d => d.classList.remove('found', 'fixed'));
+  document.querySelectorAll('.fix-prompt').forEach(fp => fp.classList.remove('shown'));
+
+  CODE.forEach((line, i) => {
+    if (!line.bugId) return;
+    const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+    if (cell) cell.innerHTML = hi(line.t);
+  });
+
+  checkExportEnabled();
+
+  // Let the shared engine reset room state and broadcast to peers
+  window.TraceLiveShare?.reset();
+
+  const firstQ = document.getElementById('q1');
+  if (firstQ && !firstQ.disabled) firstQ.focus();
+}
+
+// =====================================================================
+// QUESTION / BUG METADATA (for export)
+// =====================================================================
+const Q_META = [
+  { id: 'q1', anchor: 'Lines 5-7',    label: 'Variables and program intent' },
+  { id: 'q2', anchor: 'Lines 9-15',   label: 'Branch order -- Summit elite unreachable (Bug 1)' },
+  { id: 'q3', anchor: 'Line 17',      label: 'String comparison == vs .equals() (Bug 2)' },
+  { id: 'q4', anchor: 'Line 23',      label: 'Impossible && condition (Bug 3)' },
+  { id: 'q5', anchor: 'Full program', label: 'Complete console trace' },
+];
+
+const BUG_META = [
+  { bugId: 'b1', lines: '9 and 11', label: 'Branch order (Logic)',
+    original: 'if (hikerRating >= 5) { ... } else if (hikerRating > 10) {',
+    fix:      'if (hikerRating > 10) { ... } else if (hikerRating >= 5) {' },
+  { bugId: 'b2', line: 17, label: 'String comparison (String)',
+    original: 'if (trailName == "Avalanche Peak") {',
+    fix:      'if (trailName.equals("Avalanche Peak")) {' },
+  { bugId: 'b3', line: 23, label: 'Impossible && condition (Logic)',
+    original: 'if (weatherStatus.equals("Clear") && weatherStatus.equals("Stormy")) {',
+    fix:      'if (weatherStatus.equals("Clear") || weatherStatus.equals("Stormy")) {' },
+];
+
+// =====================================================================
+// EXPORT
+// =====================================================================
+function exportMarkdown() {
+  const out = [];
+
+  out.push('# Trail Conditions Check -- Debug & Trace Session');
+  out.push('**Week 1, Thursday | Topic: if / else if / else, String comparison**');
+  const _ls = window.TraceLiveShare?.getState();
+  if (_ls?.mode === 'room' && _ls.roomCode) {
+    const owners = (_ls.questionOwners || [])
+      .map((o, i) => `Q${i + 1}: ${o || 'unanswered'}`)
+      .join(' · ');
+    out.push(`**Room: ${_ls.roomCode} | Cohort ${_ls.cohort} | ${owners}**`);
+  } else if (_ls?.myName && _ls.myName !== 'Student') {
+    out.push(`**Student: ${_ls.myName}**`);
+  }
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## Java Program: SummitClearance.java');
+  out.push('');
+  out.push('```java');
+  CODE.forEach(l => out.push(l.t));
+  out.push('```');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('## My Predictions');
+  out.push('');
+
+  Q_META.forEach((q, i) => {
+    const el  = document.getElementById(q.id);
+    const ans = el ? el.value.trim() : '';
+    const owner = (window.TraceLiveShare?.getState()?.questionOwners || [])[i];
+    out.push(`### Q${i + 1}: ${q.label}`);
+    out.push(`_Anchor: ${q.anchor}_`);
+    if (owner) out.push(`_Answered by: ${owner}_`);
+    out.push('');
+    out.push('**My answer:**');
+    out.push('');
+    out.push(ans || '_(no answer entered)_');
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## Bug Fix Attempts');
+  out.push('');
+
+  BUG_META.forEach((b, i) => {
+    const label = b.line ? `Line ${b.line}` : `Lines ${b.lines}`;
+    const bugLines = CODE.filter(l => l.bugId === b.bugId || l.bugId === b.bugId + 'swap');
+    const wasFixed = bugLines.length > 0 && bugLines.every(l => fixed.has(l.bugId + '-' + CODE.indexOf(l)));
+    out.push(`**Bug ${i + 1} -- ${label} -- ${b.label}**`);
+    out.push(`- Status: ${wasFixed ? 'Fixed correctly' : 'Not yet fixed'}`);
+    out.push(`- Original: \`${b.original}\``);
+    out.push(`- Correct fix: \`${b.fix}\``);
+    out.push('');
+  });
+
+  out.push('---');
+  out.push('');
+  out.push('## AI Review Prompt');
+  out.push('');
+  out.push('> Copy everything above this section into Claude, ChatGPT, or Gemini,');
+  out.push('> then send the message below exactly as written.');
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push(
+`I am a Java bootcamp student. The document above contains a buggy Java program and my predictions about what it does.
+
+Please do the following:
+
+1. For each of my predictions, tell me what I got right and what I missed. If my answer is correct, confirm it briefly and move on. Only flag a misconception if one is genuinely present -- do not manufacture criticism where the answer is sound.
+
+2. For any question I left blank, give the correct answer and explain why it matters.
+
+3. For the final question, assume all three bugs have been fixed when evaluating my console trace prediction.
+
+4. For each of the bugs: explain in plain terms what went wrong, why Java behaves that way, and what the fix achieves.
+
+5. Close with two or three follow-up questions I should think about before our class discussion -- questions that push me one level deeper than what the session covered.
+
+Be accurate first. Credit what is right, then address genuine gaps. Do not manufacture criticism where the answer is sound.`
+  );
+  out.push('');
+  out.push('---');
+  out.push('');
+  out.push('_Generated by Trail Conditions Check Debug & Trace Session_');
+
+  const blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'trail-conditions-check-answers.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// =====================================================================
+// TRACE ADAPTER -- consumed by trace-liveshare.js
+// =====================================================================
+window.TRACE_ADAPTER = {
+  title:         '&#9968; BASE CAMP',
+  subtitle:      'Trail Conditions Check \u2014 Week 1, Thursday',
+  accent:        'var(--accent1, #2a7a4b)',
+  joinBtnClass:  'top-btn',
+  soloBtnClass:  'top-btn',
+  onAccent:      '#ffffff',
+  channelPrefix: 'tcc',
+  questions: [
+    { id: 'q1', hasBug: false },
+    { id: 'q2', hasBug: true  },
+    { id: 'q3', hasBug: true  },
+    { id: 'q4', hasBug: true  },
+    { id: 'q5', hasBug: false },
+  ],
+  getAnswer(qid) {
+    return document.getElementById(qid)?.value || '';
+  },
+  setAnswer(qid, val) {
+    const el = document.getElementById(qid);
+    if (!el) return;
+    el.value = val;
+    checkExportEnabled();
+    const bugId = Q_TO_BUG[qid];
+    if (bugId && val.length > 0) {
+      const fp = document.getElementById(BUG_TO_FIX_DIV[bugId]);
+      if (fp && !fp.classList.contains('shown')) fp.classList.add('shown');
+      activateBugLines(bugId);
+    }
+  },
+  getFixValues() {
+    const vals = {};
+    document.querySelectorAll('.bug-input').forEach(inp => {
+      if (inp.dataset.lineKey) vals[inp.dataset.lineKey] = inp.value;
+    });
+    return vals;
+  },
+  applyFixValue(lineKey, val) {
+    const inp = document.querySelector(`.bug-input[data-line-key="${lineKey}"]`);
+    if (!inp) return;
+    inp.value = val;
+    const parts    = lineKey.split('-');
+    const lineIdx  = parseInt(parts[parts.length - 1]);
+    const lineData = CODE[lineIdx];
+    if (lineData && lineData.fixes && lineData.fixes.some(f => norm(val) === norm(f))) {
+      fixed.add(lineKey);
+      inp.classList.add('correct');
+      inp.setAttribute('readonly', true);
+    } else {
+      fixed.delete(lineKey);
+      inp.classList.remove('correct');
+      inp.removeAttribute('readonly');
+    }
+    rebuildBugDots();
+  },
+  isDoneReady(qIdx) {
+    const qid      = this.questions[qIdx].id;
+    const textarea = document.getElementById(qid);
+    const hasText  = textarea && textarea.value.trim().length > 0;
+    if (!hasText) return false;
+    const bugId = Q_TO_BUG[qid];
+    if (!bugId) return true;
+    const bugLines = CODE.filter(l => l.bugId === bugId || l.bugId === bugId + 'swap');
+    return bugLines.length > 0 && bugLines.every(l => fixed.has(l.bugId + '-' + CODE.indexOf(l)));
+  },
+  setEditable(qIdx, editable) {
+    updateBugInputEditability(qIdx, editable);
+  },
+  onReset() {
+    fixed.clear();
+    document.querySelectorAll('.fix-prompt').forEach(fp => fp.classList.remove('shown'));
+    CODE.forEach((line, i) => {
+      if (!line.bugId) return;
+      const cell = document.getElementById('bcell-' + line.bugId + '-' + i);
+      if (cell) cell.innerHTML = hi(line.t);
+    });
+    document.querySelectorAll('.bug-dot').forEach(d => d.classList.remove('found', 'fixed'));
+    checkExportEnabled();
+  },
+};
+
+buildCode();
+checkExportEnabled();
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(t);
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('claude-theme', t);
+  const icon = document.getElementById('theme-icon');
+  const btn  = document.getElementById('theme-toggle');
+  if (t === 'dark') {
+    if (icon) icon.textContent = '\u2600';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to light mode');
+  } else {
+    if (icon) icon.textContent = '\uD83C\uDF19';
+    if (btn)  btn.setAttribute('aria-label', 'Switch to dark mode');
+  }
+}
+setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+</script>
+<script src="../shared/trace-liveshare.js"></script>
+</body>
+</html>

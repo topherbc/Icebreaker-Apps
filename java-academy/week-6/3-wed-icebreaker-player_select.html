@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Player Select</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0e1a'/><rect x='4' y='12' width='6' height='8' rx='1' fill='%2300ff88'/><rect x='7' y='9' width='2' height='14' rx='1' fill='%2300ff88'/><rect x='14' y='10' width='4' height='4' rx='1' fill='%23ff2d78'/><rect x='14' y='18' width='4' height='4' rx='1' fill='%23ff2d78'/><rect x='22' y='10' width='6' height='12' rx='1' fill='%2300cfff'/><rect x='22' y='15' width='6' height='2' fill='%230a0e1a'/></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #f0f2ff;
+    --bg2:       #e4e8f8;
+    --surface:   #ffffff;
+    --border:    #c8ceea;
+    --green:     #007a3d;
+    --pink:      #e0165a;
+    --cyan:      #0077bb;
+    --yellow:    #cc8800;
+    --purple:    #7733cc;
+    --text:      #0d1030;
+    --muted:     #5a6080;
+    --fun1:      #e0165a;
+    --fun2:      #b50f48;
+    --tech1:     #0077bb;
+    --tech2:     #005f99;
+    --font-px:   'Press Start 2P', monospace;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 18px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: flex; }
+
+  /* ════════════════════ LOAD SCREEN ════════════════════ */
+  #loadScreen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Grid bg */
+  #loadScreen::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,119,187,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,119,187,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .load-inner {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center;
+  }
+
+  .load-pixel-art {
+    margin-bottom: 32px;
+    image-rendering: pixelated;
+  }
+
+  .load-eyebrow {
+    font-family: var(--font-px);
+    font-size: 11px;
+    color: #005c91;
+    letter-spacing: 0.15em;
+    margin-bottom: 20px;
+    animation: blink 1.4s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .load-title {
+    font-family: var(--font-px);
+    font-size: clamp(28px, 4.5vw, 52px);
+    color: var(--text);
+    text-align: center;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    text-shadow:
+      4px 4px 0 var(--pink);
+    letter-spacing: 0.04em;
+  }
+
+  .load-subtitle {
+    font-family: var(--font-px);
+    font-size: 14px;
+    color: var(--green);
+    margin-bottom: 52px;
+    animation: blink 1s step-end infinite;
+  }
+
+  .load-panel {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1), 6px 6px 0 var(--border);
+    padding: 36px 44px 40px;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+  }
+
+  .load-panel::before {
+    content: '';
+    position: absolute;
+    top: -3px; left: 16px; right: 16px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pink), var(--cyan), var(--green));
+  }
+
+  .form-label {
+    font-family: var(--font-px);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-bottom: 3px solid var(--cyan);
+    color: var(--text);
+    font-family: var(--font-px);
+    font-size: 28px;
+    padding: 14px 16px;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.1em;
+  }
+
+  .form-input::-webkit-inner-spin-button,
+  .form-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .form-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0,119,187,0.12);
+  }
+
+  .form-hint {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .btn-begin {
+    display: block;
+    width: 100%;
+    margin-top: 28px;
+    padding: 20px 24px;
+    background: var(--green);
+    border: none;
+    color: #ffffff;
+    font-family: var(--font-px);
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    min-height: 60px;
+    transition: background 0.1s, transform 0.1s, box-shadow 0.1s;
+    box-shadow: 4px 4px 0 #006633, inset 0 -3px 0 rgba(0,0,0,0.2);
+    position: relative;
+  }
+
+  .btn-begin:hover {
+    background: #009948;
+    box-shadow: 6px 6px 0 #006633, inset 0 -3px 0 rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-begin:active {
+    transform: translateY(2px);
+    box-shadow: 2px 2px 0 #006633, inset 0 -1px 0 rgba(0,0,0,0.2);
+  }
+
+  /* ════════════════════ WHEEL SCREEN ════════════════════ */
+  #wheelScreen {
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+  }
+
+  #wheelScreen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,119,187,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,119,187,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wheel-header {
+    position: relative; z-index: 1;
+    background: var(--bg2);
+    border-bottom: 2px solid var(--border);
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-title {
+    font-family: var(--font-px);
+    font-size: 14px;
+    color: var(--text);
+    letter-spacing: 0.06em;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--border);
+  }
+
+  .header-sub {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .remaining-badge {
+    font-family: var(--font-px);
+    font-size: 10px;
+    color: var(--green);
+    background: rgba(0,168,85,0.08);
+    border: 1px solid rgba(0,168,85,0.3);
+    padding: 6px 14px;
+    letter-spacing: 0.08em;
+  }
+
+  .btn-restart-header {
+    padding: 0 18px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-restart-header:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+
+  /* Wheel stage */
+  .wheel-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 64px;
+    padding: 36px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .wheel-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Pointer on the right */
+  .wheel-pointer {
+    position: absolute;
+    top: 50%;
+    right: -22px;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+    border-right: 32px solid var(--pink);
+    z-index: 10;
+    filter: drop-shadow(0 0 8px var(--pink));
+  }
+
+  #wheelCanvas {
+    display: block;
+    image-rendering: pixelated;
+  }
+
+  .wheel-hub {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px; height: 48px;
+    background: var(--surface);
+    border: 4px solid var(--pink);
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15), 3px 3px 0 #880030;
+  }
+
+  .spin-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    min-width: 220px;
+  }
+
+  .spin-status {
+    font-family: var(--font-px);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-align: center;
+    min-height: 20px;
+    text-transform: uppercase;
+  }
+
+  .btn-spin {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #f04080, var(--pink) 60%, #8a0030);
+    border: 4px solid rgba(255,255,255,0.4);
+    color: #fff;
+    font-family: var(--font-px);
+    font-size: 24px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.15s;
+    box-shadow:
+      0 6px 0 #880030,
+      0 10px 20px rgba(0,0,0,0.25);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    position: relative;
+  }
+
+  .btn-spin:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow:
+      0 8px 0 #880030,
+      0 14px 28px rgba(0,0,0,0.25);
+  }
+
+  .btn-spin:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow:
+      0 2px 0 #880030,
+      0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .btn-spin:disabled {
+    background: #c8ceea;
+    box-shadow: 0 4px 0 #a0a8cc;
+    cursor: not-allowed;
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  .spin-legend {
+    display: flex;
+    gap: 20px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .legend-dot.fun  { background: var(--fun1); }
+  .legend-dot.tech { background: var(--tech1); }
+
+  /* ════════════════════ CARD OVERLAY ════════════════════ */
+  #cardOverlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(13,16,48,0.45);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  #cardOverlay.open { display: flex; }
+
+  .card-sheet {
+    background: var(--surface);
+    width: 100%;
+    max-width: 900px;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+  }
+
+  #cardOverlay.open .card-sheet {
+    transform: translateY(0);
+  }
+
+  .card-stripe {
+    height: 6px; width: 100%;
+  }
+
+  .card-stripe.fun {
+    background: linear-gradient(90deg, #cc1050, var(--pink), #ff6ba8, var(--pink));
+    background-size: 200% 100%;
+    animation: stripe-scroll 2s linear infinite;
+  }
+
+  .card-stripe.tech {
+    background: linear-gradient(90deg, #006699, var(--cyan), #66e8ff, var(--cyan));
+    background-size: 200% 100%;
+    animation: stripe-scroll 2s linear infinite;
+  }
+
+  @keyframes stripe-scroll {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+  }
+
+  .card-inner {
+    padding: 36px 56px 44px;
+  }
+
+  .card-type-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .card-type-icon {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+  }
+
+  .card-type-label {
+    font-family: var(--font-px);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  .card-type-label.fun  { color: var(--pink); text-shadow: 0 0 8px rgba(255,45,120,0.5); }
+  .card-type-label.tech { color: var(--cyan); text-shadow: 0 0 8px rgba(0,207,255,0.5); }
+
+  .card-question {
+    font-family: var(--font-body);
+    font-size: clamp(22px, 2.8vw, 32px);
+    font-weight: 500;
+    line-height: 1.65;
+    color: var(--text);
+  }
+
+  .card-slot-row {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-slot-label {
+    display: block;
+    font-family: var(--font-px);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .card-slot-input {
+    width: 100%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-bottom: 3px solid var(--pink);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 20px;
+    font-weight: 500;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .card-slot-input:focus {
+    border-bottom-color: var(--yellow);
+  }
+
+  .card-slot-input::placeholder {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 16px;
+    opacity: 0.7;
+  }
+
+  .card-reveal-row {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-reveal {
+    padding: 11px 28px;
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-px);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    min-height: 48px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .btn-reveal:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 12px rgba(0,207,255,0.15);
+  }
+
+  .card-answer {
+    display: none;
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: rgba(0,119,187,0.05);
+    border-left: 3px solid var(--cyan);
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .card-answer code {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--purple);
+    background: rgba(119,51,204,0.08);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 18px 56px 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-done {
+    padding: 16px 56px;
+    background: var(--cyan);
+    border: none;
+    color: #ffffff;
+    font-family: var(--font-px);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    min-height: 52px;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 4px 4px 0 #005588;
+  }
+
+  .btn-done:hover {
+    background: #0088cc;
+    transform: translateY(-1px);
+  }
+
+  .btn-done:active { transform: translateY(1px); }
+
+  .btn-done.finale {
+    background: var(--pink);
+    color: #ffffff;
+    box-shadow: 4px 4px 0 #880030;
+  }
+
+  .btn-done.finale:hover { background: #cc1050; }
+
+  /* ════════════════════ FINALE ════════════════════ */
+  #finaleScreen {
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+  }
+
+  #finaleScreen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,119,187,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,119,187,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .finale-header {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--border);
+    padding: 28px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .finale-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0px, transparent 38px,
+      rgba(0,119,187,0.05) 38px, rgba(0,119,187,0.05) 40px
+    );
+  }
+
+  .finale-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+  }
+
+  .finale-title-block {}
+
+  .finale-hdr-title {
+    font-family: var(--font-px);
+    font-size: 18px;
+    color: var(--text);
+    text-shadow: 3px 3px 0 var(--pink);
+    margin-bottom: 6px;
+  }
+
+  .finale-hdr-sub {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .finale-badge {
+    font-family: var(--font-px);
+    font-size: 11px;
+    color: var(--green);
+    border: 2px solid var(--green);
+    padding: 8px 18px;
+    letter-spacing: 0.08em;
+    animation: pulse-border 2s ease-in-out infinite;
+    position: relative;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 2px 2px 0 #006633; }
+    50% { box-shadow: 4px 4px 0 #006633; }
+  }
+
+  .finale-body {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 56px 40px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .finale-file-id {
+    font-family: var(--font-px);
+    font-size: 10px;
+    color: var(--pink);
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+  }
+
+  .finale-meta {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .finale-meta-item {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .finale-meta-item span {
+    color: var(--cyan);
+    margin-left: 6px;
+    font-family: var(--font-px);
+    font-size: 12px;
+  }
+
+  /* ── CRT TV + mosaic ── */
+  .mosaic-label {
+    font-family: var(--font-px);
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .crt-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .crt-outer {
+    background: #111535;
+    border-radius: 18px;
+    padding: 24px 28px 36px;
+    box-shadow:
+      0 0 0 2px #0a0e28,
+      8px 8px 0 #0a0e28,
+      0 24px 48px rgba(0,0,0,0.45);
+    position: relative;
+  }
+
+  .crt-outer::after {
+    content: 'GOOD GAME';
+    position: absolute;
+    bottom: 10px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-px);
+    font-size: 6px;
+    color: #2a3060;
+    letter-spacing: 0.22em;
+    white-space: nowrap;
+  }
+
+  .crt-screen {
+    background: #000;
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: inset 0 0 24px rgba(0,0,0,0.9);
+    position: relative;
+  }
+
+  .crt-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px
+    );
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  #mosaicCanvas {
+    display: block;
+    width: 384px;
+    height: 288px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border-radius: 3px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .mosaic-caption {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+
+  .btn-restart-finale {
+    display: block;
+    margin: 44px auto 0;
+    padding: 14px 48px;
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    min-height: 52px;
+    transition: all 0.15s;
+  }
+
+  .btn-restart-finale:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ LOAD SCREEN ════════════════════ -->
+<div id="loadScreen" class="screen active">
+  <div class="load-inner">
+
+    <!-- Pixel art controller icon -->
+    <svg class="load-pixel-art" width="80" height="56" viewBox="0 0 80 56" fill="none" aria-hidden="true">
+      <rect x="8" y="16" width="64" height="28" rx="14" fill="#1a1f45"/>
+      <rect x="8" y="16" width="64" height="28" rx="14" stroke="#2e3566" stroke-width="2"/>
+      <!-- D-pad -->
+      <rect x="20" y="26" width="8" height="2" fill="#00cfff"/>
+      <rect x="23" y="23" width="2" height="8" fill="#00cfff"/>
+      <!-- Buttons -->
+      <rect x="50" y="24" width="5" height="5" rx="2.5" fill="#ff2d78"/>
+      <rect x="56" y="28" width="5" height="5" rx="2.5" fill="#ffe600"/>
+      <rect x="44" y="28" width="5" height="5" rx="2.5" fill="#00ff88"/>
+      <rect x="50" y="32" width="5" height="5" rx="2.5" fill="#b44dff"/>
+      <!-- Center buttons -->
+      <rect x="34" y="28" width="5" height="4" rx="1" fill="#2e3566"/>
+      <rect x="40" y="28" width="5" height="4" rx="1" fill="#2e3566"/>
+    </svg>
+
+    <div class="load-eyebrow">WEEK 6 / WEDNESDAY</div>
+    <h1 class="load-title">PLAYER<br>SELECT</h1>
+    <p class="load-subtitle">INSERT COIN TO BEGIN</p>
+
+    <div class="load-panel">
+      <label class="form-label" for="playerCount">PLAYERS JOINING TODAY</label>
+      <input class="form-input" type="number" id="playerCount" value="25" min="6" max="30" aria-describedby="playerHint" />
+      <p class="form-hint" id="playerHint">Between 6 and 25 players</p>
+      <button class="btn-begin" onclick="startGame()">START GAME</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════ WHEEL SCREEN ════════════════════ -->
+<div id="wheelScreen" class="screen">
+  <header class="wheel-header">
+    <div class="header-left">
+      <svg width="28" height="20" viewBox="0 0 28 20" fill="none" aria-hidden="true">
+        <rect x="1" y="5" width="10" height="10" rx="5" fill="#1a1f45" stroke="#2e3566" stroke-width="1.5"/>
+        <rect x="17" y="5" width="10" height="10" rx="5" fill="#1a1f45" stroke="#2e3566" stroke-width="1.5"/>
+        <rect x="11" y="8" width="6" height="4" rx="1" fill="#1a1f45" stroke="#2e3566" stroke-width="1"/>
+        <rect x="5" y="9" width="4" height="2" fill="#00cfff"/>
+        <rect x="6" y="8" width="2" height="4" fill="#00cfff"/>
+        <rect x="19" y="8" width="3" height="3" rx="1.5" fill="#ff2d78"/>
+        <rect x="22" y="9" width="3" height="3" rx="1.5" fill="#ffe600"/>
+      </svg>
+      <span class="header-title">PLAYER SELECT</span>
+      <div class="header-divider"></div>
+      <span class="header-sub">Polymorphism Week</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="remaining-badge" id="remainingBadge">25 REMAINING</div>
+      <button class="btn-restart-header" onclick="restart()">Restart</button>
+    </div>
+  </header>
+
+  <div class="wheel-stage">
+    <div class="wheel-wrap">
+      <div class="wheel-pointer" aria-hidden="true"></div>
+      <canvas id="wheelCanvas" width="500" height="500" aria-label="Question selection wheel"></canvas>
+      <div class="wheel-hub" aria-hidden="true"></div>
+    </div>
+
+    <div class="spin-controls">
+      <div class="spin-status" id="spinStatus">READY</div>
+      <button class="btn-spin" id="btnSpin" onclick="spinWheel()" aria-label="Spin the wheel">SPIN</button>
+      <div class="spin-legend">
+        <div class="legend-item"><div class="legend-dot fun"></div>Personal</div>
+        <div class="legend-item"><div class="legend-dot tech"></div>Technical</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ CARD OVERLAY ════════════════════ -->
+<div id="cardOverlay" role="dialog" aria-modal="true" aria-label="Current question">
+  <div class="card-sheet" id="cardSheet">
+    <div class="card-stripe" id="cardStripe"></div>
+    <div class="card-inner">
+      <div class="card-type-row">
+        <svg class="card-type-icon" id="cardTypeIcon" viewBox="0 0 22 22" fill="none" aria-hidden="true"></svg>
+        <span class="card-type-label" id="cardTypeLabel"></span>
+      </div>
+      <p class="card-question" id="cardQuestion"></p>
+
+      <div class="card-slot-row" id="cardSlotRow" style="visibility:hidden;">
+        <label class="card-slot-label" for="cardSlotInput" id="cardSlotLabelEl">PLAYER ANSWER</label>
+        <input class="card-slot-input" type="text" id="cardSlotInput" placeholder=""
+          onkeydown="if(event.key==='Enter') dismissCard();" />
+      </div>
+
+      <div class="card-reveal-row" id="cardRevealRow" style="display:none;">
+        <button class="btn-reveal" id="btnReveal" onclick="toggleReveal()">SHOW ANSWER</button>
+        <div class="card-answer" id="cardAnswer"></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn-done" id="btnDone" onclick="dismissCard()">DONE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ FINALE ════════════════════ -->
+<div id="finaleScreen" class="screen">
+  <div class="finale-header">
+    <div class="finale-header-left">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect x="2" y="14" width="44" height="20" rx="10" fill="#111535" stroke="#1e2550" stroke-width="2"/>
+        <rect x="8" y="20" width="10" height="2" fill="#00cfff"/><rect x="12" y="16" width="2" height="10" fill="#00cfff"/>
+        <rect x="30" y="18" width="4" height="4" rx="2" fill="#ff2d78"/>
+        <rect x="35" y="21" width="4" height="4" rx="2" fill="#ffe600"/>
+        <rect x="25" y="21" width="4" height="4" rx="2" fill="#00ff88"/>
+        <rect x="30" y="24" width="4" height="4" rx="2" fill="#b44dff"/>
+      </svg>
+      <div class="finale-title-block">
+        <div class="finale-hdr-title">GAME COMPLETE</div>
+        <div class="finale-hdr-sub">All players processed</div>
+      </div>
+    </div>
+    <div class="finale-badge">ALL TROPHIES UNLOCKED</div>
+  </div>
+
+  <div class="finale-body">
+    <div class="finale-file-id" id="finaleFileId">SESSION ID:</div>
+    <div class="mosaic-label">Session Imprint</div>
+    <div class="crt-wrap">
+      <div class="crt-outer">
+        <div class="crt-screen">
+          <canvas id="mosaicCanvas" width="32" height="24" aria-label="Session mosaic generated from player answers"></canvas>
+        </div>
+      </div>
+    </div>
+    <button class="btn-restart-finale" onclick="restart()">New Session</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════
+
+const FUN_ICON_SVG = `<circle cx="11" cy="11" r="9" stroke="#e0165a" stroke-width="1.5" fill="none"/>
+  <polygon points="11,4 12.8,8.5 17.5,8.5 13.8,11.5 15.3,16 11,13 6.7,16 8.2,11.5 4.5,8.5 9.2,8.5" fill="#e0165a" opacity="0.9"/>`;
+
+const TECH_ICON_SVG = `<rect x="2" y="5" width="18" height="12" rx="1" stroke="#0077bb" stroke-width="1.5" fill="none"/>
+  <polyline points="5,11 8,8 11,13 14,9 17,11" stroke="#0077bb" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+const FUN_QS = [
+  ["Every player has a starting stat that is higher than everyone else's. What is yours?", "startingStat"],
+  ["What is a skill you have that would be completely useless in a video game but invaluable in real life?", "uselessSkill"],
+  ["Is there a moment or time in your life you would replay from time to time?", "replayMoment"],
+  ["What is the side quest in your life that keeps pulling you away from the main story?", "sideQuest"],
+  ["Every game has a tutorial level that teaches you the basics. What was yours in real life?", "tutorial"],
+  ["What is your respawn strategy? How do you recover when something goes badly wrong?", "respawnStrategy"],
+  ["What boss level in your life did you think you could never beat but eventually did?", "bossLevel"],
+  ["If your personality were a game genre, what would it be and why?", "genre"],
+  ["What is a cheat code you wish existed for real life?", "cheatCode"],
+  ["What achievement would you add to your life's achievement list that no one else would understand?", "achievement"],
+  ["What is the background music of your most productive days?", "bgMusic"],
+  ["What is something you are putting slow, steady effort into right now that most people do not know about?", "steadyWork"],
+];
+
+const TECH_QS = [
+  [
+    "You write: Fighter f = new Mage(); You call f.attack(). Mage has its own attack() method. Which version runs?",
+    "Mage's. Java always runs the method on the actual object, not the reference type. This is runtime polymorphism."
+  ],
+  [
+    "You write: Fighter f = new Mage(); What is the reference type, and what is the object type?",
+    "The reference type is Fighter. The object type is Mage. Java uses the reference type to decide what you can call at compile time, and the object type to decide what actually runs."
+  ],
+  [
+    "You have a Fighter reference that holds a Mage object. castShield() only exists on Mage. What must you do before you can call it?",
+    "Downcast to Mage first: Mage m = (Mage) myFighter; then call m.castShield(). The compiler won't allow it through a Fighter reference."
+  ],
+  [
+    "Can you explain what kind of error Java throws when you cast an object to the wrong type, and when does it happen?",
+    "A ClassCastException. It is a runtime error, not a compile error. Java checks the actual object type when the cast executes and throws if the types are incompatible."
+  ],
+  [
+    "You write @Override above a method, but you misspell the method name. What does Java do?",
+    "It throws a compile error. @Override tells the compiler to verify a matching method exists in the parent. Without it, the misspelling would silently create a new method instead."
+  ],
+  [
+    "A parent class defines a method. The subclass does not override it. You call it on a subclass object. Which version runs?",
+    "The parent's version. Java walks up the inheritance chain and uses the first definition it finds."
+  ],
+  [
+    "What keyword lets you check whether an object is a certain type before downcasting?",
+    "instanceof. Example: if (myFighter instanceof Mage) confirms the actual type is Mage before you cast, avoiding a ClassCastException."
+  ],
+  [
+    "You have an array of Fighter references. Each one might hold a different subclass object. You call attack() on every element. How does Java know which version to run?",
+    "It checks the actual object behind each reference at runtime. Each object runs its own overridden version. This is polymorphism in action."
+  ],
+  [
+    "Why is it legal to write: Fighter f = new Mage();",
+    "Because Mage extends Fighter. A subclass IS-A parent class, so a Mage can be stored anywhere a Fighter is expected."
+  ],
+  [
+    "Can you explain what @Override is for, and what happens if you try to override a method that is not actually in the parent class?",
+    "It tells the compiler to verify a matching method exists in the parent. If the method does not exist there, you get a compile error. Without @Override, a typo would silently create a brand new method instead of overriding anything."
+  ],
+  [
+    "You have two subclasses of Fighter: Mage and Brawler. Both override attack(). You call attack() on a Fighter reference. What determines which version runs?",
+    "Whatever object the reference is actually pointing to. If it holds a Mage, Mage's attack() runs. If it holds a Brawler, Brawler's runs. The reference type does not decide."
+  ],
+  [
+    "You have a Fighter reference. You want to call a method that only exists on Mage. What happens if you try without casting?",
+    "Compile error. The compiler only knows the reference type is Fighter, so it won't allow access to anything Fighter doesn't declare. You must downcast first."
+  ],
+  [
+    "You downcast a Fighter reference to Mage and then pass it to a method that expects a Fighter. Does that work?",
+    "Yes. Mage extends Fighter, so a Mage object satisfies any Fighter parameter. Casting to a subclass doesn't remove the IS-A relationship."
+  ],
+];
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+
+let cards       = [];
+let activeCards = [];
+let slots       = {};
+let sessionId   = '';
+let spinning    = false;
+let rotationDeg = 0;
+let landedIndex = -1;
+
+// Wheel segment colors
+const FUN_COLORS  = ['#e0165a', '#b80f49', '#cc1250', '#d41456'];
+const TECH_COLORS = ['#0077bb', '#005f99', '#006aaa', '#0070b3'];
+
+// ════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function randId() {
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  return letters[Math.floor(Math.random() * letters.length)] +
+         letters[Math.floor(Math.random() * letters.length)] +
+         String(Math.floor(1000 + Math.random() * 9000));
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ════════════════════════════════════════════
+//  BUILD DECK
+// ════════════════════════════════════════════
+
+function buildDeck(n) {
+  let fCount, tCount;
+  if (n <= 12) {
+    fCount = Math.min(n, FUN_QS.length);
+    tCount = Math.min(n, TECH_QS.length);
+  } else {
+    const funShare = Math.round(n * (12 / 25));
+    fCount = Math.min(funShare, FUN_QS.length);
+    tCount = Math.min(n - funShare, TECH_QS.length);
+  }
+
+  const funPool  = shuffle(FUN_QS).slice(0, fCount);
+  const techPool = shuffle(TECH_QS).slice(0, tCount);
+
+  let fi = 0, ti = 0;
+
+  const funCards = funPool.map((q, i) => ({
+    type: 'fun', question: q[0], slot: q[1], answer: null,
+    label: 'PERSONAL', done: false,
+    color: FUN_COLORS[fi++ % FUN_COLORS.length],
+    brightColor: '#ff5599',
+  }));
+
+  const techCards = techPool.map((q, i) => ({
+    type: 'tech', question: q[0], slot: null, answer: q[1],
+    label: 'TECHNICAL', done: false,
+    color: TECH_COLORS[ti++ % TECH_COLORS.length],
+    brightColor: '#33ddff',
+  }));
+
+  const all = shuffle([...funCards, ...techCards]);
+  return all;
+}
+
+// ════════════════════════════════════════════
+//  ENTRY POINT
+// ════════════════════════════════════════════
+
+document.getElementById('playerCount').addEventListener('blur', function () {
+  let v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 6)  v = 6;
+  if (v > 30) v = 30;
+  this.value = v;
+});
+
+function startGame() {
+  let n = parseInt(document.getElementById('playerCount').value, 10);
+  if (isNaN(n) || n < 6)  n = 6;
+  if (n > 30) n = 30;
+
+  cards       = buildDeck(n);
+  activeCards = cards.map((_, i) => i);
+  slots       = {};
+  rotationDeg = 0;
+  landedIndex = -1;
+  sessionId   = randId();
+
+  showScreen('wheelScreen');
+  updateRemaining();
+  setupCanvas();
+  drawWheel();
+}
+
+// ════════════════════════════════════════════
+//  WHEEL DRAWING
+// ════════════════════════════════════════════
+
+function setupCanvas() {
+  const canvas = document.getElementById('wheelCanvas');
+  const dpr    = window.devicePixelRatio || 1;
+  const size   = 500;
+  canvas.width  = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width  = size + 'px';
+  canvas.style.height = size + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+}
+
+function drawWheel() {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx    = canvas.getContext('2d');
+  const cx = 250;
+  const cy = 250;
+  const r  = cx - 4;
+
+  ctx.clearRect(0, 0, 500, 500);
+
+  const n = activeCards.length;
+  if (n === 0) return;
+
+  const sliceAngle = (2 * Math.PI) / n;
+
+  activeCards.forEach((cardIdx, i) => {
+    const card       = cards[cardIdx];
+    const startAngle = i * sliceAngle;
+    const endAngle   = startAngle + sliceAngle;
+    const midAngle   = startAngle + sliceAngle / 2;
+
+    // Slice fill
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = card.color;
+    ctx.fill();
+
+    // Separator
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(startAngle), cy + r * Math.sin(startAngle));
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = n > 20 ? 1.5 : 2.5;
+    ctx.stroke();
+
+    // Label text
+    if (sliceAngle > 0.14) {
+      ctx.save();
+      ctx.translate(
+        cx + (r - 16) * Math.cos(midAngle),
+        cy + (r - 16) * Math.sin(midAngle)
+      );
+      ctx.rotate(midAngle);
+      const fontSize = n > 20 ? 9 : n > 14 ? 11 : n > 8 ? 13 : 14;
+      ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(card.type === 'fun' ? 'FUN' : 'TECH', 0, 0);
+      ctx.restore();
+    }
+  });
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.strokeStyle = '#8890c0';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 5, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+// ════════════════════════════════════════════
+//  SPIN LOGIC
+// ════════════════════════════════════════════
+
+function updateRemaining() {
+  document.getElementById('remainingBadge').textContent =
+    `${activeCards.length} REMAINING`;
+}
+
+function spinWheel() {
+  if (activeCards.length === 0 || spinning) return;
+
+  spinning = true;
+  document.getElementById('btnSpin').disabled = true;
+  document.getElementById('spinStatus').textContent = 'SPINNING...';
+
+  const n           = activeCards.length;
+  const sliceAngle  = 360 / n;
+  const targetIdx   = Math.floor(Math.random() * n);
+
+  // Target slice center at angle 0 (pointer on right)
+  const targetAngle = -((targetIdx + 0.5) * sliceAngle);
+  const currentNorm = ((rotationDeg % 360) + 360) % 360;
+  const targetNorm  = ((targetAngle % 360) + 360) % 360;
+  let   delta       = targetNorm - currentNorm;
+  if (delta <= 0) delta += 360;
+
+  const extraSpins = (5 + Math.floor(Math.random() * 4)) * 360;
+  const totalSpin  = extraSpins + delta;
+  const finalDeg   = rotationDeg + totalSpin;
+  const duration   = 3800 + Math.random() * 900;
+  const startDeg   = rotationDeg;
+  const startTime  = performance.now();
+  const canvas     = document.getElementById('wheelCanvas');
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function animate(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    rotationDeg = startDeg + totalSpin * easeOut(t);
+    canvas.style.transform = `rotate(${rotationDeg}deg)`;
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      rotationDeg = finalDeg;
+      canvas.style.transform = `rotate(${rotationDeg}deg)`;
+      spinning    = false;
+      landedIndex = targetIdx;
+      document.getElementById('spinStatus').textContent = 'LANDED!';
+      highlightSlice(targetIdx);
+      setTimeout(() => openCard(targetIdx), 600);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function highlightSlice(activeIdx) {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx    = canvas.getContext('2d');
+  const cx = 250;
+  const cy = 250;
+  const r  = cx - 4;
+  const n  = activeCards.length;
+  if (n === 0) return;
+
+  const sliceAngle = (2 * Math.PI) / n;
+  const startAngle = activeIdx * sliceAngle;
+  const endAngle   = startAngle + sliceAngle;
+  const midAngle   = startAngle + sliceAngle / 2;
+  const card       = cards[activeCards[activeIdx]];
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, r, startAngle, endAngle);
+  ctx.closePath();
+  ctx.fillStyle = card.brightColor;
+  ctx.fill();
+
+  if (sliceAngle > 0.14) {
+    ctx.save();
+    ctx.translate(
+      cx + (r - 16) * Math.cos(midAngle),
+      cy + (r - 16) * Math.sin(midAngle)
+    );
+    ctx.rotate(midAngle);
+    const fontSize = n > 20 ? 9 : n > 14 ? 11 : n > 8 ? 13 : 14;
+    ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(card.type === 'fun' ? 'FUN' : 'TECH', 0, 0);
+    ctx.restore();
+  }
+
+  // Separator
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + r * Math.cos(startAngle), cy + r * Math.sin(startAngle));
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = n > 20 ? 1.5 : 2.5;
+  ctx.stroke();
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+  ctx.strokeStyle = '#8890c0';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+}
+
+// ════════════════════════════════════════════
+//  CARD OVERLAY
+// ════════════════════════════════════════════
+
+function openCard(activeIdx) {
+  const cardIdx = activeCards[activeIdx];
+  const card    = cards[cardIdx];
+
+  document.getElementById('cardStripe').className = `card-stripe ${card.type}`;
+
+  const icon = document.getElementById('cardTypeIcon');
+  icon.innerHTML = card.type === 'fun' ? FUN_ICON_SVG : TECH_ICON_SVG;
+
+  const lbl = document.getElementById('cardTypeLabel');
+  lbl.className = `card-type-label ${card.type}`;
+  lbl.textContent = card.label;
+
+  document.getElementById('cardQuestion').textContent = card.question;
+
+  const slotRow   = document.getElementById('cardSlotRow');
+  const slotInput = document.getElementById('cardSlotInput');
+  const revealRow = document.getElementById('cardRevealRow');
+  const revealBtn = document.getElementById('btnReveal');
+  const answerDiv = document.getElementById('cardAnswer');
+
+  answerDiv.style.display = 'none';
+  revealBtn.textContent = 'SHOW ANSWER';
+  revealBtn.style.color = '';
+  revealBtn.style.borderColor = '';
+
+  if (card.type === 'fun' && card.slot) {
+    slotRow.style.visibility = 'visible';
+    slotInput.value = slots[card.slot] || '';
+    slotInput.placeholder = SLOT_PLACEHOLDER[card.slot] || '';
+    revealRow.style.display = 'none';
+    setTimeout(() => slotInput.focus(), 450);
+  } else {
+    slotRow.style.visibility = 'hidden';
+    slotInput.value = '';
+    revealRow.style.display = 'block';
+    // Render answer with basic code tagging for inline code
+    answerDiv.innerHTML = formatAnswer(card.answer || '');
+  }
+
+  const btnDone = document.getElementById('btnDone');
+  if (activeCards.length === 1) {
+    btnDone.textContent = 'GENERATE CREDITS';
+    btnDone.className = 'btn-done finale';
+  } else {
+    btnDone.textContent = 'DONE';
+    btnDone.className = 'btn-done';
+  }
+
+  const overlay = document.getElementById('cardOverlay');
+  overlay.classList.add('open');
+}
+
+function formatAnswer(text) {
+  // Wrap anything in backticks or that looks like method calls with code tags
+  return text.replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+function toggleReveal() {
+  const answerDiv = document.getElementById('cardAnswer');
+  const btn       = document.getElementById('btnReveal');
+  const showing   = answerDiv.style.display === 'block';
+  answerDiv.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? 'SHOW ANSWER' : 'HIDE ANSWER';
+  btn.style.color       = showing ? '' : 'var(--cyan)';
+  btn.style.borderColor = showing ? '' : 'var(--cyan)';
+}
+
+function dismissCard() {
+  const cardIdx = activeCards[landedIndex];
+  const card    = cards[cardIdx];
+
+  if (card.type === 'fun' && card.slot) {
+    const val = document.getElementById('cardSlotInput').value.trim();
+    if (val) slots[card.slot] = val;
+  }
+
+  activeCards.splice(landedIndex, 1);
+  rotationDeg = 0;
+
+  const overlay = document.getElementById('cardOverlay');
+  const sheet   = document.getElementById('cardSheet');
+  sheet.style.transform = 'translateY(100%)';
+
+  setTimeout(() => {
+    overlay.classList.remove('open');
+    sheet.style.transform = '';
+
+    document.getElementById('wheelCanvas').style.transform = 'rotate(0deg)';
+    updateRemaining();
+    drawWheel();
+
+    if (activeCards.length === 0) {
+      setTimeout(showFinale, 300);
+    } else {
+      document.getElementById('btnSpin').disabled = false;
+      document.getElementById('spinStatus').textContent = 'READY';
+    }
+  }, 350);
+}
+
+// ════════════════════════════════════════════
+//  FINALE
+// ════════════════════════════════════════════
+
+function showFinale() {
+  document.getElementById('finaleFileId').textContent = `SESSION ID: ${sessionId}`;
+
+  const fCount = cards.filter(c => c.type === 'fun').length;
+  const tCount = cards.filter(c => c.type === 'tech').length;
+
+  renderMosaic();
+  showScreen('finaleScreen');
+}
+
+function s(key) {
+  if (slots[key]) return `<span class="slot-hl">${slots[key]}</span>`;
+  return null;
+}
+
+const SLOT_PLACEHOLDER = {
+  startingStat:   'noun or noun phrase',
+  uselessSkill:   'gerund phrase (e.g. "remembering names")',
+  replayMoment:   'noun phrase',
+  sideQuest:      'noun phrase',
+  tutorial:       'noun phrase',
+  respawnStrategy:'action phrase',
+  bossLevel:      'noun phrase',
+  genre:          'noun phrase',
+  cheatCode:      'noun phrase',
+  achievement:    'noun phrase',
+  bgMusic:        'noun or noun phrase',
+  steadyWork:     'noun phrase',
+};
+
+function renderMosaic() {
+  const canvas = document.getElementById('mosaicCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W = 32, H = 24;
+
+  const PALETTE = ['#00cfff','#ff2d78','#00ff88','#ffe600','#b44dff','#0077bb','#e0165a','#007a3d','#ffffff','#1e2a60'];
+
+  function hexRGB(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  function strSeed(str) {
+    let n = 0;
+    for (let i = 0; i < str.length; i++) n = (n * 31 + str.charCodeAt(i)) >>> 0;
+    return n;
+  }
+
+  const vals = Object.entries(slots)
+    .filter(([, v]) => v && v.trim())
+    .map(([k, v]) => ({ key: k, val: v.trim() }));
+
+  const count = Math.max(vals.length, 3);
+  const cols  = Math.ceil(Math.sqrt(count * W / H));
+  const cellW = W / cols;
+  const cellH = H / Math.ceil(count / cols);
+
+  const seeds = [];
+  vals.forEach(({ key, val }, i) => {
+    const col  = i % cols;
+    const row  = Math.floor(i / cols);
+    const seed = strSeed(key + val);
+    const jx   = ((seed & 0xff) / 255 - 0.5) * cellW * 0.6;
+    const jy   = (((seed >> 8) & 0xff) / 255 - 0.5) * cellH * 0.6;
+    seeds.push({ x: cellW * (col + 0.5) + jx, y: cellH * (row + 0.5) + jy, rgb: hexRGB(PALETTE[i % PALETTE.length]) });
+  });
+
+  if (!seeds.length) {
+    [[W*0.25,H*0.5],[W*0.5,H*0.3],[W*0.75,H*0.6]].forEach(([x,y],i) =>
+      seeds.push({ x, y, rgb: hexRGB(PALETTE[i]) })
+    );
+  }
+
+  const imageData = ctx.createImageData(W, H);
+  const data = imageData.data;
+  for (let py = 0; py < H; py++) {
+    for (let px = 0; px < W; px++) {
+      let minDist = Infinity, nearest = seeds[0];
+      for (const seed of seeds) {
+        const d = (px - seed.x) ** 2 + (py - seed.y) ** 2;
+        if (d < minDist) { minDist = d; nearest = seed; }
+      }
+      const idx = (py * W + px) * 4;
+      data[idx] = nearest.rgb[0]; data[idx+1] = nearest.rgb[1];
+      data[idx+2] = nearest.rgb[2]; data[idx+3] = 255;
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+}
+
+function restart() {
+  slots = {}; cards = []; activeCards = [];
+  rotationDeg = 0; landedIndex = -1; spinning = false;
+  document.getElementById('wheelCanvas').style.transform = 'rotate(0deg)';
+  document.getElementById('playerCount').value = 25;
+  showScreen('loadScreen');
+}
+</script>
+</body>
+</html>

@@ -1,8 +1,4 @@
 *.DS_Store
 node_modules/
-live-code/dist/
-live-code/build/icon.png
-classroom-apps/live-code.html
-classroom-apps/LIVE-CODE-FEATURES.md
 /java-academy/week-10/*
 /java-academy/week-11/*

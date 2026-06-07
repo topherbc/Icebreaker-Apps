@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Jeopardy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,300;0,400;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23eef1ec'/><g fill='none' stroke='%230b7c66' stroke-width='5' stroke-linejoin='round'><polygon points='50,14 84,50 50,86 16,50' opacity='0.38'/><polygon points='30,27 70,27 50,50'/><polygon points='30,73 70,73 50,50'/></g><circle cx='50' cy='50' r='4.5' fill='%230b7c66'/></svg>">
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root {
+  --bg:          #eef1ec;
+  --surface:     #f8faf6;
+  --border:      #cdd6cf;
+  --border-md:   #b4c0b6;
+  --accent:      #0b7c66;
+  --accent-lt:   #0d9079;
+  --accent-pale: rgba(11, 124, 102, 0.08);
+  --accent-ring: rgba(11, 124, 102, 0.24);
+  --teal:        #0a5a4d;
+  --teal-pale:   rgba(10, 90, 77, 0.10);
+  --amber:       #7c5009;
+  --amber-pale:  rgba(124, 80, 9, 0.08);
+  --slate:       #334155;
+  --text:        #14201c;
+  --text-2:      #34433d;
+  --muted:       #69776f;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ============================================================
+   RESET
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   LOAD SCREEN
+============================================================ */
+#load-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.load-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: 52px 56px;
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.load-badge-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.load-title {
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 44px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  line-height: 1.05;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.load-subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.load-flavor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 36px;
+  letter-spacing: 0.04em;
+}
+
+.load-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+}
+
+.load-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 14px 32px;
+  min-height: 52px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(11, 124, 102, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.load-btn:hover { background: var(--accent-lt); box-shadow: 0 4px 14px rgba(11,124,102,0.36); }
+.load-btn:active { transform: scale(0.98); }
+.load-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ============================================================
+   GAME SCREEN
+============================================================ */
+#game-screen { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* Top bar */
+.top-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 52px;
+  flex-shrink: 0;
+  gap: 12px;
+  z-index: 5;
+}
+
+.top-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.top-bar-icon { width: 24px; height: 24px; flex-shrink: 0; }
+
+.top-bar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.top-bar-spacer { flex: 1; min-width: 12px; }
+
+.reset-game-btn {
+  background: var(--bg);
+  border: 1.5px solid var(--border-md);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 14px;
+  min-height: 36px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.reset-game-btn:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+.reset-game-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* Grid area */
+.grid-area {
+  flex: 1;
+  overflow: auto;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* Jeopardy grid */
+.jeopardy-grid {
+  width: 100%;
+  max-width: 1600px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+/* Category headers */
+.category-header {
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 14px 12px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Point tiles */
+.tile {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.tile:hover:not(.tile-used) {
+  background: var(--accent-pale);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.tile:active:not(.tile-used) { transform: translateY(0); }
+
+.tile-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+}
+
+/* Used tile state */
+.tile.tile-used {
+  background: var(--bg);
+  border-color: var(--border);
+  cursor: default;
+  box-shadow: none;
+}
+
+.tile-used .tile-value {
+  text-decoration: line-through;
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+.tile-done-label {
+  display: none;
+  position: absolute;
+  bottom: 6px;
+  left: 0; right: 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tile.tile-used .tile-done-label { display: block; }
+
+/* ============================================================
+   QUESTION OVERLAY
+============================================================ */
+#overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(17, 24, 39, 0.72);
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  backdrop-filter: blur(4px);
+}
+
+#overlay.open { display: flex; }
+
+.overlay-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  padding: 48px 52px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.overlay-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--teal) 100%);
+}
+
+.overlay-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.overlay-category {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-pale);
+  border: 1px solid rgba(11, 124, 102, 0.22);
+  border-radius: 6px;
+  padding: 4px 10px;
+}
+
+.overlay-points {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.overlay-question {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 28px;
+}
+
+.overlay-question code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  background: var(--accent-pale);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--accent);
+}
+
+/* Answer block -- hidden until revealed */
+.overlay-answer-block {
+  display: none;
+  background: var(--teal-pale);
+  border: 1px solid rgba(10, 102, 87, 0.22);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.overlay-answer-block.show { display: block; }
+
+.overlay-answer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+
+.overlay-answer-text {
+  font-size: 18px;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+.overlay-answer-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  background: rgba(10, 102, 87, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--teal);
+}
+
+/* Overlay buttons */
+.overlay-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.reveal-answer-btn {
+  flex: 1;
+  min-width: 160px;
+  min-height: 52px;
+  background: var(--teal);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(10,102,87,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.reveal-answer-btn:hover { background: #0c7a6a; box-shadow: 0 4px 14px rgba(10,102,87,0.36); }
+.reveal-answer-btn:active { transform: scale(0.98); }
+.reveal-answer-btn:disabled { background: var(--border); color: var(--muted); box-shadow: none; cursor: default; }
+.reveal-answer-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.back-to-board-btn {
+  flex: 1;
+  min-width: 160px;
+  min-height: 52px;
+  background: var(--bg);
+  border: 1.5px solid var(--border-md);
+  border-radius: 10px;
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.back-to-board-btn:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+.back-to-board-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- ======================================================
+     LOAD SCREEN
+====================================================== -->
+<div id="load-screen">
+  <div class="load-card">
+    <svg class="load-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g fill="none" stroke="#0b7c66" stroke-width="3.2" stroke-linejoin="round">
+        <polygon points="32,7 55,32 32,57 9,32" opacity="0.38"/>
+        <polygon points="19,17 45,17 32,32"/>
+        <polygon points="19,47 45,47 32,32"/>
+      </g>
+      <circle cx="32" cy="32" r="3" fill="#0b7c66"/>
+    </svg>
+
+    <h1 class="load-title">The Quarterly Review</h1>
+    <p class="load-subtitle">Lattice Industries // Numeric Refinement</p>
+    <p class="load-flavor">Eleven weeks. Seven categories. One Board.</p>
+
+    <div class="load-divider"></div>
+
+    <button class="load-btn" id="start-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>
+      </svg>
+      Convene the Review
+    </button>
+  </div>
+</div>
+
+
+<!-- ======================================================
+     GAME SCREEN
+====================================================== -->
+<div id="game-screen">
+
+  <header class="top-bar">
+    <div class="top-bar-brand">
+      <svg class="top-bar-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="none" stroke="#0b7c66" stroke-width="3.6" stroke-linejoin="round">
+          <polygon points="32,7 55,32 32,57 9,32" opacity="0.38"/>
+          <polygon points="19,17 45,17 32,32"/><polygon points="19,47 45,47 32,32"/>
+        </g>
+        <circle cx="32" cy="32" r="3.2" fill="#0b7c66"/>
+      </svg>
+      <span class="top-bar-title">The Quarterly Review</span>
+    </div>
+    <div class="top-bar-spacer"></div>
+    <button class="reset-game-btn" id="reset-board-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.56"/></svg>
+      Purge Board
+    </button>
+    <button class="reset-game-btn" id="new-game-btn" style="margin-left:4px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      New Game
+    </button>
+  </header>
+
+  <div class="grid-area">
+    <div class="jeopardy-grid" id="jeopardy-grid" role="grid" aria-label="Jeopardy board"></div>
+  </div>
+
+</div>
+
+
+<!-- ======================================================
+     QUESTION OVERLAY
+====================================================== -->
+<div id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-question-text">
+  <div class="overlay-panel">
+    <div class="overlay-meta">
+      <span class="overlay-category" id="overlay-category"></span>
+      <span class="overlay-points" id="overlay-points"></span>
+    </div>
+    <p class="overlay-question" id="overlay-question-text"></p>
+    <div class="overlay-answer-block" id="overlay-answer-block">
+      <div class="overlay-answer-label">Answer</div>
+      <div class="overlay-answer-text" id="overlay-answer-text"></div>
+    </div>
+    <div class="overlay-actions">
+      <button class="reveal-answer-btn" id="reveal-answer-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Disclose Answer
+      </button>
+      <button class="back-to-board-btn" id="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Board
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ============================================================
+// BOARD DATA
+// 7 categories x 6 point values = 42 questions
+// Points: 100 / 200 / 300 / 400 / 600 / 1000
+// ============================================================
+const BOARD = [
+  {
+    category: 'The Basics',
+    questions: [
+      {
+        points: 100,
+        q: 'What data type would you use in Java to store the text "Hello, World!"?',
+        a: 'String. Java uses the String type to store text.'
+      },
+      {
+        points: 200,
+        q: 'What does this print?\n\nfor (int i = 1; i <= 3; i++) {\n  System.out.println(i);\n}',
+        qCode: true,
+        a: 'It prints 1, then 2, then 3, each on its own line. The loop starts at 1, increments by 1 each time, and runs while i is less than or equal to 3.'
+      },
+      {
+        points: 300,
+        q: 'What is wrong with this variable declaration?\n\nint 2score = 100;',
+        qCode: true,
+        a: 'Variable names cannot start with a digit. "2score" is invalid. A valid name would be "score2" or "playerScore".'
+      },
+      {
+        points: 400,
+        q: 'When would you choose a while loop over a for loop?',
+        a: 'Use a while loop when you do not know in advance how many times you need to iterate -- for example, reading input until the user enters "quit". Use a for loop when you know the count upfront or are iterating a specific range. The while loop expresses "keep going until a condition changes" more clearly in those cases.'
+      },
+      {
+        points: 600,
+        q: 'What is the difference between == and .equals() when comparing two String objects in Java?',
+        a: '== checks if both variables point to the exact same object in memory. .equals() checks if the contents of the two Strings are the same. For Strings, always use .equals() for value comparison -- == may return false even when the text is identical if the objects are different instances.'
+      },
+      {
+        points: 1000,
+        q: 'What is the difference between stack memory and heap memory in Java, and where do objects live?',
+        a: 'The stack holds method call frames and local primitive variables -- it is fast and automatically managed as methods enter and exit. The heap holds all objects created with new. References (variables that point to objects) live on the stack, but the object data itself lives on the heap. The garbage collector reclaims unreachable heap memory automatically.'
+      }
+    ]
+  },
+  {
+    category: 'Object World',
+    questions: [
+      {
+        points: 100,
+        q: 'What keyword creates a new object from a class in Java?',
+        a: 'new. You use "new ClassName()" to create a new instance of a class.'
+      },
+      {
+        points: 200,
+        q: 'What is the difference between a getter and a setter?',
+        a: 'A getter reads a private field and returns its value. A setter receives a value and assigns it to a private field. Together they control access to an object\'s internal data.'
+      },
+      {
+        points: 300,
+        q: 'In this class, what does the constructor set?\n\npublic class Dog {\n  private String name;\n  private int age;\n\n  public Dog(String n, int a) {\n    name = n;\n    age = a;\n  }\n}',
+        qCode: true,
+        a: 'The constructor sets the name field to the value of parameter n, and the age field to the value of parameter a. Every new Dog object is created with a name and an age.'
+      },
+      {
+        points: 400,
+        q: 'Explain encapsulation in plain English and why it matters.',
+        a: 'Encapsulation means keeping an object\'s internal data private and only exposing it through controlled methods. It matters because it prevents outside code from putting an object into an invalid state, makes code easier to change internally without breaking other code, and makes the intent of how data should be accessed clear.'
+      },
+      {
+        points: 600,
+        q: 'What is method overloading, and how is it different from method overriding?',
+        a: 'Overloading means defining multiple methods in the same class with the same name but different parameter lists -- the compiler picks the right one based on the arguments passed. Overriding means a subclass provides its own implementation of a method already defined in the parent class -- same name, same signature. Overloading is a compile-time decision; overriding is a runtime decision.'
+      },
+      {
+        points: 1000,
+        q: 'What is the difference between a shallow copy and a deep copy of an object?',
+        a: 'A shallow copy creates a new object but copies only the references to nested objects -- both the original and the copy point to the same nested data. A deep copy creates new independent objects for all nested members too, so the copy is fully isolated. In Java, the default clone() does a shallow copy unless you override it to perform a deep copy.'
+      }
+    ]
+  },
+  {
+    category: 'Inheritance Inc.',
+    questions: [
+      {
+        points: 100,
+        q: 'What keyword does a subclass use to inherit from a parent class in Java?',
+        a: 'extends. For example: public class Dog extends Animal.'
+      },
+      {
+        points: 200,
+        q: 'What does @Override tell the compiler when it appears above a method?',
+        a: '@Override tells the compiler that this method is intentionally replacing a method from the parent class. If no matching parent method exists, the compiler throws an error -- which catches typos and signature mismatches early.'
+      },
+      {
+        points: 300,
+        q: 'Given this inheritance chain, which speak() runs when you call dog.speak()?\n\nclass Animal {\n  void speak() { System.out.println("..."); }\n}\nclass Dog extends Animal {\n  @Override\n  void speak() { System.out.println("Woof"); }\n}',
+        qCode: true,
+        a: 'The Dog version runs and prints "Woof". Because Dog overrides speak(), Java calls the most specific version available -- Dog\'s implementation, not Animal\'s.'
+      },
+      {
+        points: 400,
+        q: 'What is the difference between an abstract class and an interface? When would you choose each?',
+        a: 'An abstract class can have both concrete and abstract methods, and can hold state. An interface defines a contract -- only method signatures (and default methods in modern Java). A class can implement multiple interfaces but extend only one class. Choose an abstract class when you want to share common implementation across related classes. Choose an interface when you want to define a capability that unrelated classes can share.'
+      },
+      {
+        points: 600,
+        q: 'What does the super keyword do inside a subclass constructor or method?',
+        a: 'In a constructor, super() calls the parent class constructor and must be the first statement. In a method, super.methodName() explicitly calls the parent\'s version of an overridden method. This is useful when the subclass wants to extend the parent\'s logic rather than completely replace it.'
+      },
+      {
+        points: 1000,
+        q: 'Explain what polymorphism means and give an example using a parent type reference.',
+        a: 'Polymorphism means that a parent type reference can hold a subclass object, and the correct overridden method is called at runtime based on the actual type. For example: Animal a = new Dog(); a.speak(); -- even though the reference type is Animal, Java calls Dog\'s speak() method. This lets you write code that works with any subclass without knowing which specific one it is at compile time.'
+      }
+    ]
+  },
+  {
+    category: 'Interface & Streams',
+    questions: [
+      {
+        points: 100,
+        q: 'What keyword does a class use to implement an interface in Java?',
+        a: 'implements. For example: public class Dog implements Runnable.'
+      },
+      {
+        points: 200,
+        q: 'In plain English, what does a lambda expression replace?',
+        a: 'A lambda replaces an anonymous inner class that implements a functional interface -- one with a single abstract method. Instead of writing the full class, you write just the method body in a compact form.'
+      },
+      {
+        points: 300,
+        q: 'What does this stream pipeline return?\n\nlist.stream()\n    .filter(n -> n > 10)\n    .map(n -> n * 2)\n    .collect(Collectors.toList());',
+        qCode: true,
+        a: 'It returns a new list containing only the elements greater than 10, each doubled. filter keeps only items matching the condition, map transforms each remaining item, and collect assembles them into a new list.'
+      },
+      {
+        points: 400,
+        q: 'Why would you use an interface instead of an abstract class?',
+        a: 'Use an interface when you want to define a capability that unrelated classes should share, or when a class needs to fulfill multiple contracts -- since Java allows implementing multiple interfaces but only extending one class. Interfaces are also the right choice when you want to define behavior without assuming anything about the implementing class\'s structure or state.'
+      },
+      {
+        points: 600,
+        q: 'What does the Optional type in Java help you avoid, and how do you use it?',
+        a: 'Optional wraps a value that may or may not be present, helping you avoid NullPointerExceptions. Instead of returning null, a method returns Optional.empty() or Optional.of(value). You then check with isPresent(), use get(), or use orElse(defaultValue) to handle the missing case safely and explicitly.'
+      },
+      {
+        points: 1000,
+        q: 'What is the difference between map and flatMap in a Java Stream?',
+        a: 'map transforms each element one-to-one -- one input produces one output. flatMap transforms each element into a stream of results and then flattens all those streams into a single stream. For example, if each order has a list of items, flatMap lets you get a single stream of all items across all orders. Use flatMap when your mapping function returns a collection or stream rather than a single value.'
+      }
+    ]
+  },
+  {
+    category: 'Data & Storage',
+    questions: [
+      {
+        points: 100,
+        q: 'What SQL keyword filters which rows are returned in a query?',
+        a: 'WHERE. For example: SELECT * FROM students WHERE grade = "A";'
+      },
+      {
+        points: 200,
+        q: 'What is the difference between an INNER JOIN and a LEFT JOIN?',
+        a: 'An INNER JOIN returns only rows where there is a matching value in both tables. A LEFT JOIN returns all rows from the left table, plus matched rows from the right -- unmatched right-side columns are NULL.'
+      },
+      {
+        points: 300,
+        q: 'What is a PreparedStatement, and why is it safer than a Statement?',
+        a: 'A PreparedStatement uses parameterized placeholders for values instead of building SQL strings by concatenation. This prevents SQL injection attacks, because user input is treated as data -- not as executable SQL.'
+      },
+      {
+        points: 400,
+        q: 'Explain what JDBC does in plain English -- what problem does it solve?',
+        a: 'JDBC (Java Database Connectivity) is the standard Java API for connecting to relational databases. It solves the problem of Java programs not having a built-in way to talk to databases -- JDBC provides the driver interface, connection management, and query execution that let Java code send SQL and receive results back from a database.'
+      },
+      {
+        points: 600,
+        q: 'What does a primary key do in a relational database, and why is it important?',
+        a: 'A primary key uniquely identifies every row in a table. No two rows can have the same primary key value, and it cannot be null. It is important because it gives every record a reliable, unique identity that other tables can reference through foreign keys to create relationships.'
+      },
+      {
+        points: 1000,
+        q: 'Explain what database normalization means and why you would want to normalize a table.',
+        a: 'Normalization is the process of organizing a database to reduce data redundancy and improve data integrity. It involves splitting tables and defining relationships so that each piece of data is stored in only one place. This prevents update anomalies -- where changing one fact requires editing many rows -- and makes the database easier to maintain and query correctly.'
+      }
+    ]
+  },
+  {
+    category: 'Spring Things',
+    questions: [
+      {
+        points: 100,
+        q: 'What does @SpringBootApplication do when placed above the main class?',
+        a: '@SpringBootApplication combines three annotations: it enables component scanning to find your classes, enables auto-configuration to set sensible defaults, and marks the class as a configuration source. It bootstraps the entire Spring application.'
+      },
+      {
+        points: 200,
+        q: 'What is the difference between @GetMapping and @PostMapping?',
+        a: '@GetMapping maps a method to HTTP GET requests -- typically used to retrieve data. @PostMapping maps a method to HTTP POST requests -- typically used to submit or create data. The difference reflects the HTTP verb the client uses to call that endpoint.'
+      },
+      {
+        points: 300,
+        q: 'What does the repository layer do in a Spring application?',
+        a: 'The repository layer handles all database interactions -- saving, finding, updating, and deleting data. It keeps database logic isolated from controllers and services so each layer has a single, clear responsibility.'
+      },
+      {
+        points: 400,
+        q: 'Explain the relationship between Spring, Spring Boot, and JPA -- how do they relate to each other?',
+        a: 'Spring is the core framework that provides dependency injection and application plumbing. Spring Boot builds on top of Spring and adds auto-configuration and defaults so you can start quickly without XML setup. JPA is a separate specification for database access that Spring and Spring Boot integrate with -- it replaces raw JDBC with object-based database interaction. They work together: Spring Boot wires them all up so you can focus on writing business logic.'
+      },
+      {
+        points: 600,
+        q: 'What is dependency injection, and what problem does @Autowired (or constructor injection) solve in Spring?',
+        a: 'Dependency injection means that objects do not create their own dependencies -- Spring creates them and injects them. @Autowired tells Spring to supply the required object automatically. This decouples classes from their dependencies, makes testing easier (you can inject mocks), and lets Spring manage object lifecycles without you writing any wiring code.'
+      },
+      {
+        points: 1000,
+        q: 'What is the purpose of @Service, @Repository, and @RestController annotations, and how do they differ?',
+        a: '@Service marks a class that holds business logic. @Repository marks a class that accesses the database and also enables Spring to translate database exceptions into Spring\'s exception hierarchy. @RestController combines @Controller with @ResponseBody, meaning every method returns JSON/data directly to the client instead of a view name. All three are specializations of @Component that make each layer\'s role explicit and self-documenting.'
+      }
+    ]
+  },
+  {
+    category: 'REST',
+    questions: [
+      {
+        points: 100,
+        q: 'What does HTTP stand for, and what is its role in web communication?',
+        a: 'HTTP stands for HyperText Transfer Protocol. It is the communication protocol used to transfer data between a client (such as a browser or app) and a server. Every API call you make uses HTTP to define how the request is structured and how the server sends a response back.'
+      },
+      {
+        points: 200,
+        q: 'What are the four most common HTTP methods, and what does each one mean?',
+        a: 'GET retrieves data without changing anything. POST creates a new resource. PUT updates an existing resource (full replacement). DELETE removes a resource. These methods express the intent of the request, and REST APIs are designed so each method has a predictable, consistent meaning.'
+      },
+      {
+        points: 300,
+        q: 'What does a 404 status code mean? What would a 200 and a 500 tell you?',
+        a: '404 means the requested resource was not found -- the URL is valid but no data exists there. 200 means the request succeeded and the server returned the expected data. 500 means an internal server error occurred on the server side -- something went wrong in the application, not with the client\'s request.'
+      },
+      {
+        points: 400,
+        q: 'What is a REST endpoint? Given the URL /api/students/42, what do you think the 42 represents?',
+        a: 'An endpoint is a specific URL on the server that the client can call to perform an action. In /api/students/42, the 42 is a path variable -- it identifies which student record you want. The endpoint /api/students/{id} combined with a GET method would retrieve the student with that ID.'
+      },
+      {
+        points: 600,
+        q: 'What is the difference between a path variable, a query parameter, and a request body? When would you use each?',
+        a: 'A path variable (e.g., /students/42) identifies a specific resource by its ID -- use it when you are targeting one record. A query parameter (e.g., /students?grade=A) filters or refines a collection -- use it for search or optional filtering. A request body carries structured data (typically JSON) for creating or updating a resource -- use it with POST or PUT when you have multiple fields to send.'
+      },
+      {
+        points: 1000,
+        q: 'In a Spring REST controller, what is the purpose of @PathVariable, @RequestParam, and @RequestBody? How would you use all three in a single endpoint?',
+        a: '@PathVariable extracts a value from the URL path (e.g., /students/{id}). @RequestParam reads a query string value (e.g., ?notify=true). @RequestBody deserializes the incoming JSON body into a Java object. You could combine them like: updateStudent(@PathVariable Long id, @RequestParam boolean notify, @RequestBody StudentDto dto) -- the path identifies which student, the param controls behavior, and the body carries the new data.'
+      }
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let usedTiles  = new Set(); // "catIdx-qIdx"
+let activeKey  = null;      // key of tile currently shown in overlay
+let lastFocused = null;
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// START
+// ============================================================
+document.getElementById('start-btn').addEventListener('click', startGame);
+
+function startGame() {
+  usedTiles.clear();
+  activeKey = null;
+
+  buildGrid();
+
+  document.getElementById('load-screen').style.display = 'none';
+  const gs = document.getElementById('game-screen');
+  gs.style.display = 'flex';
+}
+
+// ============================================================
+// BUILD GRID
+// ============================================================
+function buildGrid() {
+  const grid = document.getElementById('jeopardy-grid');
+  grid.innerHTML = '';
+
+  // Row 1: category headers
+  BOARD.forEach(cat => {
+    const hdr = document.createElement('div');
+    hdr.className = 'category-header';
+    hdr.setAttribute('role', 'columnheader');
+    hdr.textContent = cat.category;
+    grid.appendChild(hdr);
+  });
+
+  // Rows 2-7: tiles (one per point value row)
+  const pointRows = [0, 1, 2, 3, 4, 5]; // index into questions array
+  pointRows.forEach(qIdx => {
+    BOARD.forEach((cat, catIdx) => {
+      const q    = cat.questions[qIdx];
+      const key  = `${catIdx}-${qIdx}`;
+      const used = usedTiles.has(key);
+
+      const tile = document.createElement('div');
+      tile.className = 'tile' + (used ? ' tile-used' : '');
+      tile.setAttribute('role', 'gridcell');
+      tile.dataset.key = key;
+
+      if (!used) {
+        tile.setAttribute('tabindex', '0');
+        tile.setAttribute('aria-label', `${cat.category} for ${q.points} points`);
+      } else {
+        tile.setAttribute('aria-label', `${cat.category} ${q.points} points -- already played`);
+      }
+
+      const val = document.createElement('span');
+      val.className = 'tile-value';
+      val.textContent = q.points;
+
+      const done = document.createElement('span');
+      done.className = 'tile-done-label';
+      done.textContent = 'Done';
+      done.setAttribute('aria-hidden', 'true');
+
+      tile.appendChild(val);
+      tile.appendChild(done);
+
+      if (!used) {
+        tile.addEventListener('click', () => openOverlay(catIdx, qIdx, tile));
+        tile.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openOverlay(catIdx, qIdx, tile);
+          }
+        });
+      }
+
+      grid.appendChild(tile);
+    });
+  });
+}
+
+// ============================================================
+// OVERLAY
+// ============================================================
+function openOverlay(catIdx, qIdx, tilEl) {
+  const cat = BOARD[catIdx];
+  const q   = cat.questions[qIdx];
+  activeKey = `${catIdx}-${qIdx}`;
+  lastFocused = tilEl;
+
+  document.getElementById('overlay-category').textContent = cat.category;
+  document.getElementById('overlay-points').textContent   = `${q.points} pts`;
+
+  // Question text -- if qCode, render pre-formatted question with code block
+  const qEl = document.getElementById('overlay-question-text');
+  if (q.qCode) {
+    // Split on first blank line: question text before, code after
+    const parts = q.q.split('\n\n');
+    if (parts.length >= 2) {
+      const qText  = escHtml(parts[0]);
+      const codeBlock = parts.slice(1).join('\n\n');
+      qEl.innerHTML = `${qText}<br><br><code style="display:block;white-space:pre;font-family:'JetBrains Mono',monospace;font-size:15px;background:var(--accent-pale);border-radius:8px;padding:14px 16px;margin-top:2px;line-height:1.6;color:var(--accent);">${escHtml(codeBlock)}</code>`;
+    } else {
+      qEl.textContent = q.q;
+    }
+  } else {
+    qEl.textContent = q.q;
+  }
+
+  // Answer
+  document.getElementById('overlay-answer-text').textContent = q.a;
+  document.getElementById('overlay-answer-block').classList.remove('show');
+
+  const revBtn = document.getElementById('reveal-answer-btn');
+  revBtn.disabled = false;
+  revBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Disclose Answer`;
+
+  const overlay = document.getElementById('overlay');
+  overlay.classList.add('open');
+
+  // Move focus into overlay
+  requestAnimationFrame(() => {
+    revBtn.focus();
+  });
+}
+
+document.getElementById('reveal-answer-btn').addEventListener('click', () => {
+  document.getElementById('overlay-answer-block').classList.add('show');
+  const btn = document.getElementById('reveal-answer-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Answer Shown`;
+  document.getElementById('back-btn').focus();
+});
+
+document.getElementById('back-btn').addEventListener('click', closeOverlay);
+
+// Close on backdrop click
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeOverlay();
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('overlay').classList.contains('open')) {
+    closeOverlay();
+  }
+});
+
+function closeOverlay() {
+  const overlay = document.getElementById('overlay');
+  overlay.classList.remove('open');
+
+  if (activeKey) {
+    usedTiles.add(activeKey);
+    // Update just the affected tile in-place
+    const tile = document.querySelector(`.tile[data-key="${activeKey}"]`);
+    if (tile) {
+      tile.classList.add('tile-used');
+      tile.removeAttribute('tabindex');
+      const [ci, qi] = activeKey.split('-').map(Number);
+      const cat = BOARD[ci];
+      const q   = cat.questions[qi];
+      tile.setAttribute('aria-label', `${cat.category} ${q.points} points -- already played`);
+      // Remove event listeners by replacing node
+      const newTile = tile.cloneNode(true);
+      tile.parentNode.replaceChild(newTile, tile);
+    }
+    activeKey = null;
+  }
+
+  // Return focus to the tile or board
+  if (lastFocused) {
+    lastFocused.focus();
+    lastFocused = null;
+  }
+}
+
+// ============================================================
+// RESET BOARD
+// ============================================================
+document.getElementById('reset-board-btn').addEventListener('click', () => {
+  usedTiles.clear();
+  activeKey = null;
+  buildGrid();
+});
+
+// ============================================================
+// NEW GAME
+// ============================================================
+document.getElementById('new-game-btn').addEventListener('click', () => {
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('load-screen').style.display = 'flex';
+});
+</script>
+</body>
+</html>

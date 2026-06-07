@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23eef1ec'/><g fill='none' stroke='%230b7c66' stroke-width='4' stroke-linejoin='round'><polygon points='50,16 80,67 20,67'/><polygon points='50,84 80,33 20,33'/></g><circle cx='50' cy='50' r='5' fill='%230b7c66'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23eef1ec'/><g fill='none' stroke='%230b7c66' stroke-width='5' stroke-linejoin='round'><polygon points='50,14 84,50 50,86 16,50' opacity='0.38'/><polygon points='30,27 70,27 50,50'/><polygon points='30,73 70,73 50,50'/></g><circle cx='50' cy='50' r='4.5' fill='%230b7c66'/></svg>">
 <style>
 /* ============================================================
    TOKENS
@@ -262,8 +262,8 @@ button { font-family: inherit; }
   letter-spacing: 0.03em; line-height: 1;
 }
 .door-tag svg { width: 11px; height: 11px; flex-shrink: 0; }
-.door.wellness .door-tag { background: var(--accent-pale); color: var(--accent-deep); border: 1px solid var(--accent-ring); }
-.door.clearance .door-tag { background: var(--woe-bg); color: var(--woe); border: 1px solid rgba(29,95,168,.24); }
+/* identical tag for every office -- nothing reveals the question type */
+.door-tag { background: var(--accent-pale); color: var(--accent-deep); border: 1px solid var(--accent-ring); }
 
 .door-plate {
   font-family: var(--mono); font-size: 13px; font-weight: 600;
@@ -278,9 +278,9 @@ button { font-family: inherit; }
 }
 .door.is-open .door-question { filter: none; user-select: auto; }
 
-/* wellness: textarea + tempers */
-.wellness-area { display: none; flex-direction: column; gap: 10px; }
-.door.is-open .wellness-area { display: flex; }
+/* every opened office looks the same: a control + the temper sort */
+.refine-area { display: none; flex-direction: column; gap: 10px; }
+.door.is-open .refine-area { display: flex; }
 
 .wellness-label {
   font-family: var(--mono); font-size: 11px; font-weight: 600;
@@ -447,8 +447,14 @@ button { font-family: inherit; }
   margin-bottom: 16px;
 }
 .ceremony-title {
-  font-family: var(--serif); font-size: 30px; font-weight: 400;
-  color: #d8fff0; letter-spacing: -0.3px; margin-bottom: 6px;
+  font-family: var(--serif); font-size: 25px; font-weight: 400;
+  color: rgba(214,255,240,.7); letter-spacing: -0.1px; margin-bottom: 2px;
+}
+.award-perk {
+  font-family: var(--serif); font-style: italic;
+  font-size: 38px; font-weight: 400; line-height: 1.12;
+  color: #6ff0c4; margin: 0 0 18px;
+  text-shadow: 0 0 26px rgba(80,240,180,.28);
 }
 .ceremony-meta {
   font-family: var(--mono); font-size: 12px; color: rgba(120,236,200,.5);
@@ -548,10 +554,11 @@ button { font-family: inherit; }
   <div class="reception-card">
     <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
       <g fill="none" stroke="#0b7c66" stroke-width="5" stroke-linejoin="round">
-        <polygon points="50,14 82,68 18,68"/>
-        <polygon points="50,86 82,32 18,32"/>
+        <polygon points="50,14 84,50 50,86 16,50" opacity="0.38"/>
+        <polygon points="30,27 70,27 50,50"/>
+        <polygon points="30,73 70,73 50,50"/>
       </g>
-      <circle cx="50" cy="50" r="5" fill="#0b7c66"/>
+      <circle cx="50" cy="50" r="4.5" fill="#0b7c66"/>
     </svg>
 
     <p class="reception-eyebrow">Lattice Industries // Intake</p>
@@ -583,9 +590,9 @@ button { font-family: inherit; }
     <div class="floor-brand">
       <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
         <g fill="none" stroke="#0b7c66" stroke-width="6" stroke-linejoin="round">
-          <polygon points="50,14 82,68 18,68"/><polygon points="50,86 82,32 18,32"/>
+          <polygon points="50,14 84,50 50,86 16,50" opacity="0.38"/><polygon points="30,27 70,27 50,50"/><polygon points="30,73 70,73 50,50"/>
         </g>
-        <circle cx="50" cy="50" r="6" fill="#0b7c66"/>
+        <circle cx="50" cy="50" r="5.5" fill="#0b7c66"/>
       </svg>
       <span class="floor-brand-name">Lattice Industries</span>
     </div>
@@ -601,7 +608,7 @@ button { font-family: inherit; }
   <main class="floor-body">
     <div class="floor-intro">
       <h2>Welcome to the Floor</h2>
-      <p>Each office holds one new refiner. Knock to open it. Wellness offices ask you to file a feeling; clearance offices verify your data integrity. The work will make sense at the end. It always does.</p>
+      <p>Each office holds one new refiner. Knock to open it; you will not know what is inside until you do. Sort every file by how it feels. The work will make sense at the end. It always does.</p>
     </div>
 
     <div class="door-grid" id="door-grid"></div>
@@ -644,15 +651,16 @@ button { font-family: inherit; }
 
   <div id="ceremony">
     <div class="ceremony-card">
-      <div class="ceremony-stamp">Refinement Complete // Cohort Record Sealed</div>
-      <div class="ceremony-title">What The Work Was For</div>
+      <div class="ceremony-stamp">Refinement Milestone Reached</div>
+      <div class="ceremony-title">For your contributions, you have earned</div>
+      <div class="award-perk" id="award-perk"></div>
       <div class="ceremony-meta" id="ceremony-meta">Aggregated from the floor. For internal contemplation only.</div>
       <div class="temper-readout" id="temper-readout"></div>
       <div class="ceremony-divider"></div>
       <div class="ceremony-body" id="ceremony-body"></div>
       <div class="ceremony-foot">
-        <span>This image was assembled from numbers you refined without being told what they meant. The numbers meant this. The numbers always meant this.</span>
-        <span class="ceremony-foot-sig">// End of Cohort Record //</span>
+        <span>This reward is permanent, non-transferable, and exists primarily as a feeling. Please enjoy it during designated enjoyment hours.</span>
+        <span class="ceremony-foot-sig">// Issued by Lattice Wellness //</span>
       </div>
     </div>
   </div>
@@ -724,6 +732,29 @@ const TEMPERS = [
   { id: 'frolic', name: 'Frolic', dot: '#d39516' },
   { id: 'dread',  name: 'Dread',  dot: '#a566cf' },
   { id: 'malice', name: 'Malice', dot: '#d4536f' }
+];
+
+/* neutral file codenames -- the only label an office shows, identical
+   styling for wellness and clearance so the type is never telegraphed */
+const FILE_CODENAMES = [
+  'Cold Harbor','Tumwater','Allentown','Cairns','Coleman','Culpepper','Dranesville',
+  'Eminence','Jesup','Kingsport','Labrador','Le Mars','Longbranch','Minsk','Moonbeam',
+  'Nanning','Narva','Ocula','Pacheco','Siena','Sopchoppy','Sunset Park','Tan',
+  'Waynesboro','Yakima','Astoria','Bellingham','Chicxulub','Dunmore','Epping'
+];
+
+/* what the cohort wins at the terminal -- the reward, not a document */
+const PERKS = [
+  'A Finger Trap',
+  'A Caricature of the Cohort',
+  'A Waffle Party',
+  'Five Minutes of Music Dance Experience',
+  'A Melon Bar',
+  'An Egg Bar',
+  'A Commemorative Handbook',
+  'One (1) Wellness Session',
+  'A Defiant Jazz Interlude',
+  'A Spare Finger Trap'
 ];
 
 /* ============================================================
@@ -813,40 +844,43 @@ function updateRefine(){
 function renderDoors(cards){
   const grid = document.getElementById('door-grid');
   grid.innerHTML = '';
+  const codes = shuffle(FILE_CODENAMES);
 
   cards.forEach((card, idx) => {
     const div = document.createElement('div');
     div.className = `door ${card.type}`;
     div.style.animationDelay = `${Math.min(idx * 0.022, 0.55)}s`;
 
-    const tag = card.type === 'wellness'
-      ? `<span class="door-tag"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2 5 5.2 5c2 0 3.3 1.1 4.1 2.3C10.1 6.1 11.4 5 13.4 5 16.6 5 18.2 8.4 16.6 11.7 14.1 16.4 12 21 12 21z"/></svg>Wellness</span>`
-      : `<span class="door-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Clearance</span>`;
+    // Outside, every office is identical: one file codename, one diamond icon,
+    // one color. You cannot tell a wellness office from a clearance office.
+    const code = codes[idx % codes.length];
 
-    const body = card.type === 'wellness'
-      ? `<div class="wellness-area">
-           <span class="wellness-label">File: ${escHtml(card.label)}</span>
-           <textarea class="wellness-input" rows="2" aria-label="Response for ${escHtml(card.label)}"></textarea>
-           <span class="temper-prompt">Sort this response by how it feels</span>
-           <div class="temper-row" role="group" aria-label="Temper">
-             ${TEMPERS.map(t => `<button type="button" class="temper-btn" data-t="${t.id}" aria-pressed="false">${t.name}</button>`).join('')}
-           </div>
-         </div>`
-      : `<div class="clearance-area">
-           <button class="clearance-toggle" aria-expanded="false" aria-label="Verify clearance answer">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-             <span class="ct-label">Verify Clearance</span>
-           </button>
-           <div class="clearance-text" role="region"></div>
-         </div>`;
+    // The temper sort appears on EVERY office; everyone refines.
+    const temperRow = `
+      <span class="temper-prompt">Sort this file by how it feels</span>
+      <div class="temper-row" role="group" aria-label="Sort the file by temper">
+        ${TEMPERS.map(t => `<button type="button" class="temper-btn" data-t="${t.id}" aria-pressed="false">${t.name}</button>`).join('')}
+      </div>`;
+
+    const control = card.type === 'wellness'
+      ? `<span class="wellness-label">Your response</span>
+         <textarea class="wellness-input" rows="2" aria-label="Your response"></textarea>`
+      : `<button class="clearance-toggle" aria-expanded="false" aria-label="Verify clearance answer">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+           <span class="ct-label">Verify Clearance</span>
+         </button>
+         <div class="clearance-text" role="region"></div>`;
 
     div.innerHTML = `
       <div class="door-top">
-        ${tag}
+        <span class="door-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 21 12 12 21 3 12Z"/><path d="M12 8.5 15.5 12 12 15.5 8.5 12Z"/></svg>${escHtml(code)}</span>
         <span class="door-plate" aria-label="Office ${card.office}">No. ${card.office}</span>
       </div>
       <p class="door-question">${escHtml(card.q)}</p>
-      ${body}
+      <div class="refine-area">
+        ${control}
+        ${temperRow}
+      </div>
       <div class="door-footer">
         <div class="door-revealed" aria-hidden="true">Office open</div>
         <button class="knock-btn" aria-label="Knock on office ${card.office}">
@@ -868,6 +902,7 @@ function renderDoors(cards){
 
       if (card.type === 'wellness') wireWellness(div, card);
       else wireClearance(div, card);
+      wireTempers(div);
     });
 
     grid.appendChild(div);
@@ -876,18 +911,21 @@ function renderDoors(cards){
 
 function wireWellness(div, card){
   const ta = div.querySelector('.wellness-input');
-  if (card.slot) ta.addEventListener('input', () => { state.slots[card.slot] = ta.value.trim(); });
+  if (card.slot && ta) ta.addEventListener('input', () => { state.slots[card.slot] = ta.value.trim(); });
+}
 
+// Every office, wellness or clearance, gets the same single-pick temper sort.
+function wireTempers(div){
   let chosen = null;
   div.querySelectorAll('.temper-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const t = btn.dataset.t;
-      if (chosen === t) {                                  // toggle off
+      if (chosen === t) {                                  // toggle the pick off
         state.tempers[t]--; chosen = null;
         btn.classList.remove('on'); btn.setAttribute('aria-pressed', 'false');
         return;
       }
-      if (chosen) { state.tempers[chosen]--; }             // move the vote
+      if (chosen) state.tempers[chosen]--;                 // move the pick
       div.querySelectorAll('.temper-btn').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed','false'); });
       chosen = t; state.tempers[t]++;
       btn.classList.add('on'); btn.setAttribute('aria-pressed', 'true');
@@ -944,57 +982,37 @@ function descend(){
    CEREMONY -- deadpan completion record (mad lib from slots)
 ============================================================ */
 function buildCeremony(){
-  const meta = document.getElementById('ceremony-meta');
+  const meta    = document.getElementById('ceremony-meta');
   const readout = document.getElementById('temper-readout');
-  const body = document.getElementById('ceremony-body');
+  const body    = document.getElementById('ceremony-body');
+  const perkEl  = document.getElementById('award-perk');
 
-  meta.textContent = `Cohort of ${state.n} . ${state.revealed} of ${state.total} offices refined . filed permanently`;
+  const filed = state.tempers.woe + state.tempers.frolic + state.tempers.dread + state.tempers.malice;
 
-  readout.innerHTML = TEMPERS.map(t =>
-    `<span class="tr-chip"><i style="background:${t.dot}"></i>${t.name}: ${state.tempers[t.id]}</span>`).join('');
+  // which bucket did the cohort lean into?
+  let domId = 'woe', domN = -1;
+  TEMPERS.forEach(tp => { if (state.tempers[tp.id] > domN) { domN = state.tempers[tp.id]; domId = tp.id; } });
+  const domName = (TEMPERS.find(tp => tp.id === domId) || {}).name || 'Woe';
 
-  const s  = k => (state.slots[k] && state.slots[k].trim()) ? state.slots[k].trim() : null;
+  // the perk feels earned: it is derived from the sort, not drawn at random
+  perkEl.textContent = PERKS[(filed + state.n + domId.length) % PERKS.length];
+  meta.textContent = `Cohort of ${state.n} . ${filed} ${filed === 1 ? 'file' : 'files'} sorted . predominantly ${domName}`;
+
+  readout.innerHTML = TEMPERS.map(tp =>
+    `<span class="tr-chip"><i style="background:${tp.dot}"></i>${tp.name}: ${state.tempers[tp.id]}</span>`).join('');
+
   const hi = v => `<span class="slot-val">${escHtml(v)}</span>`;
+  const slotKeys = Object.keys(state.slots).filter(k => state.slots[k] && state.slots[k].trim());
+  const pick = slotKeys.length ? state.slots[slotKeys[filed % slotKeys.length]].trim() : null;
 
-  const opener = 'Cohort record sealed. Responses were collected across the floor and refined into the system without anyone being told what the refinement was for. The refinement was for this. It was always for this.';
-  const closer = 'The image above is yours, collectively, and cannot be reproduced; the parameters that made it have already been filed and forgotten. Please enjoy each measured moment. The next intake begins shortly.';
+  const lines = [];
+  lines.push(filed > 0
+    ? `The cohort sorted ${filed} ${filed === 1 ? 'file' : 'files'} into feeling, leaning ${hi(domName)}. The distribution was reviewed at the highest level and met with quiet approval.`
+    : `No files were sorted into feeling. The reward is issued anyway, as a gesture, and as a warning.`);
+  if (pick) lines.push(`It is also on record that the cohort believes ${hi(pick)}. This belief has been noted, weighed, and rewarded.`);
+  lines.push(`The image surrounding you was generated from these choices alone. It is yours. It will not be assembled this way again.`);
 
-  const candidates = [];
-  const advice = s('advice_piece'), skill = s('hidden_skill');
-  if (advice && skill) candidates.push(`On intake, the cohort offered that ${hi(advice)}. Filed under Valuable Insights, a section that is quite full. Skills review also surfaced one unlisted capability: ${hi(skill)}. This is now part of the permanent record.`);
-  else if (advice) candidates.push(`On intake, the cohort offered that ${hi(advice)}. Filed under Valuable Insights, a section that is quite full.`);
-  else if (skill) candidates.push(`Skills review surfaced a capability absent from every resume: ${hi(skill)}. It has been added to the record. The record is grateful.`);
-
-  const words = s('three_words'), habit = s('useful_habit');
-  if (words && habit) candidates.push(`Asked to describe an ideal team, the cohort produced: ${hi(words)}. This was cross-referenced against prior submissions and found compatible enough. The most useful habit reported was ${hi(habit)}, now folded into orientation materials without notice or consent.`);
-  else if (words) candidates.push(`Asked to describe an ideal team, the cohort produced: ${hi(words)}. The results were cross-referenced and found compatible enough.`);
-  else if (habit) candidates.push(`The most useful habit reported this cycle was ${hi(habit)}, now folded into orientation materials without notice or consent.`);
-
-  const style = s('work_style'), toLearn = s('one_thing_to_learn');
-  if (style && toLearn) candidates.push(`A development area was disclosed: the cohort is still working out ${hi(style)}. The system has noted this and has concerns. The week-one learning goal is ${hi(toLearn)}; the mentor has been informed and has thoughts.`);
-  else if (style) candidates.push(`A development area was disclosed: the cohort is still working out ${hi(style)}. The system has noted this and has concerns.`);
-  else if (toLearn) candidates.push(`The week-one learning goal is ${hi(toLearn)}. The mentor has been informed and has thoughts.`);
-
-  const mistake = s('useful_mistake'), vision = s('first_week_vision');
-  if (mistake && vision) candidates.push(`On instructive setbacks, the cohort named ${hi(mistake)} as a formative experience. Filed under Growth, a category the system invented recently and now uses constantly. A good first week was described as ${hi(vision)}; this has been compared against actual conditions, and the comparison is ongoing.`);
-  else if (mistake) candidates.push(`On instructive setbacks, the cohort named ${hi(mistake)} as a formative experience. Filed under Growth, a category the system uses constantly.`);
-  else if (vision) candidates.push(`A good first week was described as ${hi(vision)}. This has been compared against actual conditions, and the comparison is ongoing.`);
-
-  const heldBack = s('held_back_question'), mentor = s('mentor_moment');
-  if (heldBack && mentor) candidates.push(`Questions the cohort tends to hold back: ${hi(heldBack)}. Forwarded to the appropriate department, which has not responded; this is expected. The best thing a mentor ever did was ${hi(mentor)}, now entered into the record where two people will eventually understand it.`);
-  else if (heldBack) candidates.push(`Questions the cohort tends to hold back: ${hi(heldBack)}. Forwarded to the appropriate department, which has not responded; this is expected.`);
-  else if (mentor) candidates.push(`The best thing a mentor ever did was ${hi(mentor)}, now entered into the record where two people will eventually understand it.`);
-
-  const ramp = s('ramp_up_strategy'), remember = s('one_thing_to_remember');
-  if (ramp && remember) candidates.push(`When entering an unfamiliar codebase, the cohort relies on ${hi(ramp)}. The relevant benchmark report is long and has not been read. The cohort would like to be remembered as ${hi(remember)}. The system will remember. The system always remembers.`);
-  else if (ramp) candidates.push(`When entering an unfamiliar codebase, the cohort relies on ${hi(ramp)}. The relevant benchmark report is long and has not been read.`);
-  else if (remember) candidates.push(`The cohort would like to be remembered as ${hi(remember)}. The system will remember. The system always remembers.`);
-
-  const chosen = shuffle(candidates).slice(0, 2);
-  const paras = chosen.length ? [opener, ...chosen, closer]
-    : [opener, 'No wellness responses were filed. The system has flagged this for review and is, privately, a little hurt.', closer];
-
-  body.innerHTML = paras.map(p => `<p>${p}</p>`).join('');
+  body.innerHTML = lines.map(p => `<p>${p}</p>`).join('');
 }
 
 /* ============================================================
@@ -1016,14 +1034,17 @@ function deriveParams(){
   const filed = t.woe + t.frolic + t.dread + t.malice || 1;
   const n = state.n;
 
-  const index  = clamp(n + Math.round(state.revealed * 1.4), 0, 99);
-  const warmth = (t.frolic * 1.0 + t.malice * 0.7) / filed;
-  const temper = clamp(Math.round(1 + warmth * 9), 1, 10);
-  const improv = (t.frolic + 0.4 * t.malice) / filed;
-  const order  = clamp(Math.round(1 + improv * 9), 1, 10);
-  const turb   = clamp(Math.round((t.malice / filed) * 20), 0, 20);
-  const tempo  = clamp(Math.round((n - 6) / 24 * 30), 0, 30);
-  const depth  = clamp(Math.round((state.revealed / Math.max(1, state.total)) * 14 + (t.woe / filed) * 6), 0, 20);
+  // The four buckets drive the art directly and visibly:
+  //   Dread  -> fractal complexity     Frolic -> warmth + playful petals + tempo
+  //   Malice -> turbulence             Woe    -> cool, deep, layered
+  const wWoe = t.woe / filed, wFro = t.frolic / filed, wDre = t.dread / filed, wMal = t.malice / filed;
+
+  const index  = clamp(Math.round(n * 0.5 + wDre * 70), 0, 99);           // dread -> denser root systems
+  const temper = clamp(Math.round(1 + (wFro + wMal) * 9), 1, 10);         // warm tempers heat the palette
+  const order  = clamp(Math.round(1 + wFro * 9), 1, 10);                  // frolic -> improvised geometry
+  const turb   = clamp(Math.round(wMal * 20), 0, 20);                     // malice -> turbulent flow
+  const tempo  = clamp(Math.round(wFro * 18 + (n - 6) / 24 * 12), 0, 30); // frolic -> faster morphing
+  const depth  = clamp(Math.round(wWoe * 16 + (state.revealed / Math.max(1, state.total)) * 4), 0, 20);
 
   params = [index, temper, order, turb, tempo, depth];
 }

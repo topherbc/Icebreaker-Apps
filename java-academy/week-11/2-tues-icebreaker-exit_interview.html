@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exit Interview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23eef1ec'/><g fill='none' stroke='%230b7c66' stroke-width='5' stroke-linejoin='round'><polygon points='50,14 84,50 50,86 16,50' opacity='0.38'/><polygon points='30,27 70,27 50,50'/><polygon points='30,73 70,73 50,50'/></g><circle cx='50' cy='50' r='4.5' fill='%230b7c66'/></svg>">
+<style>
+:root{
+  --paper:#eef1ec; --paper-2:#e4e9e2; --surface:#f8faf6; --line:#cdd6cf; --line-md:#b4c0b6;
+  --ink:#14201c; --ink-2:#34433d; --muted:#69776f;
+  --accent:#0b7c66; --accent-lt:#0d9079; --accent-deep:#064a40; --accent-pale:rgba(11,124,102,.08); --accent-ring:rgba(11,124,102,.24);
+  --amber:#7c5009; --amber-pale:rgba(124,80,9,.08);
+  --shadow-sm:0 1px 3px rgba(20,32,28,.07),0 1px 2px rgba(20,32,28,.04);
+  --shadow-md:0 6px 18px rgba(20,32,28,.10),0 2px 5px rgba(20,32,28,.05);
+  --serif:'Spectral',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;cursor:pointer;}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:4px;}
+
+/* ===== RECEPTION ===== */
+#reception{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;position:relative;overflow:hidden;}
+#reception::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% -8%,var(--accent-pale) 0%,transparent 62%);}
+.deco{position:absolute;pointer-events:none;opacity:.5;border:1px solid var(--line);border-radius:50%;}
+.deco-1{width:520px;height:520px;top:-210px;right:-160px;}
+.deco-2{width:340px;height:340px;bottom:-140px;left:-110px;}
+.reception-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-md);padding:46px 50px 40px;max-width:500px;width:100%;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;}
+.reception-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent);border-radius:16px 16px 0 0;}
+.glyph{width:56px;height:56px;margin-bottom:20px;flex-shrink:0;}
+.reception-eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
+.reception-title{font-family:var(--serif);font-size:42px;font-weight:400;letter-spacing:-.4px;line-height:1.04;text-align:center;margin-bottom:14px;}
+.reception-creed{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--ink-2);text-align:center;line-height:1.55;max-width:36ch;margin-bottom:28px;}
+.reception-divider{width:100%;height:1px;background:var(--line);margin-bottom:26px;}
+.reception-label{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:10px;align-self:flex-start;}
+.reception-input{width:100%;text-align:center;background:var(--paper);border:1.5px solid var(--line-md);border-radius:10px;color:var(--ink);font-family:var(--mono);font-size:32px;font-weight:600;padding:11px;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:22px;}
+.reception-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring);}
+.btn-primary{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:18px;font-weight:700;padding:14px 28px;min-height:54px;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s,box-shadow .15s,transform .1s;box-shadow:0 2px 10px rgba(11,124,102,.26);}
+.btn-primary:hover{background:var(--accent-lt);box-shadow:0 4px 16px rgba(11,124,102,.34);}
+.btn-primary:active{transform:scale(.985);}
+.btn-primary svg{width:20px;height:20px;flex-shrink:0;}
+.reception-fineprint{margin-top:20px;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--muted);text-align:center;max-width:40ch;}
+
+/* ===== FLOOR ===== */
+#floor{display:none;flex-direction:column;min-height:100vh;}
+.floor-bar{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 24px;height:58px;flex-shrink:0;position:sticky;top:0;z-index:10;}
+.floor-brand{display:flex;align-items:center;gap:10px;min-width:0;}
+.floor-brand .glyph{width:26px;height:26px;margin:0;}
+.floor-brand-name{font-size:15px;font-weight:700;white-space:nowrap;}
+.floor-sep{height:20px;width:1px;background:var(--line);flex-shrink:0;}
+.floor-sub{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.floor-spacer{flex:1;}
+.prog-track{width:130px;height:5px;background:var(--line);border-radius:3px;overflow:hidden;flex-shrink:0;}
+.prog-fill{height:100%;width:0%;background:var(--accent);border-radius:3px;transition:width .35s var(--ease);}
+.prog-badge{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.prog-badge strong{color:var(--accent);font-weight:600;}
+.floor-body{flex:1;padding:30px 24px 56px;display:flex;flex-direction:column;align-items:center;gap:28px;}
+.floor-intro{text-align:center;max-width:62ch;}
+.floor-intro h2{font-family:var(--serif);font-weight:400;font-size:26px;letter-spacing:-.2px;margin-bottom:6px;}
+.floor-intro p{font-size:15px;color:var(--muted);}
+.door-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;width:100%;max-width:1480px;}
+
+/* door / card */
+.door{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;padding:18px;gap:13px;transition:box-shadow .2s,border-color .2s;animation:doorIn .3s var(--ease) both;}
+@keyframes doorIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.door:hover{box-shadow:var(--shadow-md);}
+.door.is-open{border-color:var(--line-md);}
+.door-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.door-tag{display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:4px 9px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;line-height:1;background:var(--accent-pale);color:var(--accent-deep);border:1px solid var(--accent-ring);}
+.door-tag svg{width:11px;height:11px;flex-shrink:0;}
+.door-plate{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink-2);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 9px;line-height:1;flex-shrink:0;}
+.door-question{font-size:17px;line-height:1.55;font-weight:500;color:var(--ink);filter:blur(5px);user-select:none;transition:filter .3s var(--ease);}
+.door.is-open .door-question{filter:none;user-select:auto;}
+.statement{display:none;flex-direction:column;gap:6px;}
+.door.is-open .statement{display:flex;}
+.statement-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-deep);}
+.statement-input{width:100%;background:var(--paper);border:1.5px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:16px;padding:9px 12px;outline:none;resize:none;min-height:54px;line-height:1.5;transition:border-color .2s,box-shadow .2s;}
+.statement-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale);}
+.door-footer{margin-top:auto;padding-top:2px;}
+.door-revealed{display:none;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);text-align:right;padding-top:2px;}
+.door.is-open .door-revealed{display:block;}
+.knock-btn{width:100%;min-height:46px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,box-shadow .15s,transform .1s;box-shadow:0 1px 5px rgba(11,124,102,.20);}
+.knock-btn svg{width:15px;height:15px;flex-shrink:0;}
+.knock-btn:hover{background:var(--accent-lt);box-shadow:0 3px 11px rgba(11,124,102,.30);}
+.knock-btn:active{transform:scale(.98);}
+.knock-btn.done{background:var(--ink-2);box-shadow:none;cursor:default;pointer-events:none;}
+
+/* finale */
+#finale-section{width:100%;max-width:1480px;display:flex;flex-direction:column;gap:18px;}
+.file-btn{width:100%;min-height:62px;background:var(--ink);color:var(--surface);border:none;border-radius:12px;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:12px;transition:background .15s,box-shadow .15s,transform .1s;box-shadow:0 4px 16px rgba(20,32,28,.22);}
+.file-btn:hover{background:#0a1512;box-shadow:0 6px 22px rgba(20,32,28,.30);}
+.file-btn:active{transform:scale(.99);}
+.file-btn svg{width:22px;height:22px;flex-shrink:0;}
+
+#record-card{display:none;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-md);padding:48px 52px;position:relative;overflow:hidden;}
+#record-card.show{display:block;}
+#record-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent) 0%,#2a9c84 60%,var(--amber) 100%);}
+.record-stamp{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.record-ey{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--muted);margin-bottom:4px;letter-spacing:.02em;}
+.record-title{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:-.3px;margin-bottom:6px;}
+.record-meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+.record-divider{height:1px;background:var(--line);margin-bottom:24px;}
+.record-body{font-size:17px;line-height:1.75;color:var(--ink-2);}
+.record-body p{margin-bottom:18px;}
+.record-body p:last-child{margin-bottom:0;}
+.slot-val{color:var(--accent-deep);font-weight:600;font-style:italic;background:var(--accent-pale);border-radius:4px;padding:1px 5px;}
+.record-foot{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.6;display:flex;flex-direction:column;gap:4px;}
+.record-foot-sig{font-weight:600;letter-spacing:.04em;}
+.reset-btn{background:var(--paper);border:1.5px solid var(--line-md);border-radius:10px;color:var(--ink-2);font-weight:600;font-size:16px;padding:12px 28px;min-height:48px;transition:background .15s,border-color .15s,color .15s;align-self:flex-start;}
+.reset-btn:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
+
+@media (max-width:560px){.reception-card{padding:34px 24px 30px;}.reception-title{font-size:34px;}#record-card{padding:32px 26px;}}
+</style>
+</head>
+<body>
+
+<!-- ===== RECEPTION ===== -->
+<div id="reception">
+  <div class="deco deco-1" aria-hidden="true"></div>
+  <div class="deco deco-2" aria-hidden="true"></div>
+  <div class="reception-card">
+    <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+      <g fill="none" stroke="#0b7c66" stroke-width="5" stroke-linejoin="round">
+        <polygon points="50,14 84,50 50,86 16,50" opacity="0.38"/>
+        <polygon points="30,27 70,27 50,50"/>
+        <polygon points="30,73 70,73 50,50"/>
+      </g>
+      <circle cx="50" cy="50" r="4.5" fill="#0b7c66"/>
+    </svg>
+    <p class="reception-eyebrow">Lattice Industries // Offboarding</p>
+    <h1 class="reception-title">Exit Interview</h1>
+    <p class="reception-creed">Eleven weeks ago you arrived knowing less. Today you leave the floor. Before you go, the floor would like a word.</p>
+
+    <div class="reception-divider"></div>
+
+    <label class="reception-label" for="refiner-count">Refiners departing today</label>
+    <input class="reception-input" id="refiner-count" type="number" value="25" min="1" max="30"
+           aria-label="How many refiners are departing today? (1 to 30)">
+
+    <button class="btn-primary" id="begin-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Begin Exit Interviews
+    </button>
+
+    <p class="reception-fineprint">Each refiner will be asked to reflect aloud. Statements are recorded for the exit file. The exit file is mostly ceremonial; the reflection is not.</p>
+  </div>
+</div>
+
+<!-- ===== FLOOR ===== -->
+<div id="floor">
+  <header class="floor-bar">
+    <div class="floor-brand">
+      <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+        <g fill="none" stroke="#0b7c66" stroke-width="6" stroke-linejoin="round">
+          <polygon points="50,14 84,50 50,86 16,50" opacity="0.5"/><polygon points="30,27 70,27 50,50"/><polygon points="30,73 70,73 50,50"/>
+        </g>
+        <circle cx="50" cy="50" r="5.5" fill="#0b7c66"/>
+      </svg>
+      <span class="floor-brand-name">Lattice Industries</span>
+    </div>
+    <div class="floor-sep"></div>
+    <span class="floor-sub">Numeric Refinement / Offboarding</span>
+    <div class="floor-spacer"></div>
+    <div class="prog-track" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" id="prog-bar">
+      <div class="prog-fill" id="prog-fill"></div>
+    </div>
+    <div class="prog-badge"><strong id="prog-current">0</strong><span>/</span><strong id="prog-total">25</strong><span>interviewed</span></div>
+  </header>
+
+  <main class="floor-body">
+    <div class="floor-intro">
+      <h2>The Exit Interviews</h2>
+      <p>Each office holds one departing refiner. Knock to begin their interview, then read the question aloud and answer it for the room. Your statement is recorded for the exit file.</p>
+    </div>
+
+    <div class="door-grid" id="door-grid"></div>
+
+    <div id="finale-section">
+      <button class="file-btn" id="file-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        File the Exit Record
+      </button>
+
+      <div id="record-card">
+        <div class="record-stamp">Lattice Industries // Permanent Exit File</div>
+        <div class="record-ey">Numeric Refinement / Offboarding</div>
+        <div class="record-title">Exit Interview Record</div>
+        <div class="record-meta" id="record-meta">Statements collected during offboarding and sealed</div>
+        <div class="record-divider"></div>
+        <div class="record-body" id="record-body"></div>
+        <div class="record-foot">
+          <span>The floor has reviewed these statements and elected to remember them. This is rare. The floor remembers almost nothing.</span>
+          <span class="record-foot-sig">// End of Exit Record //</span>
+        </div>
+      </div>
+
+      <button class="reset-btn" id="reset-btn">Begin a New Offboarding</button>
+    </div>
+  </main>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   PROMPTS -- final-week reflection. Every refiner shares one.
+   slot + label feed the closing exit-record mad lib.
+============================================================ */
+const PROMPTS = [
+  { q:'What is one assumption about software development you held at the start of this program that you no longer believe?', slot:'changed_assumption', label:'a changed assumption' },
+  { q:'What concept clicked for you later than you expected it to, and what finally made it click?', slot:'late_click', label:'a late click' },
+  { q:'What is the most useful debugging habit you have developed over the last 11 weeks?', slot:'debugging_habit', label:'a debugging habit' },
+  { q:'What is something you can do now that you genuinely could not do 10 weeks ago?', slot:'new_capability', label:'a new capability' },
+  { q:'What is a question about software development you still do not have a satisfying answer to?', slot:'open_question', label:'an open question' },
+  { q:'What kind of developer do you want to be in two years; not what role, but what kind?', slot:'developer_identity', label:'a developer identity' },
+  { q:'What is the hardest thing about working in a team on code, and how do you handle it?', slot:'team_challenge', label:'a team challenge' },
+  { q:'What is something from outside of tech that has made you a better developer?', slot:'outside_influence', label:'an outside influence' },
+  { q:'What would you tell your Week 1 self that would actually have helped?', slot:'advice_to_week_1', label:'advice to your week 1 self' },
+  { q:'What is the most interesting technical decision you have seen made, good or bad, and why did it stick with you?', slot:'technical_decision', label:'a technical decision' },
+  { q:'What does writing good code feel like to you when it is going well?', slot:'good_code_feeling', label:'a good code feeling' },
+  { q:'What is one thing about this cohort that you want to carry into your first job?', slot:'something_to_carry', label:'something to carry forward' }
+];
+
+/* neutral office file codenames (same world as wk10) */
+const FILE_CODENAMES = [
+  'Cold Harbor','Tumwater','Allentown','Cairns','Coleman','Culpepper','Dranesville',
+  'Eminence','Jesup','Kingsport','Labrador','Le Mars','Longbranch','Minsk','Moonbeam',
+  'Nanning','Narva','Ocula','Pacheco','Siena','Sopchoppy','Sunset Park','Tan',
+  'Waynesboro','Yakima','Astoria','Bellingham','Chicxulub','Dunmore','Epping'
+];
+
+const state = { n:25, slots:{}, revealed:0, total:0 };
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function clamp(v,lo,hi){ return Math.min(Math.max(v,lo),hi); }
+
+/* one reflection prompt per departing refiner (cycles if cohort > prompts) */
+function buildCards(n){
+  const pool = shuffle(PROMPTS);
+  const cards = [];
+  for (let i=0;i<n;i++) cards.push({ ...pool[i % pool.length], office:i+1 });
+  return cards;
+}
+
+/* ===== reception ===== */
+const refinerInput = document.getElementById('refiner-count');
+document.getElementById('begin-btn').addEventListener('click', start);
+refinerInput.addEventListener('keydown', e => { if (e.key==='Enter') start(); });
+refinerInput.addEventListener('blur', () => { let v=parseInt(refinerInput.value); if(isNaN(v)) v=25; refinerInput.value=clamp(v,1,30); });
+
+function start(){
+  let n = parseInt(refinerInput.value); if (isNaN(n)) n=25; n=clamp(n,1,30);
+  state.n=n; state.slots={}; state.revealed=0;
+  const cards=buildCards(n); state.total=cards.length;
+  document.getElementById('prog-total').textContent=state.total;
+  document.getElementById('prog-current').textContent='0';
+  const bar=document.getElementById('prog-bar'); bar.setAttribute('aria-valuemax',state.total); bar.setAttribute('aria-valuenow',0);
+  updateProgress();
+  renderCards(cards);
+  document.getElementById('record-card').classList.remove('show');
+  document.getElementById('reception').style.display='none';
+  document.getElementById('floor').style.display='flex';
+}
+
+function updateProgress(){
+  const pct=state.total>0?(state.revealed/state.total)*100:0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-bar').setAttribute('aria-valuenow',state.revealed);
+}
+
+/* ===== cards ===== */
+function renderCards(cards){
+  const grid=document.getElementById('door-grid'); grid.innerHTML='';
+  const codes=shuffle(FILE_CODENAMES);
+  cards.forEach((card,idx)=>{
+    const div=document.createElement('div'); div.className='door';
+    div.style.animationDelay=`${Math.min(idx*0.022,0.55)}s`;
+    const code=codes[idx % codes.length];
+    div.innerHTML=`
+      <div class="door-top">
+        <span class="door-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 21 12 12 21 3 12Z"/><path d="M12 8.5 15.5 12 12 15.5 8.5 12Z"/></svg>${escHtml(code)}</span>
+        <span class="door-plate" aria-label="Office ${card.office}">No. ${card.office}</span>
+      </div>
+      <p class="door-question">${escHtml(card.q)}</p>
+      <div class="statement">
+        <span class="statement-label">Statement for the record</span>
+        <textarea class="statement-input" rows="2" aria-label="Statement for the record"></textarea>
+      </div>
+      <div class="door-footer">
+        <div class="door-revealed" aria-hidden="true">Interview open</div>
+        <button class="knock-btn" aria-label="Knock on office ${card.office}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><circle cx="16" cy="13" r="1.4" fill="currentColor"/></svg>
+          Knock
+        </button>
+      </div>`;
+    const knock=div.querySelector('.knock-btn');
+    knock.addEventListener('click',()=>{
+      div.classList.add('is-open');
+      knock.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Opened`;
+      knock.classList.add('done'); knock.setAttribute('aria-label',`Office ${card.office} interviewed`);
+      state.revealed++; document.getElementById('prog-current').textContent=state.revealed; updateProgress();
+      const ta=div.querySelector('.statement-input');
+      if (card.slot && ta) ta.addEventListener('input',()=>{ state.slots[card.slot]=ta.value.trim(); });
+    });
+    grid.appendChild(div);
+  });
+}
+
+/* ===== exit record (mad lib from shared statements) ===== */
+document.getElementById('file-btn').addEventListener('click', fileRecord);
+document.getElementById('reset-btn').addEventListener('click', ()=>{
+  document.getElementById('floor').style.display='none';
+  document.getElementById('reception').style.display='flex';
+});
+
+function fileRecord(){
+  const body=document.getElementById('record-body');
+  const meta=document.getElementById('record-meta');
+  const card=document.getElementById('record-card');
+  const s = k => (state.slots[k] && state.slots[k].trim()) ? state.slots[k].trim() : null;
+  const hi = v => `<span class="slot-val">${escHtml(v)}</span>`;
+
+  meta.textContent = `Cohort of ${state.n} . ${state.revealed} of ${state.total} interviews conducted . sealed`;
+
+  const opener = 'Exit Interview Record. The departing cohort sat for offboarding today. Statements were collected, lightly judged, and entered into the permanent exit file. The floor wishes everyone well, in its way.';
+  const closer = 'Offboarding is complete. The refiners are free to go. The work will continue without them, which is the point of work. Please do not look back at the floor on your way out; it prefers to be remembered as it was.';
+
+  const c = [];
+  const assumption = s('changed_assumption'), lateClick = s('late_click');
+  if (assumption && lateClick) c.push(`On revised beliefs: the cohort no longer holds that ${hi(assumption)}. The assumption has been retracted from the record and replaced with nothing, as is policy. Filed alongside it: ${hi(lateClick)} was logged as a concept that clicked later than scheduled. The floor was beginning to worry. The floor worries quietly.`);
+  else if (assumption) c.push(`On revised beliefs: the cohort no longer holds that ${hi(assumption)}. The assumption has been retracted from the record and replaced with nothing. That part is now your job.`);
+  else if (lateClick) c.push(`A delayed comprehension event was logged: ${hi(lateClick)} clicked later than expected. Filed under Late Bloomers, a category the floor considers a compliment.`);
+
+  const habit = s('debugging_habit'), cap = s('new_capability');
+  if (habit && cap) c.push(`Skills inventory, updated at departure: the cohort now relies on the habit of ${hi(habit)}, entered under Hard-Won Practices. New capability confirmed: ${hi(cap)}, which was not true ten weeks ago. The floor checked. The floor checks.`);
+  else if (habit) c.push(`Skills inventory: the cohort leaves with the debugging habit of ${hi(habit)}, filed under Hard-Won Practices. Some things cannot be taught; this was almost one of them.`);
+  else if (cap) c.push(`New capability confirmed at exit: the cohort can now ${hi(cap)}. This was not the case ten weeks ago. The improvement has been verified against the intake record and judged significant.`);
+
+  const openQ = s('open_question'), identity = s('developer_identity');
+  if (openQ && identity) c.push(`Open items carried out the door: ${hi(openQ)} remains without a satisfying answer. Filed under Productive Uncertainty, which is not a real category but should be. Trajectory on record: the cohort intends to become ${hi(identity)} in two years. The floor finds this admirable and has set a reminder it will not honor.`);
+  else if (openQ) c.push(`Open item, unresolved: ${hi(openQ)}. The floor has noted this and chosen not to help. Some things must be worked out independently. This is one of them.`);
+  else if (identity) c.push(`Trajectory on record: the cohort intends to become ${hi(identity)} in two years. Entered as an official goal. The floor will be watching, in the way it watches.`);
+
+  const team = s('team_challenge'), outside = s('outside_influence');
+  if (team && outside) c.push(`Collaboration notes: the hardest part of working on shared code is, per the cohort, ${hi(team)}; a handling strategy was confirmed and filed. External development factor: ${hi(outside)} was cited as a non-technical influence on technical growth. The floor did not expect this. The floor respects it.`);
+  else if (team) c.push(`Collaboration notes: the hardest part of working on shared code is ${hi(team)}. A handling strategy was confirmed. The floor has logged both the problem and the plan and is crossing its fingers.`);
+  else if (outside) c.push(`External development factor: ${hi(outside)} was named as a non-technical influence on technical growth. The floor had no category for this and invented one. It is called Outside Factors That Matter.`);
+
+  const advice = s('advice_to_week_1'), decision = s('technical_decision');
+  if (advice && decision) c.push(`Retrospective guidance: to their Week 1 self, the cohort would say ${hi(advice)}. This has been sent back in time; results pending. Technical memory filed: the most interesting decision observed was ${hi(decision)}, added to the Decisions Worth Remembering archive, which holds this entry and seventeen others, none of which have been read.`);
+  else if (advice) c.push(`Retrospective guidance: to their Week 1 self, the cohort would say ${hi(advice)}. Forwarded to Week 1. Week 1 is not listening, but the effort is noted.`);
+  else if (decision) c.push(`Technical memory filed: the most interesting decision observed was ${hi(decision)}. It is now the most recent entry in the Decisions Worth Remembering archive. It is also the only entry.`);
+
+  const feeling = s('good_code_feeling'), carry = s('something_to_carry');
+  if (feeling && carry) c.push(`Qualitative data: when the code is going well, the cohort describes it as ${hi(feeling)}. The floor attempted a numeric score; the score is confidential. Forward projection: from this cohort, they intend to carry ${hi(carry)} into their first job. The floor endorses this and will follow up in roughly six months.`);
+  else if (feeling) c.push(`Qualitative data: good code feels, to this cohort, like ${hi(feeling)}. The floor tried to measure it and has chosen not to share the result.`);
+  else if (carry) c.push(`Forward projection: from this cohort, they intend to carry ${hi(carry)} into their first job. The floor endorses this and will hold them to it.`);
+
+  const chosen = shuffle(c).slice(0,2);
+  const paras = chosen.length ? [opener, ...chosen, closer]
+    : [opener, 'No statements were recorded. The floor has flagged this for review and is, privately, a little hurt.', closer];
+
+  body.innerHTML = paras.map(p=>`<p>${p}</p>`).join('');
+  card.classList.add('show');
+  card.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+</script>
+</body>
+</html>

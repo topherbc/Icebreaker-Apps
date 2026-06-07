@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day One Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='22' width='70' height='68' rx='8' fill='%23f7f8fa' stroke='%231e5fa8' stroke-width='5'/><rect x='37' y='10' width='26' height='20' rx='5' fill='%231e5fa8'/><circle cx='50' cy='50' r='13' fill='%23d1d9e0'/><rect x='28' y='68' width='44' height='5' rx='2.5' fill='%231e5fa8'/><rect x='35' y='77' width='30' height='4' rx='2' fill='%23c8d0da'/></svg>">
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root {
+  --bg:           #f7f8fa;
+  --surface:      #ffffff;
+  --border:       #d1d9e0;
+  --border-md:    #b0bcc8;
+  --accent:       #1e5fa8;
+  --accent-lt:    #2a72c0;
+  --accent-pale:  rgba(30, 95, 168, 0.08);
+  --accent-ring:  rgba(30, 95, 168, 0.25);
+  --teal:         #0a6657;
+  --teal-pale:    rgba(10, 102, 87, 0.09);
+  --teal-border:  rgba(10, 102, 87, 0.22);
+  --amber:        #7c5009;
+  --amber-pale:   rgba(124, 80, 9, 0.08);
+  --amber-border: rgba(124, 80, 9, 0.20);
+  --text:         #111827;
+  --text-2:       #374151;
+  --muted:        #5a6473;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:    0 4px 12px rgba(0,0,0,0.09), 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ============================================================
+   RESET
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   LOAD SCREEN
+============================================================ */
+#load-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.load-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: 52px 56px;
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.load-badge-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+
+.load-title {
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.load-subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.02em;
+  margin-bottom: 36px;
+  line-height: 1.5;
+}
+
+.load-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 32px;
+}
+
+.load-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+  align-self: flex-start;
+  width: 100%;
+}
+
+.load-input {
+  width: 100%;
+  text-align: center;
+  background: var(--bg);
+  border: 1.5px solid var(--border-md);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 600;
+  padding: 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 20px;
+}
+
+.load-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.load-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 14px 32px;
+  min-height: 52px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(30, 95, 168, 0.28);
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.load-btn:hover {
+  background: var(--accent-lt);
+  box-shadow: 0 4px 14px rgba(30, 95, 168, 0.36);
+}
+
+.load-btn:active { transform: scale(0.98); }
+
+.load-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ============================================================
+   CARD SCREEN
+============================================================ */
+#card-screen { display: none; flex-direction: column; min-height: 100vh; }
+
+/* Top bar */
+.top-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  height: 56px;
+  flex-shrink: 0;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.top-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.top-bar-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.top-bar-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.top-bar-sep {
+  height: 20px;
+  width: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.top-bar-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-bar-spacer { flex: 1; }
+
+.progress-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.progress-badge strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.progress-bar-track {
+  width: 120px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* Main content area */
+.deck-body {
+  flex: 1;
+  padding: 32px 28px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 1440px;
+}
+
+/* ============================================================
+   CARD
+============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 14px;
+  transition: box-shadow 0.2s;
+  animation: cardIn 0.3s ease both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover { box-shadow: var(--shadow-md); }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Category tag */
+.card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.card-tag svg {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+}
+
+.card.fun .card-tag {
+  background: var(--amber-pale);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+.card.tech .card-tag {
+  background: var(--amber-pale);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+/* Student number badge */
+.card-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Question text -- blurred until reveal */
+.card-question {
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--text);
+  font-weight: 500;
+  filter: blur(5px);
+  user-select: none;
+  transition: filter 0.3s ease;
+}
+
+.card.is-revealed .card-question {
+  filter: none;
+  user-select: auto;
+}
+
+/* Fun: text input */
+.answer-area {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card.is-revealed .answer-area { display: flex; }
+
+.answer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.answer-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+  min-height: 52px;
+  line-height: 1.5;
+}
+
+.answer-input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px var(--amber-pale);
+}
+
+/* Tech: answer toggle */
+.answer-key-wrap {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card.is-revealed .answer-key-wrap { display: flex; }
+
+.answer-key-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  transition: color 0.15s;
+  min-height: 28px;
+}
+
+.answer-key-btn:hover { color: var(--accent-lt); }
+
+.answer-key-btn svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.answer-key-btn.open svg { transform: rotate(90deg); }
+
+.answer-key-text {
+  display: none;
+  font-size: 15px;
+  color: var(--text-2);
+  background: var(--accent-pale);
+  border: 1px solid rgba(30, 95, 168, 0.18);
+  border-radius: 8px;
+  padding: 10px 14px;
+  line-height: 1.6;
+}
+
+.answer-key-text.open { display: block; }
+
+.answer-key-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  background: rgba(30, 95, 168, 0.10);
+  border-radius: 3px;
+  padding: 1px 4px;
+  color: var(--accent);
+}
+
+/* Reveal button */
+.card-footer { margin-top: auto; padding-top: 4px; }
+
+.reveal-btn {
+  width: 100%;
+  min-height: 48px;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 1px 4px rgba(30, 95, 168, 0.20);
+}
+
+.reveal-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+.reveal-btn:hover {
+  background: var(--accent-lt);
+  box-shadow: 0 3px 10px rgba(30, 95, 168, 0.30);
+}
+
+.reveal-btn:active { transform: scale(0.98); }
+
+.reveal-btn.done {
+  background: var(--teal);
+  box-shadow: none;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Revealed badge label */
+.revealed-badge {
+  display: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--teal);
+  text-align: right;
+  padding-top: 2px;
+}
+
+.card.is-revealed .revealed-badge { display: block; }
+
+/* ============================================================
+   FINALE SECTION
+============================================================ */
+#finale-section {
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.finale-trigger {
+  width: 100%;
+  min-height: 60px;
+  background: var(--teal);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  box-shadow: 0 3px 12px rgba(10, 102, 87, 0.28);
+  letter-spacing: 0.01em;
+}
+
+.finale-trigger:hover {
+  background: #0c7a6a;
+  box-shadow: 0 5px 18px rgba(10, 102, 87, 0.36);
+}
+
+.finale-trigger:active { transform: scale(0.99); }
+.finale-trigger svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+/* Onboarding summary card */
+#summary-card {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: 52px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+#summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, #2a72c0 50%, var(--teal) 100%);
+}
+
+#summary-card.show { display: block; }
+
+.summary-stamp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.summary-header-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+.summary-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.summary-meta {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.summary-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 24px;
+}
+
+.summary-body {
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--text-2);
+}
+
+.summary-body p {
+  margin-bottom: 18px;
+}
+
+.summary-body p:last-child { margin-bottom: 0; }
+
+.slot-val {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-pale);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-style: italic;
+}
+
+.summary-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-footer-sig {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* Reset button */
+.reset-btn {
+  background: var(--bg);
+  border: 1.5px solid var(--border-md);
+  border-radius: 10px;
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 28px;
+  min-height: 48px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  align-self: flex-start;
+}
+
+.reset-btn:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ======================================================
+     LOAD SCREEN
+====================================================== -->
+<div id="load-screen">
+  <div class="load-card">
+    <!-- ID badge icon -->
+    <svg class="load-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="6" y="16" width="52" height="44" rx="6" fill="#f7f8fa" stroke="#1e5fa8" stroke-width="3.5"/>
+      <rect x="24" y="8" width="16" height="14" rx="4" fill="#1e5fa8"/>
+      <circle cx="32" cy="36" r="10" fill="#d1d9e0"/>
+      <rect x="16" y="50" width="32" height="4" rx="2" fill="#1e5fa8"/>
+      <rect x="20" y="57" width="24" height="3" rx="1.5" fill="#c8d0da"/>
+    </svg>
+
+    <h1 class="load-title">Day One Portal</h1>
+    <p class="load-subtitle">New Developer Onboarding -- Cohort Check-In</p>
+
+    <div class="load-divider"></div>
+
+    <label class="load-label" for="hire-count">New hires today</label>
+    <input
+      class="load-input"
+      id="hire-count"
+      type="number"
+      value="25"
+      min="6"
+      max="30"
+      aria-label="How many new hires today? (6 to 30)"
+    >
+
+    <button class="load-btn" id="begin-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      Begin Onboarding
+    </button>
+  </div>
+</div>
+
+
+<!-- ======================================================
+     CARD SCREEN
+====================================================== -->
+<div id="card-screen">
+
+  <!-- Top bar -->
+  <header class="top-bar">
+    <div class="top-bar-brand">
+      <svg class="top-bar-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="6" y="16" width="52" height="44" rx="6" fill="#f7f8fa" stroke="#1e5fa8" stroke-width="3.5"/>
+        <rect x="24" y="8" width="16" height="14" rx="4" fill="#1e5fa8"/>
+        <circle cx="32" cy="36" r="10" fill="#d1d9e0"/>
+        <rect x="16" y="50" width="32" height="4" rx="2" fill="#1e5fa8"/>
+        <rect x="20" y="57" width="24" height="3" rx="1.5" fill="#c8d0da"/>
+      </svg>
+      <span class="top-bar-title">Day One Portal</span>
+    </div>
+    <div class="top-bar-sep"></div>
+    <span class="top-bar-subtitle">New Developer Onboarding</span>
+    <div class="top-bar-spacer"></div>
+    <div class="progress-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" id="progress-bar-role">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-badge">
+      <strong id="progress-current">0</strong>
+      <span>of</span>
+      <strong id="progress-total">25</strong>
+      <span>Completed</span>
+    </div>
+  </header>
+
+  <!-- Cards + finale -->
+  <main class="deck-body">
+    <div class="card-grid" id="card-grid"></div>
+
+    <div id="finale-section">
+      <button class="finale-trigger" id="finale-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Generate Onboarding Summary
+      </button>
+
+      <div id="summary-card">
+        <div class="summary-stamp">Employee Record System -- Auto-Generated</div>
+        <div class="summary-header-label">Day One Portal / Cohort Check-In</div>
+        <div class="summary-title">Onboarding Summary</div>
+        <div class="summary-meta">Orientation session data collected and filed &nbsp;|&nbsp; For internal use only &nbsp;|&nbsp; Internal use includes everyone reading this right now</div>
+        <div class="summary-divider"></div>
+        <div class="summary-body" id="summary-body"></div>
+        <div class="summary-footer">
+          <span>This record has been filed in the permanent system. The permanent system has never lost a record. The permanent system once lost a record but that was a long time ago and we do not talk about it.</span>
+          <span class="summary-footer-sig">-- End of Onboarding Record --</span>
+        </div>
+      </div>
+
+      <button class="reset-btn" id="reset-btn">Start New Session</button>
+    </div>
+  </main>
+
+</div>
+
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const FUN_LABELS = [
+  'Culture Fit', 'Team Intro', 'Background Check',
+  'First Day Notes', 'Peer Profile', 'Intake Notes'
+];
+
+const TECH_LABELS = [
+  'Technical Screen', 'Stack Review', 'Tools Check',
+  'Architecture Brief', 'Framework Orientation', 'System Check'
+];
+
+const FUN_QUESTIONS = [
+  {
+    q: 'What is one thing you wish someone had told you before your first day at a new job?',
+    slot: 'advice_piece',
+    label: 'a piece of advice'
+  },
+  {
+    q: 'What is a skill you have that does not show up on your resume but absolutely should?',
+    slot: 'hidden_skill',
+    label: 'a hidden skill'
+  },
+  {
+    q: 'Describe your ideal team dynamic in three words.',
+    slot: 'three_words',
+    label: 'three words'
+  },
+  {
+    q: 'What is the most useful habit you have built in the last year?',
+    slot: 'useful_habit',
+    label: 'a useful habit'
+  },
+  {
+    q: 'What is something you are still figuring out about how you work best?',
+    slot: 'work_style',
+    label: 'a work style question'
+  },
+  {
+    q: 'If your onboarding buddy could teach you one thing in your first week, what would you want it to be?',
+    slot: 'one_thing_to_learn',
+    label: 'one thing to learn'
+  },
+  {
+    q: 'What is a mistake you made early in your learning journey that you are glad you made?',
+    slot: 'useful_mistake',
+    label: 'a useful mistake'
+  },
+  {
+    q: 'What does a good first week at a new job look like to you?',
+    slot: 'first_week_vision',
+    label: 'a first week vision'
+  },
+  {
+    q: 'What is a question you always want to ask in a new environment but sometimes hold back?',
+    slot: 'held_back_question',
+    label: 'a held-back question'
+  },
+  {
+    q: 'What is the best thing a manager or mentor has ever done for you?',
+    slot: 'mentor_moment',
+    label: 'a mentor moment'
+  },
+  {
+    q: 'What is your go-to strategy for getting up to speed in a new codebase?',
+    slot: 'ramp_up_strategy',
+    label: 'a ramp-up strategy'
+  },
+  {
+    q: 'What is one thing you want this cohort to remember about you?',
+    slot: 'one_thing_to_remember',
+    label: 'one thing to remember'
+  }
+];
+
+const TECH_QUESTIONS = [
+  {
+    q: 'In one sentence, what does Spring do for a Java developer?',
+    answer: 'Spring is a framework that handles common application concerns -- creating objects, wiring components together, managing connections -- so developers can focus on writing their own business logic rather than plumbing.'
+  },
+  {
+    q: 'What does Springboot add on top of Spring that makes getting started easier?',
+    answer: 'Springboot provides auto-configuration and sensible defaults so you can run a Spring application with minimal setup -- no XML configuration required.'
+  },
+  {
+    q: 'What is start.spring.io used for?',
+    answer: 'It is a web tool that generates a new Springboot project with the dependencies you choose, ready to download and open in your IDE.'
+  },
+  {
+    q: 'What is JPA, and how is it different from writing raw JDBC?',
+    answer: 'JPA is a specification for mapping Java objects to database tables. Instead of writing SQL and managing connections manually with JDBC, JPA lets you work with plain Java objects and the framework handles the database communication.'
+  },
+  {
+    q: 'What does the @Entity annotation tell Spring about a Java class?',
+    answer: '@Entity marks a class as a database table. Each instance of that class represents one row in the table.'
+  },
+  {
+    q: 'What does @SpringBootApplication do when it appears above the main class?',
+    answer: '@SpringBootApplication is a shortcut for three annotations at once: it enables component scanning, enables auto-configuration, and marks the class as a configuration source. It bootstraps the entire Spring application.'
+  },
+  {
+    q: 'If you see @Autowired on a field, what is Spring doing for you?',
+    answer: 'Spring is injecting a dependency automatically. It finds the matching bean in the application context and provides it to that field -- you do not have to create it manually.'
+  },
+  {
+    q: 'What does @RestController tell Spring about a class?',
+    answer: '@RestController marks a class as a web request handler whose methods return data directly as the HTTP response body -- typically as JSON.'
+  },
+  {
+    q: 'What is an annotation in Java, and what does it do?',
+    answer: 'An annotation is a tag written with an @ symbol that attaches metadata to a class, method, or field. Frameworks like Spring read these annotations and use them to decide how to set up and run the application.'
+  },
+  {
+    q: 'What does the @Repository annotation signal about a class?',
+    answer: '@Repository marks a class as a data access component. It is a specialization of @Component that tells Spring this class is responsible for database interactions.'
+  },
+  {
+    q: 'What does @Component mean when it appears on a class?',
+    answer: '@Component tells Spring to automatically create an instance of this class and manage it -- you do not have to create it yourself with new. Spring calls these managed instances beans.'
+  },
+  {
+    q: 'In plain English, what problem does Spring solve for a Java developer?',
+    answer: 'Spring handles the boilerplate plumbing of an application -- creating objects, wiring them together, connecting to databases, handling web requests -- so developers can focus on the actual business logic.'
+  },
+  {
+    q: 'What does @Id tell JPA about a field in an @Entity class?',
+    answer: '@Id marks a field as the primary key of the database table. JPA uses it to uniquely identify each row.'
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let slots         = {};
+let revealedCount = 0;
+let totalCards    = 0;
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function randFrom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function clamp(v, lo, hi) {
+  return Math.min(Math.max(v, lo), hi);
+}
+
+// ============================================================
+// DISTRIBUTION
+// Fun and tech distributed proportionally.
+// No student answers more than 2 questions.
+// ============================================================
+function buildCardPool(n) {
+  const numFun  = Math.min(12, Math.floor(12 * n / 25));
+  const numTech = Math.min(13, n - numFun);
+
+  const funPool  = shuffle(FUN_QUESTIONS).slice(0, numFun);
+  const techPool = shuffle(TECH_QUESTIONS).slice(0, numTech);
+
+  const allQ = shuffle([
+    ...funPool.map(q  => ({ ...q, type: 'fun'  })),
+    ...techPool.map(q => ({ ...q, type: 'tech' }))
+  ]);
+
+  const cards = [];
+  for (let i = 0; i < allQ.length; i++) {
+    cards.push({ ...allQ[i], student: (i % n) + 1 });
+  }
+
+  cards.sort((a, b) => a.student - b.student);
+  return cards;
+}
+
+// ============================================================
+// LOAD SCREEN
+// ============================================================
+const hireInput = document.getElementById('hire-count');
+const beginBtn  = document.getElementById('begin-btn');
+
+hireInput.addEventListener('blur', () => {
+  let v = parseInt(hireInput.value);
+  if (isNaN(v)) v = 25;
+  hireInput.value = clamp(v, 6, 30);
+});
+
+hireInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') startSession();
+});
+
+beginBtn.addEventListener('click', startSession);
+
+function startSession() {
+  let n = parseInt(hireInput.value);
+  if (isNaN(n)) n = 25;
+  n = clamp(n, 6, 30);
+
+  slots         = {};
+  revealedCount = 0;
+
+  const cards = buildCardPool(n);
+  totalCards  = cards.length;
+
+  document.getElementById('progress-total').textContent   = totalCards;
+  document.getElementById('progress-current').textContent = '0';
+  updateProgress();
+
+  const bar = document.getElementById('progress-bar-role');
+  bar.setAttribute('aria-valuemax', totalCards);
+  bar.setAttribute('aria-valuenow', 0);
+
+  renderCards(cards);
+
+  document.getElementById('load-screen').style.display  = 'none';
+  const cs = document.getElementById('card-screen');
+  cs.style.display = 'flex';
+  document.getElementById('summary-card').classList.remove('show');
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+function updateProgress() {
+  const pct = totalCards > 0 ? (revealedCount / totalCards) * 100 : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-bar-role').setAttribute('aria-valuenow', revealedCount);
+}
+
+// ============================================================
+// RENDER CARDS
+// ============================================================
+function renderCards(cards) {
+  const grid = document.getElementById('card-grid');
+  grid.innerHTML = '';
+
+  cards.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = `card ${card.type}`;
+    div.style.animationDelay = `${Math.min(idx * 0.025, 0.6)}s`;
+
+    const tagLabel = card.type === 'fun' ? randFrom(FUN_LABELS) : randFrom(TECH_LABELS);
+
+    // Icon: profile silhouette for fun, code brackets for tech
+    const tagIcon = card.type === 'fun'
+      ? `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
+
+    // Bottom content: fun = textarea, tech = answer toggle
+    const bottomArea = card.type === 'fun'
+      ? `<div class="answer-area">
+           <span class="answer-label">${escHtml(card.label)}</span>
+           <textarea class="answer-input" rows="2" aria-label="Enter answer for slot: ${escHtml(card.label)}"></textarea>
+         </div>`
+      : `<div class="answer-key-wrap">
+           <button class="answer-key-btn" aria-expanded="false" aria-label="Show answer key">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+             Show Answer
+           </button>
+           <div class="answer-key-text" role="region"></div>
+         </div>`;
+
+    div.innerHTML = `
+      <div class="card-top">
+        <span class="card-tag">${tagIcon}${escHtml(tagLabel)}</span>
+        <span class="card-num" aria-label="Student ${card.student}">#${card.student}</span>
+      </div>
+      <p class="card-question">${escHtml(card.q)}</p>
+      ${bottomArea}
+      <div class="card-footer">
+        <div class="revealed-badge" aria-hidden="true">Revealed</div>
+        <button class="reveal-btn" aria-label="Reveal card for student ${card.student}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Reveal
+        </button>
+      </div>
+    `;
+
+    // Reveal button
+    const revBtn = div.querySelector('.reveal-btn');
+    revBtn.addEventListener('click', () => {
+      div.classList.add('is-revealed');
+      revBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Revealed`;
+      revBtn.classList.add('done');
+      revBtn.setAttribute('aria-label', `Card for student ${card.student} revealed`);
+
+      revealedCount++;
+      document.getElementById('progress-current').textContent = revealedCount;
+      updateProgress();
+
+      if (card.type === 'fun' && card.slot) {
+        const ta = div.querySelector('.answer-input');
+        ta.addEventListener('input', () => {
+          slots[card.slot] = ta.value.trim();
+        });
+      }
+
+      if (card.type === 'tech') {
+        const togBtn  = div.querySelector('.answer-key-btn');
+        const togText = div.querySelector('.answer-key-text');
+        togText.textContent = card.answer || '';
+
+        togBtn.addEventListener('click', () => {
+          const isOpen = togText.classList.toggle('open');
+          togBtn.classList.toggle('open', isOpen);
+          togBtn.setAttribute('aria-expanded', String(isOpen));
+          togBtn.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              node.textContent = isOpen ? ' Hide Answer' : ' Show Answer';
+            }
+          });
+        });
+      }
+    });
+
+    grid.appendChild(div);
+  });
+}
+
+// ============================================================
+// FINALE -- Onboarding Summary Mad Lib
+// ============================================================
+document.getElementById('finale-btn').addEventListener('click', generateSummary);
+document.getElementById('reset-btn').addEventListener('click', () => {
+  document.getElementById('card-screen').style.display = 'none';
+  document.getElementById('load-screen').style.display = 'flex';
+});
+
+function generateSummary() {
+  const summaryCard = document.getElementById('summary-card');
+  const body        = document.getElementById('summary-body');
+
+  const s  = key => (slots[key] && slots[key].trim()) ? slots[key].trim() : null;
+  const hi = val => `<span class="slot-val">${escHtml(val)}</span>`;
+
+  const opener = 'Onboarding Summary -- Cohort Record Filed. Profile data was collected during today\'s orientation and entered into the employee system with the usual degree of thoroughness.';
+  const closer = 'File sealed. The system wishes you a productive first week. The system has already moved on to the next intake.';
+
+  const candidates = [];
+
+  const advice = s('advice_piece');
+  const skill  = s('hidden_skill');
+  if (advice && skill) {
+    candidates.push(`Upon intake, the new hire noted that ${hi(advice)}. Filed under Valuable Insights, Section 4. Skills assessment also flagged one unlisted item: ${hi(skill)}. This is now the official record.`);
+  } else if (advice) {
+    candidates.push(`Upon intake, the new hire noted that ${hi(advice)}. Filed under Valuable Insights, Section 4. The section is quite full.`);
+  } else if (skill) {
+    candidates.push(`Skills assessment flagged one item not present on the official record: ${hi(skill)}. This is now the official record.`);
+  }
+
+  const words = s('three_words');
+  const habit = s('useful_habit');
+  if (words && habit) {
+    candidates.push(`When asked to characterize ideal team dynamics, the candidate offered: ${hi(words)}. HR cross-referenced this against 847 similar submissions and found it compatible. The candidate's most useful habit is ${hi(habit)}, which has been added to onboarding materials without the candidate's knowledge or consent.`);
+  } else if (words) {
+    candidates.push(`When asked to characterize ideal team dynamics, the candidate offered: ${hi(words)}. HR cross-referenced this against 847 similar submissions. The results are inconclusive. HR is satisfied.`);
+  } else if (habit) {
+    candidates.push(`The candidate's most useful habit from the past year is ${hi(habit)}. This has been added to onboarding materials without the candidate's knowledge or consent.`);
+  }
+
+  const style   = s('work_style');
+  const toLearn = s('one_thing_to_learn');
+  if (style && toLearn) {
+    candidates.push(`Self-reported development area: the candidate is still figuring out ${hi(style)}. The system has noted this. The system has concerns. First-week learning goal: the candidate would like to pick up ${hi(toLearn)} from their onboarding buddy. The onboarding buddy has been notified. The onboarding buddy has thoughts.`);
+  } else if (style) {
+    candidates.push(`Self-reported development area: the candidate is still figuring out ${hi(style)}. The system has noted this. The system has concerns.`);
+  } else if (toLearn) {
+    candidates.push(`First-week learning goal: the candidate wants to learn ${hi(toLearn)} from their onboarding buddy. The onboarding buddy has been notified. The onboarding buddy has thoughts.`);
+  }
+
+  const mistake = s('useful_mistake');
+  const vision  = s('first_week_vision');
+  if (mistake && vision) {
+    candidates.push(`On instructive setbacks: the candidate named ${hi(mistake)} as a formative experience they are glad to have had. Filed under Growth Mindset, a category the system invented two quarters ago and now uses constantly. Ideal first week: the candidate described it as one involving ${hi(vision)}. This has been compared against actual first-week conditions. The comparison is ongoing.`);
+  } else if (mistake) {
+    candidates.push(`On instructive setbacks: the candidate named ${hi(mistake)} as a formative experience. Filed under Growth Mindset, a category the system invented two quarters ago and now uses constantly.`);
+  } else if (vision) {
+    candidates.push(`Onboarding expectations: a good first week involves ${hi(vision)}. This has been compared against actual first-week conditions. The comparison is ongoing.`);
+  }
+
+  const heldBack = s('held_back_question');
+  const mentor   = s('mentor_moment');
+  if (heldBack && mentor) {
+    candidates.push(`Questions the candidate holds back in new environments: ${hi(heldBack)}. Forwarded to the appropriate department. The appropriate department has not responded. This is expected. Mentor highlight: the best thing a manager has ever done for this candidate was ${hi(mentor)}. Entered into the Manager Effectiveness module. Two managers have understood it.`);
+  } else if (heldBack) {
+    candidates.push(`Questions the candidate holds back in new environments: ${hi(heldBack)}. Forwarded to the appropriate department. The appropriate department has not responded. This is expected.`);
+  } else if (mentor) {
+    candidates.push(`Mentor highlight: the best thing a manager has ever done for this candidate was ${hi(mentor)}. Entered into the Manager Effectiveness module. Two managers have understood it.`);
+  }
+
+  const ramp   = s('ramp_up_strategy');
+  const memory = s('one_thing_to_remember');
+  if (ramp && memory) {
+    candidates.push(`Codebase entry strategy: when entering a new codebase, the candidate relies on ${hi(ramp)}. The benchmark report is 94 pages long and has not been read. Cohort impression goal: the candidate would like to be remembered as ${hi(memory)}. The system will remember. The system always remembers.`);
+  } else if (ramp) {
+    candidates.push(`Codebase entry strategy: when entering a new codebase, the candidate relies on ${hi(ramp)}. The benchmark report is 94 pages long and has not been read.`);
+  } else if (memory) {
+    candidates.push(`Cohort impression goal: the candidate would like to be remembered as ${hi(memory)}. The system will remember. The system always remembers.`);
+  }
+
+  const chosen = [...candidates].sort(() => Math.random() - 0.5).slice(0, 2);
+  const paras = chosen.length
+    ? [opener, ...chosen, closer]
+    : [opener, 'No additional profile data was collected. The system has flagged this for review.', closer];
+
+  body.innerHTML = paras.map(p => `<p>${p}</p>`).join('');
+  summaryCard.classList.add('show');
+  summaryCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>

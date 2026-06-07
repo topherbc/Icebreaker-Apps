@@ -1,0 +1,237 @@
+{
+  "id": "week-10",
+  "title": "Spring and Spring Boot",
+  "labels": [
+    {
+      "id": "endpoint",
+      "name": "Endpoint",
+      "desc": "A URL path the API exposes to the outside world",
+      "example": "@GetMapping(\"/api/products\")\npublic List<Product> getAll() { ... }"
+    },
+    {
+      "id": "request",
+      "name": "Request",
+      "desc": "Data arriving from the client — path variables, params, or body",
+      "example": "@RequestParam String category\n@PathVariable Long id\n@RequestBody Order order"
+    },
+    {
+      "id": "response",
+      "name": "Response",
+      "desc": "What the API sends back to the client",
+      "example": "return ResponseEntity.ok(product);\nreturn ResponseEntity.notFound().build();"
+    },
+    {
+      "id": "service",
+      "name": "Service layer",
+      "desc": "Where business logic lives — between the controller and data access",
+      "example": "@Service\npublic class OrderService {\n    public double calculateTotal(Order o) { ... }\n}"
+    },
+    {
+      "id": "repository",
+      "name": "Repository",
+      "desc": "The layer responsible for reading from and writing to the database",
+      "example": "@Repository\npublic interface ProductRepository\n    extends JpaRepository<Product, Long> { }"
+    },
+    {
+      "id": "entity",
+      "name": "Entity",
+      "desc": "A Java class that maps directly to a database table",
+      "example": "@Entity\npublic class Product {\n    @Id Long id; String name;\n}"
+    },
+    {
+      "id": "annotation",
+      "name": "Annotation",
+      "desc": "Metadata that tells Spring how to wire or handle something",
+      "example": "@RestController\n@RequestMapping(\"/api\")\n@Service"
+    },
+    {
+      "id": "inject",
+      "name": "Injection",
+      "desc": "Spring automatically providing a class with the dependencies it needs",
+      "example": "public ProductController(ProductService svc) {\n    this.svc = svc;\n}"
+    }
+  ],
+  "prompts": [
+    {
+      "title": "Products Endpoint",
+      "statement": "An e-commerce API needs to serve all products. Callers should also be able to narrow the results by category without a separate endpoint. The business logic for filtering should sit between the API surface and the data layer, and that layer should be injected into the controller automatically.",
+      "expectedTags": [
+        {
+          "phrase": "serve all products",
+          "labels": ["endpoint", "repository"],
+          "explanation": "Serving products means exposing a URL the outside world can call (endpoint) and reading records from the database (repository)."
+        },
+        {
+          "phrase": "narrow the results by category",
+          "labels": ["request"],
+          "explanation": "The category filter is data coming in from the caller — that makes it part of the request."
+        },
+        {
+          "phrase": "sit between the API surface and the data layer",
+          "labels": ["service"],
+          "explanation": "The service layer is precisely this middle tier — it holds business logic and sits between the controller (API surface) and the repository (data layer)."
+        },
+        {
+          "phrase": "injected into the controller automatically",
+          "labels": ["inject"],
+          "explanation": "Spring's dependency injection means the framework provides the service to the controller without the controller constructing it manually."
+        }
+      ],
+      "code": "@RestController\n@RequestMapping(\"/api/products\")\npublic class ProductController {\n\n    private final ProductService productService;\n\n    public ProductController(ProductService productService) {\n        this.productService = productService;\n    }\n\n    @GetMapping\n    public List<Product> getProducts(\n            @RequestParam(required = false) String category) {\n        if (category != null) return productService.getByCategory(category);\n        return productService.getAll();\n    }\n}"
+    },
+    {
+      "title": "Create Order Endpoint",
+      "statement": "An API endpoint accepts a new order from a client. Before saving it, the server should confirm the order contains at least one item. The API should notify the client whether the order was created.",
+      "expectedTags": [
+        {
+          "phrase": "An API endpoint accepts a new order from a client",
+          "labels": ["endpoint", "request"],
+          "explanation": "This describes both the URL the API exposes (endpoint) and the data arriving from the caller — the order itself (request)."
+        },
+        {
+          "phrase": "confirm the order contains at least one item",
+          "labels": ["service"],
+          "explanation": "Validation logic — deciding whether an order is acceptable before persisting it — belongs in the service layer, not the controller."
+        },
+        {
+          "phrase": "notify the client whether the order was created",
+          "labels": ["response"],
+          "explanation": "Whatever the API sends back to tell the caller about the outcome of their request is the response."
+        }
+      ],
+      "code": "@PostMapping(\"/api/orders\")\npublic ResponseEntity<Order> createOrder(@RequestBody @Valid Order order) {\n    if (order.getItems() == null || order.getItems().isEmpty()) {\n        return ResponseEntity.badRequest().build();\n    }\n    Order saved = orderService.save(order);\n    return ResponseEntity.status(HttpStatus.CREATED).body(saved);\n}"
+    },
+    {
+      "title": "Product by ID",
+      "statement": "Clients need to look up a single product by its ID. If the ID doesn't exist in the system, the API should respond with a meaningful not-found status.",
+      "expectedTags": [
+        {
+          "phrase": "look up a single product by its ID",
+          "labels": ["endpoint", "request"],
+          "explanation": "Exposing a lookup by ID means defining a URL for that purpose (endpoint) and treating the ID as data arriving from the caller (request)."
+        },
+        {
+          "phrase": "If the ID doesn't exist in the system",
+          "labels": ["repository"],
+          "explanation": "Checking whether a record exists requires querying the database — that is the repository's responsibility."
+        },
+        {
+          "phrase": "respond with a meaningful not-found status",
+          "labels": ["response"],
+          "explanation": "The status code and body the API sends back to the caller — whether a product or a not-found indicator — is the response."
+        }
+      ],
+      "code": "@GetMapping(\"/api/products/{id}\")\npublic ResponseEntity<Product> getProduct(@PathVariable Long id) {\n    return productService.findById(id)\n        .map(ResponseEntity::ok)\n        .orElse(ResponseEntity.notFound().build());\n}"
+    },
+    {
+      "title": "Update Customer Email",
+      "statement": "A customer wants to update the email address on their account. The API should accept the customer's ID and the new email address and return the updated customer record.",
+      "expectedTags": [
+        {
+          "phrase": "update the email address on their account",
+          "labels": ["service", "entity"],
+          "explanation": "Applying the change is business logic that belongs in the service layer, and the account being modified is a database-backed entity."
+        },
+        {
+          "phrase": "accept the customer's ID and the new email address",
+          "labels": ["endpoint", "request"],
+          "explanation": "Accepting these values means the API exposes a URL for this operation (endpoint) and the ID and email are data sent in by the caller (request)."
+        },
+        {
+          "phrase": "return the updated customer record",
+          "labels": ["response"],
+          "explanation": "Sending the changed record back to the caller is the response — it confirms what was saved."
+        }
+      ],
+      "code": "@PatchMapping(\"/api/customers/{id}/email\")\npublic ResponseEntity<Customer> updateEmail(\n        @PathVariable Long id,\n        @RequestBody Map<String, String> body) {\n    String newEmail = body.get(\"email\");\n    return customerService.updateEmail(id, newEmail)\n        .map(ResponseEntity::ok)\n        .orElse(ResponseEntity.notFound().build());\n}"
+    },
+    {
+      "title": "Discount Code Service",
+      "statement": "An order total calculation involves applying a discount code before returning the final amount. That logic should live in a dedicated layer, separate from the part of the system that handles incoming requests. The dedicated layer should be wired up automatically and should read discount records from the database.",
+      "expectedTags": [
+        {
+          "phrase": "dedicated layer",
+          "labels": ["service", "annotation"],
+          "explanation": "The service layer is that dedicated tier for business logic, and an annotation is what tells Spring to recognize and manage it as such."
+        },
+        {
+          "phrase": "wired up automatically",
+          "labels": ["inject"],
+          "explanation": "Automatic wiring is dependency injection — Spring provides the layer with everything it needs without manual construction."
+        },
+        {
+          "phrase": "handles incoming requests",
+          "labels": ["endpoint"],
+          "explanation": "The part of the system that receives calls from outside is the controller, which sits at the endpoint layer."
+        },
+        {
+          "phrase": "read discount records from the database",
+          "labels": ["repository", "entity"],
+          "explanation": "Reading from the database is the repository's job, and the discount records being read are entities — Java classes mapped to database tables."
+        }
+      ],
+      "code": "@Service\npublic class DiscountService {\n\n    private final DiscountRepository discountRepository;\n\n    public DiscountService(DiscountRepository discountRepository) {\n        this.discountRepository = discountRepository;\n    }\n\n    public double applyDiscount(String code, double originalTotal) {\n        return discountRepository.findByCode(code)\n            .map(d -> originalTotal * (1 - d.getPercentage() / 100.0))\n            .orElse(originalTotal);\n    }\n}"
+    },
+    {
+      "title": "Paginated User List",
+      "statement": "An admin dashboard needs to browse users in pages rather than loading everyone at once. The endpoint should accept the page number and page size as optional query parameters.",
+      "expectedTags": [
+        {
+          "phrase": "endpoint should accept the page number and page size as optional query parameters",
+          "labels": ["endpoint", "request"],
+          "explanation": "This names the URL the API exposes (endpoint) and identifies the pagination values as caller-supplied input (request)."
+        },
+        {
+          "phrase": "browse users in pages rather than loading everyone at once",
+          "labels": ["service", "repository"],
+          "explanation": "Deciding how to page through results is business logic in the service layer, which then delegates the actual database read to the repository."
+        }
+      ],
+      "code": "@GetMapping(\"/api/users\")\npublic Page<User> getUsers(\n        @RequestParam(defaultValue = \"0\") int page,\n        @RequestParam(defaultValue = \"20\") int size) {\n    return userService.getUsers(PageRequest.of(page, size));\n}"
+    },
+    {
+      "title": "Request Logger",
+      "statement": "The operations team wants every incoming API request logged with its method and how long it took to produce a response. This behavior should apply to all requests automatically, without touching each controller.",
+      "expectedTags": [
+        {
+          "phrase": "every incoming API request",
+          "labels": ["request", "endpoint"],
+          "explanation": "An incoming API request is data arriving from a caller (request) at one of the URLs the system exposes (endpoint)."
+        },
+        {
+          "phrase": "how long it took to produce a response",
+          "labels": ["response"],
+          "explanation": "Measuring response time means tracking the moment the API finishes and sends data back to the caller — that outbound data is the response."
+        },
+        {
+          "phrase": "apply to all requests automatically, without touching each controller",
+          "labels": ["annotation", "inject"],
+          "explanation": "An annotation tells Spring to register the filter as a managed component, and injection means Spring wires it into the request pipeline without any controller knowing about it."
+        }
+      ],
+      "code": "@Component\npublic class RequestLoggingFilter extends OncePerRequestFilter {\n\n    @Override\n    protected void doFilterInternal(HttpServletRequest request,\n                                    HttpServletResponse response,\n                                    FilterChain chain)\n            throws ServletException, IOException {\n        long start = System.currentTimeMillis();\n        chain.doFilter(request, response);\n        long duration = System.currentTimeMillis() - start;\n        log.info(\"{} {} — {}ms\", request.getMethod(), request.getRequestURI(), duration);\n    }\n}"
+    },
+    {
+      "title": "Delete Product Endpoint",
+      "statement": "An admin endpoint lets authorized users remove a product by ID. When a product is deleted, all associated order line items should also be removed. The response should confirm the deletion.",
+      "expectedTags": [
+        {
+          "phrase": "admin endpoint lets authorized users remove a product by ID",
+          "labels": ["endpoint", "request"],
+          "explanation": "The URL exposed for this delete operation is the endpoint, and the product ID supplied by the caller is the request data."
+        },
+        {
+          "phrase": "all associated order line items should also be removed",
+          "labels": ["entity", "repository"],
+          "explanation": "Order line items are entities — records mapped to a database table — and removing them requires the repository to perform the delete against the database."
+        },
+        {
+          "phrase": "The response should confirm the deletion",
+          "labels": ["response"],
+          "explanation": "Sending confirmation back to the caller is the response — it closes the loop so the client knows the operation succeeded."
+        }
+      ],
+      "code": "@DeleteMapping(\"/api/products/{id}\")\npublic ResponseEntity<String> deleteProduct(@PathVariable Long id) {\n    if (!productService.exists(id)) {\n        return ResponseEntity.notFound().build();\n    }\n    orderItemService.removeByProductId(id);\n    productService.delete(id);\n    return ResponseEntity.ok(\"Product \" + id + \" deleted.\");\n}"
+    }
+  ]
+}

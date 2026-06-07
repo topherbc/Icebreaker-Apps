@@ -1,4 +1,3 @@
 *.DS_Store
 node_modules/
-/java-academy/week-10/*
 /java-academy/week-11/*

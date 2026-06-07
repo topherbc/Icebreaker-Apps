@@ -148,7 +148,7 @@ button{font-family:inherit;cursor:pointer;}
       Roll in the Cart
     </button>
 
-    <p class="reception-fineprint">The Experience will begin promptly. Sound is optional and may be enabled on the floor. Please remain seated until invited to dance.</p>
+    <p class="reception-fineprint">The Experience will begin promptly. Provide your own music; the floor keeps the beat. Please remain seated until invited to dance.</p>
   </div>
 </div>
 
@@ -169,10 +169,6 @@ button{font-family:inherit;cursor:pointer;}
     <div class="beat-dot" id="beat-dot" aria-hidden="true"></div>
     <div class="stage-spacer"></div>
     <span class="tempo" id="tempo">— BPM</span>
-    <button class="ghost-btn" id="sound-btn" aria-pressed="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-      Sound off
-    </button>
     <button class="ghost-btn" id="conclude-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
       Conclude
@@ -350,7 +346,6 @@ function resetNowPlaying(){
 ============================================================ */
 document.getElementById('conclude-btn').addEventListener('click', conclude);
 document.getElementById('restart-btn').addEventListener('click', () => {
-  stopAudio();
   document.getElementById('finale').classList.remove('show');
   document.getElementById('experience').classList.remove('show');
   document.getElementById('reception').style.display = 'flex';
@@ -414,7 +409,6 @@ function applyGenre(g){
   target.bpm = g.bpm;
   const m = MOTION[g.motion] || MOTION.flow;
   target.rot = m.rot; target.turb = m.turb; target.curve = m.curve; target.spawnMul = m.spawn;
-  audio.bpm = g.bpm; audio.genre = g;                // audio follows the genre
 }
 
 const NP = 540;
@@ -542,101 +536,8 @@ function loop(){
   rafId = requestAnimationFrame(loop);
 }
 
-/* ============================================================
-   AUDIO ENGINE -- optional generative beat (Web Audio).
-   Defensive: never throws if Web Audio is unavailable.
-============================================================ */
-const audio = { ctx: null, master: null, on: false, next: 0, step: 0, bpm: 96, genre: GENRES[0], timer: null };
-
-function initAudio(){
-  if (audio.ctx) return true;
-  try {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return false;
-    audio.ctx = new Ctx();
-    audio.master = audio.ctx.createGain();
-    audio.master.gain.value = 0;
-    audio.master.connect(audio.ctx.destination);
-    return true;
-  } catch (e) { audio.ctx = null; return false; }
-}
-
-function tone(freq, time, dur, type, gain){
-  const c = audio.ctx, o = c.createOscillator(), g = c.createGain();
-  o.type = type; o.frequency.setValueAtTime(freq, time);
-  g.gain.setValueAtTime(0, time);
-  g.gain.linearRampToValueAtTime(gain, time + 0.012);
-  g.gain.exponentialRampToValueAtTime(0.0008, time + dur);
-  o.connect(g); g.connect(audio.master); o.start(time); o.stop(time + dur + 0.03);
-}
-function kick(time){
-  const c = audio.ctx, o = c.createOscillator(), g = c.createGain();
-  o.type = 'sine'; o.frequency.setValueAtTime(155, time); o.frequency.exponentialRampToValueAtTime(48, time + 0.12);
-  g.gain.setValueAtTime(0.9, time); g.gain.exponentialRampToValueAtTime(0.001, time + 0.17);
-  o.connect(g); g.connect(audio.master); o.start(time); o.stop(time + 0.19);
-}
-function hat(time){
-  const c = audio.ctx, len = Math.floor(c.sampleRate * 0.045);
-  const buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5);
-  const s = c.createBufferSource(); s.buffer = buf;
-  const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 6500;
-  const g = c.createGain(); g.gain.value = 0.22;
-  s.connect(hp); hp.connect(g); g.connect(audio.master); s.start(time);
-}
-function scheduleStep(time, step){
-  if (step % 2 === 0) kick(time); else hat(time);
-  if (step % 2 === 0){
-    const g = audio.genre || GENRES[0], beat = step / 2;
-    const deg = g.scale[beat % g.scale.length];
-    const f = 110 * Math.pow(2, deg / 12);
-    tone(f, time, 0.5 * 60 / audio.bpm, g.wave, 0.15);
-    if (beat % 4 === 0) tone(f * 2, time, 0.28, 'triangle', 0.07);
-  }
-}
-function audioTick(){
-  if (!audio.on || !audio.ctx) return;
-  const spb = 60 / (audio.bpm || 96);
-  while (audio.next < audio.ctx.currentTime + 0.13){
-    scheduleStep(audio.next, audio.step);
-    audio.next += spb / 2; audio.step++;
-  }
-}
-function startAudio(){
-  if (!initAudio()) return false;
-  if (audio.ctx.state === 'suspended') audio.ctx.resume().catch(() => {});
-  audio.on = true; audio.next = audio.ctx.currentTime + 0.06; audio.step = 0;
-  audio.master.gain.cancelScheduledValues(audio.ctx.currentTime);
-  audio.master.gain.setValueAtTime(audio.master.gain.value, audio.ctx.currentTime);
-  audio.master.gain.linearRampToValueAtTime(0.32, audio.ctx.currentTime + 0.3);
-  if (!audio.timer) audio.timer = setInterval(audioTick, 25);
-  return true;
-}
-function stopAudio(){
-  audio.on = false;
-  if (audio.ctx && audio.master){
-    try {
-      audio.master.gain.cancelScheduledValues(audio.ctx.currentTime);
-      audio.master.gain.setValueAtTime(audio.master.gain.value, audio.ctx.currentTime);
-      audio.master.gain.linearRampToValueAtTime(0, audio.ctx.currentTime + 0.2);
-    } catch (e) {}
-  }
-}
-
-const soundBtn = document.getElementById('sound-btn');
-soundBtn.addEventListener('click', () => {
-  if (audio.on){
-    stopAudio();
-    soundBtn.classList.remove('live'); soundBtn.setAttribute('aria-pressed', 'false');
-    soundBtn.lastChild.textContent = ' Sound off';
-  } else {
-    const ok = startAudio();
-    if (ok){
-      soundBtn.classList.add('live'); soundBtn.setAttribute('aria-pressed', 'true');
-      soundBtn.lastChild.textContent = ' Sound on';
-    }
-  }
-});
+/* No audio by design: bring your own music. The on-screen tempo and beat
+   pulse act as a visual metronome to match your track to. */
 </script>
 </body>
 </html>

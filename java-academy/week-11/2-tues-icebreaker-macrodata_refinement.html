@@ -94,6 +94,10 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 .mdr-file{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap;}
 .mdr-file strong{color:var(--glow);font-weight:600;}
 .mdr-pct{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--glow);background:rgba(111,240,196,.08);border:1px solid var(--line);border-radius:6px;padding:5px 11px;white-space:nowrap;}
+.mdr-fidelity{color:var(--ink-2);transition:color .3s,border-color .3s;}
+.mdr-fidelity.hi{color:var(--good);border-color:rgba(87,227,154,.42);}
+.mdr-fidelity.lo{color:var(--bad);border-color:rgba(240,105,127,.42);}
+.mdr-fidelity[hidden]{display:none;}
 
 .mdr-body{flex:1;display:flex;flex-direction:column;align-items:center;gap:18px;padding:22px 20px 26px;}
 .mdr-intro{text-align:center;max-width:76ch;}
@@ -120,6 +124,16 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 @keyframes feelDread{0%{transform:translate(0,0) scale(1.03)}20%{transform:translate(.6px,-1px) scale(1.06)}40%{transform:translate(-.6px,.8px) scale(1.05)}60%{transform:translate(.8px,.8px) scale(1.09)}80%{transform:translate(-.7px,-.7px) scale(1.06)}100%{transform:translate(0,0) scale(1.03)}}
 .cell.scary.feel-malice{animation:feelMalice .44s steps(4,end) infinite;}
 @keyframes feelMalice{0%{transform:translate(0,0) scale(1.06) rotate(0)}25%{transform:translate(3px,-2px) scale(1.13) rotate(3deg)}50%{transform:translate(-3px,2px) scale(1.02) rotate(-4deg)}75%{transform:translate(2px,3px) scale(1.11) rotate(2deg)}100%{transform:translate(0,0) scale(1.06) rotate(0)}}
+
+/* second movement per temper -- same feeling, different gait */
+.cell.scary.feel-woe-b{animation:feelWoeB 2.1s ease-in-out infinite;}
+@keyframes feelWoeB{0%,100%{transform:translate(0,-1px) rotate(-1.2deg);opacity:.93}50%{transform:translate(-2px,5px) rotate(1.6deg);opacity:.7}}
+.cell.scary.feel-frolic-b{animation:feelFrolicB .82s cubic-bezier(.34,1.56,.5,1) infinite;}
+@keyframes feelFrolicB{0%,100%{transform:translateY(0) rotate(-5deg) scale(1.02)}25%{transform:translateY(-5px) rotate(5deg) scale(1.12)}50%{transform:translateY(0) rotate(-3deg) scale(1.0)}75%{transform:translateY(-2px) rotate(3deg) scale(1.07)}}
+.cell.scary.feel-dread-b{animation:feelDreadB .92s ease-in-out infinite;}
+@keyframes feelDreadB{0%,100%{transform:scale(1.02) translate(0,0)}30%{transform:scale(1.1) translate(.7px,-.6px)}55%{transform:scale(1.05) translate(-.7px,.5px)}80%{transform:scale(1.12) translate(.5px,.6px)}}
+.cell.scary.feel-malice-b{animation:feelMaliceB .5s steps(5,end) infinite;}
+@keyframes feelMaliceB{0%{transform:rotate(0) scale(1.05)}20%{transform:rotate(9deg) translate(2px,-2px) scale(1.13)}40%{transform:rotate(-7deg) translate(-2px,1px) scale(1.0)}60%{transform:rotate(8deg) translate(2px,2px) scale(1.1)}80%{transform:rotate(-5deg) translate(-1px,-1px) scale(1.04)}100%{transform:rotate(0) scale(1.05)}}
 .cell.scary::after{content:'';position:absolute;inset:-3px;border-radius:7px;background:radial-gradient(circle, var(--glow-dim) 0%, transparent 70%);opacity:.32;z-index:-1;}
 .cell.scary.kin{color:#bafff0;text-shadow:0 0 16px var(--glow);}
 /* the locked, selected block */
@@ -184,7 +198,13 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 @keyframes scrimIn{from{opacity:0}to{opacity:1}}
 .calib-card{background:linear-gradient(180deg,var(--panel-2) 0%,var(--deep) 100%);border:1px solid var(--line-md);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(120,236,200,.08);max-width:560px;width:100%;padding:36px 38px 32px;position:relative;animation:calibIn .35s var(--ease);}
 @keyframes calibIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-.calib-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--tcol,var(--glow));border-radius:18px 18px 0 0;box-shadow:0 0 16px var(--tcol,rgba(111,240,196,.5));}
+.calib-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--rcol,var(--tcol,var(--glow)));border-radius:18px 18px 0 0;box-shadow:0 0 16px var(--rcol,var(--tcol,rgba(111,240,196,.5)));transition:background .3s,box-shadow .3s;}
+.calib-card.read-good{box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(120,236,200,.08),inset 0 0 60px rgba(87,227,154,.10);}
+.calib-card.read-miss{box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(120,236,200,.08),inset 0 0 60px rgba(240,105,127,.10);}
+.calib-who .cresult{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:6px;padding:4px 10px;display:none;align-items:center;gap:6px;}
+.calib-who .cresult svg{width:12px;height:12px;}
+.calib-who .cresult.good{display:inline-flex;color:var(--good);background:rgba(87,227,154,.12);border:1px solid rgba(87,227,154,.5);}
+.calib-who .cresult.miss{display:inline-flex;color:var(--bad);background:rgba(240,105,127,.12);border:1px solid rgba(240,105,127,.5);}
 .calib-stamp{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
 .calib-who{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:13px;color:var(--ink-2);flex-wrap:wrap;}
 .calib-who .badge{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--glow);background:rgba(111,240,196,.10);border:1px solid var(--line-md);border-radius:6px;padding:4px 10px;display:inline-flex;align-items:center;gap:6px;}
@@ -212,25 +232,6 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 .sort-banner .sb-pulse{width:10px;height:10px;border-radius:50%;background:var(--glow);box-shadow:0 0 10px var(--glow);animation:dotpulse 1.1s ease-in-out infinite;flex-shrink:0;}
 .sort-banner .sb-text{font-size:14px;color:var(--ink-2);line-height:1.4;}
 .sort-banner .sb-text b{color:var(--glow);font-weight:600;}
-
-/* ============================================================
-   WELLNESS SESSION
-============================================================ */
-.well-card{background:linear-gradient(180deg,var(--panel-2) 0%,var(--deep) 100%);border:1px solid var(--line-md);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(120,236,200,.08);max-width:620px;width:100%;padding:42px 44px 34px;position:relative;animation:calibIn .4s var(--ease);}
-.well-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--woe),var(--glow),var(--frolic));border-radius:18px 18px 0 0;}
-.well-stamp{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.well-title{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:-.2px;color:#eafff7;margin-bottom:6px;}
-.well-meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.5;}
-.well-divider{height:1px;background:var(--line);margin-bottom:22px;}
-.well-body{font-family:var(--serif);font-size:18px;line-height:1.85;color:var(--ink);}
-.well-body p{margin-bottom:16px;}
-.well-body p:last-child{margin-bottom:0;}
-.well-body .fact{color:var(--glow);font-style:italic;}
-.well-actions{margin-top:28px;display:flex;gap:10px;flex-wrap:wrap;}
-.well-receive{flex:1;min-width:200px;min-height:54px;border:none;border-radius:11px;background:var(--glow);color:#022019;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 22px rgba(111,240,196,.4);transition:filter .15s,transform .1s;}
-.well-receive:hover{filter:brightness(1.07);}
-.well-receive:active{transform:scale(.99);}
-.well-receive svg{width:19px;height:19px;}
 
 /* ============================================================
    THE MUSIC DANCE EXPERIENCE  (the reward)
@@ -298,7 +299,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 @media (max-width:720px){
   .intake-card{padding:36px 26px 32px;}.intake-title{font-size:34px;}
   .bins{grid-template-columns:repeat(2,1fr);}
-  .calib-card,.well-card{padding:30px 24px;}
+  .calib-card{padding:30px 24px;}
   .calib-q{font-size:22px;}
   .ceremony-card{padding:30px 24px;}
 }
@@ -364,12 +365,13 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
     <span class="mdr-file">File <strong id="file-code">Tumwater 0x00</strong></span>
     <div class="mdr-sep"></div>
     <span class="mdr-pct" id="overall-pct" role="status" aria-live="polite">0% refined</span>
+    <div class="mdr-sep"></div>
+    <span class="mdr-pct mdr-fidelity" id="fidelity-pct" hidden role="status" aria-live="polite">fidelity 100%</span>
   </header>
 
   <main class="mdr-body">
     <div class="mdr-intro">
       <h2>Sweep the grid. Feel for the frightening numbers.</h2>
-      <p>Move across the macrodata; clusters wake where you find them. Select a block and sort it into the bin whose feeling fits. A correct read glows green, a miss glows red, and either way a refiner is called to speak.</p>
     </div>
 
     <div class="grid-frame">
@@ -379,7 +381,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
     <div class="bins" id="bins"></div>
 
     <div class="deck">
-      <p class="deck-hint" id="deck-hint">Hover the grid to wake a block, <b>click it to select</b>, then choose the bin it feels like.</p>
+      <p class="deck-hint" id="deck-hint" style="display:none"></p>
       <button class="complete-btn" id="complete-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         The File Is Whole
@@ -399,11 +401,11 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
     <div class="calib-who">
       <span class="badge" id="calib-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 21 12 12 21 3 12Z"/></svg><span id="calib-codename">Cold Harbor</span></span>
       <span class="tchip" id="calib-tchip">Woe</span>
+      <span class="cresult" id="calib-result"></span>
       <span id="calib-refnum">Refiner 1 of 25</span>
     </div>
     <p class="calib-eyebrow" id="calib-eyebrow">Wellness Inquiry</p>
     <p class="calib-q" id="calib-q">&nbsp;</p>
-    <p class="calib-hint">Say it aloud to the room. Your outie is not here to be embarrassed. Type a few words if you would like them kept on file.</p>
     <label class="calib-label" for="calib-input">For the file (optional)</label>
     <textarea class="calib-input" id="calib-input" rows="2" aria-label="Type your answer for the file (optional)"></textarea>
     <p class="calib-optnote">The block is already refined. The saying is the part that matters.</p>
@@ -421,23 +423,6 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 <div class="sort-banner" id="sort-banner" role="status" aria-live="polite">
   <span class="sb-pulse"></span>
   <span class="sb-text" id="sort-text">Block selected. <b>Which feeling is it?</b> Sort it into any bin.</span>
-</div>
-
-<!-- wellness session -->
-<div class="scrim" id="well-scrim" role="dialog" aria-modal="true" aria-labelledby="well-title">
-  <div class="well-card">
-    <p class="well-stamp">Lattice Wellness // Session Granted</p>
-    <h2 class="well-title" id="well-title">Your Wellness Session</h2>
-    <p class="well-meta" id="well-meta">The file is whole. The floor has prepared a few facts about you.</p>
-    <div class="well-divider"></div>
-    <div class="well-body" id="well-body"></div>
-    <div class="well-actions">
-      <button class="well-receive" id="well-receive">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        Begin the Music Dance Experience
-      </button>
-    </div>
-  </div>
 </div>
 
 <!-- ======================================================
@@ -551,13 +536,27 @@ const TEMPERS = [
    this table to make the marked numbers genuinely feel like each one.
 ============================================================ */
 const TEMPER_FEEL = {
-  woe:    { motion:'feel-woe',    digits:[0,1,2,2,3,4,7], feel:'low and sinking, the numbers sit heavy and slump downward' },
-  frolic: { motion:'feel-frolic', digits:[2,3,6,8,8,9,3], feel:'light and bouncy, the numbers hop and will not settle' },
-  dread:  { motion:'feel-dread',  digits:[4,5,6,6,7,8,5], feel:'trembling and building, a nervous climbing jitter' },
-  malice: { motion:'feel-malice', digits:[1,6,7,9,9,8,3], feel:'sharp and violent, the numbers lash and snap' }
+  woe:    { motions:['feel-woe','feel-woe-b'],       pool:[0,0,0,1,1,2,2,3] },  // low, heavy, sinking
+  frolic: { motions:['feel-frolic','feel-frolic-b'], pool:[5,6,7,8,8,9,9,7] },  // bright, high, bouncing
+  dread:  { motions:['feel-dread','feel-dread-b'],   pool:null              },  // a climbing run, a building tremor
+  malice: { motions:['feel-malice','feel-malice-b'], pool:[9,9,9,8,7,1,9,8] }   // spiking, sharp, jagged
 };
-function temperDigit(t){ const d = (TEMPER_FEEL[t] && TEMPER_FEEL[t].digits) || [0,1,2,3,4,5,6,7,8,9]; return String(d[rnd(d.length)]); }
-function feelClasses(){ return Object.values(TEMPER_FEEL).map(f => f.motion); }
+/* a cluster's digits are FIXED for its lifetime and chosen to read like its
+   temper: Woe sinks into low digits, Frolic rides high, Dread climbs in a run,
+   Malice spikes into 9s. They are revealed on wake and never re-roll. */
+function signatureDigits(temper, size){
+  const out = [];
+  if (temper === 'dread'){
+    let v = 2 + rnd(4);                          // a climbing run: the numbers build
+    for (let i=0;i<size;i++){ out.push(String(v % 10)); v += 1 + (rnd(4)===0 ? 1 : 0); }
+    return out;
+  }
+  const pool = (TEMPER_FEEL[temper] && TEMPER_FEEL[temper].pool) || [0,1,2,3,4,5,6,7,8,9];
+  for (let i=0;i<size;i++) out.push(String(pool[rnd(pool.length)]));
+  return out;
+}
+function feelClasses(){ return Object.values(TEMPER_FEEL).flatMap(f => f.motions); }
+function pickMotion(temper){ const m = TEMPER_FEEL[temper].motions; return m[rnd(m.length)]; }
 
 /* neutral file codenames -- same world as Week 10 */
 const FILE_CODENAMES = [
@@ -647,7 +646,8 @@ function startSession(){
   document.getElementById('file-code').textContent = state.fileCode;
   document.getElementById('complete-btn').classList.remove('show');
   document.getElementById('sort-banner').classList.remove('show');
-  document.getElementById('deck-hint').innerHTML = 'Hover the grid to wake a block, <b>click it to select</b>, then choose the bin it feels like.';
+  const deckHint = document.getElementById('deck-hint');
+  deckHint.innerHTML = ''; deckHint.style.display = 'none';
 
   document.getElementById('intake').style.display = 'none';
   document.getElementById('finale').classList.remove('show');
@@ -659,6 +659,18 @@ function updateOverall(){
   const pct = state.blocksTotal>0 ? Math.round(state.blocksRefined/state.blocksTotal*100) : 0;
   document.getElementById('overall-pct').textContent = pct+'% refined';
   updateBinUI();
+  updateFidelity();
+}
+function updateFidelity(){
+  const el = document.getElementById('fidelity-pct');
+  if (!el) return;
+  el.classList.remove('hi','lo');
+  if (state.totalReads === 0){ el.hidden = true; return; }
+  el.hidden = false;
+  const pct = Math.round(state.correctReads / state.totalReads * 100);
+  el.textContent = 'fidelity ' + pct + '%';
+  if (pct >= 80) el.classList.add('hi');
+  else if (pct < 50) el.classList.add('lo');
 }
 function updateBinUI(){
   TEMPERS.forEach(t => {
@@ -688,7 +700,7 @@ function buildFile(n){
 
   const total = GRID_COLS * GRID_ROWS;
   gridCells = [];
-  for (let i=0;i<total;i++) gridCells.push({ val:randDigit(), clusterId:null, temper:null, spent:false, awake:false, el:null });
+  for (let i=0;i<total;i++){ const d=randDigit(); gridCells.push({ val:d, sleepVal:d, wakeVal:d, clusterId:null, temper:null, spent:false, awake:false, el:null }); }
 
   clusters = [];
   const free = shuffle(gridCells.map((_,i)=>i));
@@ -699,8 +711,13 @@ function buildFile(n){
     const cellIdxs = growCluster(free, cursor, size);
     cursor += size;
     if (cellIdxs.length === 0) break;
-    cellIdxs.forEach(idx => { gridCells[idx].clusterId = c; gridCells[idx].temper = temper; });
-    clusters.push({ id:c, temper, cellIdxs, refined:false });
+    const sig = signatureDigits(temper, cellIdxs.length);
+    cellIdxs.forEach((idx,k) => {
+      const cell = gridCells[idx];
+      cell.clusterId = c; cell.temper = temper;
+      cell.wakeVal = sig[k];          // the readable signature, shown only when awake; sleepVal keeps it hidden in the field
+    });
+    clusters.push({ id:c, temper, motion:pickMotion(temper), cellIdxs, refined:false });
   }
   state.blocksTotal = clusters.length;
 }
@@ -776,14 +793,14 @@ let fidgetTimer = null;
 function startFidget(){
   if (fidgetTimer) clearInterval(fidgetTimer);
   fidgetTimer = setInterval(() => {
-    for (let k=0;k<6;k++){
+    for (let k=0;k<4;k++){
       const idx = rnd(gridCells.length);
       const cell = gridCells[idx];
-      if (cell.spent || cell.awake) continue;
-      cell.val = randDigit();
+      if (cell.spent || cell.awake || cell.clusterId !== null) continue;  // the field breathes; clusters never re-roll
+      cell.val = cell.sleepVal = randDigit();
       if (cell.el) cell.el.textContent = cell.val;
     }
-  }, 700);
+  }, 1100);
 }
 
 /* wake / sleep a cluster on hover or focus (the discovery sweep) */
@@ -797,11 +814,13 @@ function hoverCluster(id, on){
     if (!el || cell.spent) return;
     if (on){
       cell.awake = true;
-      cell.val = temperDigit(c.temper);
+      cell.val = cell.wakeVal;          // reveal the fixed signature; never re-rolled
       el.textContent = cell.val;
-      el.classList.add('scary', TEMPER_FEEL[c.temper].motion, 'kin');
+      el.classList.add('scary', c.motion, 'kin');
     } else {
       cell.awake = false;
+      cell.val = cell.sleepVal;         // back to its resting digit, hidden in the field
+      el.textContent = cell.val;
       el.classList.remove('scary','kin', ...feelClasses());
     }
   });
@@ -820,7 +839,7 @@ function selectCluster(id){
     state.selected = null;
     prev.cellIdxs.forEach(idx => {
       const cell = gridCells[idx]; const el = cell.el;
-      if (el){ cell.awake = false; el.classList.remove('scary','kin','selected', ...feelClasses()); }
+      if (el){ cell.awake = false; cell.val = cell.sleepVal; el.textContent = cell.val; el.classList.remove('scary','kin','selected', ...feelClasses()); }
     });
   }
 
@@ -829,9 +848,9 @@ function selectCluster(id){
     const cell = gridCells[idx]; const el = cell.el;
     if (!el || cell.spent) return;
     cell.awake = true;
-    cell.val = temperDigit(c.temper);
+    cell.val = cell.wakeVal;
     el.textContent = cell.val;
-    el.classList.add('scary', TEMPER_FEEL[c.temper].motion, 'selected');
+    el.classList.add('scary', c.motion, 'selected');
     el.classList.remove('kin');
   });
   armBins(true);
@@ -923,7 +942,7 @@ function chooseBin(temperId, binEl){
   document.getElementById('sort-banner').classList.remove('show');
   updateBinUI(); updateOverall(); updateDeckNote();
 
-  setTimeout(() => openInquiry(temperId), 560);
+  setTimeout(() => openInquiry(temperId, correct), 560);
 }
 
 function feelFlash(good){
@@ -937,7 +956,7 @@ function feelFlash(good){
 /* ============================================================
    THE INQUIRY  (icebreaker, flavored by chosen temper)
 ============================================================ */
-function openInquiry(temperId){
+function openInquiry(temperId, correct){
   const queue = state.promptQueues[temperId];
   const item = queue[state.promptIdx[temperId] % queue.length];
   state.promptIdx[temperId]++;
@@ -947,6 +966,15 @@ function openInquiry(temperId){
 
   const card = document.getElementById('calib-card');
   card.style.setProperty('--tcol', t.dot);
+  card.style.setProperty('--rcol', correct ? '#57e39a' : '#f0697f');
+  card.classList.toggle('read-good', !!correct);
+  card.classList.toggle('read-miss', !correct);
+
+  const result = document.getElementById('calib-result');
+  result.className = 'cresult ' + (correct ? 'good' : 'miss');
+  result.innerHTML = correct
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Read true`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="9" y1="12" x2="15" y2="12"/></svg>Felt otherwise`;
 
   document.getElementById('calib-codename').textContent = codename;
   const tchip = document.getElementById('calib-tchip');
@@ -986,52 +1014,15 @@ function recordInquiry(passed){
 
 function onFileWhole(){
   document.getElementById('overall-pct').textContent = '100% refined';
-  document.getElementById('deck-hint').innerHTML = `The file is whole. <b>${state.blocksRefined}</b> refiners spoke. The floor is, quietly, moved.`;
+  const deckHint = document.getElementById('deck-hint');
+  deckHint.style.display = '';
+  deckHint.innerHTML = `The file is whole. The floor is, quietly, moved.`;
   document.getElementById('deck-note').innerHTML =
     `Numbers read correctly <b>${state.correctReads}</b> of <b>${state.totalReads}</b> times &middot; the rest were felt differently, which the floor permits`;
   document.getElementById('complete-btn').classList.add('show');
 }
 
-document.getElementById('complete-btn').addEventListener('click', openWellness);
-
-/* ============================================================
-   WELLNESS SESSION
-============================================================ */
-function openWellness(){
-  document.getElementById('well-meta').textContent =
-    `File ${state.fileCode} refined by a cohort of ${state.n}. The floor has prepared a few facts about you.`;
-  document.getElementById('well-body').innerHTML = buildWellnessFacts().map(p => `<p>${p}</p>`).join('');
-  document.getElementById('well-scrim').classList.add('show');
-}
-
-function buildWellnessFacts(){
-  const hi = v => `<span class="fact">${escHtml(v)}</span>`;
-  const vals = Object.keys(state.slots).map(k => state.slots[k]).filter(v => v && v.trim());
-
-  const templates = [
-    v => `Your outie shared this: ${hi(v)}. The floor turned it over twice and decided to keep it.`,
-    v => `On the record, from your outie: ${hi(v)}. We find this to be true, and good.`,
-    v => `Your outie said ${hi(v)}, and the room was a little warmer for it.`,
-    v => `Filed gently: ${hi(v)}. The floor keeps almost nothing. It is keeping this.`,
-    v => `Your outie offered ${hi(v)}. Please know the floor was listening, in its way.`
-  ];
-
-  const lines = ['Please enjoy each fact equally.'];
-  if (vals.length){
-    const pick = shuffle(vals).slice(0, Math.min(4, vals.length));
-    const tmpl = shuffle(templates);
-    pick.forEach((v,i) => lines.push(tmpl[i % tmpl.length](v)));
-  } else {
-    lines.push('Your outie said little, and the floor respects a quiet outie. Know only this: the work you did today mattered, even if no one will explain why.');
-  }
-  lines.push('Your outie is a person who shows up. Eleven weeks ago they arrived knowing less, and they came back every day anyway. The numbers noticed. The floor noticed. We are all very proud of you.');
-  return lines;
-}
-
-document.getElementById('well-receive').addEventListener('click', () => {
-  document.getElementById('well-scrim').classList.remove('show');
-  descend();
-});
+document.getElementById('complete-btn').addEventListener('click', descend);
 
 /* ============================================================
    DESCEND -> THE MUSIC DANCE EXPERIENCE
@@ -1092,10 +1083,10 @@ function buildCeremony(){
 
   const lines = [];
   lines.push(placed > 0
-    ? `The cohort sorted ${placed} ${placed === 1 ? 'block' : 'blocks'} of macrodata, leaning ${hi(domName)}. The numbers were read correctly ${hi(state.correctReads + ' of ' + state.totalReads)} times; the rest were felt differently, which the floor permits.`
-    : `No macrodata was sorted. The dance begins anyway, as a gesture, and as a warning.`);
-  if (pick) lines.push(`It is also on record that your outie offered: ${hi(pick)}. This has been noted, weighed, and set to music.`);
-  lines.push(`The dance around you was choreographed from the numbers you sorted. It is yours. It will not be danced this way again.`);
+    ? `The file is whole. It reads, in the end, as the cohort itself: ${placed} ${placed === 1 ? 'block' : 'blocks'} refined, tempered toward ${hi(domName)}. ${hi(state.correctReads + ' of ' + state.totalReads)} were read true; the rest were felt otherwise, and the floor does not hold this against you.`
+    : `No macrodata was refined. The work eludes you today. The dance proceeds regardless, as Kier would wish.`);
+  if (pick) lines.push(`Your outie left one thing on the record: ${hi(pick)}. It has been weighed, found agreeable, and set to music.`);
+  lines.push(`What moves around you was drawn from the numbers you refined. It belongs to this cohort and to no other. Please enjoy it equally.`);
 
   body.innerHTML = lines.map(p => `<p>${p}</p>`).join('');
 }

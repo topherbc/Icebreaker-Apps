@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macrodata Refinement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%2308323a'/><g fill='none' stroke='%237ce8d0' stroke-width='5' stroke-linejoin='round'><polygon points='50,14 84,50 50,86 16,50' opacity='0.42'/><polygon points='30,27 70,27 50,50'/><polygon points='30,73 70,73 50,50'/></g><circle cx='50' cy='50' r='4.5' fill='%237ce8d0'/></svg>">
+<style>
+/* ============================================================
+   MACRODATA REFINEMENT  --  Lattice Industries, Week 11
+   The whole app lives inside the terminal now. Deep Lumon teal,
+   glowing macrodata, four bins. The icebreaker IS the calibration
+   that makes the numbers legible. Refining a file grants Wellness.
+   The final reward is the generative-art ceremony from Week 10.
+   Uniform dark theme; light-on-dark, high contrast throughout.
+============================================================ */
+:root{
+  /* the terminal */
+  --void:      #03110f;
+  --deep:      #062420;
+  --panel:     #082c28;
+  --panel-2:   #0a3531;
+  --line:      rgba(120,236,200,.16);
+  --line-md:   rgba(120,236,200,.30);
+  --ink:       #d8fff0;
+  --ink-2:     #a9e6d4;
+  --muted:     rgba(120,236,200,.52);
+  --glow:      #6ff0c4;
+  --glow-dim:  rgba(111,240,196,.55);
+  --accent:    #1fae90;
+  --accent-lt: #2fd0ad;
+
+  /* the four tempers / bins -- colorblind-considerate, always text-labelled.
+     tuned bright enough to carry on the dark terminal. */
+  --woe:    #5aa6ee;  --woe-bg:    rgba(90,166,238,.14);  --woe-ring:    rgba(90,166,238,.55);
+  --frolic: #e7b341;  --frolic-bg: rgba(231,179,65,.15);  --frolic-ring: rgba(231,179,65,.55);
+  --dread:  #c08be6;  --dread-bg:  rgba(192,139,230,.15); --dread-ring:  rgba(192,139,230,.55);
+  --malice: #ef6b86;  --malice-bg: rgba(239,107,134,.14); --malice-ring: rgba(239,107,134,.55);
+
+  --serif:'Spectral',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--void); color:var(--ink); font-family:var(--sans);
+  font-size:18px; line-height:1.6; min-height:100vh; -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 50% -6%, rgba(31,174,144,.16) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 92% 108%, rgba(31,174,144,.10) 0%, transparent 60%);
+}
+button{font-family:inherit;cursor:pointer;color:inherit;}
+:focus-visible{outline:2.5px solid var(--glow);outline-offset:2px;border-radius:4px;}
+
+/* ============================================================
+   INTAKE  (load screen)
+============================================================ */
+#intake{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;position:relative;overflow:hidden;}
+.intake-deco{position:absolute;pointer-events:none;opacity:.5;border:1px solid var(--line);border-radius:50%;}
+.id1{width:520px;height:520px;top:-210px;right:-160px;}
+.id2{width:340px;height:340px;bottom:-140px;left:-110px;}
+.intake-card{
+  background:linear-gradient(180deg,var(--panel) 0%,var(--deep) 100%);
+  border:1px solid var(--line-md); border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(120,236,200,.08);
+  padding:48px 52px 42px; max-width:520px; width:100%;
+  display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;
+}
+.intake-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--glow);border-radius:16px 16px 0 0;box-shadow:0 0 18px rgba(111,240,196,.5);}
+.glyph{width:58px;height:58px;margin-bottom:22px;flex-shrink:0;filter:drop-shadow(0 0 10px rgba(111,240,196,.4));}
+.intake-eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--glow);margin-bottom:14px;}
+.intake-title{font-family:var(--serif);font-size:42px;font-weight:400;letter-spacing:-.4px;line-height:1.05;text-align:center;margin-bottom:12px;color:#eafff7;}
+.intake-creed{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--ink-2);text-align:center;line-height:1.5;max-width:36ch;margin-bottom:30px;}
+.intake-divider{width:100%;height:1px;background:var(--line);margin-bottom:28px;}
+.intake-label{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:10px;align-self:flex-start;}
+.intake-input{
+  width:100%;text-align:center;background:var(--void);
+  border:1.5px solid var(--line-md);border-radius:10px;color:var(--glow);
+  font-family:var(--mono);font-size:34px;font-weight:600;padding:12px;outline:none;
+  transition:border-color .2s,box-shadow .2s;margin-bottom:22px;
+}
+.intake-input:focus{border-color:var(--glow);box-shadow:0 0 0 3px rgba(111,240,196,.22);}
+.btn-primary{
+  width:100%;background:var(--accent);color:#022019;border:none;border-radius:10px;
+  font-family:var(--sans);font-size:18px;font-weight:700;letter-spacing:.01em;
+  padding:14px 28px;min-height:54px;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:background .15s,box-shadow .15s,transform .1s;box-shadow:0 2px 16px rgba(47,208,173,.34);
+}
+.btn-primary:hover{background:var(--accent-lt);box-shadow:0 4px 22px rgba(47,208,173,.46);}
+.btn-primary:active{transform:scale(.985);}
+.btn-primary svg{width:20px;height:20px;flex-shrink:0;}
+.intake-fineprint{margin-top:22px;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--muted);text-align:center;max-width:42ch;}
+
+/* ============================================================
+   THE REFINEMENT TERMINAL
+============================================================ */
+#mdr{display:none;flex-direction:column;min-height:100vh;}
+.mdr-bar{
+  background:linear-gradient(180deg,var(--panel) 0%,var(--deep) 100%);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;
+  padding:0 22px;height:56px;flex-shrink:0;position:sticky;top:0;z-index:30;
+}
+.mdr-brand{display:flex;align-items:center;gap:10px;min-width:0;}
+.mdr-brand .glyph{width:24px;height:24px;margin:0;}
+.mdr-brand-name{font-size:14px;font-weight:700;white-space:nowrap;letter-spacing:.02em;color:#eafff7;}
+.mdr-sep{height:20px;width:1px;background:var(--line);flex-shrink:0;}
+.mdr-sub{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mdr-spacer{flex:1;}
+.mdr-file{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap;}
+.mdr-file strong{color:var(--glow);font-weight:600;}
+.mdr-pct{
+  font-family:var(--mono);font-size:13px;font-weight:600;color:var(--glow);
+  background:rgba(111,240,196,.08);border:1px solid var(--line);border-radius:6px;padding:5px 11px;white-space:nowrap;
+}
+
+.mdr-body{flex:1;display:flex;flex-direction:column;align-items:center;gap:18px;padding:22px 20px 26px;}
+.mdr-intro{text-align:center;max-width:74ch;}
+.mdr-intro h2{font-family:var(--serif);font-weight:400;font-size:23px;letter-spacing:-.2px;margin-bottom:4px;color:#eafff7;}
+.mdr-intro p{font-size:14px;color:var(--muted);line-height:1.55;}
+
+/* ---- the macrodata grid ---- */
+.grid-frame{
+  width:100%;max-width:1180px;position:relative;
+  background:radial-gradient(ellipse 80% 90% at 50% 42%, rgba(13,64,57,.6) 0%, rgba(4,22,19,.4) 70%, transparent 100%);
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:inset 0 0 80px rgba(0,0,0,.55), inset 0 0 0 1px rgba(120,236,200,.04);
+  padding:26px 18px;overflow:hidden;
+}
+.grid-frame::before{ /* faint scanlines, very subtle */
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg, rgba(120,236,200,.025) 0px, rgba(120,236,200,.025) 1px, transparent 1px, transparent 4px);
+}
+.num-grid{display:grid;gap:2px 0;justify-content:center;position:relative;z-index:1;}
+.num-row{display:flex;justify-content:center;gap:0;}
+.cell{
+  width:clamp(30px,3.4vw,46px);height:clamp(34px,3.8vw,50px);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:clamp(15px,1.7vw,21px);font-weight:500;
+  color:rgba(150,210,192,.40);user-select:none;position:relative;
+  transition:color .25s,transform .25s,text-shadow .25s;
+}
+.cell.float{animation:cfloat var(--dur,4s) ease-in-out infinite;}
+@keyframes cfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(var(--amp,-2px))}}
+/* a "scary" awakened cell -- part of a revealed cluster */
+.cell.scary{color:var(--glow);font-weight:700;cursor:pointer;animation:scaryWob .9s ease-in-out infinite;text-shadow:0 0 10px var(--glow-dim);}
+@keyframes scaryWob{0%,100%{transform:translate(0,0) scale(1.04)}25%{transform:translate(1px,-2px) scale(1.1)}50%{transform:translate(-1px,1px) scale(1.04)}75%{transform:translate(2px,1px) scale(1.08)}}
+.cell.scary::after{content:'';position:absolute;inset:-3px;border-radius:7px;background:radial-gradient(circle, var(--glow-dim) 0%, transparent 70%);opacity:.32;z-index:-1;}
+.cell.refining{animation:refineOut .5s var(--ease) forwards;pointer-events:none;}
+@keyframes refineOut{to{opacity:0;transform:scale(.2) translateY(14px);}}
+.cell.spent{color:rgba(120,236,200,.10);font-weight:400;}
+
+/* a hovered scary cluster highlights its whole group */
+.cell.scary.kin{color:#bafff0;text-shadow:0 0 16px var(--glow);}
+
+/* ---- the four bins ---- */
+.bins{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:1180px;}
+.bin{
+  background:linear-gradient(180deg,var(--panel) 0%,var(--deep) 100%);
+  border:1.5px solid var(--line);border-radius:12px;padding:13px 14px 14px;
+  display:flex;flex-direction:column;gap:9px;position:relative;
+  transition:border-color .2s,box-shadow .2s,transform .12s;
+}
+.bin.locked{opacity:.62;}
+.bin.armed{cursor:pointer;}
+.bin.armed:hover{transform:translateY(-2px);}
+.bin.flash{animation:binFlash .6s var(--ease);}
+@keyframes binFlash{0%{box-shadow:0 0 0 0 var(--bin-ring);}40%{box-shadow:0 0 0 5px var(--bin-ring);}100%{box-shadow:0 0 0 0 transparent;}}
+.bin-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.bin-code{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.08em;}
+.bin-name{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.bin-pct{font-family:var(--mono);font-size:13px;font-weight:600;}
+.bin-meter{height:8px;border-radius:5px;background:rgba(120,236,200,.08);overflow:hidden;}
+.bin-fill{height:100%;width:0%;border-radius:5px;transition:width .5s var(--ease);}
+.bin-lockmsg{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);display:flex;align-items:center;gap:5px;min-height:14px;}
+.bin-lockmsg svg{width:11px;height:11px;flex-shrink:0;}
+.bin[data-t="woe"]    {--bin:var(--woe);   --bin-bg:var(--woe-bg);   --bin-ring:var(--woe-ring);}
+.bin[data-t="frolic"] {--bin:var(--frolic);--bin-bg:var(--frolic-bg);--bin-ring:var(--frolic-ring);}
+.bin[data-t="dread"]  {--bin:var(--dread); --bin-bg:var(--dread-bg); --bin-ring:var(--dread-ring);}
+.bin[data-t="malice"] {--bin:var(--malice);--bin-bg:var(--malice-bg);--bin-ring:var(--malice-ring);}
+.bin .bin-code,.bin .bin-pct{color:var(--bin);}
+.bin .bin-fill{background:var(--bin);box-shadow:0 0 12px var(--bin-ring);}
+.bin.armed{border-color:var(--bin);background:linear-gradient(180deg,var(--bin-bg) 0%,var(--deep) 120%);}
+.bin.armed .bin-lockmsg{color:var(--bin);}
+
+/* ---- the control deck ---- */
+.deck{width:100%;max-width:1180px;display:flex;flex-direction:column;gap:12px;}
+.summon-btn{
+  width:100%;min-height:60px;border:none;border-radius:12px;
+  background:linear-gradient(180deg,var(--accent-lt) 0%,var(--accent) 100%);color:#022019;
+  font-family:var(--sans);font-size:19px;font-weight:700;letter-spacing:.01em;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  transition:filter .15s,box-shadow .15s,transform .1s;box-shadow:0 4px 20px rgba(47,208,173,.34);
+}
+.summon-btn:hover{filter:brightness(1.06);box-shadow:0 6px 26px rgba(47,208,173,.46);}
+.summon-btn:active{transform:scale(.99);}
+.summon-btn svg{width:21px;height:21px;flex-shrink:0;}
+.summon-btn:disabled{opacity:.5;cursor:default;filter:none;box-shadow:none;}
+.deck-note{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+.deck-note b{color:var(--ink-2);font-weight:600;}
+
+.complete-btn{
+  width:100%;min-height:60px;border:none;border-radius:12px;background:var(--glow);color:#022019;
+  font-family:var(--sans);font-size:19px;font-weight:700;display:none;align-items:center;justify-content:center;gap:12px;
+  box-shadow:0 4px 22px rgba(111,240,196,.4);transition:filter .15s,transform .1s;
+}
+.complete-btn.show{display:flex;}
+.complete-btn:hover{filter:brightness(1.07);}
+.complete-btn:active{transform:scale(.99);}
+.complete-btn svg{width:22px;height:22px;flex-shrink:0;}
+
+/* ============================================================
+   CALIBRATION MODAL  (the icebreaker)
+============================================================ */
+.scrim{
+  position:fixed;inset:0;z-index:60;background:rgba(2,12,10,.78);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:24px;
+}
+.scrim.show{display:flex;animation:scrimIn .25s var(--ease);}
+@keyframes scrimIn{from{opacity:0}to{opacity:1}}
+.calib-card{
+  background:linear-gradient(180deg,var(--panel-2) 0%,var(--deep) 100%);
+  border:1px solid var(--line-md);border-radius:18px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(120,236,200,.08);
+  max-width:560px;width:100%;padding:36px 38px 32px;position:relative;
+  animation:calibIn .35s var(--ease);
+}
+@keyframes calibIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.calib-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--glow);border-radius:18px 18px 0 0;box-shadow:0 0 16px rgba(111,240,196,.5);}
+.calib-stamp{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.calib-who{
+  display:flex;align-items:center;gap:10px;margin-bottom:18px;
+  font-family:var(--mono);font-size:13px;color:var(--ink-2);
+}
+.calib-who .badge{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;
+  color:var(--glow);background:rgba(111,240,196,.10);border:1px solid var(--line-md);
+  border-radius:6px;padding:4px 10px;display:inline-flex;align-items:center;gap:6px;
+}
+.calib-who .badge svg{width:12px;height:12px;}
+.calib-eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--glow);margin-bottom:8px;}
+.calib-q{font-family:var(--serif);font-size:25px;font-weight:400;line-height:1.32;color:#eafff7;margin-bottom:6px;}
+.calib-hint{font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+.calib-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:8px;}
+.calib-input{
+  width:100%;background:var(--void);border:1.5px solid var(--line-md);border-radius:10px;
+  color:var(--ink);font-family:var(--sans);font-size:16px;padding:11px 14px;outline:none;resize:none;
+  min-height:54px;line-height:1.5;transition:border-color .2s,box-shadow .2s;margin-bottom:8px;
+}
+.calib-input:focus{border-color:var(--glow);box-shadow:0 0 0 3px rgba(111,240,196,.18);}
+.calib-optnote{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-bottom:20px;}
+.calib-actions{display:flex;gap:10px;}
+.calib-attune{
+  flex:1;min-height:52px;border:none;border-radius:10px;
+  background:linear-gradient(180deg,var(--accent-lt) 0%,var(--accent) 100%);color:#022019;
+  font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 3px 16px rgba(47,208,173,.34);transition:filter .15s,transform .1s;
+}
+.calib-attune:hover{filter:brightness(1.06);}
+.calib-attune:active{transform:scale(.99);}
+.calib-attune svg{width:18px;height:18px;}
+.calib-skip{
+  min-height:52px;border:1.5px solid var(--line-md);border-radius:10px;background:transparent;
+  color:var(--ink-2);font-size:14px;font-weight:600;padding:0 18px;transition:background .15s,color .15s;
+}
+.calib-skip:hover{background:rgba(120,236,200,.06);color:var(--ink);}
+
+/* ---- sorting sub-state (after attune, before binning) ---- */
+.sort-banner{
+  position:fixed;left:50%;top:74px;transform:translateX(-50%);z-index:40;
+  background:linear-gradient(180deg,var(--panel-2) 0%,var(--deep) 100%);
+  border:1px solid var(--line-md);border-radius:12px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);padding:13px 20px;display:none;
+  align-items:center;gap:14px;max-width:calc(100% - 32px);
+  animation:sortIn .3s var(--ease);
+}
+.sort-banner.show{display:flex;}
+@keyframes sortIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+.sort-banner .sb-pulse{width:10px;height:10px;border-radius:50%;background:var(--glow);box-shadow:0 0 10px var(--glow);animation:dotpulse 1.1s ease-in-out infinite;flex-shrink:0;}
+.sort-banner .sb-text{font-size:14px;color:var(--ink-2);line-height:1.4;}
+.sort-banner .sb-text b{color:var(--glow);font-weight:600;}
+
+/* ============================================================
+   WELLNESS SESSION  (the result)
+============================================================ */
+.well-card{
+  background:linear-gradient(180deg,var(--panel-2) 0%,var(--deep) 100%);
+  border:1px solid var(--line-md);border-radius:18px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(120,236,200,.08);
+  max-width:620px;width:100%;padding:42px 44px 34px;position:relative;
+  animation:calibIn .4s var(--ease);
+}
+.well-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--woe),var(--glow),var(--frolic));border-radius:18px 18px 0 0;}
+.well-stamp{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.well-title{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:-.2px;color:#eafff7;margin-bottom:6px;}
+.well-meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.5;}
+.well-divider{height:1px;background:var(--line);margin-bottom:22px;}
+.well-body{font-family:var(--serif);font-size:18px;line-height:1.85;color:var(--ink);}
+.well-body p{margin-bottom:16px;}
+.well-body p:last-child{margin-bottom:0;}
+.well-body .fact{color:var(--glow);font-style:italic;}
+.well-actions{margin-top:28px;display:flex;gap:10px;flex-wrap:wrap;}
+.well-receive{
+  flex:1;min-width:200px;min-height:54px;border:none;border-radius:11px;
+  background:var(--glow);color:#022019;font-size:17px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 4px 22px rgba(111,240,196,.4);transition:filter .15s,transform .1s;
+}
+.well-receive:hover{filter:brightness(1.07);}
+.well-receive:active{transform:scale(.99);}
+.well-receive svg{width:19px;height:19px;}
+
+/* ============================================================
+   THE GENERATIVE-ART TERMINAL  (the reward, from Week 10)
+============================================================ */
+#finale{display:none;position:relative;min-height:100vh;background:#03110f;}
+#finale.show{display:block;}
+#art-wrap{position:fixed;inset:0;z-index:0;}
+#art-wrap canvas{position:absolute;inset:0;display:block;width:100% !important;height:100% !important;}
+#veil{
+  position:fixed;inset:0;z-index:8;background:#03110f;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;transition:opacity 1.3s var(--ease);text-align:center;padding:24px;
+}
+#veil.gone{opacity:0;pointer-events:none;}
+.veil-line{font-family:var(--serif);font-style:italic;font-size:clamp(1.4rem,3.4vw,2.3rem);color:rgba(120,236,200,.82);}
+.veil-sub{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(120,236,200,.34);}
+.dots{display:flex;gap:7px;}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(120,236,200,.45);animation:dotpulse 1.3s ease-in-out infinite;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+@keyframes dotpulse{0%,80%,100%{transform:scale(.6);opacity:.3;}40%{transform:scale(1.1);opacity:1;}}
+
+.term-top{position:fixed;top:14px;left:16px;right:16px;z-index:20;display:flex;align-items:center;gap:12px;pointer-events:none;}
+.term-top>*{pointer-events:auto;}
+.term-tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(120,236,200,.55);background:rgba(3,17,15,.5);padding:6px 12px;border-radius:6px;border:1px solid rgba(120,236,200,.14);}
+.term-spacer{flex:1;}
+.btn-ghost{font-family:var(--sans);font-size:13px;font-weight:600;color:rgba(120,236,200,.7);background:rgba(3,17,15,.5);border:1px solid rgba(120,236,200,.2);border-radius:8px;padding:8px 16px;cursor:pointer;transition:background .15s,color .15s;min-height:38px;}
+.btn-ghost:hover{background:rgba(120,236,200,.12);color:#c8ffe9;}
+
+#ceremony{position:relative;z-index:12;max-width:720px;margin:0 auto;padding:96px 24px 230px;opacity:0;transform:translateY(14px);transition:opacity .9s var(--ease),transform .9s var(--ease);}
+#ceremony.in{opacity:1;transform:translateY(0);}
+.ceremony-card{background:rgba(4,22,19,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(120,236,200,.18);border-radius:16px;padding:40px 42px;box-shadow:0 20px 60px rgba(0,0,0,.45);}
+.ceremony-stamp{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(120,236,200,.5);margin-bottom:16px;}
+.ceremony-title{font-family:var(--serif);font-size:25px;font-weight:400;color:rgba(214,255,240,.7);letter-spacing:-.1px;margin-bottom:2px;}
+.award-perk{font-family:var(--serif);font-style:italic;font-size:38px;font-weight:400;line-height:1.12;color:#6ff0c4;margin:0 0 18px;text-shadow:0 0 26px rgba(80,240,180,.28);}
+.ceremony-meta{font-family:var(--mono);font-size:12px;color:rgba(120,236,200,.5);line-height:1.6;margin-bottom:22px;}
+.ceremony-divider{height:1px;background:rgba(120,236,200,.16);margin-bottom:22px;}
+.ceremony-body{font-size:16px;line-height:1.75;color:rgba(214,255,240,.88);}
+.ceremony-body p{margin-bottom:16px;}
+.ceremony-body p:last-child{margin-bottom:0;}
+.slot-val{color:#6ff0c4;font-weight:600;font-style:italic;background:rgba(120,236,200,.10);border-radius:4px;padding:1px 5px;}
+.ceremony-foot{margin-top:26px;padding-top:18px;border-top:1px solid rgba(120,236,200,.16);font-family:var(--mono);font-size:11.5px;line-height:1.6;color:rgba(120,236,200,.5);display:flex;flex-direction:column;gap:5px;}
+.ceremony-foot-sig{font-weight:600;letter-spacing:.04em;}
+.temper-readout{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 22px;}
+.tr-chip{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;display:inline-flex;gap:7px;align-items:center;background:rgba(120,236,200,.06);border:1px solid rgba(120,236,200,.16);color:rgba(214,255,240,.85);}
+.tr-chip i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+.param-panel{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(3,17,15,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(120,236,200,.10);padding:12px 18px 14px;}
+.param-title{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(120,236,200,.34);margin-bottom:9px;}
+.param-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:5px 16px;}
+.param-row{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:0 11px;padding:5px 6px;border-radius:7px;transition:background .14s;}
+.param-row:hover{background:rgba(120,236,200,.04);}
+.param-dot{width:8px;height:8px;border-radius:50%;}
+.param-text{display:flex;flex-direction:column;gap:1px;min-width:0;}
+.param-name{font-size:12.5px;font-weight:600;color:rgba(214,255,240,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.param-role{font-size:11px;color:rgba(120,236,200,.42);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stepper{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.step-btn{width:24px;height:24px;border-radius:5px;background:rgba(120,236,200,.08);border:1px solid rgba(120,236,200,.16);color:rgba(120,236,200,.7);font-size:.8rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:background .12s,color .12s,transform .08s;flex-shrink:0;}
+.step-btn:hover{background:rgba(120,236,200,.2);color:#c8ffe9;}
+.step-btn:active{transform:scale(.88);}
+.step-input{width:3.6ch;background:rgba(120,236,200,.08);border:1px solid rgba(120,236,200,.18);border-radius:5px;color:#d8fff0;font-family:var(--mono);font-size:.92rem;font-weight:500;text-align:center;padding:.2rem;outline:none;-moz-appearance:textfield;transition:border-color .15s,background .15s;}
+.step-input::-webkit-outer-spin-button,.step-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.step-input:focus{border-color:rgba(120,236,200,.45);background:rgba(120,236,200,.14);}
+.recalc-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;pointer-events:none;opacity:0;font-family:var(--serif);font-style:italic;font-size:1.1rem;color:rgba(120,236,200,.6);letter-spacing:.06em;transition:opacity .3s;}
+.recalc-flash.show{opacity:1;transition:none;}
+
+@media (max-width:720px){
+  .intake-card{padding:36px 26px 32px;}.intake-title{font-size:34px;}
+  .bins{grid-template-columns:repeat(2,1fr);}
+  .calib-card,.well-card{padding:30px 24px;}
+  .calib-q{font-size:22px;}
+  .ceremony-card{padding:30px 24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================================================
+     INTAKE
+====================================================== -->
+<div id="intake">
+  <div class="intake-deco id1" aria-hidden="true"></div>
+  <div class="intake-deco id2" aria-hidden="true"></div>
+
+  <div class="intake-card">
+    <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+      <g fill="none" stroke="#7ce8d0" stroke-width="5" stroke-linejoin="round">
+        <polygon points="50,14 84,50 50,86 16,50" opacity="0.42"/>
+        <polygon points="30,27 70,27 50,50"/>
+        <polygon points="30,73 70,73 50,50"/>
+      </g>
+      <circle cx="50" cy="50" r="4.5" fill="#7ce8d0"/>
+    </svg>
+
+    <p class="intake-eyebrow">Lattice Industries // Macrodata Refinement</p>
+    <h1 class="intake-title">Macrodata Refinement</h1>
+    <p class="intake-creed">The numbers are frightening, but the work is important. You will know the bad ones when you feel them.</p>
+
+    <div class="intake-divider"></div>
+
+    <label class="intake-label" for="refiner-count">Refiners reporting to the floor</label>
+    <input class="intake-input" id="refiner-count" type="number" value="25" min="4" max="30"
+           aria-label="How many refiners are reporting to the floor today? (4 to 30)">
+
+    <button class="btn-primary" id="begin-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      Report to the Terminal
+    </button>
+
+    <p class="intake-fineprint">A single file awaits refinement. The numbers will not reveal their feeling until a refiner calibrates the instrument. Calibration requires you to say something true.</p>
+  </div>
+</div>
+
+<!-- ======================================================
+     THE REFINEMENT TERMINAL
+====================================================== -->
+<div id="mdr">
+  <header class="mdr-bar">
+    <div class="mdr-brand">
+      <svg class="glyph" viewBox="0 0 100 100" aria-hidden="true">
+        <g fill="none" stroke="#7ce8d0" stroke-width="6" stroke-linejoin="round">
+          <polygon points="50,14 84,50 50,86 16,50" opacity="0.5"/><polygon points="30,27 70,27 50,50"/><polygon points="30,73 70,73 50,50"/>
+        </g>
+        <circle cx="50" cy="50" r="5.5" fill="#7ce8d0"/>
+      </svg>
+      <span class="mdr-brand-name">Lattice Industries</span>
+    </div>
+    <div class="mdr-sep"></div>
+    <span class="mdr-sub">Macrodata Refinement</span>
+    <div class="mdr-spacer"></div>
+    <span class="mdr-file">File <strong id="file-code">Tumwater 0x00</strong></span>
+    <div class="mdr-sep"></div>
+    <span class="mdr-pct" id="overall-pct" role="status" aria-live="polite">0% refined</span>
+  </header>
+
+  <main class="mdr-body">
+    <div class="mdr-intro">
+      <h2>The file is loaded. The feeling is not yet legible.</h2>
+      <p>Summon a refiner. They calibrate the instrument by saying something true about their outie; that truth wakes a cluster of frightening numbers. Feel out which bin the cluster belongs to and refine it. Repeat until the file is whole.</p>
+    </div>
+
+    <div class="grid-frame">
+      <div class="num-grid" id="num-grid" role="group" aria-label="Macrodata grid"></div>
+    </div>
+
+    <div class="bins" id="bins"></div>
+
+    <div class="deck">
+      <button class="summon-btn" id="summon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Summon the Next Refiner
+      </button>
+      <button class="complete-btn" id="complete-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        The File Is Whole
+      </button>
+      <p class="deck-note" id="deck-note"><b>0</b> of <b>0</b> refiners have calibrated &middot; the floor waits</p>
+    </div>
+  </main>
+</div>
+
+<!-- calibration modal (the icebreaker) -->
+<div class="scrim" id="calib-scrim" role="dialog" aria-modal="true" aria-labelledby="calib-q">
+  <div class="calib-card">
+    <p class="calib-stamp">Lattice Wellness // Instrument Calibration</p>
+    <div class="calib-who">
+      <span class="badge" id="calib-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 21 12 12 21 3 12Z"/></svg><span id="calib-codename">Cold Harbor</span></span>
+      <span id="calib-refnum">Refiner 1 of 25</span>
+    </div>
+    <p class="calib-eyebrow">Wellness Inquiry</p>
+    <p class="calib-q" id="calib-q">&nbsp;</p>
+    <p class="calib-hint">Say it aloud to the room. Your outie is not here to be embarrassed. Type a few words if you would like them kept on file.</p>
+    <label class="calib-label" for="calib-input">For the file (optional)</label>
+    <textarea class="calib-input" id="calib-input" rows="2" aria-label="Type your answer for the file (optional)"></textarea>
+    <p class="calib-optnote">Calibration succeeds whether or not you write anything. The saying is the part that matters.</p>
+    <div class="calib-actions">
+      <button class="calib-attune" id="calib-attune">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>
+        Attune the Instrument
+      </button>
+      <button class="calib-skip" id="calib-skip">They pass</button>
+    </div>
+  </div>
+</div>
+
+<!-- sorting banner (after attune) -->
+<div class="sort-banner" id="sort-banner" role="status" aria-live="polite">
+  <span class="sb-pulse"></span>
+  <span class="sb-text" id="sort-text">A cluster has woken. <b>Feel it out</b> and drop it into the bin it belongs to.</span>
+</div>
+
+<!-- wellness session (the result) -->
+<div class="scrim" id="well-scrim" role="dialog" aria-modal="true" aria-labelledby="well-title">
+  <div class="well-card">
+    <p class="well-stamp">Lattice Wellness // Session Granted</p>
+    <h2 class="well-title" id="well-title">Your Wellness Session</h2>
+    <p class="well-meta" id="well-meta">The file is whole. The floor has prepared a few facts about you.</p>
+    <div class="well-divider"></div>
+    <div class="well-body" id="well-body"></div>
+    <div class="well-actions">
+      <button class="well-receive" id="well-receive">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        Receive Your Reward
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     THE GENERATIVE-ART TERMINAL  (the reward)
+====================================================== -->
+<div id="finale">
+  <div id="art-wrap">
+    <canvas id="c-newton" style="z-index:1"></canvas>
+    <canvas id="c-curves" style="z-index:2"></canvas>
+    <canvas id="c-flow"   style="z-index:3"></canvas>
+  </div>
+
+  <div id="veil">
+    <p class="veil-line">Assembling the work you refined...</p>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <p class="veil-sub">Three systems converging</p>
+  </div>
+
+  <div class="recalc-flash" id="recalc-flash">recalculating...</div>
+
+  <div class="term-top">
+    <span class="term-tag">Refinement Complete // Live</span>
+    <div class="term-spacer"></div>
+    <button class="btn-ghost" id="restart-btn">&#8635; New File</button>
+  </div>
+
+  <div id="ceremony">
+    <div class="ceremony-card">
+      <div class="ceremony-stamp">File Refined &middot; Wellness Reward Issued</div>
+      <div class="ceremony-title">For your refinement, the floor grants the cohort</div>
+      <div class="award-perk" id="award-perk"></div>
+      <div class="ceremony-meta" id="ceremony-meta">Assembled from the numbers you sorted. For internal contemplation only.</div>
+      <div class="temper-readout" id="temper-readout"></div>
+      <div class="ceremony-divider"></div>
+      <div class="ceremony-body" id="ceremony-body"></div>
+      <div class="ceremony-foot">
+        <span>This reward is permanent, non-transferable, and exists primarily as a feeling. Please enjoy it during designated enjoyment hours.</span>
+        <span class="ceremony-foot-sig">// Issued by Lattice Wellness //</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="param-panel" role="region" aria-label="Live parameter controls">
+    <p class="param-title">Refined parameters // adjust to explore the work</p>
+    <div class="param-grid" id="param-grid"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   DATA -- WELLNESS INQUIRIES (the icebreaker / calibration)
+   Severance-flavored, about the refiner's "outie" (their real
+   self). Fun, light, no technical review. Each carries a slot +
+   label that feeds the Wellness session and the closing ceremony.
+============================================================ */
+const INQUIRIES = [
+  { q:'Your outie is given a four-day weekend with no obligations. What does your outie actually do?', slot:'weekend', label:'a free weekend' },
+  { q:'Your outie keeps one snack at their desk for emergencies. Name the snack.', slot:'snack', label:'an emergency snack' },
+  { q:'Your outie has a song they would defiantly dance to. Name the song.', slot:'song', label:'a defiant song' },
+  { q:'Your outie once quit something they are now glad they quit. What was it?', slot:'quit', label:'a thing they quit' },
+  { q:'Your outie has a strong, slightly unreasonable opinion about a small thing. What is it?', slot:'opinion', label:'a small strong opinion' },
+  { q:'Your outie has a most-used phone app they are a little embarrassed by. Which one?', slot:'app', label:'an embarrassing app' },
+  { q:'Describe your outie\'s ideal Music Dance Experience in exactly three words.', slot:'mde', label:'three words' },
+  { q:'Your outie is weirdly good at one small, useless thing. What is the thing?', slot:'useless_skill', label:'a useless talent' },
+  { q:'If your outie could be issued one Lattice perk in real life, which: a waffle party, a finger trap, a melon bar, or a caricature?', slot:'perk_pick', label:'a chosen perk' },
+  { q:'Your outie has a comfort show they have seen too many times. Name it.', slot:'comfort_show', label:'a comfort show' },
+  { q:'What is the last thing that made your outie laugh out loud, alone, like a person who has lost it?', slot:'last_laugh', label:'a recent laugh' },
+  { q:'Your outie has a small ritual that starts their best days. What is it?', slot:'ritual', label:'a morning ritual' },
+  { q:'Your outie would happily give a 20-minute talk, with zero preparation, on what subject?', slot:'expert_topic', label:'an unprepared expertise' },
+  { q:'Your outie has an irrational fear that is honestly kind of fun to admit. What is it?', slot:'fear', label:'a fun fear' },
+  { q:'If your outie\'s week had a theme song this week, what would it be?', slot:'theme_song', label:'a theme for the week' },
+  { q:'Your outie owns one object they would grab first in a fire (people and pets are safe). What is it?', slot:'grab_object', label:'a treasured object' },
+  { q:'Your outie has a hill they will absolutely die on about food. State the hill.', slot:'food_hill', label:'a food hill' },
+  { q:'Your outie did something eleven weeks ago they could not do today\'s version believe. Brag a little.', slot:'brag', label:'a small brag' },
+  { q:'Your outie has a place that always feels like a reset. Where is it?', slot:'reset_place', label:'a place that resets them' },
+  { q:'If your outie were a Lattice department, what would it be called?', slot:'department', label:'a personal department' },
+  { q:'Your outie has a phrase or word they say way too often. What is it?', slot:'catchphrase', label:'an overused phrase' },
+  { q:'Your outie has a tiny act of rebellion they commit regularly. Confess it.', slot:'rebellion', label:'a tiny rebellion' },
+  { q:'Your outie would relive one ordinary day from the last year. What happened that day?', slot:'ordinary_day', label:'an ordinary good day' },
+  { q:'Your outie has one strong opinion about the perfect break-room snack table. What must be on it?', slot:'break_room', label:'a break-room demand' },
+  { q:'What is one thing your outie wants this cohort to remember them by?', slot:'remember_by', label:'how they want to be remembered' },
+  { q:'Your outie has a guilty-pleasure that is not guilty at all. Name it proudly.', slot:'guilty_pleasure', label:'an un-guilty pleasure' },
+  { q:'Your outie keeps a goal taped somewhere only they can see. What does it say?', slot:'hidden_goal', label:'a private goal' },
+  { q:'Your outie has a compliment they received once and never forgot. What was it?', slot:'compliment', label:'an unforgotten compliment' },
+  { q:'If your outie could instantly be fluent in one thing (language, instrument, skill), which?', slot:'instant_fluency', label:'an instant fluency' },
+  { q:'Your outie has a deeply held belief about the correct way to load a dishwasher. Share it.', slot:'dishwasher', label:'a dishwasher doctrine' }
+];
+
+/* the four bins / tempers -- carried straight from Week 10 */
+const TEMPERS = [
+  { id:'woe',    code:'WO', name:'Woe',    dot:'#5aa6ee' },
+  { id:'frolic', code:'FC', name:'Frolic', dot:'#e7b341' },
+  { id:'dread',  code:'DR', name:'Dread',  dot:'#c08be6' },
+  { id:'malice', code:'MA', name:'Malice', dot:'#ef6b86' }
+];
+
+/* neutral file codenames -- same world as Week 10 */
+const FILE_CODENAMES = [
+  'Cold Harbor','Tumwater','Allentown','Cairns','Coleman','Culpepper','Dranesville',
+  'Eminence','Jesup','Kingsport','Labrador','Le Mars','Longbranch','Minsk','Moonbeam',
+  'Nanning','Narva','Ocula','Pacheco','Siena','Sopchoppy','Sunset Park','Tan',
+  'Waynesboro','Yakima','Astoria','Bellingham','Chicxulub','Dunmore','Epping'
+];
+
+/* what the cohort wins at the terminal */
+const PERKS = [
+  'A Waffle Party',
+  'A Music Dance Experience',
+  'A Melon Bar',
+  'An Egg Bar',
+  'A Defiant Jazz Interlude',
+  'A Caricature of the Cohort',
+  'A Commemorative Handbook',
+  'Five Minutes of Finger Traps',
+  'One (1) Wellness Session',
+  'A Modest, Sincere Applause'
+];
+
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  n: 25,
+  refinersDone: 0,          // how many refiners have calibrated
+  clustersRefined: 0,       // clusters successfully binned
+  clustersTotal: 0,         // clusters in the file
+  tempers: { woe:0, frolic:0, dread:0, malice:0 },   // count refined per bin
+  binTarget: { woe:0, frolic:0, dread:0, malice:0 }, // clusters assigned per bin
+  slots: {},                // saved answers, keyed by inquiry slot
+  inquiryQueue: [],         // shuffled inquiries to walk through
+  pendingCluster: null,     // the cluster awaiting a bin choice
+  fileCode: 'Tumwater 0x00',
+  busy: false
+};
+
+/* the live grid model: each cell { val, el, clusterId|null, temper|null, spent } */
+let gridCells = [];
+let clusters = [];          // { id, temper, cellIdxs[], refined:false, revealed:false }
+let GRID_COLS = 18, GRID_ROWS = 9;
+
+/* ============================================================
+   UTILITIES
+============================================================ */
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function clamp(v,lo,hi){ return Math.min(Math.max(v,lo),hi); }
+function rnd(n){ return Math.floor(Math.random()*n); }
+function randDigit(){ return String(rnd(10)); }
+
+/* ============================================================
+   INTAKE -> START
+============================================================ */
+const refinerInput = document.getElementById('refiner-count');
+document.getElementById('begin-btn').addEventListener('click', startSession);
+refinerInput.addEventListener('keydown', e => { if (e.key === 'Enter') startSession(); });
+refinerInput.addEventListener('blur', () => { let v=parseInt(refinerInput.value); if(isNaN(v)) v=25; refinerInput.value=clamp(v,4,30); });
+
+function startSession(){
+  let n = parseInt(refinerInput.value); if (isNaN(n)) n=25; n=clamp(n,4,30);
+  state.n = n;
+  state.refinersDone = 0;
+  state.clustersRefined = 0;
+  state.tempers = { woe:0, frolic:0, dread:0, malice:0 };
+  state.slots = {};
+  state.inquiryQueue = shuffle(INQUIRIES);
+  state.pendingCluster = null;
+  state.busy = false;
+  state.fileCode = `${FILE_CODENAMES[rnd(FILE_CODENAMES.length)]} 0x${(16 + rnd(220)).toString(16).toUpperCase().padStart(2,'0')}`;
+
+  buildFile(n);
+  renderGrid();
+  renderBins();
+  updateOverall();
+  updateDeckNote();
+
+  document.getElementById('file-code').textContent = state.fileCode;
+  document.getElementById('complete-btn').classList.remove('show');
+  document.getElementById('summon-btn').disabled = false;
+  document.getElementById('sort-banner').classList.remove('show');
+
+  document.getElementById('intake').style.display = 'none';
+  document.getElementById('finale').classList.remove('show');
+  document.getElementById('mdr').style.display = 'flex';
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   BUILD THE FILE
+   One cluster per refiner (so every refiner's calibration wakes
+   exactly one cluster). Clusters are spread across the four bins.
+============================================================ */
+function buildFile(n){
+  // size the grid to comfortably hold n clusters of ~3-5 cells
+  const targetCells = Math.max(120, n * 7);
+  GRID_COLS = clamp(Math.round(Math.sqrt(targetCells * 1.9)), 12, 22);
+  GRID_ROWS = clamp(Math.ceil(targetCells / GRID_COLS), 7, 12);
+
+  const total = GRID_COLS * GRID_ROWS;
+  gridCells = [];
+  for (let i=0;i<total;i++) gridCells.push({ val:randDigit(), clusterId:null, temper:null, spent:false, el:null });
+
+  // assign clusters round-robin across tempers so the bins stay balanced
+  state.clustersTotal = n;
+  state.binTarget = { woe:0, frolic:0, dread:0, malice:0 };
+  clusters = [];
+  const free = shuffle(gridCells.map((_,i)=>i));   // candidate seed cells
+  let cursor = 0;
+
+  for (let c=0;c<n;c++){
+    const temper = TEMPERS[c % TEMPERS.length].id;
+    const size = 3 + rnd(3);                        // 3..5 cells
+    const cellIdxs = growCluster(free, cursor, size);
+    cursor += size;
+    if (cellIdxs.length === 0){ break; }
+    cellIdxs.forEach(idx => { gridCells[idx].clusterId = c; gridCells[idx].temper = temper; });
+    clusters.push({ id:c, temper, cellIdxs, refined:false, revealed:false });
+    state.binTarget[temper]++;
+  }
+  state.clustersTotal = clusters.length;
+  // shuffle the order refiners wake clusters in (independent of bin)
+  clusters = shuffle(clusters);
+}
+
+/* grow a roughly-contiguous cluster from a pool of free seed indices */
+function growCluster(free, cursor, size){
+  // find a free seed
+  let seed = -1;
+  for (let k=cursor;k<free.length;k++){ if (gridCells[free[k]].clusterId===null){ seed=free[k]; break; } }
+  if (seed===-1){ for (let i=0;i<gridCells.length;i++){ if (gridCells[i].clusterId===null){ seed=i; break; } } }
+  if (seed===-1) return [];
+  const chosen=[seed];
+  const inGrid = idx => idx>=0 && idx<gridCells.length;
+  const neighbors = idx => {
+    const r=Math.floor(idx/GRID_COLS), col=idx%GRID_COLS, out=[];
+    if (col>0) out.push(idx-1);
+    if (col<GRID_COLS-1) out.push(idx+1);
+    out.push(idx-GRID_COLS, idx+GRID_COLS);
+    return out.filter(inGrid);
+  };
+  while (chosen.length<size){
+    const frontier=[];
+    chosen.forEach(idx => neighbors(idx).forEach(nb => {
+      if (gridCells[nb].clusterId===null && !chosen.includes(nb)) frontier.push(nb);
+    }));
+    if (!frontier.length) break;
+    chosen.push(frontier[rnd(frontier.length)]);
+  }
+  return chosen;
+}
+
+/* ============================================================
+   RENDER GRID
+============================================================ */
+function renderGrid(){
+  const grid = document.getElementById('num-grid');
+  grid.innerHTML = '';
+  for (let r=0;r<GRID_ROWS;r++){
+    const row = document.createElement('div');
+    row.className = 'num-row';
+    for (let col=0;col<GRID_COLS;col++){
+      const idx = r*GRID_COLS+col;
+      const cell = gridCells[idx];
+      const span = document.createElement('span');
+      span.className = 'cell float';
+      span.textContent = cell.val;
+      span.style.setProperty('--dur', (3.4 + Math.random()*2.6).toFixed(2)+'s');
+      span.style.setProperty('--amp', (Math.random()<.5?-1:1)*(1.5+Math.random()*2.4)+'px');
+      span.style.animationDelay = (Math.random()*-4).toFixed(2)+'s';
+      cell.el = span;
+      row.appendChild(span);
+    }
+    grid.appendChild(row);
+  }
+  // gentle ambient fidget: occasionally reroll a non-scary, non-spent digit
+  startFidget();
+}
+
+let fidgetTimer = null;
+function startFidget(){
+  if (fidgetTimer) clearInterval(fidgetTimer);
+  fidgetTimer = setInterval(() => {
+    for (let k=0;k<6;k++){
+      const idx = rnd(gridCells.length);
+      const cell = gridCells[idx];
+      if (cell.spent) continue;
+      if (cell.el && cell.el.classList.contains('scary')) continue;
+      cell.val = randDigit();
+      if (cell.el) cell.el.textContent = cell.val;
+    }
+  }, 700);
+}
+
+/* ============================================================
+   RENDER BINS
+============================================================ */
+function renderBins(){
+  const wrap = document.getElementById('bins');
+  wrap.innerHTML = '';
+  TEMPERS.forEach(t => {
+    const bin = document.createElement('div');
+    bin.className = 'bin locked';
+    bin.dataset.t = t.id;
+    bin.setAttribute('role','button');
+    bin.setAttribute('tabindex','0');
+    bin.setAttribute('aria-label', `Bin ${t.name}. Locked until a cluster is awake.`);
+    bin.innerHTML = `
+      <div class="bin-head">
+        <span class="bin-code">${t.code}</span>
+        <span class="bin-pct" id="binpct-${t.id}">0%</span>
+      </div>
+      <span class="bin-name">${t.name}</span>
+      <div class="bin-meter"><div class="bin-fill" id="binfill-${t.id}"></div></div>
+      <div class="bin-lockmsg" id="binlock-${t.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        dormant
+      </div>`;
+    bin.addEventListener('click', () => chooseBin(t.id, bin));
+    bin.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); chooseBin(t.id, bin); } });
+    wrap.appendChild(bin);
+  });
+}
+
+function updateBinUI(){
+  TEMPERS.forEach(t => {
+    const target = state.binTarget[t.id] || 0;
+    const done = state.tempers[t.id] || 0;
+    const pct = target>0 ? Math.round(done/target*100) : 0;
+    const fill = document.getElementById('binfill-'+t.id);
+    const lab = document.getElementById('binpct-'+t.id);
+    if (fill) fill.style.width = pct+'%';
+    if (lab) lab.textContent = pct+'%';
+  });
+}
+
+function updateOverall(){
+  const pct = state.clustersTotal>0 ? Math.round(state.clustersRefined/state.clustersTotal*100) : 0;
+  document.getElementById('overall-pct').textContent = pct+'% refined';
+  updateBinUI();
+}
+
+function updateDeckNote(){
+  const note = document.getElementById('deck-note');
+  note.innerHTML = `<b>${state.refinersDone}</b> of <b>${state.n}</b> refiners have calibrated &middot; <b>${state.clustersRefined}</b> of <b>${state.clustersTotal}</b> clusters refined`;
+}
+
+/* ============================================================
+   SUMMON A REFINER -> CALIBRATION MODAL
+============================================================ */
+const summonBtn = document.getElementById('summon-btn');
+summonBtn.addEventListener('click', summonRefiner);
+
+function nextUnrevealedCluster(){
+  return clusters.find(c => !c.revealed && !c.refined) || null;
+}
+
+function summonRefiner(){
+  if (state.busy) return;
+  if (state.pendingCluster){           // a cluster is already awake & awaiting a bin
+    flashSortBanner();
+    return;
+  }
+  const cluster = nextUnrevealedCluster();
+  if (!cluster){ return; }             // nothing left to wake
+
+  const inquiry = state.inquiryQueue[state.refinersDone % state.inquiryQueue.length];
+  const codename = FILE_CODENAMES[state.refinersDone % FILE_CODENAMES.length];
+
+  document.getElementById('calib-codename').textContent = codename;
+  document.getElementById('calib-refnum').textContent = `Refiner ${state.refinersDone+1} of ${state.n}`;
+  document.getElementById('calib-q').textContent = inquiry.q;
+  const inputEl = document.getElementById('calib-input');
+  inputEl.value = '';
+
+  const scrim = document.getElementById('calib-scrim');
+  scrim.classList.add('show');
+  scrim.dataset.clusterId = cluster.id;
+  scrim.dataset.slot = inquiry.slot;
+  setTimeout(() => inputEl.focus(), 60);
+}
+
+document.getElementById('calib-attune').addEventListener('click', () => attune(false));
+document.getElementById('calib-skip').addEventListener('click', () => attune(true));
+document.getElementById('calib-input').addEventListener('keydown', e => {
+  if (e.key==='Enter' && (e.metaKey||e.ctrlKey)) attune(false);
+});
+
+function attune(passed){
+  const scrim = document.getElementById('calib-scrim');
+  const clusterId = parseInt(scrim.dataset.clusterId);
+  const slot = scrim.dataset.slot;
+  const cluster = clusters.find(c => c.id===clusterId);
+  if (!cluster) { scrim.classList.remove('show'); return; }
+
+  // keep the written answer on file (even a skip can leave a blank)
+  if (!passed){
+    const val = document.getElementById('calib-input').value.trim();
+    if (val) state.slots[slot] = val;
+  }
+
+  state.refinersDone++;
+  scrim.classList.remove('show');
+
+  // wake the cluster: its cells become "scary"
+  revealCluster(cluster);
+  state.pendingCluster = cluster;
+  showSortBanner(cluster);
+  updateDeckNote();
+
+  // can't summon again until this cluster is binned
+  summonBtn.disabled = true;
+}
+
+/* ============================================================
+   REVEAL / WAKE A CLUSTER
+============================================================ */
+function revealCluster(cluster){
+  cluster.revealed = true;
+  cluster.cellIdxs.forEach(idx => {
+    const cell = gridCells[idx];
+    if (cell.spent) return;
+    // give the scary cells fresh, unsettling digits
+    cell.val = randDigit();
+    if (cell.el){
+      cell.el.textContent = cell.val;
+      cell.el.classList.remove('float');
+      cell.el.classList.add('scary');
+      cell.el.dataset.cluster = cluster.id;
+      // hovering one lights up its kin so the cluster reads as one shape
+      cell.el.onmouseenter = () => highlightKin(cluster, true);
+      cell.el.onmouseleave = () => highlightKin(cluster, false);
+    }
+  });
+  // bring the awake cluster into view if needed
+  const first = gridCells[cluster.cellIdxs[0]].el;
+  if (first) first.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function highlightKin(cluster, on){
+  cluster.cellIdxs.forEach(idx => {
+    const el = gridCells[idx].el;
+    if (el && el.classList.contains('scary')) el.classList.toggle('kin', on);
+  });
+}
+
+/* ============================================================
+   SORT BANNER  (which bin? the feeling is the point)
+============================================================ */
+function showSortBanner(cluster){
+  const banner = document.getElementById('sort-banner');
+  const txt = document.getElementById('sort-text');
+  // give the room a gentle nudge toward the right feeling without spoiling it
+  txt.innerHTML = `A cluster has woken. <b>Feel it out together</b> and drop it into the bin it belongs to.`;
+  banner.classList.add('show');
+  // arm the bins
+  document.querySelectorAll('.bin').forEach(b => {
+    b.classList.remove('locked'); b.classList.add('armed');
+    b.querySelector('.bin-lockmsg').innerHTML = 'awake &middot; choose if it fits';
+    b.setAttribute('aria-label', `Bin ${b.dataset.t}. A cluster is awake; choose this bin if the feeling fits.`);
+  });
+}
+
+let flashTimer = null;
+function flashSortBanner(){
+  const banner = document.getElementById('sort-banner');
+  banner.style.transition = 'none';
+  banner.classList.add('show');
+  banner.animate([{transform:'translate(-50%,0)'},{transform:'translate(-50%,-4px)'},{transform:'translate(-50%,0)'}],{duration:260});
+}
+
+/* ============================================================
+   CHOOSE A BIN  (refine the awake cluster)
+   The cluster has a true temper; feeling it wrong is allowed and
+   gently corrected -- this is a celebration, not a quiz.
+============================================================ */
+function chooseBin(temperId, binEl){
+  const cluster = state.pendingCluster;
+  if (!cluster || state.busy) return;
+  state.busy = true;
+
+  const correct = (temperId === cluster.temper);
+  if (!correct){
+    // soft resist: the numbers refuse the wrong feeling, then point the way
+    binEl.animate([{transform:'translateY(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:240});
+    const txt = document.getElementById('sort-text');
+    const trueName = (TEMPERS.find(t=>t.id===cluster.temper)||{}).name;
+    txt.innerHTML = `Not quite. The numbers resist <b>${escHtml((TEMPERS.find(t=>t.id===temperId)||{}).name)}</b>. Sit with them; they feel more like <b>${escHtml(trueName)}</b>.`;
+    state.busy = false;
+    return;
+  }
+
+  // correct: refine the cluster into the bin
+  refineCluster(cluster, temperId, binEl);
+}
+
+function refineCluster(cluster, temperId, binEl){
+  // animate cells out
+  cluster.cellIdxs.forEach((idx, k) => {
+    const cell = gridCells[idx];
+    const el = cell.el;
+    if (el){
+      el.classList.remove('scary','kin');
+      el.onmouseenter = null; el.onmouseleave = null;
+      setTimeout(() => { el.classList.add('refining'); }, k*40);
+      setTimeout(() => { el.classList.remove('refining'); el.classList.add('spent'); el.textContent = cell.val; }, k*40+500);
+    }
+    cell.spent = true;
+  });
+
+  // bin flash
+  binEl.classList.add('flash');
+  setTimeout(() => binEl.classList.remove('flash'), 600);
+
+  cluster.refined = true;
+  state.clustersRefined++;
+  state.tempers[temperId]++;
+  state.pendingCluster = null;
+
+  setTimeout(() => {
+    // re-lock bins between clusters
+    document.querySelectorAll('.bin').forEach(b => {
+      b.classList.add('locked'); b.classList.remove('armed');
+      b.querySelector('.bin-lockmsg').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> dormant`;
+    });
+    document.getElementById('sort-banner').classList.remove('show');
+    updateOverall();
+    updateDeckNote();
+    state.busy = false;
+
+    // done?
+    if (state.clustersRefined >= state.clustersTotal || nextUnrevealedCluster() === null){
+      onFileWhole();
+    } else {
+      summonBtn.disabled = false;
+    }
+  }, cluster.cellIdxs.length*40 + 560);
+}
+
+/* ============================================================
+   FILE WHOLE -> show the "complete" button
+============================================================ */
+function onFileWhole(){
+  summonBtn.disabled = true;
+  document.getElementById('overall-pct').textContent = '100% refined';
+  const note = document.getElementById('deck-note');
+  note.innerHTML = `The file is whole. <b>${state.refinersDone}</b> refiners calibrated the instrument. The floor is, quietly, moved.`;
+  document.getElementById('complete-btn').classList.add('show');
+}
+
+document.getElementById('complete-btn').addEventListener('click', openWellness);
+
+/* ============================================================
+   WELLNESS SESSION  (the result of refinement)
+============================================================ */
+function openWellness(){
+  const body = document.getElementById('well-body');
+  const meta = document.getElementById('well-meta');
+  meta.textContent = `File ${state.fileCode} refined by a cohort of ${state.n}. The floor has prepared a few facts about you.`;
+
+  const facts = buildWellnessFacts();
+  body.innerHTML = facts.map(p => `<p>${p}</p>`).join('');
+  document.getElementById('well-scrim').classList.add('show');
+}
+
+/* Ms. Casey cadence: soothing affirmations, seeded by the cohort's
+   real answers when present, graceful when not. */
+function buildWellnessFacts(){
+  const hi = v => `<span class="fact">${escHtml(v)}</span>`;
+  const have = Object.keys(state.slots).filter(k => state.slots[k] && state.slots[k].trim());
+  const pick = (k) => state.slots[k] && state.slots[k].trim() ? state.slots[k].trim() : null;
+
+  const lines = [];
+  lines.push('Please enjoy each fact equally.');
+
+  // weave up to three real answers into Wellness affirmations
+  const woven = [];
+  const tryWeave = (key, fn) => { const v = pick(key); if (v) woven.push(fn(hi(v))); };
+  tryWeave('weekend',       v => `Your outie is the kind of person who spends a free weekend on ${v}. The floor finds this restful to think about.`);
+  tryWeave('useless_skill', v => `Your outie is quietly, pointlessly excellent at ${v}. This is the best kind of excellent.`);
+  tryWeave('song',          v => `Your outie would dance, defiantly, to ${v}. The floor cannot, but it understands.`);
+  tryWeave('snack',         v => `Your outie keeps ${v} close, for emergencies. Your outie is prepared. Your outie is loved.`);
+  tryWeave('brag',          v => `Your outie can now do something they could not do eleven weeks ago: ${v}. The floor has verified this and is, privately, proud.`);
+  tryWeave('comfort_show',  v => `When the world is loud, your outie returns to ${v}. The floor approves of having a place to return to.`);
+  tryWeave('opinion',       v => `Your outie holds, with conviction, that ${v}. The floor will not argue. The floor admires conviction.`);
+  tryWeave('remember_by',   v => `Your outie would like to be remembered for ${v}. Consider it filed, and honored.`);
+  tryWeave('reset_place',   v => `Your outie is restored by ${v}. Everyone should have such a place. The floor does not, but it is happy you do.`);
+  tryWeave('compliment',    v => `Someone once told your outie ${v}, and your outie never forgot it. Today the floor says it again.`);
+
+  if (woven.length){
+    lines.push(...shuffle(woven).slice(0, Math.min(4, woven.length)));
+  } else {
+    lines.push('Your outie said little, and the floor respects a quiet outie. Know only this: the work you did today mattered, even if no one will explain why.');
+  }
+
+  lines.push('Your outie is a person who shows up. Eleven weeks ago they arrived knowing less, and they came back every day anyway. The numbers noticed. The floor noticed. We are all very proud of you.');
+  return lines;
+}
+
+document.getElementById('well-receive').addEventListener('click', () => {
+  document.getElementById('well-scrim').classList.remove('show');
+  descend();
+});
+
+/* ============================================================
+   DESCEND -> THE GENERATIVE-ART TERMINAL  (reward, from Week 10)
+============================================================ */
+document.getElementById('restart-btn').addEventListener('click', () => {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  document.getElementById('veil').classList.remove('gone');
+  document.getElementById('ceremony').classList.remove('in');
+  document.getElementById('finale').classList.remove('show');
+  document.getElementById('mdr').style.display = 'none';
+  document.getElementById('intake').style.display = 'flex';
+});
+
+function descend(){
+  if (fidgetTimer) { clearInterval(fidgetTimer); fidgetTimer = null; }
+  document.getElementById('mdr').style.display = 'none';
+  const term = document.getElementById('finale');
+  term.classList.add('show');
+  document.getElementById('veil').classList.remove('gone');
+  document.getElementById('ceremony').classList.remove('in');
+
+  buildCeremony();
+  deriveParams();
+  buildParamPanel();
+
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  startArt();
+
+  setTimeout(() => document.getElementById('ceremony').classList.add('in'), 900);
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   CEREMONY  -- deadpan completion record (mad lib from slots)
+============================================================ */
+function buildCeremony(){
+  const meta    = document.getElementById('ceremony-meta');
+  const readout = document.getElementById('temper-readout');
+  const body    = document.getElementById('ceremony-body');
+  const perkEl  = document.getElementById('award-perk');
+
+  const filed = state.tempers.woe + state.tempers.frolic + state.tempers.dread + state.tempers.malice;
+
+  let domId = 'woe', domN = -1;
+  TEMPERS.forEach(tp => { if (state.tempers[tp.id] > domN) { domN = state.tempers[tp.id]; domId = tp.id; } });
+  const domName = (TEMPERS.find(tp => tp.id === domId) || {}).name || 'Woe';
+
+  perkEl.textContent = PERKS[(filed + state.n + domId.length) % PERKS.length];
+  meta.textContent = `File ${state.fileCode} . ${filed} ${filed === 1 ? 'cluster' : 'clusters'} refined . predominantly ${domName}`;
+
+  readout.innerHTML = TEMPERS.map(tp =>
+    `<span class="tr-chip"><i style="background:${tp.dot}"></i>${tp.name}: ${state.tempers[tp.id]}</span>`).join('');
+
+  const hi = v => `<span class="slot-val">${escHtml(v)}</span>`;
+  const slotKeys = Object.keys(state.slots).filter(k => state.slots[k] && state.slots[k].trim());
+  const pick = slotKeys.length ? state.slots[slotKeys[filed % slotKeys.length]].trim() : null;
+
+  const lines = [];
+  lines.push(filed > 0
+    ? `The cohort refined ${filed} ${filed === 1 ? 'cluster' : 'clusters'} of macrodata, leaning ${hi(domName)}. The work was reviewed at the highest level and met with quiet approval.`
+    : `No macrodata was refined. The reward is issued anyway, as a gesture, and as a warning.`);
+  if (pick) lines.push(`It is also on record that your outie offered: ${hi(pick)}. This has been noted, weighed, and rewarded.`);
+  lines.push(`The image surrounding you was assembled from the numbers you sorted. It is yours. It will not be assembled this way again.`);
+
+  body.innerHTML = lines.map(p => `<p>${p}</p>`).join('');
+}
+
+/* ============================================================
+   PARAMETERS  -- cohort aggregates -> 6 art parameters
+============================================================ */
+const PARAM_DEFS = [
+  { key:'index',  name:'Refinement Index', role:'Root system: degree & layout of the fractal basins', min:0,  max:99, dot: TEMPERS[0].dot },
+  { key:'temper', name:'Temperament',      role:'Color family: cool at low, warm at high',            min:1,  max:10, dot: TEMPERS[1].dot },
+  { key:'order',  name:'Order / Improv',   role:'Curve geometry: rose petals vs wild epitrochoids',    min:1,  max:10, dot: TEMPERS[2].dot },
+  { key:'turb',   name:'Turbulence',       role:'Flow field: how chaotic the drifting paths become',   min:0,  max:20, dot: TEMPERS[3].dot },
+  { key:'tempo',  name:'Tempo',            role:'Evolution speed: how fast the system morphs',          min:0,  max:30, dot:'#4ae8a8' },
+  { key:'depth',  name:'Depth',            role:'Saturation & layering of the whole composition',       min:0,  max:20, dot:'#4ae8d8' }
+];
+let params = [12, 5, 5, 4, 6, 10];
+
+function deriveParams(){
+  const t = state.tempers;
+  const filed = t.woe + t.frolic + t.dread + t.malice || 1;
+  const n = state.n;
+  const wWoe = t.woe / filed, wFro = t.frolic / filed, wDre = t.dread / filed, wMal = t.malice / filed;
+
+  const index  = clamp(Math.round(n * 0.5 + wDre * 70), 0, 99);
+  const temper = clamp(Math.round(1 + (wFro + wMal) * 9), 1, 10);
+  const order  = clamp(Math.round(1 + wFro * 9), 1, 10);
+  const turb   = clamp(Math.round(wMal * 20), 0, 20);
+  const tempo  = clamp(Math.round(wFro * 18 + (n - 4) / 26 * 12), 0, 30);
+  const depth  = clamp(Math.round(wWoe * 16 + (state.clustersRefined / Math.max(1, state.clustersTotal)) * 4), 0, 20);
+
+  params = [index, temper, order, turb, tempo, depth];
+}
+
+/* ============================================================
+   LIVE PARAMETER PANEL
+============================================================ */
+function buildParamPanel(){
+  const el = document.getElementById('param-grid');
+  el.innerHTML = '';
+  PARAM_DEFS.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'param-row';
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', p.name);
+    row.innerHTML = `
+      <span class="param-dot" style="background:${p.dot}"></span>
+      <span class="param-text">
+        <span class="param-name">${p.name}</span>
+        <span class="param-role">${p.role}</span>
+      </span>
+      <span class="stepper">
+        <button class="step-btn" data-dir="-1" aria-label="Decrease ${p.name}">&#9660;</button>
+        <input type="number" class="step-input" id="pi-${i}" value="${params[i]}" min="${p.min}" max="${p.max}" aria-label="${p.name} value">
+        <button class="step-btn" data-dir="1" aria-label="Increase ${p.name}">&#9650;</button>
+      </span>`;
+    el.appendChild(row);
+
+    const input = row.querySelector('.step-input');
+    const [dec, inc] = row.querySelectorAll('.step-btn');
+    function commit(v){
+      const c = clamp(Math.round(+v), p.min, p.max);
+      if (isNaN(c)) return;
+      params[i] = c; input.value = c;
+      scheduleUpdate();
+    }
+    dec.addEventListener('click', () => commit(params[i] - 1));
+    inc.addEventListener('click', () => commit(params[i] + 1));
+    let hold = null;
+    const hStart = d => { hold = setInterval(() => commit(params[i] + d), 90); };
+    const hEnd = () => clearInterval(hold);
+    dec.addEventListener('mousedown', () => hStart(-1)); inc.addEventListener('mousedown', () => hStart(1));
+    dec.addEventListener('touchstart', () => hStart(-1), { passive:true }); inc.addEventListener('touchstart', () => hStart(1), { passive:true });
+    ['mouseup','mouseleave','touchend'].forEach(e => { dec.addEventListener(e, hEnd); inc.addEventListener(e, hEnd); });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { commit(input.value); input.blur(); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); commit(params[i] + 1); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); commit(params[i] - 1); }
+    });
+    input.addEventListener('blur', () => commit(input.value));
+  });
+}
+function syncParamPanel(){ PARAM_DEFS.forEach((p,i)=>{ const inp = document.getElementById(`pi-${i}`); if (inp) inp.value = params[i]; }); }
+
+let debTimer = null;
+function scheduleUpdate(){
+  clearTimeout(debTimer);
+  debTimer = setTimeout(() => { startArt(); flashRecalc(); }, 200);
+}
+function flashRecalc(){
+  const el = document.getElementById('recalc-flash');
+  el.classList.remove('show');
+  requestAnimationFrame(() => { el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 850); });
+}
+
+/* ============================================================
+   ART ENGINE  -- Newton fractal + symmetric curves + flow field
+   Carried from Week 10. Driven by the six refined parameters.
+============================================================ */
+let rafId = null;
+
+function startArt(){
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  syncParamPanel();
+  const a = params.map(Number);
+
+  const newtonDeg    = 3 + (a[0] % 10);
+  const newtonLayout = Math.floor(a[0] / 10) % 4;
+  const perturbAmt   = 0.04 + (a[0] % 7) * 0.11;
+  const baseHue      = Math.round(170 - ((a[1]-1)/9) * 130);
+  const hue2         = (baseHue + 122) % 360;
+  const hue3         = (baseHue + 244) % 360;
+  const shapeBias    = (a[2]-1)/9;
+  const roseK        = 2 + Math.floor(shapeBias * 13);
+  const folds        = 4 + Math.floor(shapeBias * 12);
+  const epiR         = 2 + Math.floor(shapeBias * 7);
+  const epir         = 1 + Math.floor((1-shapeBias) * 5);
+  const epiD_norm    = 0.3 + shapeBias * 0.6;
+  const flowFreq     = 0.3 + (a[3]/20) * 5.2;
+  const speed        = 0.00015 + (a[4]/30) * 0.0024;
+  const depth        = 0.3 + (a[5]/20) * 0.7;
+  const numP         = Math.round(600 + (a[5]/20) * 1600);
+
+  const wrap = document.getElementById('art-wrap');
+  const W = wrap.offsetWidth, H = wrap.offsetHeight;
+  const cnN = document.getElementById('c-newton');
+  const cnC = document.getElementById('c-curves');
+  const cnF = document.getElementById('c-flow');
+  const NW = Math.floor(W * 0.5), NH = Math.floor(H * 0.5);
+  cnN.width = NW; cnN.height = NH; cnN.style.width = W+'px'; cnN.style.height = H+'px';
+  cnC.width = W; cnC.height = H; cnF.width = W; cnF.height = H;
+  const ctxN = cnN.getContext('2d'), ctxC = cnC.getContext('2d'), ctxF = cnF.getContext('2d');
+
+  function buildRoots(drift){
+    const roots = [], n = newtonDeg;
+    if (newtonLayout === 0){
+      for (let k=0;k<n;k++){ const a2=(2*Math.PI*k/n)+drift; roots.push([Math.cos(a2),Math.sin(a2)]); }
+    } else if (newtonLayout === 1){
+      const phi = 2.3999;
+      for (let k=0;k<n;k++){ const r=0.45+0.55*(k/n), a2=phi*k+drift; roots.push([r*Math.cos(a2),r*Math.sin(a2)]); }
+    } else if (newtonLayout === 2){
+      const half = Math.ceil(n/2);
+      for (let k=0;k<n;k++){
+        const cl=k<half?0:1, cx2=cl===0?-0.72:0.72, cy2=cl===0?0.18:-0.18, sz=k<half?half:n-half;
+        const a2=(2*Math.PI*(k-(cl===0?0:half))/sz)+drift, r=0.22+perturbAmt*0.28;
+        roots.push([cx2+r*Math.cos(a2),cy2+r*Math.sin(a2)]);
+      }
+    } else {
+      for (let k=0;k<n;k++){
+        const a2=(2*Math.PI*k/n)+drift, rx=0.9+perturbAmt*0.5, ry=0.5+perturbAmt*0.4;
+        roots.push([rx*Math.cos(a2)+(k%3-1)*perturbAmt*0.25, ry*Math.sin(a2)+(k%2-.5)*perturbAmt*0.2]);
+      }
+    }
+    return roots;
+  }
+
+  function newtonIter(cr,ci,roots){
+    let zr=cr, zi=ci; const maxIt=22+Math.floor(depth*30);
+    for (let it=0;it<maxIt;it++){
+      let dsr=0, dsi=0;
+      for (let k=0;k<roots.length;k++){
+        const dr=zr-roots[k][0], di=zi-roots[k][1], m2=dr*dr+di*di;
+        if (m2>1e-18){ dsr+=dr/m2; dsi-=di/m2; }
+      }
+      const sm2=dsr*dsr+dsi*dsi; if (sm2<1e-18) break;
+      zr-=dsr/sm2; zi-=dsi/sm2;
+      for (let k=0;k<roots.length;k++){
+        const dr=zr-roots[k][0], di=zi-roots[k][1];
+        if (dr*dr+di*di<8e-7){ const smooth=it+1-0.5*Math.log2(Math.max(1e-12,dr*dr+di*di)+1e-12); return [k,smooth,maxIt]; }
+      }
+    }
+    let best=0, bestD=1e18;
+    for (let k=0;k<roots.length;k++){ const dr=zr-roots[k][0], di=zi-roots[k][1], d=dr*dr+di*di; if (d<bestD){ bestD=d; best=k; } }
+    return [best, 22+Math.floor(depth*30), 22+Math.floor(depth*30)];
+  }
+
+  function h2r(p,q2,t){ if(t<0)t+=1; if(t>1)t-=1; if(t<1/6)return p+(q2-p)*6*t; if(t<1/2)return q2; if(t<2/3)return p+(q2-p)*(2/3-t)*6; return p; }
+  function hslPx(h,s,l){ h/=360; const q2=l<.5?l*(1+s):l+s-l*s, p2=2*l-q2; return [h2r(p2,q2,h+1/3)*255|0, h2r(p2,q2,h)*255|0, h2r(p2,q2,h-1/3)*255|0]; }
+  function newtonColor(ri,smooth,maxIt){
+    if (smooth>=maxIt){ const h=(baseHue+ri*(360/newtonDeg))%360; const [r,g,b]=hslPx(h,0.25+depth*0.25,0.05+depth*0.05); return [r,g,b,210]; }
+    const t=Math.pow(smooth/maxIt,0.52);
+    const rh=(baseHue+ri*(360/newtonDeg)+smooth*1.1)%360;
+    const s=0.48+depth*0.42-t*0.18, l=0.07+(1-t)*(0.5+depth*0.32);
+    const [r,g,b]=hslPx(rh,s,l); return [r,g,b,215];
+  }
+
+  const ROWS=6; let nRow=0, nDrift=0;
+  let nImgData=ctxN.createImageData(NW,NH);
+  const nScale=4.4/Math.min(NW,NH);
+  let nRoots=buildRoots(nDrift), nFirstDone=false;
+
+  function renderNewtonChunk(){
+    const data=nImgData.data, endRow=Math.min(nRow+ROWS,NH);
+    for (let py=nRow;py<endRow;py++){
+      const ci=(py-NH/2)*nScale;
+      for (let px=0;px<NW;px++){
+        const cr=(px-NW/2)*nScale;
+        const [ri,smooth,maxIt]=newtonIter(cr,ci,nRoots);
+        const [r,g,b,al]=newtonColor(ri,smooth,maxIt);
+        const idx=(py*NW+px)*4; data[idx]=r; data[idx+1]=g; data[idx+2]=b; data[idx+3]=al;
+      }
+    }
+    ctxN.putImageData(nImgData,0,0); nRow=endRow;
+    if (nRow>=NH){
+      if (!nFirstDone){ nFirstDone=true; document.getElementById('veil').classList.add('gone'); }
+      nRow=0; nDrift+=speed*320; nRoots=buildRoots(nDrift); nImgData=ctxN.createImageData(NW,NH);
+    }
+  }
+
+  function drawCurves(t){
+    const CW=cnC.width, CH=cnC.height; ctxC.clearRect(0,0,CW,CH);
+    const cx=CW/2, cy=CH/2, maxR=Math.min(CW,CH)*0.43;
+    function layer(hue,ctype,phase,rotSpd,opacity,lw){
+      ctxC.globalAlpha=(0.42+depth*0.48)*opacity; ctxC.globalCompositeOperation='screen';
+      ctxC.lineWidth=(0.7+depth*1.1)*lw; ctxC.lineCap='round';
+      for (let fold=0;fold<folds;fold++){
+        ctxC.save(); ctxC.translate(cx,cy); ctxC.rotate((Math.PI*2/folds)*fold+t*speed*rotSpd);
+        if (fold%2===1) ctxC.scale(1,-1);
+        ctxC.beginPath(); const steps=680;
+        for (let s=0;s<=steps;s++){
+          const theta=(Math.PI*2*s/steps)+phase; let x,y;
+          if (ctype==='rose'){ const r=maxR*0.44*Math.abs(Math.cos(roseK*theta+t*speed*20)); x=r*Math.cos(theta); y=r*Math.sin(theta); }
+          else if (ctype==='epi'){
+            const sumR=epiR+epir, ratio=sumR/epir, d=epiD_norm*maxR*0.55;
+            x=sumR*Math.cos(theta)-d*Math.cos(ratio*theta+t*speed*11);
+            y=sumR*Math.sin(theta)-d*Math.sin(ratio*theta+t*speed*11);
+            const norm=Math.min(1,maxR*0.44/((epiR+epir+epiD_norm*maxR*0.55)*0.9)); x*=norm; y*=norm;
+          } else {
+            const kx=2+Math.floor(shapeBias*5), ky=3+Math.floor((1-shapeBias)*4);
+            x=maxR*0.42*Math.sin(kx*theta+t*speed*16); y=maxR*0.42*Math.sin(ky*theta+Math.PI*0.38);
+          }
+          s===0?ctxC.moveTo(x,y):ctxC.lineTo(x,y);
+        }
+        ctxC.strokeStyle=`hsl(${hue},${52+depth*38|0}%,${52+depth*20|0}%)`; ctxC.stroke(); ctxC.restore();
+      }
+      ctxC.globalAlpha=1; ctxC.globalCompositeOperation='source-over';
+    }
+    const ct=shapeBias<0.35?'rose':shapeBias>0.65?'epi':'lissajous';
+    layer(hue2,ct,t*speed*5,40,1.0,1.0);
+    layer(hue3,ct,-t*speed*3.5,-28,0.55,0.65);
+    layer((hue2+65)%360,'rose',t*speed*8,18,0.32,0.5);
+  }
+
+  const pX=new Float32Array(numP), pY=new Float32Array(numP);
+  const pAge=new Float32Array(numP), pLife=new Float32Array(numP), pH=new Float32Array(numP);
+  function resetP(i){ pX[i]=Math.random()*W; pY[i]=Math.random()*H; pAge[i]=0; pLife[i]=80+Math.random()*260; pH[i]=hue3+(Math.random()-.5)*(55+depth*95); }
+  for (let i=0;i<numP;i++){ resetP(i); pAge[i]=Math.random()*160; }
+
+  function flowAngle(x,y,tt){
+    const nx=x/W*flowFreq, ny=y/H*flowFreq;
+    let a2=Math.sin(nx*2.1+tt*.6)*Math.cos(ny*1.7+tt*.5)*Math.PI*1.65;
+    if (flowFreq>1.8) a2+=Math.cos(nx*3.4-tt*.4)*Math.sin(ny*2.9+tt*.7)*Math.PI*.75;
+    if (flowFreq>3.5) a2+=Math.sin(nx*5.2+tt*.9)*Math.cos(ny*4.3-tt*.6)*Math.PI*.45;
+    return a2;
+  }
+  let fInit=false;
+  function updateFlow(tt){
+    if (!fInit){ ctxF.fillStyle='#03110f'; ctxF.fillRect(0,0,W,H); fInit=true; }
+    ctxF.globalCompositeOperation='source-over'; ctxF.fillStyle='rgba(3,17,15,0.022)'; ctxF.fillRect(0,0,W,H);
+    ctxF.globalCompositeOperation='screen';
+    const ps=0.75+(a[4]/30)*1.45;
+    for (let i=0;i<numP;i++){
+      const angle=flowAngle(pX[i],pY[i],tt);
+      const nx2=pX[i]+Math.cos(angle)*ps, ny2=pY[i]+Math.sin(angle)*ps;
+      const lf=pAge[i]/pLife[i];
+      const fi=Math.min(1,pAge[i]/22), fo=Math.max(0,1-Math.pow(Math.max(0,lf-.70)/.30,2));
+      const alpha2=fi*fo*(0.26+depth*0.40);
+      ctxF.strokeStyle=`hsla(${pH[i]%360},${52+depth*32|0}%,${50+depth*24|0}%,${alpha2})`;
+      ctxF.lineWidth=0.75+depth*.75; ctxF.lineCap='round';
+      ctxF.beginPath(); ctxF.moveTo(pX[i],pY[i]); ctxF.lineTo(nx2,ny2); ctxF.stroke();
+      pX[i]=nx2; pY[i]=ny2; pAge[i]++;
+      if (nx2<0||nx2>W||ny2<0||ny2>H||pAge[i]>pLife[i]) resetP(i);
+    }
+    ctxF.globalCompositeOperation='source-over';
+  }
+
+  let t=0;
+  function loop(){ t+=speed*55; renderNewtonChunk(); drawCurves(t); updateFlow(t*0.016); rafId=requestAnimationFrame(loop); }
+  rafId=requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('finale').classList.contains('show') && rafId) {
+    clearTimeout(window.__rz);
+    window.__rz = setTimeout(() => startArt(), 200);
+  }
+});
+</script>
+</body>
+</html>

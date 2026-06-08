@@ -294,7 +294,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
     <div class="top-bar-spacer"></div>
     <button class="reset-game-btn" id="reset-board-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.56"/></svg>
-      Purge Board
+      Clear Board
     </button>
     <button class="reset-game-btn" id="new-game-btn" style="margin-left:4px;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
@@ -367,17 +367,17 @@ const BOARD = [
       {
         points: 400,
         q: 'When would you choose a while loop over a for loop?',
-        a: 'Use a while loop when you do not know in advance how many times you need to iterate -- for example, reading input until the user enters "quit". Use a for loop when you know the count upfront or are iterating a specific range. The while loop expresses "keep going until a condition changes" more clearly in those cases.'
+        a: 'Use a while loop when you do not know in advance how many times you need to iterate; for example, reading input until the user enters "quit". Use a for loop when you know the count upfront or are iterating a specific range. The while loop expresses "keep going until a condition changes" more clearly in those cases.'
       },
       {
         points: 600,
         q: 'What is the difference between == and .equals() when comparing two String objects in Java?',
-        a: '== checks if both variables point to the exact same object in memory. .equals() checks if the contents of the two Strings are the same. For Strings, always use .equals() for value comparison -- == may return false even when the text is identical if the objects are different instances.'
+        a: '== checks if both variables point to the exact same object in memory. .equals() checks if the contents of the two Strings are the same. For Strings, always use .equals() for value comparison. == may return false even when the text is identical if the objects are different instances.'
       },
       {
         points: 1000,
         q: 'What is the difference between stack memory and heap memory in Java, and where do objects live?',
-        a: 'The stack holds method call frames and local primitive variables -- it is fast and automatically managed as methods enter and exit. The heap holds all objects created with new. References (variables that point to objects) live on the stack, but the object data itself lives on the heap. The garbage collector reclaims unreachable heap memory automatically.'
+        a: 'The stack holds method call frames and local primitive variables; it is fast and automatically managed as methods enter and exit. The heap holds all objects created with new. References (variables that point to objects) live on the stack, but the object data itself lives on the heap. The garbage collector reclaims unreachable heap memory automatically.'
       }
     ]
   },
@@ -408,12 +408,12 @@ const BOARD = [
       {
         points: 600,
         q: 'What is method overloading, and how is it different from method overriding?',
-        a: 'Overloading means defining multiple methods in the same class with the same name but different parameter lists -- the compiler picks the right one based on the arguments passed. Overriding means a subclass provides its own implementation of a method already defined in the parent class -- same name, same signature. Overloading is a compile-time decision; overriding is a runtime decision.'
+        a: 'Overloading means defining multiple methods in the same class with the same name but different parameter lists; the compiler picks the right one based on the arguments passed. Overriding means a subclass provides its own implementation of a method already defined in the parent class, with the same name and same signature. Overloading is a compile-time decision; overriding is a runtime decision.'
       },
       {
         points: 1000,
         q: 'What is the difference between a shallow copy and a deep copy of an object?',
-        a: 'A shallow copy creates a new object but copies only the references to nested objects -- both the original and the copy point to the same nested data. A deep copy creates new independent objects for all nested members too, so the copy is fully isolated. In Java, the default clone() does a shallow copy unless you override it to perform a deep copy.'
+        a: 'A shallow copy creates a new object but copies only the references to nested objects, so both the original and the copy point to the same nested data. A deep copy creates new independent objects for all nested members too, so the copy is fully isolated. In Java, the default clone() does a shallow copy unless you override it to perform a deep copy.'
       }
     ]
   },
@@ -428,18 +428,18 @@ const BOARD = [
       {
         points: 200,
         q: 'What does @Override tell the compiler when it appears above a method?',
-        a: '@Override tells the compiler that this method is intentionally replacing a method from the parent class. If no matching parent method exists, the compiler throws an error -- which catches typos and signature mismatches early.'
+        a: '@Override tells the compiler that this method is intentionally replacing a method from the parent class. If no matching parent method exists, the compiler throws an error, which catches typos and signature mismatches early.'
       },
       {
         points: 300,
         q: 'Given this inheritance chain, which speak() runs when you call dog.speak()?\n\nclass Animal {\n  void speak() { System.out.println("..."); }\n}\nclass Dog extends Animal {\n  @Override\n  void speak() { System.out.println("Woof"); }\n}',
         qCode: true,
-        a: 'The Dog version runs and prints "Woof". Because Dog overrides speak(), Java calls the most specific version available -- Dog\'s implementation, not Animal\'s.'
+        a: 'The Dog version runs and prints "Woof". Because Dog overrides speak(), Java calls the most specific version available, which is Dog\'s implementation, not Animal\'s.'
       },
       {
         points: 400,
         q: 'What is the difference between an abstract class and an interface? When would you choose each?',
-        a: 'An abstract class can have both concrete and abstract methods, and can hold state. An interface defines a contract -- only method signatures (and default methods in modern Java). A class can implement multiple interfaces but extend only one class. Choose an abstract class when you want to share common implementation across related classes. Choose an interface when you want to define a capability that unrelated classes can share.'
+        a: 'An abstract class can have both concrete and abstract methods, and can hold state. An interface defines a contract: only method signatures (and default methods in modern Java). A class can implement multiple interfaces but extend only one class. Choose an abstract class when you want to share common implementation across related classes. Choose an interface when you want to define a capability that unrelated classes can share.'
       },
       {
         points: 600,
@@ -449,7 +449,7 @@ const BOARD = [
       {
         points: 1000,
         q: 'Explain what polymorphism means and give an example using a parent type reference.',
-        a: 'Polymorphism means that a parent type reference can hold a subclass object, and the correct overridden method is called at runtime based on the actual type. For example: Animal a = new Dog(); a.speak(); -- even though the reference type is Animal, Java calls Dog\'s speak() method. This lets you write code that works with any subclass without knowing which specific one it is at compile time.'
+        a: 'Polymorphism means that a parent type reference can hold a subclass object, and the correct overridden method is called at runtime based on the actual type. For example: Animal a = new Dog(); a.speak(); even though the reference type is Animal, Java calls Dog\'s speak() method. This lets you write code that works with any subclass without knowing which specific one it is at compile time.'
       }
     ]
   },
@@ -464,7 +464,7 @@ const BOARD = [
       {
         points: 200,
         q: 'In plain English, what does a lambda expression replace?',
-        a: 'A lambda replaces an anonymous inner class that implements a functional interface -- one with a single abstract method. Instead of writing the full class, you write just the method body in a compact form.'
+        a: 'A lambda replaces an anonymous inner class that implements a functional interface, one with a single abstract method. Instead of writing the full class, you write just the method body in a compact form.'
       },
       {
         points: 300,
@@ -475,7 +475,7 @@ const BOARD = [
       {
         points: 400,
         q: 'Why would you use an interface instead of an abstract class?',
-        a: 'Use an interface when you want to define a capability that unrelated classes should share, or when a class needs to fulfill multiple contracts -- since Java allows implementing multiple interfaces but only extending one class. Interfaces are also the right choice when you want to define behavior without assuming anything about the implementing class\'s structure or state.'
+        a: 'Use an interface when you want to define a capability that unrelated classes should share, or when a class needs to fulfill multiple contracts, since Java allows implementing multiple interfaces but only extending one class. Interfaces are also the right choice when you want to define behavior without assuming anything about the implementing class\'s structure or state.'
       },
       {
         points: 600,
@@ -485,7 +485,7 @@ const BOARD = [
       {
         points: 1000,
         q: 'What is the difference between map and flatMap in a Java Stream?',
-        a: 'map transforms each element one-to-one -- one input produces one output. flatMap transforms each element into a stream of results and then flattens all those streams into a single stream. For example, if each order has a list of items, flatMap lets you get a single stream of all items across all orders. Use flatMap when your mapping function returns a collection or stream rather than a single value.'
+        a: 'map transforms each element one-to-one; one input produces one output. flatMap transforms each element into a stream of results and then flattens all those streams into a single stream. For example, if each order has a list of items, flatMap lets you get a single stream of all items across all orders. Use flatMap when your mapping function returns a collection or stream rather than a single value.'
       }
     ]
   },
@@ -500,17 +500,17 @@ const BOARD = [
       {
         points: 200,
         q: 'What is the difference between an INNER JOIN and a LEFT JOIN?',
-        a: 'An INNER JOIN returns only rows where there is a matching value in both tables. A LEFT JOIN returns all rows from the left table, plus matched rows from the right -- unmatched right-side columns are NULL.'
+        a: 'An INNER JOIN returns only rows where there is a matching value in both tables. A LEFT JOIN returns all rows from the left table, plus matched rows from the right; unmatched right-side columns are NULL.'
       },
       {
         points: 300,
         q: 'What is a PreparedStatement, and why is it safer than a Statement?',
-        a: 'A PreparedStatement uses parameterized placeholders for values instead of building SQL strings by concatenation. This prevents SQL injection attacks, because user input is treated as data -- not as executable SQL.'
+        a: 'A PreparedStatement uses parameterized placeholders for values instead of building SQL strings by concatenation. This prevents SQL injection attacks, because user input is treated as data, not as executable SQL.'
       },
       {
         points: 400,
-        q: 'Explain what JDBC does in plain English -- what problem does it solve?',
-        a: 'JDBC (Java Database Connectivity) is the standard Java API for connecting to relational databases. It solves the problem of Java programs not having a built-in way to talk to databases -- JDBC provides the driver interface, connection management, and query execution that let Java code send SQL and receive results back from a database.'
+        q: 'Explain what JDBC does in plain English. What problem does it solve?',
+        a: 'JDBC (Java Database Connectivity) is the standard Java API for connecting to relational databases. It solves the problem of Java programs not having a built-in way to talk to databases. JDBC provides the driver interface, connection management, and query execution that let Java code send SQL and receive results back from a database.'
       },
       {
         points: 600,
@@ -520,7 +520,7 @@ const BOARD = [
       {
         points: 1000,
         q: 'Explain what database normalization means and why you would want to normalize a table.',
-        a: 'Normalization is the process of organizing a database to reduce data redundancy and improve data integrity. It involves splitting tables and defining relationships so that each piece of data is stored in only one place. This prevents update anomalies -- where changing one fact requires editing many rows -- and makes the database easier to maintain and query correctly.'
+        a: 'Normalization is the process of organizing a database to reduce data redundancy and improve data integrity. It involves splitting tables and defining relationships so that each piece of data is stored in only one place. This prevents update anomalies, where changing one fact requires editing many rows, and makes the database easier to maintain and query correctly.'
       }
     ]
   },
@@ -535,22 +535,22 @@ const BOARD = [
       {
         points: 200,
         q: 'What is the difference between @GetMapping and @PostMapping?',
-        a: '@GetMapping maps a method to HTTP GET requests -- typically used to retrieve data. @PostMapping maps a method to HTTP POST requests -- typically used to submit or create data. The difference reflects the HTTP verb the client uses to call that endpoint.'
+        a: '@GetMapping maps a method to HTTP GET requests, typically used to retrieve data. @PostMapping maps a method to HTTP POST requests, typically used to submit or create data. The difference reflects the HTTP verb the client uses to call that endpoint.'
       },
       {
         points: 300,
         q: 'What does the repository layer do in a Spring application?',
-        a: 'The repository layer handles all database interactions -- saving, finding, updating, and deleting data. It keeps database logic isolated from controllers and services so each layer has a single, clear responsibility.'
+        a: 'The repository layer handles all database interactions: saving, finding, updating, and deleting data. It keeps database logic isolated from controllers and services so each layer has a single, clear responsibility.'
       },
       {
         points: 400,
-        q: 'Explain the relationship between Spring, Spring Boot, and JPA -- how do they relate to each other?',
-        a: 'Spring is the core framework that provides dependency injection and application plumbing. Spring Boot builds on top of Spring and adds auto-configuration and defaults so you can start quickly without XML setup. JPA is a separate specification for database access that Spring and Spring Boot integrate with -- it replaces raw JDBC with object-based database interaction. They work together: Spring Boot wires them all up so you can focus on writing business logic.'
+        q: 'Explain the relationship between Spring, Spring Boot, and JPA. How do they relate to each other?',
+        a: 'Spring is the core framework that provides dependency injection and application plumbing. Spring Boot builds on top of Spring and adds auto-configuration and defaults so you can start quickly without XML setup. JPA is a separate specification for database access that Spring and Spring Boot integrate with; it replaces raw JDBC with object-based database interaction. They work together: Spring Boot wires them all up so you can focus on writing business logic.'
       },
       {
         points: 600,
         q: 'What is dependency injection, and what problem does @Autowired (or constructor injection) solve in Spring?',
-        a: 'Dependency injection means that objects do not create their own dependencies -- Spring creates them and injects them. @Autowired tells Spring to supply the required object automatically. This decouples classes from their dependencies, makes testing easier (you can inject mocks), and lets Spring manage object lifecycles without you writing any wiring code.'
+        a: 'Dependency injection means that objects do not create their own dependencies; Spring creates them and injects them. @Autowired tells Spring to supply the required object automatically. This decouples classes from their dependencies, makes testing easier (you can inject mocks), and lets Spring manage object lifecycles without you writing any wiring code.'
       },
       {
         points: 1000,
@@ -575,22 +575,22 @@ const BOARD = [
       {
         points: 300,
         q: 'What does a 404 status code mean? What would a 200 and a 500 tell you?',
-        a: '404 means the requested resource was not found -- the URL is valid but no data exists there. 200 means the request succeeded and the server returned the expected data. 500 means an internal server error occurred on the server side -- something went wrong in the application, not with the client\'s request.'
+        a: '404 means the requested resource was not found; the URL is valid but no data exists there. 200 means the request succeeded and the server returned the expected data. 500 means an internal server error occurred on the server side; something went wrong in the application, not with the client\'s request.'
       },
       {
         points: 400,
         q: 'What is a REST endpoint? Given the URL /api/students/42, what do you think the 42 represents?',
-        a: 'An endpoint is a specific URL on the server that the client can call to perform an action. In /api/students/42, the 42 is a path variable -- it identifies which student record you want. The endpoint /api/students/{id} combined with a GET method would retrieve the student with that ID.'
+        a: 'An endpoint is a specific URL on the server that the client can call to perform an action. In /api/students/42, the 42 is a path variable; it identifies which student record you want. The endpoint /api/students/{id} combined with a GET method would retrieve the student with that ID.'
       },
       {
         points: 600,
         q: 'What is the difference between a path variable, a query parameter, and a request body? When would you use each?',
-        a: 'A path variable (e.g., /students/42) identifies a specific resource by its ID -- use it when you are targeting one record. A query parameter (e.g., /students?grade=A) filters or refines a collection -- use it for search or optional filtering. A request body carries structured data (typically JSON) for creating or updating a resource -- use it with POST or PUT when you have multiple fields to send.'
+        a: 'A path variable (e.g., /students/42) identifies a specific resource by its ID; use it when you are targeting one record. A query parameter (e.g., /students?grade=A) filters or refines a collection; use it for search or optional filtering. A request body carries structured data (typically JSON) for creating or updating a resource; use it with POST or PUT when you have multiple fields to send.'
       },
       {
         points: 1000,
         q: 'In a Spring REST controller, what is the purpose of @PathVariable, @RequestParam, and @RequestBody? How would you use all three in a single endpoint?',
-        a: '@PathVariable extracts a value from the URL path (e.g., /students/{id}). @RequestParam reads a query string value (e.g., ?notify=true). @RequestBody deserializes the incoming JSON body into a Java object. You could combine them like: updateStudent(@PathVariable Long id, @RequestParam boolean notify, @RequestBody StudentDto dto) -- the path identifies which student, the param controls behavior, and the body carries the new data.'
+        a: '@PathVariable extracts a value from the URL path (e.g., /students/{id}). @RequestParam reads a query string value (e.g., ?notify=true). @RequestBody deserializes the incoming JSON body into a Java object. You could combine them like: updateStudent(@PathVariable Long id, @RequestParam boolean notify, @RequestBody StudentDto dto); the path identifies which student, the param controls behavior, and the body carries the new data.'
       }
     ]
   }
@@ -659,7 +659,7 @@ function buildGrid() {
         tile.setAttribute('tabindex', '0');
         tile.setAttribute('aria-label', `${cat.category} for ${q.points} points`);
       } else {
-        tile.setAttribute('aria-label', `${cat.category} ${q.points} points -- already played`);
+        tile.setAttribute('aria-label', `${cat.category} ${q.points} points, already played`);
       }
 
       const val = document.createElement('span');
@@ -770,7 +770,7 @@ function closeOverlay() {
       const [ci, qi] = activeKey.split('-').map(Number);
       const cat = BOARD[ci];
       const q   = cat.questions[qi];
-      tile.setAttribute('aria-label', `${cat.category} ${q.points} points -- already played`);
+      tile.setAttribute('aria-label', `${cat.category} ${q.points} points, already played`);
       // Remove event listeners by replacing node
       const newTile = tile.cloneNode(true);
       tile.parentNode.replaceChild(newTile, tile);

@@ -679,9 +679,12 @@ function updateDeckNote(){
    BUILD THE FILE  (one cluster per refiner; each has a true temper)
 ============================================================ */
 function buildFile(n){
-  const targetCells = Math.max(120, n * 7);
-  GRID_COLS = clamp(Math.round(Math.sqrt(targetCells * 1.9)), 12, 22);
-  GRID_ROWS = clamp(Math.ceil(targetCells / GRID_COLS), 7, 12);
+  // the grid scales with the cohort, so the field always holds exactly n
+  // selectable blocks at a roughly steady density (about 55% clustered)
+  // rather than n blocks hidden in a fixed oversized field
+  const targetCells = clamp(Math.round(n * 6.4), 56, 308);
+  GRID_COLS = clamp(Math.round(Math.sqrt(targetCells * 1.9)), 11, 22);
+  GRID_ROWS = clamp(Math.ceil(targetCells / GRID_COLS), 5, 14);
 
   const total = GRID_COLS * GRID_ROWS;
   gridCells = [];

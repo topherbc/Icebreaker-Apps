@@ -7,137 +7,97 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,300;0,400;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23eef1ec'/><g fill='none' stroke='%230b7c66' stroke-width='5' stroke-linejoin='round'><polygon points='50,14 84,50 50,86 16,50' opacity='0.38'/><polygon points='30,27 70,27 50,50'/><polygon points='30,73 70,73 50,50'/></g><circle cx='50' cy='50' r='4.5' fill='%230b7c66'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%2308323a'/><g fill='none' stroke='%237ce8d0' stroke-width='5' stroke-linejoin='round'><polygon points='50,14 84,50 50,86 16,50' opacity='0.42'/><polygon points='30,27 70,27 50,50'/><polygon points='30,73 70,73 50,50'/></g><circle cx='50' cy='50' r='4.5' fill='%237ce8d0'/></svg>">
 <style>
 /* ============================================================
-   TOKENS
+   DEV JEOPARDY  --  Lattice Industries, Week 11 review
+   Skinned to match the Macrodata Refinement terminal: deep Lumon
+   teal, glowing UI, JetBrains mono. Still a real Jeopardy board --
+   categories across the top, values descending, click to reveal.
+   Gold point values nod to classic Jeopardy while staying in palette.
+   Uniform high-contrast dark theme.
 ============================================================ */
 :root {
-  --bg:          #eef1ec;
-  --surface:     #f8faf6;
-  --border:      #cdd6cf;
-  --border-md:   #b4c0b6;
-  --accent:      #0b7c66;
-  --accent-lt:   #0d9079;
-  --accent-pale: rgba(11, 124, 102, 0.08);
-  --accent-ring: rgba(11, 124, 102, 0.24);
-  --teal:        #0a5a4d;
-  --teal-pale:   rgba(10, 90, 77, 0.10);
-  --amber:       #7c5009;
-  --amber-pale:  rgba(124, 80, 9, 0.08);
-  --slate:       #334155;
-  --text:        #14201c;
-  --text-2:      #34433d;
-  --muted:       #69776f;
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md:   0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
-  --shadow-lg:   0 12px 40px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.08);
+  --void:      #03110f;
+  --deep:      #062420;
+  --panel:     #082c28;
+  --panel-2:   #0a3531;
+  --line:      rgba(120,236,200,.16);
+  --line-md:   rgba(120,236,200,.30);
+  --ink:       #d8fff0;
+  --ink-2:     #a9e6d4;
+  --muted:     rgba(120,236,200,.52);
+  --glow:      #6ff0c4;
+  --glow-dim:  rgba(111,240,196,.55);
+  --accent:    #1fae90;
+  --accent-lt: #2fd0ad;
+  --gold:      #e7b341;
+  --gold-dim:  rgba(231,179,65,.5);
+  --serif:'Spectral',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.45);
+  --shadow-lg: 0 30px 80px rgba(0,0,0,.6);
 }
 
-/* ============================================================
-   RESET
-============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--sans);
   font-size: 18px;
   line-height: 1.65;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 50% -6%, rgba(31,174,144,.16) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 92% 108%, rgba(31,174,144,.10) 0%, transparent 60%);
 }
+button { font-family: inherit; cursor: pointer; color: inherit; }
+:focus-visible { outline: 2.5px solid var(--glow); outline-offset: 2px; border-radius: 4px; }
 
 /* ============================================================
    LOAD SCREEN
 ============================================================ */
 #load-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 40px 20px; position: relative; overflow: hidden;
 }
-
 .load-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-md);
-  padding: 52px 56px;
-  max-width: 480px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--deep) 100%);
+  border: 1px solid var(--line-md); border-radius: 16px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(120,236,200,.08);
+  padding: 52px 56px 46px; max-width: 500px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; position: relative;
 }
-
-.load-badge-icon {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 24px;
-  flex-shrink: 0;
+.load-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: var(--glow); border-radius: 16px 16px 0 0; box-shadow: 0 0 18px rgba(111,240,196,.5);
 }
-
+.load-badge-icon { width: 62px; height: 62px; margin-bottom: 22px; flex-shrink: 0; filter: drop-shadow(0 0 10px rgba(111,240,196,.4)); }
 .load-title {
-  font-family: 'Spectral', Georgia, serif;
-  font-size: 44px;
-  font-weight: 400;
-  color: var(--text);
-  letter-spacing: -0.3px;
-  line-height: 1.05;
-  text-align: center;
-  margin-bottom: 8px;
+  font-family: var(--serif); font-size: 44px; font-weight: 400; color: #eafff7;
+  letter-spacing: -0.3px; line-height: 1.05; text-align: center; margin-bottom: 10px;
 }
-
 .load-subtitle {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--muted);
-  text-align: center;
-  margin-bottom: 6px;
-  line-height: 1.5;
+  font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--glow); text-align: center; margin-bottom: 8px;
 }
-
 .load-flavor {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--accent);
-  text-align: center;
-  margin-bottom: 36px;
-  letter-spacing: 0.04em;
+  font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-2);
+  text-align: center; margin-bottom: 32px;
 }
-
-.load-divider {
-  width: 100%;
-  height: 1px;
-  background: var(--border);
-  margin-bottom: 28px;
-}
-
+.load-divider { width: 100%; height: 1px; background: var(--line); margin-bottom: 28px; }
 .load-btn {
-  width: 100%;
-  background: var(--accent);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  padding: 14px 32px;
-  min-height: 52px;
-  cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-  box-shadow: 0 2px 8px rgba(11, 124, 102, 0.28);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+  width: 100%; background: var(--accent); color: #022019; border: none; border-radius: 10px;
+  font-family: var(--sans); font-size: 18px; font-weight: 700; padding: 14px 32px; min-height: 54px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s; box-shadow: 0 2px 16px rgba(47,208,173,.34);
 }
-
-.load-btn:hover { background: var(--accent-lt); box-shadow: 0 4px 14px rgba(11,124,102,0.36); }
+.load-btn:hover { background: var(--accent-lt); box-shadow: 0 4px 22px rgba(47,208,173,.46); }
 .load-btn:active { transform: scale(0.98); }
 .load-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
 
@@ -146,333 +106,141 @@ body {
 ============================================================ */
 #game-screen { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
 
-/* Top bar */
 .top-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  height: 52px;
-  flex-shrink: 0;
-  gap: 12px;
-  z-index: 5;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--deep) 100%);
+  border-bottom: 1px solid var(--line); display: flex; align-items: center;
+  padding: 0 20px; height: 56px; flex-shrink: 0; gap: 12px; z-index: 5;
 }
-
-.top-bar-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.top-bar-icon { width: 24px; height: 24px; flex-shrink: 0; }
-
-.top-bar-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-}
-
+.top-bar-brand { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
+.top-bar-icon { width: 24px; height: 24px; flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(111,240,196,.35)); }
+.top-bar-title { font-size: 15px; font-weight: 700; color: #eafff7; white-space: nowrap; letter-spacing: 0.01em; }
 .top-bar-spacer { flex: 1; min-width: 12px; }
-
 .reset-game-btn {
-  background: var(--bg);
-  border: 1.5px solid var(--border-md);
-  border-radius: 8px;
-  color: var(--text-2);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 6px 14px;
-  min-height: 36px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  background: rgba(120,236,200,.06); border: 1.5px solid var(--line-md); border-radius: 8px;
+  color: var(--ink-2); font-family: var(--sans); font-size: 14px; font-weight: 600;
+  padding: 6px 14px; min-height: 38px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-
-.reset-game-btn:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+.reset-game-btn:hover { background: rgba(120,236,200,.14); border-color: var(--glow); color: var(--glow); }
 .reset-game-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-/* Grid area */
-.grid-area {
-  flex: 1;
-  overflow: auto;
-  padding: 20px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
+.grid-area { flex: 1; overflow: auto; padding: 20px; display: flex; align-items: flex-start; justify-content: center; }
+.jeopardy-grid { width: 100%; max-width: 1600px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
 
-/* Jeopardy grid */
-.jeopardy-grid {
-  width: 100%;
-  max-width: 1600px;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
-
-/* Category headers */
 .category-header {
-  background: var(--accent);
-  color: #ffffff;
-  border-radius: 8px;
-  padding: 14px 12px;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  line-height: 1.3;
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: linear-gradient(180deg, var(--panel-2) 0%, var(--panel) 100%);
+  color: var(--glow); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 12px; text-align: center; font-family: var(--mono);
+  font-size: 13px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.3;
+  min-height: 64px; display: flex; align-items: center; justify-content: center;
+  text-shadow: 0 0 12px rgba(111,240,196,.3);
 }
 
-/* Point tiles */
 .tile {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  min-height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
-  box-shadow: var(--shadow-sm);
-  position: relative;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--deep) 100%);
+  border: 1.5px solid var(--line); border-radius: 10px; min-height: 80px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s, background 0.15s;
+  box-shadow: var(--shadow-sm); position: relative;
 }
-
 .tile:hover:not(.tile-used) {
-  background: var(--accent-pale);
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
+  border-color: var(--glow);
+  box-shadow: 0 0 0 1px var(--glow-dim), 0 8px 22px rgba(0,0,0,.4), inset 0 0 26px rgba(111,240,196,.08);
   transform: translateY(-2px);
 }
-
 .tile:active:not(.tile-used) { transform: translateY(0); }
-
 .tile-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: -0.5px;
+  font-family: var(--mono); font-size: 25px; font-weight: 700; color: var(--gold);
+  letter-spacing: -0.5px; text-shadow: 0 0 14px var(--gold-dim);
 }
-
-/* Used tile state */
 .tile.tile-used {
-  background: var(--bg);
-  border-color: var(--border);
-  cursor: default;
-  box-shadow: none;
+  background: rgba(8,44,40,.4); border-color: rgba(120,236,200,.08); cursor: default; box-shadow: none;
 }
-
-.tile-used .tile-value {
-  text-decoration: line-through;
-  color: var(--muted);
-  opacity: 0.5;
-}
-
+.tile-used .tile-value { text-decoration: line-through; color: rgba(120,236,200,.22); text-shadow: none; }
 .tile-done-label {
-  display: none;
-  position: absolute;
-  bottom: 6px;
-  left: 0; right: 0;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  display: none; position: absolute; bottom: 6px; left: 0; right: 0; text-align: center;
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: rgba(120,236,200,.3);
 }
-
 .tile.tile-used .tile-done-label { display: block; }
 
 /* ============================================================
    QUESTION OVERLAY
 ============================================================ */
 #overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(17, 24, 39, 0.72);
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  backdrop-filter: blur(4px);
+  display: none; position: fixed; inset: 0; z-index: 100; background: rgba(2,12,10,.78);
+  align-items: center; justify-content: center; padding: 40px 20px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
-
-#overlay.open { display: flex; }
+#overlay.open { display: flex; animation: ovIn .25s var(--ease); }
+@keyframes ovIn { from { opacity: 0; } to { opacity: 1; } }
 
 .overlay-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  box-shadow: var(--shadow-lg);
-  padding: 48px 52px;
-  max-width: 720px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  position: relative;
+  background: linear-gradient(180deg, var(--panel-2) 0%, var(--deep) 100%);
+  border: 1px solid var(--line-md); border-radius: 20px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(120,236,200,.08);
+  padding: 46px 50px; max-width: 740px; width: 100%; max-height: 90vh; overflow-y: auto;
+  display: flex; flex-direction: column; position: relative; animation: panelIn .35s var(--ease);
 }
-
+@keyframes panelIn { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .overlay-panel::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  border-radius: 20px 20px 0 0;
-  background: linear-gradient(90deg, var(--accent) 0%, var(--teal) 100%);
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, var(--glow) 0%, var(--gold) 100%); box-shadow: 0 0 16px rgba(111,240,196,.4);
 }
-
-.overlay-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
+.overlay-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
 .overlay-category {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: var(--accent-pale);
-  border: 1px solid rgba(11, 124, 102, 0.22);
-  border-radius: 6px;
-  padding: 4px 10px;
+  font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--glow); background: rgba(111,240,196,.10);
+  border: 1px solid var(--line-md); border-radius: 6px; padding: 4px 10px;
 }
-
-.overlay-points {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.overlay-question {
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.55;
-  margin-bottom: 28px;
-}
-
+.overlay-points { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--gold); text-shadow: 0 0 12px var(--gold-dim); }
+.overlay-question { font-size: 22px; font-weight: 600; color: #eafff7; line-height: 1.55; margin-bottom: 28px; }
 .overlay-question code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
-  background: var(--accent-pale);
-  border-radius: 4px;
-  padding: 1px 6px;
-  color: var(--accent);
+  font-family: var(--mono); font-size: 18px; background: rgba(111,240,196,.10);
+  border-radius: 4px; padding: 1px 6px; color: #bafff0;
 }
-
-/* Answer block -- hidden until revealed */
 .overlay-answer-block {
-  display: none;
-  background: var(--teal-pale);
-  border: 1px solid rgba(10, 102, 87, 0.22);
-  border-radius: 12px;
-  padding: 20px 24px;
-  margin-bottom: 24px;
+  display: none; background: rgba(111,240,196,.06); border: 1px solid var(--line-md);
+  border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;
 }
-
 .overlay-answer-block.show { display: block; }
-
 .overlay-answer-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--teal);
-  margin-bottom: 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--glow); margin-bottom: 8px;
 }
-
-.overlay-answer-text {
-  font-size: 18px;
-  color: var(--text-2);
-  line-height: 1.65;
-}
-
+.overlay-answer-text { font-size: 18px; color: var(--ink-2); line-height: 1.65; }
 .overlay-answer-text code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 15px;
-  background: rgba(10, 102, 87, 0.12);
-  border-radius: 4px;
-  padding: 1px 5px;
-  color: var(--teal);
+  font-family: var(--mono); font-size: 15px; background: rgba(111,240,196,.10);
+  border-radius: 4px; padding: 1px 5px; color: #bafff0;
 }
-
-/* Overlay buttons */
-.overlay-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
+.overlay-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .reveal-answer-btn {
-  flex: 1;
-  min-width: 160px;
-  min-height: 52px;
-  background: var(--teal);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-  box-shadow: 0 2px 8px rgba(10,102,87,0.28);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  flex: 1; min-width: 160px; min-height: 52px; background: var(--accent); color: #022019;
+  border: none; border-radius: 10px; font-family: var(--sans); font-size: 17px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s; box-shadow: 0 2px 16px rgba(47,208,173,.3);
 }
-
-.reveal-answer-btn:hover { background: #0c7a6a; box-shadow: 0 4px 14px rgba(10,102,87,0.36); }
+.reveal-answer-btn:hover { background: var(--accent-lt); box-shadow: 0 4px 20px rgba(47,208,173,.42); }
 .reveal-answer-btn:active { transform: scale(0.98); }
-.reveal-answer-btn:disabled { background: var(--border); color: var(--muted); box-shadow: none; cursor: default; }
+.reveal-answer-btn:disabled { background: rgba(120,236,200,.12); color: var(--muted); box-shadow: none; cursor: default; }
 .reveal-answer-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-
 .back-to-board-btn {
-  flex: 1;
-  min-width: 160px;
-  min-height: 52px;
-  background: var(--bg);
-  border: 1.5px solid var(--border-md);
-  border-radius: 10px;
-  color: var(--text-2);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  flex: 1; min-width: 160px; min-height: 52px; background: rgba(120,236,200,.06);
+  border: 1.5px solid var(--line-md); border-radius: 10px; color: var(--ink-2);
+  font-family: var(--sans); font-size: 17px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-
-.back-to-board-btn:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+.back-to-board-btn:hover { background: rgba(120,236,200,.14); border-color: var(--glow); color: var(--glow); }
 .back-to-board-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+@media (max-width: 720px) {
+  .load-card { padding: 38px 28px 32px; }
+  .load-title { font-size: 34px; }
+  .overlay-panel { padding: 32px 24px; }
+  .category-header { font-size: 11px; }
+  .tile-value { font-size: 20px; }
+}
 </style>
 </head>
 <body>
@@ -483,17 +251,17 @@ body {
 <div id="load-screen">
   <div class="load-card">
     <svg class="load-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <g fill="none" stroke="#0b7c66" stroke-width="3.2" stroke-linejoin="round">
-        <polygon points="32,7 55,32 32,57 9,32" opacity="0.38"/>
+      <g fill="none" stroke="#7ce8d0" stroke-width="3.2" stroke-linejoin="round">
+        <polygon points="32,7 55,32 32,57 9,32" opacity="0.42"/>
         <polygon points="19,17 45,17 32,32"/>
         <polygon points="19,47 45,47 32,32"/>
       </g>
-      <circle cx="32" cy="32" r="3" fill="#0b7c66"/>
+      <circle cx="32" cy="32" r="3" fill="#7ce8d0"/>
     </svg>
 
     <h1 class="load-title">The Quarterly Review</h1>
     <p class="load-subtitle">Lattice Industries // Numeric Refinement</p>
-    <p class="load-flavor">Eleven weeks. Seven categories. One Board.</p>
+    <p class="load-flavor">Eleven weeks. Seven categories. One board.</p>
 
     <div class="load-divider"></div>
 
@@ -515,11 +283,11 @@ body {
   <header class="top-bar">
     <div class="top-bar-brand">
       <svg class="top-bar-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <g fill="none" stroke="#0b7c66" stroke-width="3.6" stroke-linejoin="round">
-          <polygon points="32,7 55,32 32,57 9,32" opacity="0.38"/>
+        <g fill="none" stroke="#7ce8d0" stroke-width="3.6" stroke-linejoin="round">
+          <polygon points="32,7 55,32 32,57 9,32" opacity="0.42"/>
           <polygon points="19,17 45,17 32,32"/><polygon points="19,47 45,47 32,32"/>
         </g>
-        <circle cx="32" cy="32" r="3.2" fill="#0b7c66"/>
+        <circle cx="32" cy="32" r="3.2" fill="#7ce8d0"/>
       </svg>
       <span class="top-bar-title">The Quarterly Review</span>
     </div>
@@ -941,7 +709,7 @@ function openOverlay(catIdx, qIdx, tilEl) {
     if (parts.length >= 2) {
       const qText  = escHtml(parts[0]);
       const codeBlock = parts.slice(1).join('\n\n');
-      qEl.innerHTML = `${qText}<br><br><code style="display:block;white-space:pre;font-family:'JetBrains Mono',monospace;font-size:15px;background:var(--accent-pale);border-radius:8px;padding:14px 16px;margin-top:2px;line-height:1.6;color:var(--accent);">${escHtml(codeBlock)}</code>`;
+      qEl.innerHTML = `${qText}<br><br><code style="display:block;white-space:pre;font-family:'JetBrains Mono',monospace;font-size:15px;background:rgba(111,240,196,.07);border:1px solid rgba(120,236,200,.18);border-radius:8px;padding:14px 16px;margin-top:2px;line-height:1.6;color:#bafff0;">${escHtml(codeBlock)}</code>`;
     } else {
       qEl.textContent = q.q;
     }

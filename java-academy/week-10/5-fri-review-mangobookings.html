@@ -7,11 +7,13 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%231e0e18'/><text y='66' x='50' text-anchor='middle' font-size='52' font-family='serif' fill='%23fde8c0'>&#x1F39F;</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   CSS VARIABLES -- Mango palette adapted for box-office / marquee
-   (extends the Mango Music + Mango XM family from week 9)
+   MangoBookings -- Box Office
+   Refined Mango palette (cream / orange / purple) reskinned with
+   old-school ticket materials: serrated ADMIT ONE stubs, serials,
+   barcodes, gate dispensers, and a rubber-stamp reveal.
 ============================================================ */
 :root {
   --bg:           #faf6f1;
@@ -43,19 +45,29 @@
   --muted:        #8a6040;
   --muted-lt:     #8c5830;
 
-  /* Marquee / box-office tones */
-  --marquee-bg:   #1e0e18;
-  --marquee-bg2:  #2a1420;
+  /* Box-office tones */
+  --sign-bg:      #1e0e18;
+  --sign-bg2:     #2a1420;
   --bulb-on:      #ffd98a;
   --bulb-glow:    rgba(255,217,138,0.85);
-  --bulb-off:     #5a3a2a;
-  --letterboard:  #0a0508;
   --board-on:     #fde8c0;
-  --board-muted:  rgba(253,232,192,0.32);
+  --board-muted:  rgba(253,232,192,0.34);
+
+  /* Ticket paper */
   --ticket-paper: #fbf3e4;
-  --ticket-edge:  #e7d8bd;
+  --ticket-paper2:#f5ead3;
+  --ticket-edge:  #e2d2b4;
+  --ticket-ink:   #2a1c0c;
+
+  /* Gate accents -- all drawn from the mango family */
+  --gate-a:       #c05a3a;  /* orange  */
+  --gate-b:       #6b3fa0;  /* purple  */
+  --gate-c:       #2f8f7e;  /* jade    */
+  --gate-d:       #b07a2a;  /* gold    */
+
   --signal-green: #5aaa6a;
   --confirm-green:#3a8a4a;
+  --stamp-ink:    #b23320;  /* faded rubber-stamp red */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -81,7 +93,7 @@ body {
   justify-content: center;
   height: 100vh;
   background:
-    radial-gradient(ellipse 70% 50% at 30% 60%, rgba(107,63,160,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 30% 60%, rgba(107,63,160,0.13) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 75% 35%, rgba(192,90,58,0.10) 0%, transparent 60%),
     var(--bg);
   position: relative;
@@ -96,44 +108,46 @@ body {
   pointer-events: none;
 }
 
-/* Mini marquee on the load screen */
-.load-marquee {
+/* Vintage box-office sign */
+.load-sign {
   position: relative;
-  background: linear-gradient(180deg, var(--marquee-bg2) 0%, var(--marquee-bg) 100%);
+  background: linear-gradient(180deg, var(--sign-bg2) 0%, var(--sign-bg) 100%);
   border-radius: 14px;
-  padding: 26px 40px 22px;
-  margin-bottom: 36px;
-  box-shadow: 0 12px 40px rgba(26,13,46,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+  padding: 16px 30px 20px;
+  margin-bottom: 38px;
+  box-shadow: 0 14px 44px rgba(26,13,46,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
-.load-marquee-bulbs {
+.load-sign-bulbs {
   display: flex;
   justify-content: center;
-  gap: 11px;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.load-bulb {
+.bulb {
   width: 9px; height: 9px;
   border-radius: 50%;
   background: var(--bulb-on);
-  box-shadow: 0 0 8px var(--bulb-glow);
-  animation: bulb-chase 1.4s ease-in-out infinite;
+  box-shadow: 0 0 9px var(--bulb-glow);
+  flex-shrink: 0;
+  animation: bulb-chase 1.7s ease-in-out infinite;
 }
 
 @keyframes bulb-chase {
   0%, 100% { opacity: 1; box-shadow: 0 0 9px var(--bulb-glow); }
-  50%      { opacity: 0.28; box-shadow: 0 0 3px rgba(255,217,138,0.3); }
+  50%      { opacity: 0.30; box-shadow: 0 0 3px rgba(255,217,138,0.3); }
 }
 
-.load-marquee-ticket {
+.load-sign-placard {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 3px;
+  font-weight: 700;
+  letter-spacing: 5px;
   text-transform: uppercase;
-  color: var(--board-muted);
+  color: var(--board-on);
   text-align: center;
+  text-shadow: 0 0 16px rgba(253,232,192,0.4);
 }
 
 .load-title {
@@ -160,7 +174,7 @@ body {
   letter-spacing: 3.5px;
   text-transform: uppercase;
   color: var(--muted-lt);
-  margin-bottom: 48px;
+  margin-bottom: 46px;
   text-align: center;
 }
 
@@ -172,12 +186,7 @@ body {
   width: 320px;
 }
 
-.load-label {
-  font-size: 17px;
-  color: var(--text-2);
-  font-weight: 500;
-  text-align: center;
-}
+.load-label { font-size: 17px; color: var(--text-2); font-weight: 500; text-align: center; }
 
 .load-input {
   width: 100px;
@@ -194,10 +203,7 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.load-input:focus {
-  border-color: var(--purple);
-  box-shadow: 0 0 0 3px var(--purple-pale);
-}
+.load-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-pale); }
 
 .load-btn {
   background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 100%);
@@ -230,268 +236,279 @@ body {
 }
 
 /* ============================================================
-   ZONE 1: MARQUEE
+   ZONE 1: BOX-OFFICE SIGN
 ============================================================ */
-.marquee {
-  background: linear-gradient(180deg, var(--marquee-bg2) 0%, var(--marquee-bg) 100%);
-  border-bottom: 3px solid rgba(0,0,0,0.6);
+.boxoffice-sign {
+  background: linear-gradient(180deg, var(--sign-bg2) 0%, var(--sign-bg) 100%);
+  border-bottom: 3px solid rgba(0,0,0,0.55);
   flex-shrink: 0;
   position: relative;
-  box-shadow: 0 4px 28px rgba(0,0,0,0.5);
-  overflow: hidden;
-  padding: 0 0 6px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+  padding: 0 0 4px;
 }
 
-.marquee::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Bulb rows top and bottom */
-.bulb-row {
+.sign-bulbs {
   display: flex;
   justify-content: space-between;
-  padding: 9px 22px 7px;
-  position: relative;
-  z-index: 2;
+  padding: 8px 22px 4px;
 }
 
-.bulb-row.bottom { padding: 5px 22px 4px; }
-
-.bulb {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: var(--bulb-on);
-  box-shadow: 0 0 9px var(--bulb-glow);
-  flex-shrink: 0;
-  animation: bulb-chase 1.6s ease-in-out infinite;
-}
-
-/* Row 1: brand | letterboard | stage tiles */
-.marquee-top-row {
+.sign-row {
   display: flex;
-  align-items: stretch;
-  gap: 0;
-  padding: 4px 24px 8px;
-  position: relative;
-  z-index: 2;
+  align-items: center;
+  gap: 18px;
+  padding: 2px 26px 8px;
 }
 
-.marquee-brand {
-  flex-shrink: 0;
+.sign-brand {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding-right: 22px;
+  gap: 2px;
+  padding-right: 20px;
   border-right: 1px solid rgba(255,255,255,0.08);
-  margin-right: 22px;
-  min-width: 150px;
+  flex-shrink: 0;
 }
 
-.marquee-brand-name {
+.sign-brand-name {
   font-family: 'Playfair Display', serif;
-  font-size: 27px;
+  font-size: 26px;
   font-weight: 900;
   color: var(--board-on);
-  text-shadow: 0 0 22px rgba(253,232,192,0.40);
+  text-shadow: 0 0 22px rgba(253,232,192,0.4);
   letter-spacing: -0.5px;
   line-height: 1;
 }
 
-.marquee-brand-name span {
-  color: var(--orange-lt);
-}
+.sign-brand-name span { color: var(--orange-lt); }
 
-.marquee-brand-sub {
-  font-size: 8px;
+.sign-brand-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  color: rgba(253,232,192,0.32);
+  color: var(--board-muted);
 }
 
-/* Letterboard -- the "now booking" marquee text */
-.marquee-board-wrap {
+.sign-serving {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 7px;
   min-width: 0;
-}
-
-.marquee-now-line {
   display: flex;
   align-items: baseline;
-  gap: 11px;
-  padding: 0 4px;
+  gap: 12px;
 }
 
-.marquee-now-tag {
+.sign-serving-tag {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 2px;
   color: var(--orange-lt);
   text-shadow: 0 0 12px rgba(212,115,78,0.5);
   flex-shrink: 0;
 }
 
-.marquee-now-show {
+.sign-serving-text {
   font-family: 'Playfair Display', serif;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--board-on);
-  text-shadow: 0 0 14px rgba(253,232,192,0.45);
-  flex: 1;
+  text-shadow: 0 0 14px rgba(253,232,192,0.4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Animated letterboard underline lights */
-.marquee-strip {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  height: 22px;
-  padding: 0 4px;
-}
-
-.marquee-strip-cell {
-  flex: 1;
-  height: 5px;
-  border-radius: 2px;
-  animation: strip-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes strip-pulse {
-  0%, 100% { opacity: 0.22; transform: scaleY(0.5); }
-  50%      { opacity: 0.9;  transform: scaleY(1); }
-}
-
-.marquee-strip.idle .marquee-strip-cell {
-  animation: none;
-  opacity: 0.12;
-  transform: scaleY(0.5);
-}
-
-/* Stage tiles -- the showtimes */
-.stage-tiles {
+.sign-house {
   flex-shrink: 0;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding-left: 22px;
-  border-left: 1px solid rgba(255,255,255,0.08);
-  margin-left: 4px;
-}
-
-.stage-tile {
-  width: 132px;
-  min-height: 82px;
-  border-radius: 8px;
-  border: 1.5px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 4px;
-  padding: 9px 13px;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-  position: relative;
-  text-align: left;
-}
-
-.stage-tile:hover {
-  background: rgba(255,255,255,0.09);
-  border-color: rgba(255,255,255,0.22);
-}
-
-.stage-tile:focus-visible {
-  outline: 2px solid var(--orange-lt);
-  outline-offset: 2px;
-}
-
-.stage-tile.active-stage {
-  background: linear-gradient(135deg, rgba(61,31,94,0.85), rgba(107,63,160,0.6));
-  border-color: rgba(155,111,168,0.65);
-  box-shadow: 0 0 18px rgba(107,63,160,0.35), inset 0 0 12px rgba(107,63,160,0.15);
-}
-
-.stage-tile.cleared-stage {
-  background: linear-gradient(135deg, rgba(26,58,32,0.7), rgba(31,74,40,0.6));
-  border-color: rgba(90,170,106,0.45);
-  cursor: default;
-}
-
-.stage-tile.cleared-stage:hover {
-  background: linear-gradient(135deg, rgba(26,58,32,0.7), rgba(31,74,40,0.6));
-  border-color: rgba(90,170,106,0.45);
-}
-
-.stage-tile.active-stage::after {
-  content: '';
-  position: absolute;
-  top: 7px; right: 8px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--purple-lt);
-  box-shadow: 0 0 6px var(--purple-lt);
-}
-
-.stage-tile.cleared-stage::after {
-  content: '';
-  position: absolute;
-  top: 7px; right: 8px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--signal-green);
-  box-shadow: 0 0 6px var(--signal-green);
-}
-
-.stage-tile-gate {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: rgba(253,232,192,0.40);
-  line-height: 1;
-  letter-spacing: 0.5px;
-}
-
-.stage-tile.active-stage .stage-tile-gate { color: rgba(253,232,192,0.75); }
-.stage-tile.cleared-stage .stage-tile-gate { color: rgba(90,170,106,0.75); }
-
-.stage-tile-name {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(253,232,192,0.72);
-  line-height: 1.2;
-}
-
-.stage-tile.active-stage .stage-tile-name { color: rgba(253,232,192,0.96); }
-.stage-tile.cleared-stage .stage-tile-name { color: rgba(90,170,106,0.92); }
-
-.stage-tile-status {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  color: rgba(253,232,192,0.26);
+  color: var(--board-muted);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 6px 16px;
 }
 
-.stage-tile.active-stage .stage-tile-status { color: rgba(155,111,168,0.92); }
-.stage-tile.cleared-stage .stage-tile-status { color: var(--signal-green); }
+.sign-house strong { color: var(--board-on); }
 
 /* ============================================================
-   ZONE 2: BOOKING PANEL
+   ZONE 2: THE COUNTER (gate dispensers)
+============================================================ */
+.counter {
+  flex-shrink: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.5), rgba(0,0,0,0.02)),
+    var(--bg3);
+  border-bottom: 1px solid var(--border-md);
+  box-shadow: inset 0 -6px 14px rgba(110,60,20,0.06);
+  padding: 16px 26px 18px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.gate-dispenser {
+  --gc: var(--orange);
+  width: 210px;
+  min-height: 108px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(0,0,0,0.12)),
+    var(--gc);
+  border: none;
+  box-shadow: 0 7px 16px rgba(60,30,10,0.22), inset 0 1px 0 rgba(255,255,255,0.38), inset 0 -3px 7px rgba(0,0,0,0.20);
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 11px 13px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  text-align: left;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.gate-0 { --gc: var(--gate-a); }
+.gate-1 { --gc: var(--gate-b); }
+.gate-2 { --gc: var(--gate-c); }
+.gate-3 { --gc: var(--gate-d); }
+
+.gate-dispenser:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 24px rgba(60,30,10,0.30), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -3px 7px rgba(0,0,0,0.20);
+}
+.gate-dispenser:active { transform: translateY(0); }
+.gate-dispenser:focus-visible { outline: 3px solid var(--board-on); outline-offset: 2px; }
+
+.gate-dispenser.active-stage {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.65), 0 0 0 6px rgba(0,0,0,0.10), 0 12px 26px rgba(60,30,10,0.32), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.gd-plate {
+  background: var(--cream);
+  border-radius: 7px;
+  padding: 7px 11px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.gd-letter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--muted-lt);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gd-letter::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gc);
+}
+
+.gd-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+/* Dark slot with a peeking ticket */
+.gd-slot {
+  height: 14px;
+  border-radius: 3px;
+  background: #1a1008;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.7);
+  position: relative;
+  margin-top: auto;
+}
+
+.gd-peek {
+  position: absolute;
+  left: 10px; right: 10px; top: -7px;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, var(--ticket-paper) 0 6px, var(--ticket-edge) 6px 7px);
+  border-radius: 2px 2px 0 0;
+  box-shadow: 0 -1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.15s;
+}
+
+.gate-dispenser:hover .gd-peek { transform: translateY(2px); }
+.gate-dispenser.pulling .gd-peek { animation: peek-pull 0.3s ease-in forwards; }
+
+@keyframes peek-pull {
+  to { transform: translateY(24px); opacity: 0; }
+}
+
+.gd-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gd-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--board-on);
+  background: rgba(26,16,8,0.55);
+  padding: 3px 9px;
+  border-radius: 11px;
+}
+
+.gd-pull {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Sold-out dispenser */
+.gate-dispenser.sold-out { cursor: default; filter: saturate(0.55) brightness(0.93); }
+.gate-dispenser.sold-out:hover { transform: none; box-shadow: 0 7px 16px rgba(60,30,10,0.22), inset 0 1px 0 rgba(255,255,255,0.38), inset 0 -3px 7px rgba(0,0,0,0.20); }
+.gate-dispenser.sold-out .gd-peek { display: none; }
+
+.gd-soldout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.gd-soldout span {
+  border: 3px double var(--stamp-ink);
+  color: var(--stamp-ink);
+  background: rgba(251,243,228,0.45);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: 6px;
+  transform: rotate(-11deg);
+}
+
+/* ============================================================
+   ZONE 3: BOOKING PANEL
 ============================================================ */
 .booking-panel {
   flex: 1;
@@ -504,7 +521,7 @@ body {
 .booking-header {
   background: var(--cream-dk);
   border-bottom: 1px solid var(--border);
-  padding: 12px 28px;
+  padding: 11px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -513,7 +530,7 @@ body {
 
 .booking-stage-label {
   font-family: 'Playfair Display', serif;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--text);
 }
@@ -531,18 +548,14 @@ body {
   align-items: center;
 }
 
-.booking-ticket-badge strong {
-  color: var(--orange);
-  margin: 0 2px;
-}
+.booking-ticket-badge strong { color: var(--orange); margin: 0 2px; }
 
 .booking-body {
   flex: 1;
   overflow-y: auto;
-  padding: 28px 36px;
+  padding: 26px 36px 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
 }
 
 .booking-body::-webkit-scrollbar { width: 4px; }
@@ -554,74 +567,166 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   color: var(--muted-lt);
   text-align: center;
   min-height: 200px;
 }
 
-.booking-idle-icon { font-size: 44px; opacity: 0.3; line-height: 1; }
-.booking-idle p { font-size: 17px; color: var(--muted-lt); }
+.booking-idle-icon { font-size: 46px; opacity: 0.3; line-height: 1; }
+.booking-idle p { font-size: 18px; color: var(--muted-lt); }
 
 /* ============================================================
-   TICKET CARD -- the question lives on a ticket stub
+   THE TICKET (ADMIT ONE stub)
 ============================================================ */
 .ticket-card {
-  background: var(--ticket-paper);
-  border: 1px solid var(--ticket-edge);
-  border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(110,60,20,0.10), 0 1px 0 rgba(255,255,255,0.6) inset;
-  overflow: hidden;
   position: relative;
-}
-
-/* Ticket stub header strip */
-.ticket-stub {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 24px;
-  background: linear-gradient(180deg, var(--cream-dk), var(--ticket-paper));
+  align-items: stretch;
+  border-radius: 14px;
+  /* Notches punched at the perforation (x = 196px) using the panel bg color */
+  background:
+    radial-gradient(circle 11px at 196px -2px, var(--bg) 11px, transparent 12px),
+    radial-gradient(circle 11px at 196px calc(100% + 2px), var(--bg) 11px, transparent 12px),
+    linear-gradient(180deg, var(--ticket-paper) 0%, var(--ticket-paper2) 100%);
+  box-shadow:
+    0 8px 26px rgba(110,60,20,0.14),
+    inset 0 0 0 1px var(--ticket-edge),
+    inset 0 0 0 5px var(--ticket-paper),
+    inset 0 0 0 6px rgba(180,140,80,0.20);
+  overflow: hidden;
+  animation: ticket-drop 0.34s cubic-bezier(0.2, 1.1, 0.5, 1);
+}
+
+@keyframes ticket-drop {
+  0%   { opacity: 0; transform: translateY(-16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Left stub */
+.ticket-stub {
+  width: 196px;
+  flex-shrink: 0;
+  border-right: 2px dashed var(--ticket-edge);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   position: relative;
 }
 
-/* Perforation line under the stub */
-.ticket-stub::after {
-  content: '';
-  position: absolute;
-  left: 16px; right: 16px; bottom: 0;
-  border-bottom: 2px dashed var(--ticket-edge);
-}
-
-.ticket-stub-no {
+.stub-admit {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--muted-lt);
-  text-transform: uppercase;
-}
-
-.ticket-stub-no strong { color: var(--orange); }
-
-.ticket-stub-stage {
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gc, var(--orange));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stub-serial-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-bottom: 2px;
+}
+
+.stub-serial {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--ticket-ink);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.stub-gate {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+  background: var(--gc, var(--orange));
+  border-radius: 5px;
+  padding: 4px 10px;
+  align-self: flex-start;
+}
+
+.stub-barcode {
+  margin-top: auto;
+  height: 30px;
+  background: repeating-linear-gradient(90deg,
+    var(--ticket-ink) 0 2px, transparent 2px 4px,
+    var(--ticket-ink) 4px 5px, transparent 5px 8px,
+    var(--ticket-ink) 8px 11px, transparent 11px 13px);
+  opacity: 0.78;
+  border-radius: 1px;
+}
+
+.stub-fineprint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  opacity: 0.8;
+}
+
+/* Right main */
+.ticket-main {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 28px 26px;
+  position: relative;
+}
+
+.ticket-microprint {
+  position: absolute;
+  bottom: 6px; left: 0; right: 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--purple);
-  background: var(--purple-pale);
-  border: 1px solid rgba(107,63,160,0.18);
-  border-radius: 5px;
-  padding: 3px 12px;
+  color: rgba(110,60,20,0.28);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.ticket-main {
-  padding: 22px 26px 26px;
+/* Rubber-stamp reveal */
+.stamp {
+  position: absolute;
+  top: 12px; right: 22px;
+  border: 3px double var(--stamp-ink);
+  color: var(--stamp-ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 6px 15px;
+  border-radius: 7px;
+  transform: rotate(-13deg);
+  opacity: 0.8;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 3;
+  animation: stamp-thunk 0.42s cubic-bezier(0.2, 1.5, 0.5, 1) both;
 }
 
-/* Question display */
+@keyframes stamp-thunk {
+  0%   { opacity: 0;    transform: rotate(-13deg) scale(1.8); }
+  60%  { opacity: 0.85; transform: rotate(-13deg) scale(0.92); }
+  100% { opacity: 0.8;  transform: rotate(-13deg) scale(1); }
+}
+
+/* Question content */
 .q-format-tag {
   display: inline-block;
   background: var(--surface);
@@ -652,7 +757,6 @@ body {
   line-height: 1.5;
 }
 
-/* Code block */
 .q-code {
   background: #1a1008;
   border: 1px solid rgba(255,255,255,0.06);
@@ -664,7 +768,7 @@ body {
   color: var(--board-on);
   line-height: 1.7;
   overflow-x: auto;
-  margin-top: 4px;
+  margin-top: 14px;
   white-space: pre;
   box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
 }
@@ -673,7 +777,7 @@ body {
   display: inline-block;
   min-width: 84px;
   border-bottom: 2px solid var(--orange-lt);
-  background: rgba(212,115,78,0.08);
+  background: rgba(212,115,78,0.10);
   border-radius: 2px;
   padding: 0 4px;
   margin: 0 2px;
@@ -693,7 +797,7 @@ body {
   caret-color: var(--orange-lt);
 }
 
-/* Recall prompt (no options -- speak it from memory) */
+/* Recall cue (no options) */
 .recall-cue {
   display: flex;
   align-items: center;
@@ -710,12 +814,12 @@ body {
 
 .recall-cue svg { flex-shrink: 0; }
 
-/* Multiple choice / code trace options */
+/* Multiple choice / code trace */
 .mc-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 14px;
 }
 
 .mc-btn {
@@ -723,10 +827,8 @@ body {
   border: 2px solid var(--border-md);
   border-radius: 10px;
   padding: 14px 18px;
-  min-height: 64px;
+  min-height: 62px;
   text-align: left;
-  cursor: default;
-  font-family: 'DM Sans', sans-serif;
   font-size: 16px;
   font-weight: 500;
   color: var(--text);
@@ -750,16 +852,8 @@ body {
   margin-top: 1px;
 }
 
-.mc-btn.revealed-correct {
-  background: #e8f5ea;
-  border-color: var(--signal-green);
-}
-
-.mc-btn.revealed-correct .mc-letter {
-  background: var(--signal-green);
-  color: white;
-}
-
+.mc-btn.revealed-correct { background: #e8f5ea; border-color: var(--signal-green); }
+.mc-btn.revealed-correct .mc-letter { background: var(--signal-green); color: white; }
 .mc-btn.revealed-correct::after {
   content: ' \2713 correct';
   font-size: 13px;
@@ -770,27 +864,9 @@ body {
 }
 
 /* Drag and drop */
-.dnd-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: start;
-}
-
-.dnd-col-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted-lt);
-  margin-bottom: 8px;
-}
-
-.dnd-items, .dnd-targets {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.dnd-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; margin-top: 14px; }
+.dnd-col-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted-lt); margin-bottom: 8px; }
+.dnd-items, .dnd-targets { display: flex; flex-direction: column; gap: 8px; }
 
 .dnd-draggable {
   background: var(--surface);
@@ -809,14 +885,8 @@ body {
   gap: 8px;
 }
 
-.dnd-draggable:hover {
-  background: var(--bg3);
-  border-color: var(--purple-lt);
-  transform: translateY(-1px);
-}
-
+.dnd-draggable:hover { background: var(--bg3); border-color: var(--purple-lt); transform: translateY(-1px); }
 .dnd-draggable.dragging { opacity: 0.4; cursor: grabbing; }
-
 .dnd-drag-handle { color: var(--muted-lt); flex-shrink: 0; font-size: 13px; }
 
 .dnd-target {
@@ -836,22 +906,13 @@ body {
 
 .dnd-target.drag-over { border-color: var(--purple); background: var(--purple-pale); }
 .dnd-target.matched { border-style: solid; border-color: var(--signal-green); background: #e8f5ea; }
-
 .dnd-target-label { font-style: italic; color: var(--muted-lt); font-size: 14px; }
 
-.dnd-matched-chip {
-  background: var(--confirm-green);
-  color: white;
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
+.dnd-matched-chip { background: var(--confirm-green); color: white; border-radius: 4px; padding: 2px 8px; font-size: 13px; font-weight: 700; }
 .dnd-check { font-size: 16px; margin-left: auto; flex-shrink: 0; }
 
-/* Reveal and answer */
-.reveal-row { display: flex; gap: 12px; margin-top: 18px; }
+/* Reveal + answer + footer */
+.reveal-row { display: flex; gap: 12px; margin-top: 20px; }
 
 .reveal-btn {
   background: var(--bg3);
@@ -880,14 +941,30 @@ body {
   font-size: 17px;
   line-height: 1.6;
   color: var(--text);
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
 .answer-box strong { color: var(--orange-dk); }
 .answer-box .answer-note { font-size: 16px; color: var(--muted); display: block; margin-top: 6px; }
 
-.next-btn {
-  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 100%);
+.continue-hint {
+  margin-top: 22px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted-lt);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.continue-hint::before {
+  content: '\27F2';
+  font-size: 18px;
+  color: var(--orange);
+}
+
+.close-btn {
+  background: linear-gradient(135deg, var(--orange-grad-a), var(--orange-grad-b));
   border: none;
   border-radius: 10px;
   color: white;
@@ -898,15 +975,14 @@ body {
   min-height: 52px;
   cursor: pointer;
   transition: opacity 0.15s, box-shadow 0.15s;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 3px 14px rgba(107,63,160,0.28);
-  align-self: flex-start;
-  margin-top: 20px;
+  box-shadow: 0 3px 14px rgba(192,90,58,0.28);
+  margin-top: 22px;
 }
 
-.next-btn:hover { opacity: 0.9; box-shadow: 0 5px 18px rgba(107,63,160,0.38); }
+.close-btn:hover { opacity: 0.92; box-shadow: 0 5px 18px rgba(192,90,58,0.38); }
 
 /* ============================================================
    COMPLETION SCREEN
@@ -919,7 +995,7 @@ body {
   flex-direction: column;
   gap: 18px;
   text-align: center;
-  background: linear-gradient(135deg, var(--marquee-bg) 0%, var(--purple-deep) 50%, #0d0508 100%);
+  background: linear-gradient(135deg, var(--sign-bg) 0%, var(--purple-deep) 50%, #0d0508 100%);
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -927,38 +1003,39 @@ body {
 
 .completion-glow {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(90,170,106,0.12), transparent 70%);
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(192,90,58,0.14), transparent 70%);
   pointer-events: none;
 }
 
-.completion-bulbs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
+.completion-bulbs { display: flex; gap: 11px; margin-bottom: 6px; }
+.completion-bulbs .bulb { width: 12px; height: 12px; }
 
-.completion-bulbs span {
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: var(--bulb-on);
-  box-shadow: 0 0 12px var(--bulb-glow);
-  animation: bulb-chase 1.4s ease-in-out infinite;
+.completion-stamp {
+  border: 4px double var(--stamp-ink);
+  color: var(--stamp-ink);
+  background: rgba(251,243,228,0.10);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  padding: 10px 26px;
+  border-radius: 10px;
+  transform: rotate(-7deg);
+  margin-bottom: 8px;
+  text-shadow: 0 0 18px rgba(178,51,32,0.3);
 }
 
 .completion-title {
   font-family: 'Playfair Display', serif;
-  font-size: 48px;
+  font-size: 46px;
   font-weight: 900;
   color: var(--board-on);
   text-shadow: 0 0 30px rgba(253,232,192,0.3);
   line-height: 1.1;
 }
 
-.completion-sub {
-  font-size: 18px;
-  color: rgba(253,232,192,0.55);
-  font-style: italic;
-}
+.completion-sub { font-size: 18px; color: rgba(253,232,192,0.55); font-style: italic; }
 
 .reopen-btn {
   background: linear-gradient(135deg, var(--orange-grad-a), var(--orange-grad-b));
@@ -980,12 +1057,10 @@ body {
 
 .hidden { display: none !important; }
 
-/* Respect reduced-motion preferences */
+/* Reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .load-bulb, .bulb, .marquee-strip-cell, .completion-bulbs span {
-    animation: none !important;
-  }
-  .marquee-strip-cell { opacity: 0.6; transform: scaleY(0.8); }
+  .bulb, .gate-dispenser.pulling .gd-peek, .ticket-card, .stamp { animation: none !important; }
+  .gate-dispenser:hover .gd-peek { transform: none; }
 }
 </style>
 </head>
@@ -995,16 +1070,16 @@ body {
      LOAD SCREEN
 ============================================================ -->
 <div id="load-screen">
-  <div class="load-marquee">
-    <div class="load-marquee-bulbs" id="load-bulbs"></div>
-    <div class="load-marquee-ticket">Now Booking &bull; Week 10 Review</div>
+  <div class="load-sign">
+    <div class="load-sign-bulbs" id="load-bulbs"></div>
+    <div class="load-sign-placard">Box Office &bull; Week 10 Review</div>
   </div>
   <h1 class="load-title">Mango<span>Bookings</span></h1>
-  <p class="load-subtitle">Doors Open. Review Up.</p>
+  <p class="load-subtitle">Step Right Up. Take a Ticket.</p>
   <div class="load-form">
     <label class="load-label" for="guest-count">How many guests tonight?</label>
     <input class="load-input" type="number" id="guest-count" value="25" min="6" max="30" inputmode="numeric">
-    <button class="load-btn" id="open-doors-btn">Open the Doors</button>
+    <button class="load-btn" id="open-doors-btn">Open the Box Office</button>
   </div>
 </div>
 
@@ -1013,63 +1088,80 @@ body {
 ============================================================ -->
 <div id="venue-screen">
 
-  <!-- Zone 1: Marquee -->
-  <div class="marquee">
-
-    <div class="bulb-row top" id="bulb-row-top"></div>
-
-    <div class="marquee-top-row">
-      <div class="marquee-brand">
-        <div class="marquee-brand-name">Mango<span>Bookings</span></div>
-        <div class="marquee-brand-sub">REST &amp; Spring Boot Review</div>
+  <!-- Zone 1: Box-office sign -->
+  <div class="boxoffice-sign">
+    <div class="sign-bulbs" id="sign-bulbs"></div>
+    <div class="sign-row">
+      <div class="sign-brand">
+        <div class="sign-brand-name">Mango<span>Bookings</span></div>
+        <div class="sign-brand-sub">Box Office</div>
       </div>
-
-      <div class="marquee-board-wrap">
-        <div class="marquee-now-line">
-          <div class="marquee-now-tag" id="board-tag">NOW BOOKING</div>
-          <div class="marquee-now-show" id="board-show">Pick a stage to open the show</div>
-        </div>
-        <div class="marquee-strip idle" id="marquee-strip"></div>
+      <div class="sign-serving">
+        <div class="sign-serving-tag" id="serving-tag">BOX OFFICE OPEN</div>
+        <div class="sign-serving-text" id="serving-text">Pull a ticket from any gate to begin</div>
       </div>
-
-      <div class="stage-tiles">
-        <button class="stage-tile" id="stage-0" data-stage="0" aria-label="Gate A, The Box Office: URLs, DNS, HTTP">
-          <div class="stage-tile-gate">GATE A</div>
-          <div class="stage-tile-name">The Box Office</div>
-          <div class="stage-tile-status" id="stage-status-0">Ready</div>
-        </button>
-        <button class="stage-tile" id="stage-1" data-stage="1" aria-label="Gate B, Will Call: REST verbs">
-          <div class="stage-tile-gate">GATE B</div>
-          <div class="stage-tile-name">Will Call</div>
-          <div class="stage-tile-status" id="stage-status-1">Ready</div>
-        </button>
-        <button class="stage-tile" id="stage-2" data-stage="2" aria-label="Gate C, Backstage: controller, service, model layers">
-          <div class="stage-tile-gate">GATE C</div>
-          <div class="stage-tile-name">Backstage</div>
-          <div class="stage-tile-status" id="stage-status-2">Ready</div>
-        </button>
-        <button class="stage-tile" id="stage-3" data-stage="3" aria-label="Gate D, Soundcheck: Spring Boot, JPA, annotations">
-          <div class="stage-tile-gate">GATE D</div>
-          <div class="stage-tile-name">Soundcheck</div>
-          <div class="stage-tile-status" id="stage-status-3">Ready</div>
-        </button>
-      </div>
+      <div class="sign-house" id="house-badge">House: <strong>0</strong> seated</div>
     </div>
-
-    <div class="bulb-row bottom" id="bulb-row-bottom"></div>
-
   </div>
 
-  <!-- Zone 2: Booking Panel -->
+  <!-- Zone 2: The counter (gate dispensers) -->
+  <div class="counter">
+    <button class="gate-dispenser gate-0" id="gate-0" data-stage="0" aria-label="Gate A, The Box Office. Pull a ticket.">
+      <div class="gd-plate">
+        <div class="gd-letter">GATE A</div>
+        <div class="gd-name">The Box Office</div>
+      </div>
+      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-foot">
+        <div class="gd-count" id="gd-count-0">7 left</div>
+        <div class="gd-pull">Pull &#10515;</div>
+      </div>
+    </button>
+    <button class="gate-dispenser gate-1" id="gate-1" data-stage="1" aria-label="Gate B, Will Call. Pull a ticket.">
+      <div class="gd-plate">
+        <div class="gd-letter">GATE B</div>
+        <div class="gd-name">Will Call</div>
+      </div>
+      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-foot">
+        <div class="gd-count" id="gd-count-1">7 left</div>
+        <div class="gd-pull">Pull &#10515;</div>
+      </div>
+    </button>
+    <button class="gate-dispenser gate-2" id="gate-2" data-stage="2" aria-label="Gate C, Backstage. Pull a ticket.">
+      <div class="gd-plate">
+        <div class="gd-letter">GATE C</div>
+        <div class="gd-name">Backstage</div>
+      </div>
+      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-foot">
+        <div class="gd-count" id="gd-count-2">7 left</div>
+        <div class="gd-pull">Pull &#10515;</div>
+      </div>
+    </button>
+    <button class="gate-dispenser gate-3" id="gate-3" data-stage="3" aria-label="Gate D, Soundcheck. Pull a ticket.">
+      <div class="gd-plate">
+        <div class="gd-letter">GATE D</div>
+        <div class="gd-name">Soundcheck</div>
+      </div>
+      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-foot">
+        <div class="gd-count" id="gd-count-3">7 left</div>
+        <div class="gd-pull">Pull &#10515;</div>
+      </div>
+    </button>
+  </div>
+
+  <!-- Zone 3: Booking panel -->
   <div class="booking-panel">
     <div class="booking-header">
-      <div class="booking-stage-label" id="booking-stage-label">No Stage Selected</div>
-      <div class="booking-ticket-badge" id="ticket-badge">Pick a stage to begin</div>
+      <div class="booking-stage-label" id="booking-stage-label">No Ticket Pulled</div>
+      <div class="booking-ticket-badge" id="ticket-badge">Pull a ticket to begin</div>
     </div>
     <div class="booking-body" id="booking-body">
       <div class="booking-idle" id="booking-idle">
         <div class="booking-idle-icon">&#127915;</div>
-        <p>Open a stage from the marquee to start the review</p>
+        <p>Pull a ticket from any gate to open the box office</p>
       </div>
       <div class="hidden" id="question-panel"></div>
     </div>
@@ -1083,14 +1175,15 @@ body {
 <div id="completion-screen">
   <div class="completion-glow"></div>
   <div class="completion-bulbs" id="completion-bulbs"></div>
-  <div class="completion-title">Every stage sold out.<br>The house is full.</div>
-  <div class="completion-sub">Every ticket booked. Every guest seated. Great show.</div>
+  <div class="completion-stamp">House Full</div>
+  <div class="completion-title">Every gate sold out.<br>The house is full.</div>
+  <div class="completion-sub">Every ticket pulled. Every guest seated. Great show.</div>
   <button class="reopen-btn" id="reopen-btn">Reopen the Box Office</button>
 </div>
 
 <script>
 // ============================================================
-// QUESTION DATA -- 4 stages mapping to week 10 skills
+// QUESTION DATA -- 4 gates mapping to week 10 skills
 // Formats: recall (no options), fill-in-the-blank, code-trace,
 //          multiple-choice, drag-and-drop
 // ============================================================
@@ -1407,14 +1500,14 @@ const STAGES = [
   }
 ];
 
+const GATE_LETTERS = ['A', 'B', 'C', 'D'];
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // ============================================================
 // STATE
 // ============================================================
-let state = {
-  guestCount: 25,
-  activeStage: null,
-  stageState: []
-};
+let state = { guestCount: 25, activeStage: null, stageState: [] };
+let isPulling = false;
 
 function fisherYates(arr) {
   const a = [...arr];
@@ -1429,8 +1522,8 @@ function initSession(n) {
   state.guestCount = n;
   state.activeStage = null;
 
-  // Total questions: enough for every guest to take at least one ticket.
-  // Floor of 12 (3 per stage) so small cohorts still get a full review.
+  // Total tickets: enough for every guest to be called at least once.
+  // Floor of 12 (3 per gate) so small cohorts still get a full review.
   const totalNeeded = Math.max(12, n);
   const stageCount = STAGES.length;
   const basePerStage = Math.floor(totalNeeded / stageCount);
@@ -1448,103 +1541,8 @@ function initSession(n) {
       slots.push(allGuests[cursor % allGuests.length]);
       cursor++;
     }
-    return { questionIdx: 0, ticketSlots: slots, revealed: false, cleared: false, dndState: null };
+    return { ticketSlots: slots, dispensed: 0, idx: -1, revealed: false, dndState: null };
   });
-}
-
-// ============================================================
-// BUILD MARQUEE BULBS
-// ============================================================
-function buildBulbs(el, count) {
-  el.innerHTML = '';
-  for (let i = 0; i < count; i++) {
-    const b = document.createElement('div');
-    b.className = el.id === 'load-bulbs' ? 'load-bulb' : 'bulb';
-    b.style.animationDelay = (i * 0.12).toFixed(2) + 's';
-    el.appendChild(b);
-  }
-}
-
-// ============================================================
-// BUILD MARQUEE STRIP (polychrome light cells)
-// ============================================================
-(function buildStrip() {
-  const strip = document.getElementById('marquee-strip');
-  const N = 40;
-  const stops = [
-    [212,115,78],[190,100,140],[155,111,168],
-    [91,127,166],[110,150,140],[194,156,60],[212,115,78]
-  ];
-  function lerp(t) {
-    const seg = t * (stops.length - 1), i = Math.min(Math.floor(seg), stops.length - 2), f = seg - i;
-    const a = stops[i], b = stops[i + 1];
-    return `rgb(${Math.round(a[0]+(b[0]-a[0])*f)},${Math.round(a[1]+(b[1]-a[1])*f)},${Math.round(a[2]+(b[2]-a[2])*f)})`;
-  }
-  for (let i = 0; i < N; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'marquee-strip-cell';
-    cell.style.background = lerp(i / (N - 1));
-    cell.style.animationDelay = (Math.random() * 1.6).toFixed(2) + 's';
-    strip.appendChild(cell);
-  }
-})();
-
-// ============================================================
-// RENDER STAGE TILES
-// ============================================================
-function renderStageTiles() {
-  STAGES.forEach((stage, si) => {
-    const tile = document.getElementById('stage-' + si);
-    const statusEl = document.getElementById('stage-status-' + si);
-    const ss = state.stageState[si];
-    const isActive = state.activeStage === si;
-    const isCleared = ss.cleared;
-
-    tile.className = 'stage-tile' +
-      (isActive ? ' active-stage' : '') +
-      (isCleared ? ' cleared-stage' : '');
-
-    if (statusEl) {
-      if (isCleared) {
-        statusEl.textContent = 'Sold Out';
-      } else if (isActive) {
-        statusEl.textContent = `Ticket ${ss.questionIdx + 1} of ${ss.ticketSlots.length}`;
-      } else {
-        statusEl.textContent = 'Ready';
-      }
-    }
-  });
-}
-
-// ============================================================
-// UPDATE MARQUEE BOARD
-// ============================================================
-function updateBoard() {
-  const tagEl = document.getElementById('board-tag');
-  const showEl = document.getElementById('board-show');
-  const strip = document.getElementById('marquee-strip');
-
-  if (state.activeStage === null) {
-    tagEl.textContent = 'NOW BOOKING';
-    showEl.innerHTML = 'Pick a stage to open the show';
-    strip.classList.add('idle');
-    return;
-  }
-
-  const stage = STAGES[state.activeStage];
-  tagEl.textContent = 'NOW SHOWING';
-  showEl.innerHTML = stage.show;
-  strip.classList.remove('idle');
-}
-
-// ============================================================
-// OPEN A STAGE
-// ============================================================
-function openStage(si) {
-  state.activeStage = si;
-  renderStageTiles();
-  updateBoard();
-  renderQuestion();
 }
 
 // ============================================================
@@ -1552,6 +1550,12 @@ function openStage(si) {
 // ============================================================
 function spacer(h) { const d = document.createElement('div'); d.style.height = h + 'px'; return d; }
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function gateColorVar(si) { return ['var(--gate-a)', 'var(--gate-b)', 'var(--gate-c)', 'var(--gate-d)'][si]; }
+function remaining(ss) { return ss.ticketSlots.length - ss.dispensed; }
+function allSoldOut() { return state.stageState.every(s => remaining(s) === 0); }
+function servedTotal() { return state.stageState.reduce((sum, s) => sum + s.dispensed, 0); }
+function totalTickets() { return state.stageState.reduce((sum, s) => sum + s.ticketSlots.length, 0); }
 
 function formatLabel(fmt) {
   if (fmt === 'recall') return 'Recall · Say It From Memory';
@@ -1565,7 +1569,103 @@ function formatLabel(fmt) {
 const EYE_SVG = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 
 // ============================================================
-// RENDER QUESTION
+// BUILD BULBS
+// ============================================================
+function buildBulbs(el, count) {
+  el.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement('div');
+    b.className = 'bulb';
+    b.style.animationDelay = (i * 0.12).toFixed(2) + 's';
+    el.appendChild(b);
+  }
+}
+
+// ============================================================
+// RENDER GATE DISPENSERS
+// ============================================================
+function renderDispensers() {
+  STAGES.forEach((stage, si) => {
+    const disp = document.getElementById('gate-' + si);
+    const countEl = document.getElementById('gd-count-' + si);
+    const ss = state.stageState[si];
+    const left = remaining(ss);
+    const soldOut = left === 0;
+
+    disp.classList.toggle('active-stage', state.activeStage === si);
+    disp.classList.toggle('sold-out', soldOut);
+    disp.setAttribute('aria-disabled', soldOut ? 'true' : 'false');
+
+    if (countEl) countEl.textContent = soldOut ? 'sold out' : (left + ' left');
+
+    // Sold-out stamp overlay (added once)
+    if (soldOut && !disp.querySelector('.gd-soldout')) {
+      const stamp = document.createElement('div');
+      stamp.className = 'gd-soldout';
+      stamp.innerHTML = '<span>Sold Out</span>';
+      disp.appendChild(stamp);
+    } else if (!soldOut) {
+      const existing = disp.querySelector('.gd-soldout');
+      if (existing) existing.remove();
+    }
+  });
+}
+
+// ============================================================
+// UPDATE THE BOX-OFFICE SIGN
+// ============================================================
+function updateSign() {
+  const tag = document.getElementById('serving-tag');
+  const text = document.getElementById('serving-text');
+  const house = document.getElementById('house-badge');
+
+  house.innerHTML = 'House: <strong>' + servedTotal() + '</strong> of ' + totalTickets() + ' seated';
+
+  if (state.activeStage === null) {
+    tag.textContent = 'BOX OFFICE OPEN';
+    text.innerHTML = 'Pull a ticket from any gate to begin';
+    return;
+  }
+
+  const si = state.activeStage;
+  const stage = STAGES[si];
+  const ss = state.stageState[si];
+  const guestNum = ss.ticketSlots[ss.idx];
+  const serial = GATE_LETTERS[si] + '·' + String(guestNum).padStart(3, '0');
+  tag.textContent = 'NOW SERVING';
+  text.innerHTML = 'No. ' + serial + ' &nbsp;·&nbsp; ' + stage.show;
+}
+
+// ============================================================
+// PULL A TICKET FROM A GATE
+// ============================================================
+function pullGate(si) {
+  if (isPulling) return;
+  const ss = state.stageState[si];
+  if (remaining(ss) === 0) return;
+
+  isPulling = true;
+  const disp = document.getElementById('gate-' + si);
+  disp.classList.add('pulling');
+
+  ss.idx = ss.dispensed;
+  ss.dispensed++;
+  ss.revealed = false;
+  ss.dndState = null;
+  state.activeStage = si;
+
+  const delay = prefersReduced ? 0 : 300;
+  setTimeout(() => {
+    disp.classList.remove('pulling');
+    isPulling = false;
+    renderDispensers();
+    updateSign();
+    renderQuestion();
+  }, delay);
+}
+
+// ============================================================
+// RENDER QUESTION (on a ticket stub)
 // ============================================================
 function renderQuestion() {
   const idle = document.getElementById('booking-idle');
@@ -1576,55 +1676,43 @@ function renderQuestion() {
   if (state.activeStage === null) {
     idle.classList.remove('hidden');
     panel.classList.add('hidden');
-    stageLabel.textContent = 'No Stage Selected';
-    ticketBadge.textContent = 'Pick a stage to begin';
+    stageLabel.textContent = 'No Ticket Pulled';
+    ticketBadge.textContent = 'Pull a ticket to begin';
     return;
   }
 
   const si = state.activeStage;
   const stage = STAGES[si];
   const ss = state.stageState[si];
+  const qi = ss.idx;
+  const q = stage.questions[qi];
+  const guestNum = ss.ticketSlots[qi];
+  const serial = GATE_LETTERS[si] + '·' + String(guestNum).padStart(3, '0');
 
-  stageLabel.textContent = `${stage.gate} · ${stage.name}`;
-
-  if (ss.cleared) {
-    idle.classList.remove('hidden');
-    panel.classList.add('hidden');
-    idle.innerHTML = `
-      <div class="booking-idle-icon">&#9989;</div>
-      <p>${esc(stage.name)} is sold out. Every ticket booked.</p>
-    `;
-    ticketBadge.textContent = 'Stage Sold Out';
-    return;
-  }
+  stageLabel.textContent = stage.gate + ' · ' + stage.name;
+  ticketBadge.innerHTML = 'Ticket <strong>' + servedTotal() + '</strong> of ' + totalTickets();
 
   idle.classList.add('hidden');
   panel.classList.remove('hidden');
   panel.innerHTML = '';
 
-  const qi = ss.questionIdx;
-  const total = ss.ticketSlots.length;
-  const q = stage.questions[qi];
-
-  // Global ticket counter across all stages
-  const globalCurrent = state.stageState.reduce((sum, s, i) =>
-    i === si ? sum : (s.cleared ? sum + s.ticketSlots.length : sum + s.questionIdx), 0) + qi + 1;
-  const globalTotal = state.stageState.reduce((sum, s) => sum + s.ticketSlots.length, 0);
-  ticketBadge.innerHTML = `Ticket <strong>${globalCurrent}</strong> of ${globalTotal}`;
-
-  // Build the ticket card
+  // Ticket card
   const card = document.createElement('div');
   card.className = 'ticket-card';
+  card.style.setProperty('--gc', gateColorVar(si));
 
-  const ticketNo = String(globalCurrent).padStart(3, '0');
+  // Left stub
   const stub = document.createElement('div');
   stub.className = 'ticket-stub';
-  stub.innerHTML = `
-    <div class="ticket-stub-no">Ticket No. <strong>${ticketNo}</strong></div>
-    <div class="ticket-stub-stage">${esc(stage.gate)} · ${esc(stage.name)}</div>
-  `;
+  stub.innerHTML =
+    '<div class="stub-admit">✦ Admit One</div>' +
+    '<div><div class="stub-serial-label">Ticket No.</div><div class="stub-serial">' + esc(serial) + '</div></div>' +
+    '<div class="stub-gate">' + esc(stage.gate) + '</div>' +
+    '<div class="stub-barcode"></div>' +
+    '<div class="stub-fineprint">MangoBookings · No Refunds</div>';
   card.appendChild(stub);
 
+  // Right main
   const main = document.createElement('div');
   main.className = 'ticket-main';
 
@@ -1635,15 +1723,13 @@ function renderQuestion() {
 
   const qLabel = document.createElement('div');
   qLabel.className = 'q-label';
-  qLabel.textContent = 'Question ' + (qi + 1) + ' of ' + total;
+  qLabel.textContent = 'Gate ' + GATE_LETTERS[si] + ' · Ticket ' + (ss.dispensed) + ' of ' + ss.ticketSlots.length;
   main.appendChild(qLabel);
 
   const qText = document.createElement('div');
   qText.className = 'q-text';
   qText.textContent = q.text;
   main.appendChild(qText);
-
-  main.appendChild(spacer(14));
 
   if (q.format === 'fill-in-the-blank') {
     renderFITB(main, q, ss);
@@ -1655,8 +1741,40 @@ function renderQuestion() {
     renderDnD(main, q, ss);
   }
 
+  // Microprint footer
+  const micro = document.createElement('div');
+  micro.className = 'ticket-microprint';
+  micro.textContent = 'MANGOBOOKINGS BOX OFFICE · ADMIT ONE · ' + serial + ' · VALID TONIGHT ONLY · MANGOBOOKINGS BOX OFFICE · ADMIT ONE';
+  main.appendChild(micro);
+
+  // Rubber stamp on reveal
+  if (ss.revealed) {
+    const stamp = document.createElement('div');
+    stamp.className = 'stamp';
+    stamp.textContent = 'Admitted';
+    card.appendChild(stamp);
+  }
+
   card.appendChild(main);
   panel.appendChild(card);
+
+  // Footer: continue hint or close-the-night button
+  if (ss.revealed || allSoldOut()) {
+    const footer = document.createElement('div');
+    if (allSoldOut()) {
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-btn';
+      closeBtn.innerHTML = 'Close the Box Office <span style="font-size:18px">&#9679;</span>';
+      closeBtn.addEventListener('click', showCompletion);
+      footer.appendChild(closeBtn);
+    } else if (ss.revealed) {
+      const hint = document.createElement('div');
+      hint.className = 'continue-hint';
+      hint.textContent = 'Pull the next ticket from any gate to continue.';
+      footer.appendChild(hint);
+    }
+    panel.appendChild(footer);
+  }
 }
 
 // ============================================================
@@ -1669,19 +1787,14 @@ function renderRecall(main, q, ss) {
   main.appendChild(cue);
 
   if (q.code) {
-    main.appendChild(spacer(14));
     const codeBlock = document.createElement('pre');
     codeBlock.className = 'q-code';
     codeBlock.textContent = q.code;
     main.appendChild(codeBlock);
   }
 
-  if (!ss.revealed) {
-    appendRevealBtn(main, ss);
-  } else {
-    appendAnswerBox(main, q);
-    appendNextBtn(main, ss);
-  }
+  if (!ss.revealed) appendRevealBtn(main, ss);
+  else appendAnswerBox(main, q);
 }
 
 // ============================================================
@@ -1695,12 +1808,8 @@ function renderFITB(main, q, ss) {
   codeWrap.innerHTML = codeText;
   main.appendChild(codeWrap);
 
-  if (!ss.revealed) {
-    appendRevealBtn(main, ss);
-  } else {
-    appendAnswerBox(main, q);
-    appendNextBtn(main, ss);
-  }
+  if (!ss.revealed) appendRevealBtn(main, ss);
+  else appendAnswerBox(main, q);
 }
 
 // ============================================================
@@ -1712,7 +1821,6 @@ function renderMC(main, q, ss) {
     codeBlock.className = 'q-code';
     codeBlock.textContent = q.code;
     main.appendChild(codeBlock);
-    main.appendChild(spacer(16));
   }
 
   const grid = document.createElement('div');
@@ -1721,17 +1829,13 @@ function renderMC(main, q, ss) {
   q.options.forEach((opt, oi) => {
     const btn = document.createElement('div');
     btn.className = 'mc-btn' + (ss.revealed && oi === q.correctIndex ? ' revealed-correct' : '');
-    btn.innerHTML = `<span class="mc-letter">${letters[oi]}</span><span>${esc(opt)}</span>`;
+    btn.innerHTML = '<span class="mc-letter">' + letters[oi] + '</span><span>' + esc(opt) + '</span>';
     grid.appendChild(btn);
   });
   main.appendChild(grid);
 
-  if (!ss.revealed) {
-    appendRevealBtn(main, ss);
-  } else {
-    appendAnswerBox(main, q);
-    appendNextBtn(main, ss);
-  }
+  if (!ss.revealed) appendRevealBtn(main, ss);
+  else appendAnswerBox(main, q);
 }
 
 // ============================================================
@@ -1752,7 +1856,6 @@ function renderDnD(main, q, ss) {
 
   const itemsDiv = document.createElement('div');
   itemsDiv.className = 'dnd-items';
-
   const matchedItemIds = new Set(Object.values(dndState.matches));
   q.items.forEach(item => {
     if (matchedItemIds.has(item.id)) return;
@@ -1760,7 +1863,7 @@ function renderDnD(main, q, ss) {
     drag.className = 'dnd-draggable';
     drag.draggable = true;
     drag.dataset.itemId = item.id;
-    drag.innerHTML = `<span class="dnd-drag-handle">&#8801;</span><span>${esc(item.label)}</span>`;
+    drag.innerHTML = '<span class="dnd-drag-handle">&#8801;</span><span>' + esc(item.label) + '</span>';
     drag.addEventListener('dragstart', e => {
       dndState.dragItem = item.id;
       drag.classList.add('dragging');
@@ -1789,13 +1892,12 @@ function renderDnD(main, q, ss) {
       tgt.classList.add('matched');
       const matchedItem = q.items.find(i => i.id === matchedItemId);
       const correct = matchedItemId === target.matchId;
-      tgt.innerHTML = `
-        <span class="dnd-matched-chip">${esc(matchedItem ? matchedItem.label : '')}</span>
-        <span style="font-size:14px;color:var(--text-2);flex:1">${esc(target.label)}</span>
-        <span class="dnd-check" style="color:${correct ? 'var(--signal-green)' : 'var(--orange)'}">${correct ? '&#10003;' : '&#215;'}</span>
-      `;
+      tgt.innerHTML =
+        '<span class="dnd-matched-chip">' + esc(matchedItem ? matchedItem.label : '') + '</span>' +
+        '<span style="font-size:14px;color:var(--text-2);flex:1">' + esc(target.label) + '</span>' +
+        '<span class="dnd-check" style="color:' + (correct ? 'var(--signal-green)' : 'var(--orange)') + '">' + (correct ? '&#10003;' : '&#215;') + '</span>';
     } else {
-      tgt.innerHTML = `<span class="dnd-target-label">${esc(target.label)}</span>`;
+      tgt.innerHTML = '<span class="dnd-target-label">' + esc(target.label) + '</span>';
       tgt.addEventListener('dragover', e => { e.preventDefault(); tgt.classList.add('drag-over'); });
       tgt.addEventListener('dragleave', () => tgt.classList.remove('drag-over'));
       tgt.addEventListener('drop', e => {
@@ -1822,12 +1924,11 @@ function renderDnD(main, q, ss) {
     });
   } else {
     appendAnswerBox(main, q);
-    appendNextBtn(main, ss);
   }
 }
 
 // ============================================================
-// SHARED: REVEAL BUTTON, ANSWER BOX, NEXT BUTTON
+// SHARED: REVEAL BUTTON, ANSWER BOX
 // ============================================================
 function appendRevealBtn(main, ss, beforeReveal) {
   const row = document.createElement('div');
@@ -1838,6 +1939,8 @@ function appendRevealBtn(main, ss, beforeReveal) {
   btn.addEventListener('click', () => {
     if (beforeReveal) beforeReveal();
     ss.revealed = true;
+    renderDispensers();
+    updateSign();
     renderQuestion();
   });
   row.appendChild(btn);
@@ -1851,35 +1954,6 @@ function appendAnswerBox(main, q) {
   if (q.answerNote) html += '<span class="answer-note">' + esc(q.answerNote) + '</span>';
   aBox.innerHTML = html;
   main.appendChild(aBox);
-}
-
-function appendNextBtn(main, ss) {
-  const btn = document.createElement('button');
-  btn.className = 'next-btn';
-  const isLast = ss.questionIdx >= ss.ticketSlots.length - 1;
-  btn.innerHTML = isLast
-    ? 'Stage Sold Out <span style="font-size:18px">&#9679;</span>'
-    : 'Next Ticket <span style="font-size:18px">&#8594;</span>';
-
-  btn.addEventListener('click', () => {
-    if (isLast) {
-      ss.cleared = true;
-      state.activeStage = null;
-      renderStageTiles();
-      updateBoard();
-      renderQuestion();
-      if (state.stageState.every(s => s.cleared)) {
-        setTimeout(showCompletion, 500);
-      }
-    } else {
-      ss.questionIdx++;
-      ss.revealed = false;
-      ss.dndState = null;
-      renderStageTiles();
-      renderQuestion();
-    }
-  });
-  main.appendChild(btn);
 }
 
 // ============================================================
@@ -1904,22 +1978,20 @@ document.getElementById('open-doors-btn').addEventListener('click', () => {
   const n = parseInt(document.getElementById('guest-count').value, 10) || 25;
   initSession(n);
 
-  buildBulbs(document.getElementById('bulb-row-top'), 22);
-  buildBulbs(document.getElementById('bulb-row-bottom'), 22);
+  buildBulbs(document.getElementById('sign-bulbs'), 24);
 
   document.getElementById('load-screen').style.display = 'none';
   document.getElementById('venue-screen').style.display = 'flex';
 
-  renderStageTiles();
-  updateBoard();
+  renderDispensers();
+  updateSign();
   renderQuestion();
 });
 
 STAGES.forEach((_, si) => {
-  document.getElementById('stage-' + si).addEventListener('click', () => {
-    const ss = state.stageState[si];
-    if (ss.cleared) return;
-    openStage(si);
+  document.getElementById('gate-' + si).addEventListener('click', () => {
+    if (remaining(state.stageState[si]) === 0) return;
+    pullGate(si);
   });
 });
 
@@ -1927,13 +1999,12 @@ document.getElementById('reopen-btn').addEventListener('click', () => {
   document.getElementById('completion-screen').style.display = 'none';
   document.getElementById('venue-screen').style.display = 'none';
   document.getElementById('load-screen').style.display = 'flex';
-  document.getElementById('booking-idle').innerHTML = `
-    <div class="booking-idle-icon">&#127915;</div>
-    <p>Open a stage from the marquee to start the review</p>
-  `;
+  document.getElementById('booking-idle').innerHTML =
+    '<div class="booking-idle-icon">&#127915;</div>' +
+    '<p>Pull a ticket from any gate to open the box office</p>';
 });
 
-// Build the load-screen marquee bulbs on first paint
+// Build the load-screen sign bulbs on first paint
 buildBulbs(document.getElementById('load-bulbs'), 13);
 </script>
 </body>

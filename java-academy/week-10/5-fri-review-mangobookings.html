@@ -424,30 +424,42 @@ body {
 }
 
 /* Dark slot with a peeking ticket */
-.gd-slot {
-  height: 14px;
-  border-radius: 3px;
-  background: #1a1008;
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.7);
+.gd-slotwrap {
   position: relative;
+  height: 22px;
   margin-top: auto;
+  overflow: hidden;            /* clip the ticket once it passes below the slot */
 }
 
 .gd-peek {
   position: absolute;
-  left: 10px; right: 10px; top: -7px;
-  height: 12px;
+  left: 10px; right: 10px; top: 0;
+  height: 14px;
   background: repeating-linear-gradient(90deg, var(--ticket-paper) 0 6px, var(--ticket-edge) 6px 7px);
   border-radius: 2px 2px 0 0;
   box-shadow: 0 -1px 3px rgba(0,0,0,0.25);
+  z-index: 1;                  /* behind the slot bar */
   transition: transform 0.15s;
 }
 
-.gate-dispenser:hover .gd-peek { transform: translateY(2px); }
-.gate-dispenser.pulling .gd-peek { animation: peek-pull 0.3s ease-in forwards; }
+/* The dark slot bar sits in FRONT, so a pulled ticket slides behind it
+   and vanishes, like being inserted into the dispenser. */
+.gd-slot {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 13px;
+  border-radius: 3px;
+  background: #1a1008;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.7);
+  z-index: 2;
+}
 
+.gate-dispenser:hover .gd-peek { transform: translateY(2px); }
+.gate-dispenser.pulling .gd-peek { animation: peek-pull 0.28s ease-in forwards; }
+
+/* Slides straight down behind the slot; no fade -- the slot swallows it */
 @keyframes peek-pull {
-  to { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(16px); }
 }
 
 .gd-foot {
@@ -1112,7 +1124,7 @@ body {
         <div class="gd-letter">GATE A</div>
         <div class="gd-name">The Box Office</div>
       </div>
-      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-slotwrap"><div class="gd-peek"></div><div class="gd-slot"></div></div>
       <div class="gd-foot">
         <div class="gd-count" id="gd-count-0">7 left</div>
         <div class="gd-pull">Pull &#10515;</div>
@@ -1123,7 +1135,7 @@ body {
         <div class="gd-letter">GATE B</div>
         <div class="gd-name">Will Call</div>
       </div>
-      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-slotwrap"><div class="gd-peek"></div><div class="gd-slot"></div></div>
       <div class="gd-foot">
         <div class="gd-count" id="gd-count-1">7 left</div>
         <div class="gd-pull">Pull &#10515;</div>
@@ -1134,7 +1146,7 @@ body {
         <div class="gd-letter">GATE C</div>
         <div class="gd-name">Backstage</div>
       </div>
-      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-slotwrap"><div class="gd-peek"></div><div class="gd-slot"></div></div>
       <div class="gd-foot">
         <div class="gd-count" id="gd-count-2">7 left</div>
         <div class="gd-pull">Pull &#10515;</div>
@@ -1145,7 +1157,7 @@ body {
         <div class="gd-letter">GATE D</div>
         <div class="gd-name">Soundcheck</div>
       </div>
-      <div class="gd-slot"><div class="gd-peek"></div></div>
+      <div class="gd-slotwrap"><div class="gd-peek"></div><div class="gd-slot"></div></div>
       <div class="gd-foot">
         <div class="gd-count" id="gd-count-3">7 left</div>
         <div class="gd-pull">Pull &#10515;</div>

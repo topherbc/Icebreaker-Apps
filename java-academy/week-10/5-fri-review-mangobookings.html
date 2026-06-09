@@ -658,6 +658,11 @@ body {
   line-height: 1;
 }
 
+.stub-gate-wrap {
+  position: relative;
+  align-self: flex-start;
+}
+
 .stub-gate {
   font-size: 12px;
   font-weight: 700;
@@ -666,7 +671,30 @@ body {
   background: var(--gc, var(--orange));
   border-radius: 5px;
   padding: 4px 10px;
-  align-self: flex-start;
+}
+
+/* Conductor's hole punch -- appears SE of the gate chip once admitted.
+   Filled with the panel bg + inset shadow so it reads as a real
+   cut-through-to-the-background hole in the ticket. */
+.stub-punch {
+  position: absolute;
+  top: 100%;
+  left: 100%;
+  transform: translate(-3px, 3px);
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow:
+    inset 0 2px 3px rgba(0,0,0,0.45),
+    inset 0 -1px 1px rgba(255,255,255,0.55),
+    0 0 0 1px rgba(110,60,20,0.10);
+  animation: punch-pop 0.22s cubic-bezier(0.2, 1.6, 0.5, 1) both;
+}
+
+@keyframes punch-pop {
+  0%   { transform: translate(-3px, 3px) scale(0); }
+  70%  { transform: translate(-3px, 3px) scale(1.25); }
+  100% { transform: translate(-3px, 3px) scale(1); }
 }
 
 .stub-barcode {
@@ -1055,7 +1083,7 @@ body {
 
 /* Reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .bulb, .gate-dispenser.pulling .gd-peek, .ticket-card, .stamp { animation: none !important; }
+  .bulb, .gate-dispenser.pulling .gd-peek, .ticket-card, .stamp, .stub-punch { animation: none !important; }
   .gate-dispenser:hover .gd-peek { transform: none; }
 }
 </style>
@@ -1703,7 +1731,8 @@ function renderQuestion() {
   stub.innerHTML =
     '<div class="stub-admit">✦ Admit One</div>' +
     '<div><div class="stub-serial-label">Ticket No.</div><div class="stub-serial">' + esc(serial) + '</div></div>' +
-    '<div class="stub-gate">' + esc(stage.gate) + '</div>' +
+    '<div class="stub-gate-wrap"><div class="stub-gate">' + esc(stage.gate) + '</div>' +
+      (ss.revealed ? '<div class="stub-punch" aria-hidden="true"></div>' : '') + '</div>' +
     '<div class="stub-barcode"></div>' +
     '<div class="stub-fineprint">MangoBookings · No Refunds</div>';
   card.appendChild(stub);

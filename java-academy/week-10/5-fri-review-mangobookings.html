@@ -134,9 +134,10 @@ body {
   animation: bulb-chase 1.7s ease-in-out infinite;
 }
 
+/* Opacity-only so the marquee bulbs do not repaint box-shadow every frame */
 @keyframes bulb-chase {
-  0%, 100% { opacity: 1; box-shadow: 0 0 9px var(--bulb-glow); }
-  50%      { opacity: 0.30; box-shadow: 0 0 3px rgba(255,217,138,0.3); }
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.30; }
 }
 
 .load-sign-placard {

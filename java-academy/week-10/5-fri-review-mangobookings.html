@@ -658,11 +658,6 @@ body {
   line-height: 1;
 }
 
-.stub-gate-wrap {
-  position: relative;
-  align-self: flex-start;
-}
-
 .stub-gate {
   font-size: 12px;
   font-weight: 700;
@@ -671,17 +666,18 @@ body {
   background: var(--gc, var(--orange));
   border-radius: 5px;
   padding: 4px 10px;
+  align-self: flex-start;
 }
 
-/* Conductor's hole punch -- appears SE of the gate chip once admitted.
-   Filled with the panel bg + inset shadow so it reads as a real
-   cut-through-to-the-background hole in the ticket. */
+/* Conductor's hole punch -- punched onto the barcode once admitted, at a
+   different spot per gate (left set inline). Filled with the panel bg +
+   inset shadow so it reads as a real cut-through-the-paper hole. */
 .stub-punch {
   position: absolute;
-  top: 100%;
-  left: 100%;
-  transform: translate(-3px, 3px);
-  width: 18px; height: 18px;
+  top: 50%;
+  left: 50%;                       /* overridden per gate via inline style */
+  transform: translate(-50%, -50%) scale(1);
+  width: 17px; height: 17px;
   border-radius: 50%;
   background: var(--bg);
   box-shadow:
@@ -692,19 +688,19 @@ body {
 }
 
 @keyframes punch-pop {
-  0%   { transform: translate(-3px, 3px) scale(0); }
-  70%  { transform: translate(-3px, 3px) scale(1.25); }
-  100% { transform: translate(-3px, 3px) scale(1); }
+  0%   { transform: translate(-50%, -50%) scale(0); }
+  70%  { transform: translate(-50%, -50%) scale(1.25); }
+  100% { transform: translate(-50%, -50%) scale(1); }
 }
 
 .stub-barcode {
+  position: relative;             /* anchors the hole punch */
   margin-top: auto;
   height: 30px;
   background: repeating-linear-gradient(90deg,
-    var(--ticket-ink) 0 2px, transparent 2px 4px,
-    var(--ticket-ink) 4px 5px, transparent 5px 8px,
-    var(--ticket-ink) 8px 11px, transparent 11px 13px);
-  opacity: 0.78;
+    rgba(42,28,12,0.78) 0 2px, transparent 2px 4px,
+    rgba(42,28,12,0.78) 4px 5px, transparent 5px 8px,
+    rgba(42,28,12,0.78) 8px 11px, transparent 11px 13px);
   border-radius: 1px;
 }
 
@@ -838,6 +834,14 @@ body {
   caret-color: var(--orange-lt);
 }
 
+/* Blank filled in with the answer on reveal */
+.q-code-blank.filled {
+  color: var(--orange-lt);
+  font-weight: 700;
+  text-align: center;
+  background: rgba(212,115,78,0.20);
+}
+
 /* Multiple choice / code trace */
 .mc-options {
   display: grid;
@@ -930,7 +934,14 @@ body {
 
 .dnd-target.drag-over { border-color: var(--purple); background: var(--purple-pale); }
 .dnd-target.matched { border-style: solid; border-color: var(--signal-green); background: #e8f5ea; }
+.dnd-target.reject { border-color: var(--orange); background: var(--orange-pale); animation: dnd-reject 0.36s ease; }
 .dnd-target-label { font-style: italic; color: var(--muted-lt); font-size: 14px; }
+
+@keyframes dnd-reject {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
 
 .dnd-matched-chip { background: var(--confirm-green); color: white; border-radius: 4px; padding: 2px 8px; font-size: 13px; font-weight: 700; }
 .dnd-check { font-size: 16px; margin-left: auto; flex-shrink: 0; }
@@ -1083,7 +1094,7 @@ body {
 
 /* Reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .bulb, .gate-dispenser.pulling .gd-peek, .ticket-card, .stamp, .stub-punch { animation: none !important; }
+  .bulb, .gate-dispenser.pulling .gd-peek, .ticket-card, .stamp, .stub-punch, .dnd-target.reject { animation: none !important; }
   .gate-dispenser:hover .gd-peek { transform: none; }
 }
 </style>
@@ -1525,6 +1536,7 @@ const STAGES = [
 ];
 
 const GATE_LETTERS = ['A', 'B', 'C', 'D'];
+const PUNCH_X = ['26%', '48%', '70%', '88%']; // hole-punch spot on the barcode, per gate
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ============================================================
@@ -1731,9 +1743,10 @@ function renderQuestion() {
   stub.innerHTML =
     '<div class="stub-admit">✦ Admit One</div>' +
     '<div><div class="stub-serial-label">Ticket No.</div><div class="stub-serial">' + esc(serial) + '</div></div>' +
-    '<div class="stub-gate-wrap"><div class="stub-gate">' + esc(stage.gate) + '</div>' +
-      (ss.revealed ? '<div class="stub-punch" aria-hidden="true"></div>' : '') + '</div>' +
-    '<div class="stub-barcode"></div>' +
+    '<div class="stub-gate">' + esc(stage.gate) + '</div>' +
+    '<div class="stub-barcode">' +
+      (ss.revealed ? '<div class="stub-punch" style="left:' + PUNCH_X[si] + '" aria-hidden="true"></div>' : '') +
+    '</div>' +
     '<div class="stub-fineprint">MangoBookings · No Refunds</div>';
   card.appendChild(stub);
 
@@ -1823,8 +1836,10 @@ function renderRecall(main, q, ss) {
 function renderFITB(main, q, ss) {
   const codeWrap = document.createElement('div');
   codeWrap.className = 'q-code';
-  const codeText = esc(q.code).replace('/* ___ */',
-    '<span class="q-code-blank"><input type="text" placeholder="' + esc(q.blankPlaceholder) + '" id="fitb-input" autocomplete="off" spellcheck="false" aria-label="Fill in the blank"></span>');
+  const blankFill = ss.revealed
+    ? '<span class="q-code-blank filled">' + esc(q.answer) + '</span>'
+    : '<span class="q-code-blank"><input type="text" placeholder="' + esc(q.blankPlaceholder) + '" id="fitb-input" autocomplete="off" spellcheck="false" aria-label="Fill in the blank"></span>';
+  const codeText = esc(q.code).replace('/* ___ */', blankFill);
   codeWrap.innerHTML = codeText;
   main.appendChild(codeWrap);
 
@@ -1923,10 +1938,17 @@ function renderDnD(main, q, ss) {
       tgt.addEventListener('drop', e => {
         e.preventDefault();
         tgt.classList.remove('drag-over');
-        if (dndState.dragItem) {
-          dndState.matches[target.id] = dndState.dragItem;
-          dndState.dragItem = null;
+        const dragged = dndState.dragItem;
+        dndState.dragItem = null;
+        if (!dragged) return;
+        if (dragged === target.matchId) {
+          // Correct match only -- accept and lock it in
+          dndState.matches[target.id] = dragged;
           renderQuestion();
+        } else {
+          // Wrong match -- reject; the item stays in the pool
+          tgt.classList.add('reject');
+          setTimeout(() => tgt.classList.remove('reject'), 360);
         }
       });
     }

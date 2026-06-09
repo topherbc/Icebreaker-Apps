@@ -810,23 +810,6 @@ body {
   caret-color: var(--orange-lt);
 }
 
-/* Recall cue (no options) */
-.recall-cue {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-top: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--purple);
-  background: var(--purple-pale);
-  border: 1px solid rgba(107,63,160,0.16);
-  border-radius: 8px;
-  padding: 11px 16px;
-}
-
-.recall-cue svg { flex-shrink: 0; }
-
 /* Multiple choice / code trace */
 .mc-options {
   display: grid;
@@ -1571,7 +1554,7 @@ function servedTotal() { return state.stageState.reduce((sum, s) => sum + s.disp
 function totalTickets() { return state.stageState.reduce((sum, s) => sum + s.ticketSlots.length, 0); }
 
 function formatLabel(fmt) {
-  if (fmt === 'recall') return 'Recall · Say It From Memory';
+  if (fmt === 'recall') return 'Short Answer';
   if (fmt === 'fill-in-the-blank') return 'Fill in the Blank';
   if (fmt === 'code-trace') return 'Code Trace';
   if (fmt === 'multiple-choice') return 'Multiple Choice';
@@ -1791,14 +1774,9 @@ function renderQuestion() {
 }
 
 // ============================================================
-// RECALL (no options -- active retrieval)
+// SHORT ANSWER (question + reveal; no on-screen options)
 // ============================================================
 function renderRecall(main, q, ss) {
-  const cue = document.createElement('div');
-  cue.className = 'recall-cue';
-  cue.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> No options. Have the guest say the answer out loud, then reveal to confirm.';
-  main.appendChild(cue);
-
   if (q.code) {
     const codeBlock = document.createElement('pre');
     codeBlock.className = 'q-code';

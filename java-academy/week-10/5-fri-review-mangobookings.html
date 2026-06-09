@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MangoBookings</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%231e0e18'/><text y='66' x='50' text-anchor='middle' font-size='52' font-family='serif' fill='%23fde8c0'>&#x1F39F;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CSS VARIABLES -- Mango palette adapted for box-office / marquee
+   (extends the Mango Music + Mango XM family from week 9)
+============================================================ */
+:root {
+  --bg:           #faf6f1;
+  --bg2:          #f2ebe0;
+  --bg3:          #e8ddd0;
+  --surface:      #ddd0be;
+  --surface2:     #cfc0a8;
+  --border:       rgba(110,60,20,0.13);
+  --border-md:    rgba(110,60,20,0.24);
+
+  --purple-deep:  #1a0d2e;
+  --purple-mid:   #3d1f5e;
+  --purple:       #6b3fa0;
+  --purple-lt:    #9b6fa8;
+  --purple-pale:  rgba(107,63,160,0.10);
+
+  --orange:       #c05a3a;
+  --orange-dk:    #a04830;
+  --orange-lt:    #d4734e;
+  --orange-grad-a:#d4734e;
+  --orange-grad-b:#c2621a;
+  --orange-pale:  rgba(192,90,58,0.10);
+
+  --cream:        #faf6f1;
+  --cream-dk:     #f0e8da;
+
+  --text:         #1e1209;
+  --text-2:       #3d2510;
+  --muted:        #8a6040;
+  --muted-lt:     #8c5830;
+
+  /* Marquee / box-office tones */
+  --marquee-bg:   #1e0e18;
+  --marquee-bg2:  #2a1420;
+  --bulb-on:      #ffd98a;
+  --bulb-glow:    rgba(255,217,138,0.85);
+  --bulb-off:     #5a3a2a;
+  --letterboard:  #0a0508;
+  --board-on:     #fde8c0;
+  --board-muted:  rgba(253,232,192,0.32);
+  --ticket-paper: #fbf3e4;
+  --ticket-edge:  #e7d8bd;
+  --signal-green: #5aaa6a;
+  --confirm-green:#3a8a4a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  min-height: 100vh;
+  overflow: hidden;
+  height: 100vh;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   LOAD SCREEN
+============================================================ */
+#load-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 60%, rgba(107,63,160,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 75% 35%, rgba(192,90,58,0.10) 0%, transparent 60%),
+    var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+#load-screen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(155,111,168,0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+/* Mini marquee on the load screen */
+.load-marquee {
+  position: relative;
+  background: linear-gradient(180deg, var(--marquee-bg2) 0%, var(--marquee-bg) 100%);
+  border-radius: 14px;
+  padding: 26px 40px 22px;
+  margin-bottom: 36px;
+  box-shadow: 0 12px 40px rgba(26,13,46,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.load-marquee-bulbs {
+  display: flex;
+  justify-content: center;
+  gap: 11px;
+  margin-bottom: 14px;
+}
+
+.load-bulb {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--bulb-on);
+  box-shadow: 0 0 8px var(--bulb-glow);
+  animation: bulb-chase 1.4s ease-in-out infinite;
+}
+
+@keyframes bulb-chase {
+  0%, 100% { opacity: 1; box-shadow: 0 0 9px var(--bulb-glow); }
+  50%      { opacity: 0.28; box-shadow: 0 0 3px rgba(255,217,138,0.3); }
+}
+
+.load-marquee-ticket {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--board-muted);
+  text-align: center;
+}
+
+.load-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 64px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.load-title span {
+  background: linear-gradient(135deg, var(--orange-grad-a), var(--purple-lt));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.load-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.load-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 320px;
+}
+
+.load-label {
+  font-size: 17px;
+  color: var(--text-2);
+  font-weight: 500;
+  text-align: center;
+}
+
+.load-input {
+  width: 100px;
+  text-align: center;
+  background: white;
+  border: 2px solid var(--border-md);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  padding: 10px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.load-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px var(--purple-pale);
+}
+
+.load-btn {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 14px 40px;
+  min-height: 52px;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(107,63,160,0.30);
+}
+
+.load-btn:hover { opacity: 0.9; box-shadow: 0 6px 24px rgba(107,63,160,0.40); }
+.load-btn:active { transform: scale(0.98); }
+
+/* ============================================================
+   VENUE SCREEN LAYOUT
+============================================================ */
+#venue-screen {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg2);
+}
+
+/* ============================================================
+   ZONE 1: MARQUEE
+============================================================ */
+.marquee {
+  background: linear-gradient(180deg, var(--marquee-bg2) 0%, var(--marquee-bg) 100%);
+  border-bottom: 3px solid rgba(0,0,0,0.6);
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.5);
+  overflow: hidden;
+  padding: 0 0 6px;
+}
+
+.marquee::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Bulb rows top and bottom */
+.bulb-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 22px 7px;
+  position: relative;
+  z-index: 2;
+}
+
+.bulb-row.bottom { padding: 5px 22px 4px; }
+
+.bulb {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--bulb-on);
+  box-shadow: 0 0 9px var(--bulb-glow);
+  flex-shrink: 0;
+  animation: bulb-chase 1.6s ease-in-out infinite;
+}
+
+/* Row 1: brand | letterboard | stage tiles */
+.marquee-top-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 4px 24px 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.marquee-brand {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding-right: 22px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  margin-right: 22px;
+  min-width: 150px;
+}
+
+.marquee-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 27px;
+  font-weight: 900;
+  color: var(--board-on);
+  text-shadow: 0 0 22px rgba(253,232,192,0.40);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.marquee-brand-name span {
+  color: var(--orange-lt);
+}
+
+.marquee-brand-sub {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(253,232,192,0.32);
+}
+
+/* Letterboard -- the "now booking" marquee text */
+.marquee-board-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.marquee-now-line {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  padding: 0 4px;
+}
+
+.marquee-now-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--orange-lt);
+  text-shadow: 0 0 12px rgba(212,115,78,0.5);
+  flex-shrink: 0;
+}
+
+.marquee-now-show {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--board-on);
+  text-shadow: 0 0 14px rgba(253,232,192,0.45);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Animated letterboard underline lights */
+.marquee-strip {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 4px;
+}
+
+.marquee-strip-cell {
+  flex: 1;
+  height: 5px;
+  border-radius: 2px;
+  animation: strip-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes strip-pulse {
+  0%, 100% { opacity: 0.22; transform: scaleY(0.5); }
+  50%      { opacity: 0.9;  transform: scaleY(1); }
+}
+
+.marquee-strip.idle .marquee-strip-cell {
+  animation: none;
+  opacity: 0.12;
+  transform: scaleY(0.5);
+}
+
+/* Stage tiles -- the showtimes */
+.stage-tiles {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-left: 22px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  margin-left: 4px;
+}
+
+.stage-tile {
+  width: 132px;
+  min-height: 82px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 9px 13px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+  text-align: left;
+}
+
+.stage-tile:hover {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.stage-tile:focus-visible {
+  outline: 2px solid var(--orange-lt);
+  outline-offset: 2px;
+}
+
+.stage-tile.active-stage {
+  background: linear-gradient(135deg, rgba(61,31,94,0.85), rgba(107,63,160,0.6));
+  border-color: rgba(155,111,168,0.65);
+  box-shadow: 0 0 18px rgba(107,63,160,0.35), inset 0 0 12px rgba(107,63,160,0.15);
+}
+
+.stage-tile.cleared-stage {
+  background: linear-gradient(135deg, rgba(26,58,32,0.7), rgba(31,74,40,0.6));
+  border-color: rgba(90,170,106,0.45);
+  cursor: default;
+}
+
+.stage-tile.cleared-stage:hover {
+  background: linear-gradient(135deg, rgba(26,58,32,0.7), rgba(31,74,40,0.6));
+  border-color: rgba(90,170,106,0.45);
+}
+
+.stage-tile.active-stage::after {
+  content: '';
+  position: absolute;
+  top: 7px; right: 8px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--purple-lt);
+  box-shadow: 0 0 6px var(--purple-lt);
+}
+
+.stage-tile.cleared-stage::after {
+  content: '';
+  position: absolute;
+  top: 7px; right: 8px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--signal-green);
+  box-shadow: 0 0 6px var(--signal-green);
+}
+
+.stage-tile-gate {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(253,232,192,0.40);
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.stage-tile.active-stage .stage-tile-gate { color: rgba(253,232,192,0.75); }
+.stage-tile.cleared-stage .stage-tile-gate { color: rgba(90,170,106,0.75); }
+
+.stage-tile-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(253,232,192,0.72);
+  line-height: 1.2;
+}
+
+.stage-tile.active-stage .stage-tile-name { color: rgba(253,232,192,0.96); }
+.stage-tile.cleared-stage .stage-tile-name { color: rgba(90,170,106,0.92); }
+
+.stage-tile-status {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(253,232,192,0.26);
+}
+
+.stage-tile.active-stage .stage-tile-status { color: rgba(155,111,168,0.92); }
+.stage-tile.cleared-stage .stage-tile-status { color: var(--signal-green); }
+
+/* ============================================================
+   ZONE 2: BOOKING PANEL
+============================================================ */
+.booking-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.booking-header {
+  background: var(--cream-dk);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.booking-stage-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.booking-ticket-badge {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: 20px;
+  padding: 5px 16px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.booking-ticket-badge strong {
+  color: var(--orange);
+  margin: 0 2px;
+}
+
+.booking-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.booking-body::-webkit-scrollbar { width: 4px; }
+.booking-body::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+.booking-idle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted-lt);
+  text-align: center;
+  min-height: 200px;
+}
+
+.booking-idle-icon { font-size: 44px; opacity: 0.3; line-height: 1; }
+.booking-idle p { font-size: 17px; color: var(--muted-lt); }
+
+/* ============================================================
+   TICKET CARD -- the question lives on a ticket stub
+============================================================ */
+.ticket-card {
+  background: var(--ticket-paper);
+  border: 1px solid var(--ticket-edge);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(110,60,20,0.10), 0 1px 0 rgba(255,255,255,0.6) inset;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Ticket stub header strip */
+.ticket-stub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  background: linear-gradient(180deg, var(--cream-dk), var(--ticket-paper));
+  position: relative;
+}
+
+/* Perforation line under the stub */
+.ticket-stub::after {
+  content: '';
+  position: absolute;
+  left: 16px; right: 16px; bottom: 0;
+  border-bottom: 2px dashed var(--ticket-edge);
+}
+
+.ticket-stub-no {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--muted-lt);
+  text-transform: uppercase;
+}
+
+.ticket-stub-no strong { color: var(--orange); }
+
+.ticket-stub-stage {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--purple);
+  background: var(--purple-pale);
+  border: 1px solid rgba(107,63,160,0.18);
+  border-radius: 5px;
+  padding: 3px 12px;
+}
+
+.ticket-main {
+  padding: 22px 26px 26px;
+}
+
+/* Question display */
+.q-format-tag {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.q-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-bottom: 8px;
+}
+
+.q-text {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Code block */
+.q-code {
+  background: #1a1008;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 18px 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--board-on);
+  line-height: 1.7;
+  overflow-x: auto;
+  margin-top: 4px;
+  white-space: pre;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+}
+
+.q-code-blank {
+  display: inline-block;
+  min-width: 84px;
+  border-bottom: 2px solid var(--orange-lt);
+  background: rgba(212,115,78,0.08);
+  border-radius: 2px;
+  padding: 0 4px;
+  margin: 0 2px;
+  vertical-align: baseline;
+}
+
+.q-code-blank input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--board-on);
+  width: 100%;
+  min-width: 84px;
+  caret-color: var(--orange-lt);
+}
+
+/* Recall prompt (no options -- speak it from memory) */
+.recall-cue {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple);
+  background: var(--purple-pale);
+  border: 1px solid rgba(107,63,160,0.16);
+  border-radius: 8px;
+  padding: 11px 16px;
+}
+
+.recall-cue svg { flex-shrink: 0; }
+
+/* Multiple choice / code trace options */
+.mc-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mc-btn {
+  background: white;
+  border: 2px solid var(--border-md);
+  border-radius: 10px;
+  padding: 14px 18px;
+  min-height: 64px;
+  text-align: left;
+  cursor: default;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.mc-letter {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.mc-btn.revealed-correct {
+  background: #e8f5ea;
+  border-color: var(--signal-green);
+}
+
+.mc-btn.revealed-correct .mc-letter {
+  background: var(--signal-green);
+  color: white;
+}
+
+.mc-btn.revealed-correct::after {
+  content: ' \2713 correct';
+  font-size: 13px;
+  font-weight: 700;
+  color: #2a6a38;
+  margin-left: auto;
+  align-self: center;
+}
+
+/* Drag and drop */
+.dnd-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.dnd-col-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-bottom: 8px;
+}
+
+.dnd-items, .dnd-targets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dnd-draggable {
+  background: var(--surface);
+  border: 2px solid var(--border-md);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: grab;
+  user-select: none;
+  transition: background 0.12s, border-color 0.12s, opacity 0.12s, transform 0.1s;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dnd-draggable:hover {
+  background: var(--bg3);
+  border-color: var(--purple-lt);
+  transform: translateY(-1px);
+}
+
+.dnd-draggable.dragging { opacity: 0.4; cursor: grabbing; }
+
+.dnd-drag-handle { color: var(--muted-lt); flex-shrink: 0; font-size: 13px; }
+
+.dnd-target {
+  background: white;
+  border: 2px dashed var(--border-md);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-height: 48px;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.4;
+  transition: border-color 0.12s, background 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dnd-target.drag-over { border-color: var(--purple); background: var(--purple-pale); }
+.dnd-target.matched { border-style: solid; border-color: var(--signal-green); background: #e8f5ea; }
+
+.dnd-target-label { font-style: italic; color: var(--muted-lt); font-size: 14px; }
+
+.dnd-matched-chip {
+  background: var(--confirm-green);
+  color: white;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dnd-check { font-size: 16px; margin-left: auto; flex-shrink: 0; }
+
+/* Reveal and answer */
+.reveal-row { display: flex; gap: 12px; margin-top: 18px; }
+
+.reveal-btn {
+  background: var(--bg3);
+  border: 1.5px solid var(--border-md);
+  border-radius: 10px;
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 22px;
+  min-height: 48px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reveal-btn:hover { background: var(--surface); border-color: var(--orange-lt); }
+
+.answer-box {
+  background: white;
+  border-left: 4px solid var(--orange-lt);
+  border-radius: 0 10px 10px 0;
+  padding: 16px 20px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-top: 18px;
+}
+
+.answer-box strong { color: var(--orange-dk); }
+.answer-box .answer-note { font-size: 16px; color: var(--muted); display: block; margin-top: 6px; }
+
+.next-btn {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 28px;
+  min-height: 52px;
+  cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 3px 14px rgba(107,63,160,0.28);
+  align-self: flex-start;
+  margin-top: 20px;
+}
+
+.next-btn:hover { opacity: 0.9; box-shadow: 0 5px 18px rgba(107,63,160,0.38); }
+
+/* ============================================================
+   COMPLETION SCREEN
+============================================================ */
+#completion-screen {
+  display: none;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 18px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--marquee-bg) 0%, var(--purple-deep) 50%, #0d0508 100%);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.completion-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(90,170,106,0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.completion-bulbs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.completion-bulbs span {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--bulb-on);
+  box-shadow: 0 0 12px var(--bulb-glow);
+  animation: bulb-chase 1.4s ease-in-out infinite;
+}
+
+.completion-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--board-on);
+  text-shadow: 0 0 30px rgba(253,232,192,0.3);
+  line-height: 1.1;
+}
+
+.completion-sub {
+  font-size: 18px;
+  color: rgba(253,232,192,0.55);
+  font-style: italic;
+}
+
+.reopen-btn {
+  background: linear-gradient(135deg, var(--orange-grad-a), var(--orange-grad-b));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 16px 44px;
+  min-height: 56px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(192,90,58,0.30);
+}
+
+.reopen-btn:hover { opacity: 0.9; box-shadow: 0 6px 24px rgba(192,90,58,0.40); }
+
+.hidden { display: none !important; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .load-bulb, .bulb, .marquee-strip-cell, .completion-bulbs span {
+    animation: none !important;
+  }
+  .marquee-strip-cell { opacity: 0.6; transform: scaleY(0.8); }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOAD SCREEN
+============================================================ -->
+<div id="load-screen">
+  <div class="load-marquee">
+    <div class="load-marquee-bulbs" id="load-bulbs"></div>
+    <div class="load-marquee-ticket">Now Booking &bull; Week 10 Review</div>
+  </div>
+  <h1 class="load-title">Mango<span>Bookings</span></h1>
+  <p class="load-subtitle">Doors Open. Review Up.</p>
+  <div class="load-form">
+    <label class="load-label" for="guest-count">How many guests tonight?</label>
+    <input class="load-input" type="number" id="guest-count" value="25" min="6" max="30" inputmode="numeric">
+    <button class="load-btn" id="open-doors-btn">Open the Doors</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     VENUE SCREEN
+============================================================ -->
+<div id="venue-screen">
+
+  <!-- Zone 1: Marquee -->
+  <div class="marquee">
+
+    <div class="bulb-row top" id="bulb-row-top"></div>
+
+    <div class="marquee-top-row">
+      <div class="marquee-brand">
+        <div class="marquee-brand-name">Mango<span>Bookings</span></div>
+        <div class="marquee-brand-sub">REST &amp; Spring Boot Review</div>
+      </div>
+
+      <div class="marquee-board-wrap">
+        <div class="marquee-now-line">
+          <div class="marquee-now-tag" id="board-tag">NOW BOOKING</div>
+          <div class="marquee-now-show" id="board-show">Pick a stage to open the show</div>
+        </div>
+        <div class="marquee-strip idle" id="marquee-strip"></div>
+      </div>
+
+      <div class="stage-tiles">
+        <button class="stage-tile" id="stage-0" data-stage="0" aria-label="Gate A, The Box Office: URLs, DNS, HTTP">
+          <div class="stage-tile-gate">GATE A</div>
+          <div class="stage-tile-name">The Box Office</div>
+          <div class="stage-tile-status" id="stage-status-0">Ready</div>
+        </button>
+        <button class="stage-tile" id="stage-1" data-stage="1" aria-label="Gate B, Will Call: REST verbs">
+          <div class="stage-tile-gate">GATE B</div>
+          <div class="stage-tile-name">Will Call</div>
+          <div class="stage-tile-status" id="stage-status-1">Ready</div>
+        </button>
+        <button class="stage-tile" id="stage-2" data-stage="2" aria-label="Gate C, Backstage: controller, service, model layers">
+          <div class="stage-tile-gate">GATE C</div>
+          <div class="stage-tile-name">Backstage</div>
+          <div class="stage-tile-status" id="stage-status-2">Ready</div>
+        </button>
+        <button class="stage-tile" id="stage-3" data-stage="3" aria-label="Gate D, Soundcheck: Spring Boot, JPA, annotations">
+          <div class="stage-tile-gate">GATE D</div>
+          <div class="stage-tile-name">Soundcheck</div>
+          <div class="stage-tile-status" id="stage-status-3">Ready</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="bulb-row bottom" id="bulb-row-bottom"></div>
+
+  </div>
+
+  <!-- Zone 2: Booking Panel -->
+  <div class="booking-panel">
+    <div class="booking-header">
+      <div class="booking-stage-label" id="booking-stage-label">No Stage Selected</div>
+      <div class="booking-ticket-badge" id="ticket-badge">Pick a stage to begin</div>
+    </div>
+    <div class="booking-body" id="booking-body">
+      <div class="booking-idle" id="booking-idle">
+        <div class="booking-idle-icon">&#127915;</div>
+        <p>Open a stage from the marquee to start the review</p>
+      </div>
+      <div class="hidden" id="question-panel"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     COMPLETION SCREEN
+============================================================ -->
+<div id="completion-screen">
+  <div class="completion-glow"></div>
+  <div class="completion-bulbs" id="completion-bulbs"></div>
+  <div class="completion-title">Every stage sold out.<br>The house is full.</div>
+  <div class="completion-sub">Every ticket booked. Every guest seated. Great show.</div>
+  <button class="reopen-btn" id="reopen-btn">Reopen the Box Office</button>
+</div>
+
+<script>
+// ============================================================
+// QUESTION DATA -- 4 stages mapping to week 10 skills
+// Formats: recall (no options), fill-in-the-blank, code-trace,
+//          multiple-choice, drag-and-drop
+// ============================================================
+const STAGES = [
+  {
+    id: 0,
+    name: "The Box Office",
+    gate: "GATE A",
+    show: "The Box Office: URLs, DNS &amp; HTTP",
+    questions: [
+      {
+        format: "recall",
+        text: "Before your browser can send a request to mangobookings.com, it has to find the server's real address on the network. What system turns the domain name into an IP address?",
+        answer: "DNS, the Domain Name System.",
+        answerNote: "DNS works like the venue's directory: you know the name (mangobookings.com), DNS looks up the numeric IP address the network actually routes traffic to."
+      },
+      {
+        format: "drag-and-drop",
+        text: "Match each part of this URL to its name:  https://mangobookings.com/shows/42?section=floor",
+        items: [
+          { id: "u-a", label: "https" },
+          { id: "u-b", label: "mangobookings.com" },
+          { id: "u-c", label: "/shows/42" },
+          { id: "u-d", label: "?section=floor" }
+        ],
+        targets: [
+          { id: "ut-a", label: "Host (domain): which server to reach", matchId: "u-b" },
+          { id: "ut-b", label: "Query string: extra parameters after the ?", matchId: "u-d" },
+          { id: "ut-c", label: "Scheme (protocol): how to talk to the server", matchId: "u-a" },
+          { id: "ut-d", label: "Path: which resource on that server", matchId: "u-c" }
+        ],
+        answer: "Scheme = https. Host = mangobookings.com. Path = /shows/42. Query string = ?section=floor. The scheme says how, the host says where, the path says what, the query passes extra detail."
+      },
+      {
+        format: "recall",
+        text: "Every HTTP message, request or response, is built from the same pieces. Name the parts of an HTTP request from memory.",
+        answer: "A request line (method + path + version), headers, and an optional body.",
+        answerNote: "Example request line: POST /bookings HTTP/1.1. Headers carry metadata like Content-Type. The body carries the data being sent, for example the JSON for a new booking."
+      },
+      {
+        format: "code-trace",
+        text: "A guest's browser asks for /shows/999 and gets this status line back. What is the server telling the client?",
+        code: "HTTP/1.1 404 Not Found",
+        options: [
+          "The request succeeded and a show was returned",
+          "The show does not exist; this is a client-side (4xx) error",
+          "The server crashed while handling the request",
+          "The guest is not allowed to view that show"
+        ],
+        correctIndex: 1,
+        answer: "404 means the requested resource was not found. The 4xx range signals client errors: the request asked for something that is missing or invalid. (5xx would mean the server itself failed.)"
+      },
+      {
+        format: "drag-and-drop",
+        text: "Match each HTTP status code to what it means.",
+        items: [
+          { id: "s-a", label: "200" },
+          { id: "s-b", label: "201" },
+          { id: "s-c", label: "404" },
+          { id: "s-d", label: "500" }
+        ],
+        targets: [
+          { id: "st-a", label: "Created: a new resource was made", matchId: "s-b" },
+          { id: "st-b", label: "Internal Server Error: the server failed", matchId: "s-d" },
+          { id: "st-c", label: "OK: the request succeeded", matchId: "s-a" },
+          { id: "st-d", label: "Not Found: no such resource", matchId: "s-c" }
+        ],
+        answer: "200 OK = success. 201 Created = a new resource was created (common after a POST). 404 Not Found = the resource does not exist. 500 = the server hit an error handling the request."
+      },
+      {
+        format: "recall",
+        text: "HTTP is often described as stateless. Explain what that means and why it matters for a booking app.",
+        answer: "Each request is independent; the server does not remember previous requests on its own.",
+        answerNote: "Because the server keeps no memory between requests, anything it needs to know (like who you are) must be re-sent every time, usually in a header such as a token. State has to travel with the request."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the scheme that encrypts traffic between the browser and the server:",
+        code: "/* ___ */://mangobookings.com/shows",
+        blank: "https",
+        blankPlaceholder: "scheme",
+        answer: "https",
+        answerNote: "https is http layered over TLS encryption, so the request and response cannot be read in transit. Plain http sends everything in the clear."
+      }
+    ]
+  },
+  {
+    id: 1,
+    name: "Will Call",
+    gate: "GATE B",
+    show: "Will Call: REST verbs as booking actions",
+    questions: [
+      {
+        format: "drag-and-drop",
+        text: "Match each HTTP verb to the booking action it performs.",
+        items: [
+          { id: "v-a", label: "GET" },
+          { id: "v-b", label: "POST" },
+          { id: "v-c", label: "PUT" },
+          { id: "v-d", label: "DELETE" }
+        ],
+        targets: [
+          { id: "vt-a", label: "Reserve a brand new booking", matchId: "v-b" },
+          { id: "vt-b", label: "Cancel an existing booking", matchId: "v-d" },
+          { id: "vt-c", label: "Browse the show lineup (read only)", matchId: "v-a" },
+          { id: "vt-d", label: "Replace / update an existing booking", matchId: "v-c" }
+        ],
+        answer: "GET reads (browse shows). POST creates (new booking). PUT replaces/updates (change a booking). DELETE removes (cancel a booking). These four verbs map cleanly onto create, read, update, delete."
+      },
+      {
+        format: "recall",
+        text: "A guest wants to see the full list of shows on the lineup. Which HTTP verb does the app use, and what effect does that verb have on the server's data?",
+        answer: "GET. It is read-only; it retrieves data and does not change anything on the server.",
+        answerNote: "GET is a safe verb: calling it any number of times leaves the server's data untouched. You can refresh the lineup as often as you like without booking anything."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the verb that reserves a new seat by sending booking data to the server:",
+        code: "/* ___ */ /bookings\nContent-Type: application/json\n\n{ \"showId\": 42, \"seat\": \"A12\" }",
+        blank: "POST",
+        blankPlaceholder: "verb",
+        answer: "POST",
+        answerNote: "POST sends a body of new data to create a resource. A successful create usually comes back as 201 Created with the new booking in the response."
+      },
+      {
+        format: "multiple-choice",
+        text: "A guest wants to change only the seat on an existing booking. What is the difference between PUT and PATCH here?",
+        options: [
+          "PUT and PATCH are identical; either one always works the same way",
+          "PUT replaces the whole booking; PATCH updates just the fields you send",
+          "PUT is read-only; PATCH is the only one that changes data",
+          "PUT creates a new booking; PATCH can only delete one"
+        ],
+        correctIndex: 1,
+        answer: "PUT replaces the entire resource, so you typically send the whole booking. PATCH applies a partial update, changing only the fields you include (like just the seat). Both modify an existing resource."
+      },
+      {
+        format: "recall",
+        text: "Two important properties of HTTP verbs are safe and idempotent. Which verbs are safe, and which are idempotent? Explain idempotent in your own words.",
+        answer: "GET is safe (no change). GET, PUT, and DELETE are idempotent; POST is not.",
+        answerNote: "Idempotent means repeating the same request gives the same end state. DELETE /bookings/7 twice still leaves booking 7 gone. But POST /bookings twice creates two bookings, so POST is not idempotent."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the verb that cancels booking number 7:",
+        code: "/* ___ */ /bookings/7",
+        blank: "DELETE",
+        blankPlaceholder: "verb",
+        answer: "DELETE",
+        answerNote: "DELETE removes the resource identified by the URL. The id in the path (/bookings/7) tells the server exactly which booking to cancel."
+      },
+      {
+        format: "code-trace",
+        text: "A guest sends this request and gets a 201 Created back. What happened?",
+        code: "POST /bookings\nContent-Type: application/json\n\n{ \"showId\": 7, \"seat\": \"B4\" }",
+        options: [
+          "The server returned a list of all existing bookings",
+          "An existing booking was deleted",
+          "A new booking was created for show 7, seat B4",
+          "The request failed because POST needs an id in the URL"
+        ],
+        correctIndex: 2,
+        answer: "POST /bookings with a body creates a new booking. The 201 Created status confirms a new resource was made. Note there is no id in the URL because the server assigns the new booking's id."
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "Backstage",
+    gate: "GATE C",
+    show: "Backstage: Controller, Service &amp; Model layers",
+    questions: [
+      {
+        format: "drag-and-drop",
+        text: "Match each layer of the app to the job it does.",
+        items: [
+          { id: "l-a", label: "Controller" },
+          { id: "l-b", label: "Service" },
+          { id: "l-c", label: "Model (Entity)" },
+          { id: "l-d", label: "Repository" }
+        ],
+        targets: [
+          { id: "lt-a", label: "Holds business logic: checks availability, applies rules", matchId: "l-b" },
+          { id: "lt-b", label: "Talks to the database to load and save rows", matchId: "l-d" },
+          { id: "lt-c", label: "Receives the HTTP request and returns a response", matchId: "l-a" },
+          { id: "lt-d", label: "Represents the data: a Booking, a Show", matchId: "l-c" }
+        ],
+        answer: "Controller handles the HTTP layer. Service holds the business logic. Model/Entity is the data shape. Repository is the database access. Each layer has one clear responsibility."
+      },
+      {
+        format: "recall",
+        text: "A POST /bookings request arrives at your Spring Boot app. Which layer receives it first, and what is that layer's job?",
+        answer: "The controller. It maps the HTTP request to a method, pulls out the inputs, delegates to the service, and returns a response.",
+        answerNote: "The controller is the box-office window: it takes the request and hands back a response. It should stay thin and not contain the real booking logic itself."
+      },
+      {
+        format: "recall",
+        text: "Why do we put business logic in a service layer instead of writing it all inside the controller?",
+        answer: "Separation of concerns: thin controllers, reusable and testable logic.",
+        answerNote: "Keeping logic in the service means it can be reused by more than one controller, tested without HTTP, and changed without touching request handling. The controller just coordinates."
+      },
+      {
+        format: "code-trace",
+        text: "Trace this controller method. When a booking request comes in, what does this code actually do?",
+        code: "@PostMapping(\"/bookings\")\npublic Booking create(@RequestBody Booking b) {\n    return bookingService.book(b);\n}",
+        options: [
+          "It writes the booking directly to the database itself",
+          "It receives the booking, hands it to the service, and returns the result",
+          "It deletes the booking with the given id",
+          "It returns every booking in the system"
+        ],
+        correctIndex: 1,
+        answer: "The controller takes the booking from the request body, delegates the real work to bookingService.book(b), and returns whatever the service gives back. The controller coordinates; the service does the logic."
+      },
+      {
+        format: "recall",
+        text: "In the booking app, what does the Model (the Booking entity) represent, and roughly what does one instance of it correspond to in the database?",
+        answer: "It represents the data shape of a booking; one instance corresponds to one row in the bookings table.",
+        answerNote: "A Booking object holds the fields (id, showId, seat, guestName). With JPA, the class maps to a table and each object maps to a row, so saving a Booking writes a row."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the field type so this model can hold the guest's name on a booking:",
+        code: "public class Booking {\n    private Long id;\n    private /* ___ */ guestName;\n    private String seat;\n}",
+        blank: "String",
+        blankPlaceholder: "type",
+        answer: "String",
+        answerNote: "A name is text, so the field type is String. The model is just a plain class describing the data; the field types match the kind of value each piece of data holds."
+      },
+      {
+        format: "recall",
+        text: "Trace the path a POST /bookings request travels through the app, in order, from the outside world to the database.",
+        answer: "Client to Controller to Service to Repository to Database (and the response travels back the same way).",
+        answerNote: "Request comes in to the controller, which calls the service for the logic, which calls the repository to save, which hits the database. Each layer only talks to the one next to it."
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Soundcheck",
+    gate: "GATE D",
+    show: "Soundcheck: Spring Boot, JPA &amp; annotations",
+    questions: [
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the annotation that marks this class as a REST controller so Spring routes web requests to it:",
+        code: "@/* ___ */\npublic class BookingController {\n    // handler methods\n}",
+        blank: "RestController",
+        blankPlaceholder: "annotation",
+        answer: "RestController",
+        answerNote: "@RestController tells Spring this class handles web requests and that method return values are written straight to the response body (as JSON), not treated as view names."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the annotation that maps this method to GET /shows:",
+        code: "@/* ___ */(\"/shows\")\npublic List<Show> all() {\n    return showService.findAll();\n}",
+        blank: "GetMapping",
+        blankPlaceholder: "annotation",
+        answer: "GetMapping",
+        answerNote: "@GetMapping(\"/shows\") maps HTTP GET requests for /shows to this method. There are matching annotations for the other verbs: @PostMapping, @PutMapping, @DeleteMapping."
+      },
+      {
+        format: "drag-and-drop",
+        text: "Match each Spring / JPA annotation to what it does.",
+        items: [
+          { id: "a-a", label: "@Entity" },
+          { id: "a-b", label: "@Id" },
+          { id: "a-c", label: "@RestController" },
+          { id: "a-d", label: "@Autowired" }
+        ],
+        targets: [
+          { id: "at-a", label: "Marks the primary key field", matchId: "a-b" },
+          { id: "at-b", label: "Injects a dependency (like a service)", matchId: "a-d" },
+          { id: "at-c", label: "Maps the class to a database table", matchId: "a-a" },
+          { id: "at-d", label: "Handles REST requests and returns data", matchId: "a-c" }
+        ],
+        answer: "@Entity maps a class to a table. @Id marks the primary key. @RestController handles web requests and returns data. @Autowired injects a dependency so you do not construct it by hand."
+      },
+      {
+        format: "recall",
+        text: "What does the @Entity annotation do, and what must every @Entity class have?",
+        answer: "@Entity maps the class to a database table; every entity must have an @Id (a primary key field).",
+        answerNote: "JPA uses @Entity to treat the class as persistent data, so each object becomes a row. The @Id field uniquely identifies each row, like the booking's id."
+      },
+      {
+        format: "fill-in-the-blank",
+        text: "Fill in the annotation that captures the {id} from the URL path into the method parameter:",
+        code: "@GetMapping(\"/shows/{id}\")\npublic Show one(@/* ___ */ Long id) {\n    return showService.findById(id);\n}",
+        blank: "PathVariable",
+        blankPlaceholder: "annotation",
+        answer: "PathVariable",
+        answerNote: "@PathVariable binds the {id} placeholder in the URL to the method parameter. So a request to /shows/42 calls the method with id = 42."
+      },
+      {
+        format: "code-trace",
+        text: "Your repository is just this interface, with no method bodies written. What do you get from it?",
+        code: "public interface BookingRepository\n        extends JpaRepository<Booking, Long> {\n}",
+        options: [
+          "Nothing; an empty interface cannot do anything",
+          "Built-in CRUD methods like save, findById, findAll, deleteById",
+          "Only a findAll method, and you must write the rest",
+          "A new database table, but no methods to use it"
+        ],
+        correctIndex: 1,
+        answer: "Extending JpaRepository gives you ready-made CRUD methods (save, findById, findAll, deleteById, and more) without writing any SQL or implementation. Spring Data provides the implementation at runtime."
+      },
+      {
+        format: "recall",
+        text: "In a POST handler, what does @RequestBody do?",
+        answer: "It binds the JSON body of the request to a Java object (deserializes the body into a parameter).",
+        answerNote: "When a guest POSTs booking JSON, @RequestBody Booking b converts that JSON into a Booking object so your method can work with it as normal Java, no manual parsing needed."
+      }
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  guestCount: 25,
+  activeStage: null,
+  stageState: []
+};
+
+function fisherYates(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initSession(n) {
+  state.guestCount = n;
+  state.activeStage = null;
+
+  // Total questions: enough for every guest to take at least one ticket.
+  // Floor of 12 (3 per stage) so small cohorts still get a full review.
+  const totalNeeded = Math.max(12, n);
+  const stageCount = STAGES.length;
+  const basePerStage = Math.floor(totalNeeded / stageCount);
+  let remainder = totalNeeded - basePerStage * stageCount;
+
+  const allGuests = fisherYates(Array.from({ length: n }, (_, i) => i + 1));
+  let cursor = 0;
+
+  state.stageState = STAGES.map((stage) => {
+    let qps = basePerStage + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder--;
+    const questionCount = Math.min(qps, stage.questions.length);
+    const slots = [];
+    for (let q = 0; q < questionCount; q++) {
+      slots.push(allGuests[cursor % allGuests.length]);
+      cursor++;
+    }
+    return { questionIdx: 0, ticketSlots: slots, revealed: false, cleared: false, dndState: null };
+  });
+}
+
+// ============================================================
+// BUILD MARQUEE BULBS
+// ============================================================
+function buildBulbs(el, count) {
+  el.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement('div');
+    b.className = el.id === 'load-bulbs' ? 'load-bulb' : 'bulb';
+    b.style.animationDelay = (i * 0.12).toFixed(2) + 's';
+    el.appendChild(b);
+  }
+}
+
+// ============================================================
+// BUILD MARQUEE STRIP (polychrome light cells)
+// ============================================================
+(function buildStrip() {
+  const strip = document.getElementById('marquee-strip');
+  const N = 40;
+  const stops = [
+    [212,115,78],[190,100,140],[155,111,168],
+    [91,127,166],[110,150,140],[194,156,60],[212,115,78]
+  ];
+  function lerp(t) {
+    const seg = t * (stops.length - 1), i = Math.min(Math.floor(seg), stops.length - 2), f = seg - i;
+    const a = stops[i], b = stops[i + 1];
+    return `rgb(${Math.round(a[0]+(b[0]-a[0])*f)},${Math.round(a[1]+(b[1]-a[1])*f)},${Math.round(a[2]+(b[2]-a[2])*f)})`;
+  }
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'marquee-strip-cell';
+    cell.style.background = lerp(i / (N - 1));
+    cell.style.animationDelay = (Math.random() * 1.6).toFixed(2) + 's';
+    strip.appendChild(cell);
+  }
+})();
+
+// ============================================================
+// RENDER STAGE TILES
+// ============================================================
+function renderStageTiles() {
+  STAGES.forEach((stage, si) => {
+    const tile = document.getElementById('stage-' + si);
+    const statusEl = document.getElementById('stage-status-' + si);
+    const ss = state.stageState[si];
+    const isActive = state.activeStage === si;
+    const isCleared = ss.cleared;
+
+    tile.className = 'stage-tile' +
+      (isActive ? ' active-stage' : '') +
+      (isCleared ? ' cleared-stage' : '');
+
+    if (statusEl) {
+      if (isCleared) {
+        statusEl.textContent = 'Sold Out';
+      } else if (isActive) {
+        statusEl.textContent = `Ticket ${ss.questionIdx + 1} of ${ss.ticketSlots.length}`;
+      } else {
+        statusEl.textContent = 'Ready';
+      }
+    }
+  });
+}
+
+// ============================================================
+// UPDATE MARQUEE BOARD
+// ============================================================
+function updateBoard() {
+  const tagEl = document.getElementById('board-tag');
+  const showEl = document.getElementById('board-show');
+  const strip = document.getElementById('marquee-strip');
+
+  if (state.activeStage === null) {
+    tagEl.textContent = 'NOW BOOKING';
+    showEl.innerHTML = 'Pick a stage to open the show';
+    strip.classList.add('idle');
+    return;
+  }
+
+  const stage = STAGES[state.activeStage];
+  tagEl.textContent = 'NOW SHOWING';
+  showEl.innerHTML = stage.show;
+  strip.classList.remove('idle');
+}
+
+// ============================================================
+// OPEN A STAGE
+// ============================================================
+function openStage(si) {
+  state.activeStage = si;
+  renderStageTiles();
+  updateBoard();
+  renderQuestion();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function spacer(h) { const d = document.createElement('div'); d.style.height = h + 'px'; return d; }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function formatLabel(fmt) {
+  if (fmt === 'recall') return 'Recall · Say It From Memory';
+  if (fmt === 'fill-in-the-blank') return 'Fill in the Blank';
+  if (fmt === 'code-trace') return 'Code Trace';
+  if (fmt === 'multiple-choice') return 'Multiple Choice';
+  if (fmt === 'drag-and-drop') return 'Drag and Drop';
+  return fmt;
+}
+
+const EYE_SVG = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  const idle = document.getElementById('booking-idle');
+  const panel = document.getElementById('question-panel');
+  const stageLabel = document.getElementById('booking-stage-label');
+  const ticketBadge = document.getElementById('ticket-badge');
+
+  if (state.activeStage === null) {
+    idle.classList.remove('hidden');
+    panel.classList.add('hidden');
+    stageLabel.textContent = 'No Stage Selected';
+    ticketBadge.textContent = 'Pick a stage to begin';
+    return;
+  }
+
+  const si = state.activeStage;
+  const stage = STAGES[si];
+  const ss = state.stageState[si];
+
+  stageLabel.textContent = `${stage.gate} · ${stage.name}`;
+
+  if (ss.cleared) {
+    idle.classList.remove('hidden');
+    panel.classList.add('hidden');
+    idle.innerHTML = `
+      <div class="booking-idle-icon">&#9989;</div>
+      <p>${esc(stage.name)} is sold out. Every ticket booked.</p>
+    `;
+    ticketBadge.textContent = 'Stage Sold Out';
+    return;
+  }
+
+  idle.classList.add('hidden');
+  panel.classList.remove('hidden');
+  panel.innerHTML = '';
+
+  const qi = ss.questionIdx;
+  const total = ss.ticketSlots.length;
+  const q = stage.questions[qi];
+
+  // Global ticket counter across all stages
+  const globalCurrent = state.stageState.reduce((sum, s, i) =>
+    i === si ? sum : (s.cleared ? sum + s.ticketSlots.length : sum + s.questionIdx), 0) + qi + 1;
+  const globalTotal = state.stageState.reduce((sum, s) => sum + s.ticketSlots.length, 0);
+  ticketBadge.innerHTML = `Ticket <strong>${globalCurrent}</strong> of ${globalTotal}`;
+
+  // Build the ticket card
+  const card = document.createElement('div');
+  card.className = 'ticket-card';
+
+  const ticketNo = String(globalCurrent).padStart(3, '0');
+  const stub = document.createElement('div');
+  stub.className = 'ticket-stub';
+  stub.innerHTML = `
+    <div class="ticket-stub-no">Ticket No. <strong>${ticketNo}</strong></div>
+    <div class="ticket-stub-stage">${esc(stage.gate)} · ${esc(stage.name)}</div>
+  `;
+  card.appendChild(stub);
+
+  const main = document.createElement('div');
+  main.className = 'ticket-main';
+
+  const formatTag = document.createElement('div');
+  formatTag.className = 'q-format-tag';
+  formatTag.textContent = formatLabel(q.format);
+  main.appendChild(formatTag);
+
+  const qLabel = document.createElement('div');
+  qLabel.className = 'q-label';
+  qLabel.textContent = 'Question ' + (qi + 1) + ' of ' + total;
+  main.appendChild(qLabel);
+
+  const qText = document.createElement('div');
+  qText.className = 'q-text';
+  qText.textContent = q.text;
+  main.appendChild(qText);
+
+  main.appendChild(spacer(14));
+
+  if (q.format === 'fill-in-the-blank') {
+    renderFITB(main, q, ss);
+  } else if (q.format === 'recall') {
+    renderRecall(main, q, ss);
+  } else if (q.format === 'code-trace' || q.format === 'multiple-choice') {
+    renderMC(main, q, ss);
+  } else if (q.format === 'drag-and-drop') {
+    renderDnD(main, q, ss);
+  }
+
+  card.appendChild(main);
+  panel.appendChild(card);
+}
+
+// ============================================================
+// RECALL (no options -- active retrieval)
+// ============================================================
+function renderRecall(main, q, ss) {
+  const cue = document.createElement('div');
+  cue.className = 'recall-cue';
+  cue.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> No options. Have the guest say the answer out loud, then reveal to confirm.';
+  main.appendChild(cue);
+
+  if (q.code) {
+    main.appendChild(spacer(14));
+    const codeBlock = document.createElement('pre');
+    codeBlock.className = 'q-code';
+    codeBlock.textContent = q.code;
+    main.appendChild(codeBlock);
+  }
+
+  if (!ss.revealed) {
+    appendRevealBtn(main, ss);
+  } else {
+    appendAnswerBox(main, q);
+    appendNextBtn(main, ss);
+  }
+}
+
+// ============================================================
+// FILL IN THE BLANK
+// ============================================================
+function renderFITB(main, q, ss) {
+  const codeWrap = document.createElement('div');
+  codeWrap.className = 'q-code';
+  const codeText = esc(q.code).replace('/* ___ */',
+    '<span class="q-code-blank"><input type="text" placeholder="' + esc(q.blankPlaceholder) + '" id="fitb-input" autocomplete="off" spellcheck="false" aria-label="Fill in the blank"></span>');
+  codeWrap.innerHTML = codeText;
+  main.appendChild(codeWrap);
+
+  if (!ss.revealed) {
+    appendRevealBtn(main, ss);
+  } else {
+    appendAnswerBox(main, q);
+    appendNextBtn(main, ss);
+  }
+}
+
+// ============================================================
+// MULTIPLE CHOICE / CODE TRACE
+// ============================================================
+function renderMC(main, q, ss) {
+  if (q.code) {
+    const codeBlock = document.createElement('pre');
+    codeBlock.className = 'q-code';
+    codeBlock.textContent = q.code;
+    main.appendChild(codeBlock);
+    main.appendChild(spacer(16));
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'mc-options';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, oi) => {
+    const btn = document.createElement('div');
+    btn.className = 'mc-btn' + (ss.revealed && oi === q.correctIndex ? ' revealed-correct' : '');
+    btn.innerHTML = `<span class="mc-letter">${letters[oi]}</span><span>${esc(opt)}</span>`;
+    grid.appendChild(btn);
+  });
+  main.appendChild(grid);
+
+  if (!ss.revealed) {
+    appendRevealBtn(main, ss);
+  } else {
+    appendAnswerBox(main, q);
+    appendNextBtn(main, ss);
+  }
+}
+
+// ============================================================
+// DRAG AND DROP
+// ============================================================
+function renderDnD(main, q, ss) {
+  if (!ss.dndState) ss.dndState = { matches: {}, dragItem: null };
+  const dndState = ss.dndState;
+
+  const container = document.createElement('div');
+  container.className = 'dnd-container';
+
+  const leftCol = document.createElement('div');
+  const leftLabel = document.createElement('div');
+  leftLabel.className = 'dnd-col-label';
+  leftLabel.textContent = 'Items';
+  leftCol.appendChild(leftLabel);
+
+  const itemsDiv = document.createElement('div');
+  itemsDiv.className = 'dnd-items';
+
+  const matchedItemIds = new Set(Object.values(dndState.matches));
+  q.items.forEach(item => {
+    if (matchedItemIds.has(item.id)) return;
+    const drag = document.createElement('div');
+    drag.className = 'dnd-draggable';
+    drag.draggable = true;
+    drag.dataset.itemId = item.id;
+    drag.innerHTML = `<span class="dnd-drag-handle">&#8801;</span><span>${esc(item.label)}</span>`;
+    drag.addEventListener('dragstart', e => {
+      dndState.dragItem = item.id;
+      drag.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    drag.addEventListener('dragend', () => drag.classList.remove('dragging'));
+    itemsDiv.appendChild(drag);
+  });
+  leftCol.appendChild(itemsDiv);
+
+  const rightCol = document.createElement('div');
+  const rightLabel = document.createElement('div');
+  rightLabel.className = 'dnd-col-label';
+  rightLabel.textContent = 'Match To';
+  rightCol.appendChild(rightLabel);
+
+  const targetsDiv = document.createElement('div');
+  targetsDiv.className = 'dnd-targets';
+  q.targets.forEach(target => {
+    const tgt = document.createElement('div');
+    tgt.className = 'dnd-target';
+    tgt.dataset.targetId = target.id;
+    const matchedItemId = dndState.matches[target.id];
+
+    if (matchedItemId) {
+      tgt.classList.add('matched');
+      const matchedItem = q.items.find(i => i.id === matchedItemId);
+      const correct = matchedItemId === target.matchId;
+      tgt.innerHTML = `
+        <span class="dnd-matched-chip">${esc(matchedItem ? matchedItem.label : '')}</span>
+        <span style="font-size:14px;color:var(--text-2);flex:1">${esc(target.label)}</span>
+        <span class="dnd-check" style="color:${correct ? 'var(--signal-green)' : 'var(--orange)'}">${correct ? '&#10003;' : '&#215;'}</span>
+      `;
+    } else {
+      tgt.innerHTML = `<span class="dnd-target-label">${esc(target.label)}</span>`;
+      tgt.addEventListener('dragover', e => { e.preventDefault(); tgt.classList.add('drag-over'); });
+      tgt.addEventListener('dragleave', () => tgt.classList.remove('drag-over'));
+      tgt.addEventListener('drop', e => {
+        e.preventDefault();
+        tgt.classList.remove('drag-over');
+        if (dndState.dragItem) {
+          dndState.matches[target.id] = dndState.dragItem;
+          dndState.dragItem = null;
+          renderQuestion();
+        }
+      });
+    }
+    targetsDiv.appendChild(tgt);
+  });
+  rightCol.appendChild(targetsDiv);
+
+  container.appendChild(leftCol);
+  container.appendChild(rightCol);
+  main.appendChild(container);
+
+  if (!ss.revealed) {
+    appendRevealBtn(main, ss, () => {
+      q.targets.forEach(t => { if (!dndState.matches[t.id]) dndState.matches[t.id] = t.matchId; });
+    });
+  } else {
+    appendAnswerBox(main, q);
+    appendNextBtn(main, ss);
+  }
+}
+
+// ============================================================
+// SHARED: REVEAL BUTTON, ANSWER BOX, NEXT BUTTON
+// ============================================================
+function appendRevealBtn(main, ss, beforeReveal) {
+  const row = document.createElement('div');
+  row.className = 'reveal-row';
+  const btn = document.createElement('button');
+  btn.className = 'reveal-btn';
+  btn.innerHTML = EYE_SVG + ' Reveal Answer';
+  btn.addEventListener('click', () => {
+    if (beforeReveal) beforeReveal();
+    ss.revealed = true;
+    renderQuestion();
+  });
+  row.appendChild(btn);
+  main.appendChild(row);
+}
+
+function appendAnswerBox(main, q) {
+  const aBox = document.createElement('div');
+  aBox.className = 'answer-box';
+  let html = '<strong>Answer: ' + esc(q.answer) + '</strong>';
+  if (q.answerNote) html += '<span class="answer-note">' + esc(q.answerNote) + '</span>';
+  aBox.innerHTML = html;
+  main.appendChild(aBox);
+}
+
+function appendNextBtn(main, ss) {
+  const btn = document.createElement('button');
+  btn.className = 'next-btn';
+  const isLast = ss.questionIdx >= ss.ticketSlots.length - 1;
+  btn.innerHTML = isLast
+    ? 'Stage Sold Out <span style="font-size:18px">&#9679;</span>'
+    : 'Next Ticket <span style="font-size:18px">&#8594;</span>';
+
+  btn.addEventListener('click', () => {
+    if (isLast) {
+      ss.cleared = true;
+      state.activeStage = null;
+      renderStageTiles();
+      updateBoard();
+      renderQuestion();
+      if (state.stageState.every(s => s.cleared)) {
+        setTimeout(showCompletion, 500);
+      }
+    } else {
+      ss.questionIdx++;
+      ss.revealed = false;
+      ss.dndState = null;
+      renderStageTiles();
+      renderQuestion();
+    }
+  });
+  main.appendChild(btn);
+}
+
+// ============================================================
+// COMPLETION
+// ============================================================
+function showCompletion() {
+  buildBulbs(document.getElementById('completion-bulbs'), 9);
+  document.getElementById('completion-screen').style.display = 'flex';
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('guest-count').addEventListener('blur', function () {
+  let v = parseInt(this.value, 10);
+  if (isNaN(v) || v < 6) v = 6;
+  if (v > 30) v = 30;
+  this.value = v;
+});
+
+document.getElementById('open-doors-btn').addEventListener('click', () => {
+  const n = parseInt(document.getElementById('guest-count').value, 10) || 25;
+  initSession(n);
+
+  buildBulbs(document.getElementById('bulb-row-top'), 22);
+  buildBulbs(document.getElementById('bulb-row-bottom'), 22);
+
+  document.getElementById('load-screen').style.display = 'none';
+  document.getElementById('venue-screen').style.display = 'flex';
+
+  renderStageTiles();
+  updateBoard();
+  renderQuestion();
+});
+
+STAGES.forEach((_, si) => {
+  document.getElementById('stage-' + si).addEventListener('click', () => {
+    const ss = state.stageState[si];
+    if (ss.cleared) return;
+    openStage(si);
+  });
+});
+
+document.getElementById('reopen-btn').addEventListener('click', () => {
+  document.getElementById('completion-screen').style.display = 'none';
+  document.getElementById('venue-screen').style.display = 'none';
+  document.getElementById('load-screen').style.display = 'flex';
+  document.getElementById('booking-idle').innerHTML = `
+    <div class="booking-idle-icon">&#127915;</div>
+    <p>Open a stage from the marquee to start the review</p>
+  `;
+});
+
+// Build the load-screen marquee bulbs on first paint
+buildBulbs(document.getElementById('load-bulbs'), 13);
+</script>
+</body>
+</html>

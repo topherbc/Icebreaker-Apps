@@ -1247,10 +1247,10 @@ const STAGES = [
         targets: [
           { id: "ut-a", label: "Host (domain): which server to reach", matchId: "u-b" },
           { id: "ut-b", label: "Query string: extra parameters after the ?", matchId: "u-d" },
-          { id: "ut-c", label: "Scheme (protocol): how to talk to the server", matchId: "u-a" },
+          { id: "ut-c", label: "Protocol: how to talk to the server", matchId: "u-a" },
           { id: "ut-d", label: "Path: which resource on that server", matchId: "u-c" }
         ],
-        answer: "Scheme = https. Host = mangobookings.com. Path = /shows/42. Query string = ?section=floor. The scheme says how, the host says where, the path says what, the query passes extra detail."
+        answer: "Protocol = https. Host = mangobookings.com. Path = /shows/42. Query string = ?section=floor. The protocol says how, the host says where, the path says what, the query passes extra detail."
       },
       {
         format: "recall",
@@ -1296,10 +1296,10 @@ const STAGES = [
       },
       {
         format: "fill-in-the-blank",
-        text: "Fill in the scheme that encrypts traffic between the browser and the server:",
+        text: "Fill in the protocol that encrypts traffic between the browser and the server:",
         code: "/* ___ */://mangobookings.com/shows",
         blank: "https",
-        blankPlaceholder: "scheme",
+        blankPlaceholder: "protocol",
         answer: "https",
         answerNote: "https is http layered over TLS encryption, so the request and response cannot be read in transit. Plain http sends everything in the clear."
       }
@@ -1345,19 +1345,19 @@ const STAGES = [
       },
       {
         format: "multiple-choice",
-        text: "A guest wants to change only the seat on an existing booking. What is the difference between PUT and PATCH here?",
+        text: "A guest already has a booking and wants to change the seat on it. What is the difference between PUT and POST here?",
         options: [
-          "PUT and PATCH are identical; either one always works the same way",
-          "PUT replaces the whole booking; PATCH updates just the fields you send",
-          "PUT is read-only; PATCH is the only one that changes data",
-          "PUT creates a new booking; PATCH can only delete one"
+          "PUT and POST are identical; either one always works the same way",
+          "PUT updates an existing booking; POST creates a brand new one",
+          "PUT is read-only; POST is the only one that changes data",
+          "PUT creates a new booking; POST can only delete one"
         ],
         correctIndex: 1,
-        answer: "PUT replaces the entire resource, so you typically send the whole booking. PATCH applies a partial update, changing only the fields you include (like just the seat). Both modify an existing resource."
+        answer: "POST creates a brand new resource, so it makes a new booking each time you call it. PUT updates (replaces) an existing resource at a known id, so it changes the booking already there. To change the seat on an existing booking you want PUT, not POST."
       },
       {
         format: "recall",
-        text: "Two important properties of HTTP verbs are safe and idempotent. Which verbs are safe, and which are idempotent? Explain idempotent in your own words.",
+        text: "Idempotent means repeating the same request gives the same end state. Two important properties of HTTP verbs are safe and idempotent. Which verbs are safe, and which are idempotent?",
         answer: "GET is safe (no change). GET, PUT, and DELETE are idempotent; POST is not.",
         answerNote: "Idempotent means repeating the same request gives the same end state. DELETE /bookings/7 twice still leaves booking 7 gone. But POST /bookings twice creates two bookings, so POST is not idempotent."
       },
@@ -1435,18 +1435,18 @@ const STAGES = [
       },
       {
         format: "recall",
-        text: "In the booking app, what does the Model (the Booking entity) represent, and roughly what does one instance of it correspond to in the database?",
-        answer: "It represents the data shape of a booking; one instance corresponds to one row in the bookings table.",
-        answerNote: "A Booking object holds the fields (id, showId, seat, guestName). With JPA, the class maps to a table and each object maps to a row, so saving a Booking writes a row."
+        text: "What is a Model in a Spring app? Describe what the Booking model would look like (what fields it might hold).",
+        answer: "A Model is a plain class that describes the shape of one kind of data. A Booking model would be a class holding fields like id, showId, seat, and guestName.",
+        answerNote: "The Model is just the data definition; it has no logic. With JPA the class maps to a table and one Booking object maps to one row, so saving a Booking writes a row to the bookings table."
       },
       {
         format: "fill-in-the-blank",
-        text: "Fill in the field type so this model can hold the guest's name on a booking:",
-        code: "public class Booking {\n    private Long id;\n    private /* ___ */ guestName;\n    private String seat;\n}",
-        blank: "String",
-        blankPlaceholder: "type",
-        answer: "String",
-        answerNote: "A name is text, so the field type is String. The model is just a plain class describing the data; the field types match the kind of value each piece of data holds."
+        text: "Fill in the Spring annotation that marks the id as this booking's primary key:",
+        code: "@Entity\npublic class Booking {\n    @/* ___ */\n    private Long id;\n    private String guestName;\n    private String seat;\n}",
+        blank: "Id",
+        blankPlaceholder: "annotation",
+        answer: "Id",
+        answerNote: "@Id tells JPA which field is the primary key, the value that uniquely identifies one row. It usually pairs with @GeneratedValue so the database fills in the id automatically."
       },
       {
         format: "recall",
